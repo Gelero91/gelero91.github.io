@@ -1,4 +1,4 @@
-const DESIRED_FPS = 60;
+const DESIRED_FPS = 180;
 const UPDATE_INTERVAL = Math.trunc(1000 / DESIRED_FPS)
 const KEY_UP = 38
 const KEY_DOWN = 40
@@ -77,7 +77,7 @@ let lastTime = new Date().getSeconds();
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Taille de la table pour sin, cos, tan et atan avec une précision accrue (ajustez selon vos besoins)
-const tableSize = 3600;
+const tableSize = 720;
 
 // Création des tables précalculées pour sin, cos, tan et atan avec une plus grande précision
 const sinTable = [];
