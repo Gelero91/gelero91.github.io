@@ -1,4 +1,4 @@
-const DESIRED_FPS = 120;
+const DESIRED_FPS = 60;
 const UPDATE_INTERVAL = Math.trunc(1000 / DESIRED_FPS)
 const KEY_UP = 38
 const KEY_DOWN = 40
