@@ -77,7 +77,7 @@ let lastTime = new Date().getSeconds();
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Taille de la table pour sin, cos, tan et atan avec une précision accrue (ajustez selon vos besoins)
-const tableSize = 360;
+const tableSize = 3600;
 
 // Création des tables précalculées pour sin, cos, tan et atan avec une plus grande précision
 const sinTable = [];
