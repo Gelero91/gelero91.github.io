@@ -31,7 +31,6 @@ Gwendal L.R.
   font-family: 'apple][', sans-serif;
   color :white;
   font-size: 14px;
-
 }
 
 body {
@@ -39,7 +38,6 @@ body {
 
   margin: 0;
   padding: 0;
-  overflow: hidden;
 }
 
 div#minimapcontainer {
@@ -73,7 +71,7 @@ canvas#minimapobjects {
 
 #infos
 {
-  height: 388px;
+  height: 400px;
   width: 192px;
 }
 
@@ -134,6 +132,9 @@ canvas#minimapobjects {
   width: 100%;
 }
 
+.controlButton {
+  border-radius: 10px;
+}
 </style>
 
 </head>
@@ -145,8 +146,8 @@ canvas#minimapobjects {
   This is to prevent "canvas has been tainted by cross-origin data" errors.
   -->
 
+<!-- Textures -->
 
-  
   <div>
 
     <!-- world texture -->
@@ -313,183 +314,214 @@ canvas#minimapobjects {
     >
     
   </div>
-    
-<!-- début UX/UI -->
+
+
 
 <div>
 
- <div class="paper">
-  <div class="center">
+<!-- UX/UI - Start -->
+  <div>
+    <div class="paper">
+<!-- Header Présentation -->  
+<!-- <p>HEADER DE LA PAGE</p> --> 
 
-  <!-- écran de jeux -->
-  <div id ="gameWindow" class="container" style="width: 870px; height : 602px; padding : 10px;border-radius: 5px;">      
-        <div id="screen" style = "padding: 10px;">
-          <canvas id="mainCanvas" style="border-radius: 5px; image-rendering: optimizeSpeed;"></canvas>
-      <!--pour les animations (à tester)-->
-      </div>
+      <div class="center">
+        
+        <!-- écran de jeux -->
+        <div id ="gameWindow" class="container" style="width: 870px; height : 602px; padding : 10px;border-radius: 5px;">      
+              <div id="screen" style = "padding: 10px;">
+                <canvas id="mainCanvas" style="border-radius: 5px; image-rendering: optimizeSpeed;"></canvas>
+            <!--pour les animations (à tester)-->
+            </div>
 
-  <div id="infos" style="position: relative; width: 192px; padding-left :9px;">
-  <!--div info partie-->
-        <div id = "info" style="display:block;image-rendering: pixelated;">
-          <h1 style="text-align: center; padding: 10px; margin : 0px;"!>Alakir<br>lvl 1</h1>
-          <hr>
+        <div id="infos" style="position: relative; width: 192px; padding-left :9px;">
+        <!--div info partie-->
+              <div id = "info" style="display:block;image-rendering: pixelated;">
+                <h1 style="text-align: center; padding: 10px; margin : 0px;"!>Alakir<br>lvl 1</h1>
+                <hr>
 
-<!-- TEXT OUTPUT -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); text-align: right; padding: 10px; margin : 0px; display:none;">
+      <!-- TEXT OUTPUT -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); text-align: right; padding: 10px; margin : 0px; display:none;">
 
-            <p id="PlayerHPoutput">XXX</p><p style="text-align: center;">/</p><p id="PlayerMaxHP">XXX</p><p style="font-weight: bold;"> HP </p>
+                  <p id="PlayerHPoutput">XXX</p><p style="text-align: center;">/</p><p id="PlayerMaxHP">XXX</p><p style="font-weight: bold;"> HP </p>
 
-            <p id="PlayerMPoutput">YYY</p><p style="text-align: center;">/</p><p id="PlayerMaxMP">YYY</p><p style="font-weight: bold;"> MP </p>
-          
-            <p id="PlayerXPoutput">ZZZ</p><p style="text-align: center;">/</p><p id="NextLevelXP">ZZZ</p><p style="font-weight: bold;"> XP </p>
+                  <p id="PlayerMPoutput">YYY</p><p style="text-align: center;">/</p><p id="PlayerMaxMP">YYY</p><p style="font-weight: bold;"> MP </p>
+                
+                  <p id="PlayerXPoutput">ZZZ</p><p style="text-align: center;">/</p><p id="NextLevelXP">ZZZ</p><p style="font-weight: bold;"> XP </p>
+                </div>
+
+      <!-- PROGRESS BAR OUTPUT -->
+                <br>
+                <label>Health:</label>
+
+                <progress id="hpBar" value="x" max="x" style="width:100%;"></progress>
+                <br>
+                <br>
+                <label>Mana:</label>
+
+                <progress id="mpBar" value="y" max="y" style="width:100%;"></progress>
+                <br>
+                <br>
+                <label>Experience:</label>
+                <progress id="xpBar" value="z" max="z" style="width:100%;"></progress>
+                <p></p>
+                <p></p>
+
+            </div>
+        <!--div stats-->
+        <div id = "stats" style="height : 400px;display:none;">
+          <h1 style="text-align: center; padding: 10px; margin : 0px;image-rendering: pixelated;">Stats</h1>
+          <hr class="golden">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: right; padding: 10px; margin : 0px;">
+            <p style="text-align: center;">Expe.</p><p style="text-align: center;">:</p><p style="text-align: center;">0</p>          
+            <p style="text-align: center;">Level</p><p style="text-align: center;">:</p><p style="text-align: center;">1</p>
+            <p></p><p></p><p></p> <!--saut de ligne-->
+            <p style="text-align: center;">Might</p> <p style="text-align: center;">:</p> <p style="text-align: center;">1</p>
+            <p style="text-align: center;">Skill</p> <p style="text-align: center;">:</p> <p style="text-align: center;">1</p>
+            <p style="text-align: center;">Intel</p> <p style="text-align: center;">:</p> <p style="text-align: center;">1</p>
+            <p style="height: 1px;"></p><p></p><p></p> <!--saut de ligne-->
+          </div>
+        </div>
+
+        <div id="equipment" style="height : 400px;display:none;">
+
+          <!--div équipement OLD-->
+          <div style="display: none;">
+            <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">EQUIPMENT</h1>
+            <hr>
+            <div style="display: grid; grid-template-columns: repeat(1, 1fr); text-align: right; margin: 0px; height : 192px;">
+                <p style="text-align: left;">Hands :</p>
+                <span id="handsContent" style="text-align: left; height : 36px;text-align: center;">EMPTY</span>
+                <p style="text-align: left;">Torso :</p>
+                <span id="torsoContent" style="text-align: left; height : 36px;text-align: center;">EMPTY</span>
+                <br>
+            </div>
           </div>
 
-<!-- PROGRESS BAR OUTPUT -->
-          <br>
-          <label>Health:</label>
+          <div>
+            <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">STATS</h1>
+            <hr>
 
-          <progress id="hpBar" value="x" max="x" style="width:100%;"></progress>
-          <br>
-          <br>
-          <label>Mana:</label>
-
-          <progress id="mpBar" value="y" max="y" style="width:100%;"></progress>
-          <br>
-          <br>
-          <label>Experience:</label>
-          <progress id="xpBar" value="z" max="z" style="width:100%;"></progress>
-          <p></p>
-          <p></p>
-
-       </div>
-
-
-
-  <!--div stats-->
-  <div id = "stats" style="height : 388px;display:none;">
-    <h1 style="text-align: center; padding: 10px; margin : 0px;image-rendering: pixelated;">Stats</h1>
-    <hr class="golden">
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: right; padding: 10px; margin : 0px;">
-      <p style="text-align: center;">Expe.</p><p style="text-align: center;">:</p><p style="text-align: center;">0</p>          
-      <p style="text-align: center;">Level</p><p style="text-align: center;">:</p><p style="text-align: center;">1</p>
-      <p></p><p></p><p></p> <!--saut de ligne-->
-      <p style="text-align: center;">Might</p> <p style="text-align: center;">:</p> <p style="text-align: center;">1</p>
-      <p style="text-align: center;">Skill</p> <p style="text-align: center;">:</p> <p style="text-align: center;">1</p>
-      <p style="text-align: center;">Intel</p> <p style="text-align: center;">:</p> <p style="text-align: center;">1</p>
-      <p style="height: 1px;"></p><p></p><p></p> <!--saut de ligne-->
-    </div>
-  </div>
-
-
-  <div id="equipment" style="height : 394px;display:none;">
-
-    <!--div équipement OLD-->
-    <div style="display: none;">
-      <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">EQUIPMENT</h1>
-      <hr>
-      <div style="display: grid; grid-template-columns: repeat(1, 1fr); text-align: right; margin: 0px; height : 192px;">
-          <p style="text-align: left;">Hands :</p>
-          <span id="handsContent" style="text-align: left; height : 36px;text-align: center;">EMPTY</span>
-          <p style="text-align: left;">Torso :</p>
-          <span id="torsoContent" style="text-align: left; height : 36px;text-align: center;">EMPTY</span>
-          <br>
-      </div>
-    </div>
-
-    <div>
-      <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">STATS</h1>
-      <hr>
-
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, auto); gap: 10px; margin-top : 18px;">
-        <div>Strength</div><div style="text-align: right;">:</div>
-        <div id="PlayerStrOutput" style="text-align: right;">x</div>
-      
-        <div>Dexterity</div><div style="text-align: right;">:</div>
-        <div id="PlayerDexOutput" style="text-align: right;">y</div>
-      
-        <div>Intellect</div><div style="text-align: right;">:</div>
-        <div id="PlayerIntOutput" style="text-align: right;">z</div>
-      </div>
-
-      <br>
-      <br>
-      <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">COMBAT STATS</h1>
-      <hr>
-      <!-- LAAAAA -->
-
-      <div style="  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, auto); gap: 10px; margin-top : 18px;">
-        <div>Might</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerMightOutput">x</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, auto); gap: 10px; margin-top : 18px;">
+              <div>Strength</div><div style="text-align: right;">:</div>
+              <div id="PlayerStrOutput" style="text-align: right;">x</div>
             
-        <div>Guile</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerGuileOutput">y</div>
+              <div>Dexterity</div><div style="text-align: right;">:</div>
+              <div id="PlayerDexOutput" style="text-align: right;">y</div>
             
-        <div>Magic</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerMagicOutput">z</div>
-      </div>
-      <br>
-      <hr>
-      <div style="  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, auto); gap: 10px; margin-top : 18px;">
-        <div>Armor</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerArmorOutput">a</div>
-        <div>Dodge</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerArmorOutput">0 %</div>
-      </div>
-    </div>
-  </div>
+              <div>Intellect</div><div style="text-align: right;">:</div>
+              <div id="PlayerIntOutput" style="text-align: right;">z</div>
+            </div>
 
+            <br>
+            <br>
+            <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">COMBAT STATS</h1>
+            <hr>
+            <!-- LAAAAA -->
 
-      </div>
+            <div style="  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, auto); gap: 10px; margin-top : 18px;">
+              <div>Might</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerMightOutput">x</div>
+                  
+              <div>Guile</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerGuileOutput">y</div>
+                  
+              <div>Magic</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerMagicOutput">z</div>
+            </div>
+            <br>
+            <hr>
+            <div style="  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, auto); gap: 10px; margin-top : 18px;">
+              <div>Armor</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerArmorOutput">a</div>
+              <div>Dodge</div><div style="text-align: right;">:</div><div style="text-align: right;" id="PlayerArmorOutput">0 %</div>
+            </div>
+          </div>
+        </div>
 
-  <!-- outputs -->
-      <div style="position: relative;width: 668px;padding: 0px;image-rendering: pixelated;">
+        </div>
 
-      <!--CONSOLE-->      
-              <output id="output"   style="display: block; padding-top :0px; padding-bottom : 0px; height: 190px; width:630px;"></output>
-              <!-- output fenêtre dialogue-->
+        <!-- outputs -->
+            <div style="position: relative;width: 668px;padding: 0px;image-rendering: pixelated;">
 
-      <!--FENETRE DIALOGUE-->
-              <div id="dialogueWindow" style = "display: none;">
-                <div style="display: flex;">
-                  <img id="faceOutput" style="position: relative;height: 192;width: 192px; padding-left : 10px; border-radius: 10px; image-rendering: optimizeQuality;" src="" alt="No face error !">
-                    <!-- visage -->
-                  <div id="dialogue" style="position: relative;height: 192px;width: 438px;padding-left : 10px;">
-                    <!-- dialogue -->
-                  </div>
-                </div>
+            <!--CONSOLE-->      
+                    <output id="output"   style="display: block; padding-top :0px; padding-bottom : 0px; height: 190px; width:630px;"></output>
+                    <!-- output fenêtre dialogue-->
+
+            <!--FENETRE DIALOGUE-->
+                    <div id="dialogueWindow" style = "display: none;">
+                      <div style="display: flex;">
+                        <img id="faceOutput" style="position: relative;height: 192;width: 192px; padding-left : 10px; border-radius: 10px; image-rendering: optimizeQuality;" src="" alt="No face error !">
+                          <!-- visage -->
+                        <div id="dialogue" style="position: relative;height: 192px;width: 438px;padding-left : 10px;">
+                          <!-- dialogue -->
+                        </div>
+                      </div>
+                    </div>
+
+            <!--ITEMS-->
+            <div id="items" style="display: none;width: 640px; height: 192; padding-left: 10px; color: black;">
+              <div>
+                ITEMS
               </div>
+              <br>
+              <div id="inventoryContent" style="width:100%;">
+                > The inventory is empty
+              </div>
+            </div>
 
-      <!--ITEMS-->
-      <div id="items" style="display: none;width: 640px; height: 192; padding: 10px; color: black;">
-        <div>
-          ITEMS
+          </div>
+
+        <!-- MAP -->
+        <div id="minimapcontainer" class="border" style ="display: none;">
+          <canvas id="minimap"></canvas>
+          <canvas id="minimapobjects"></canvas>
         </div>
-        <br>
-        <div id="inventoryContent" style="width:100%;">
-          > The inventory is empty
-        </div>
-      </div>
+        <!--COMMANDES-->
+          <div id="commandcontainer" style="height: 192px; width: 192px; display: block; position: relative;">
+            <div class="grid-container">
+              <button id="button1" class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">✜</button>
+              <button id="button2"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">★</button>
+              <button id="button3"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">▣</button>
+              <div  class="grid-item controlButton" style ="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
+              <button id="button5"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↑</button>
+              <div  class="grid-item controlButton" style ="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
+              <button id="button7"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↰</button>
+              <button id="button8"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↓</button>
+              <button id="button9"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↱</button>
+            </div>
+          </div>
 
+            </div>
+      </div>
+    
+    
     </div>
 
-  <!-- MAP -->
-  <div id="minimapcontainer" class="border" style ="display: none;">
-    <canvas id="minimap"></canvas>
-    <canvas id="minimapobjects"></canvas>
+
+<!-- UX/UI - End -->
+
+<!-- 
+FOOTER
+Footer Présentation 
+ overflow: hidden; -> dans le body, pour afficer le paragraphe
+ <p>testooooooons</p>
+-->  
+<div id="commandfootercontainer" style="height: 192px; width: 192px; display: block; position: relative;">
+  <div class="grid-container">
+    <button id="button1" class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">✜</button>
+    <button id="button2"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">★</button>
+    <button id="button3"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">▣</button>
+    <div  class="grid-item controlButton" style ="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
+    <button id="button5"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↑</button>
+    <div  class="grid-item controlButton" style ="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
+    <button id="button7"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↰</button>
+    <button id="button8"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↓</button>
+    <button id="button9"  class="grid-item controlButton" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↱</button>
   </div>
-  <!--COMMANDES-->
-    <div id="commandcontainer" style="height: 192px; width: 192px; display: block; position: relative;">
-      <div class="grid-container">
-        <button id="button1" class="grid-item" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">✜</button>
-        <button id="button2"  class="grid-item" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">★</button>
-        <button id="button3"  class="grid-item" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">▣</button>
-        <div  class="grid-item" style ="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
-        <button id="button5"  class="grid-item" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↑</button>
-        <div  class="grid-item" style ="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
-        <button id="button7"  class="grid-item" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↰</button>
-        <button id="button8"  class="grid-item" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↓</button>
-        <button id="button9"  class="grid-item" style ="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↱</button>
-      </div>
-    </div>
+</div>
 
-      </div>
-    </div>
-  </div>
+</div>
+
+
+
+
 </div>
   <script type="text/javascript">
     window.onload = function() {

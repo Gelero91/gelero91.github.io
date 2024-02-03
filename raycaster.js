@@ -200,7 +200,33 @@ class Sprite {
         this.spriteFlash = 0; 
     }
 
+    // ABC - modification pour régler chevauchement de div :
+    // resetToggle() est une méthode accessible depuis l'objet sprite
+    resetToggleSpriteMethod() {
+        var info = document.getElementById('info');
+        var stats = document.getElementById('stats');
+        var equipment = document.getElementById('equipment');
+
+        var output = document.getElementById('output');
+        var items = document.getElementById('items');
+        var dialWindow = document.getElementById('dialogueWindow');
+ 
+        info.style.display = 'block';
+        equipment.style.display = 'none';
+        stats.style.display = 'none';
+ 
+        dialWindow.style.display = "none";
+        items.style.display = "none";
+        output.style.display = "block";
+    }
+
+    // ABC
     async talk(entry, face) {
+        // on accède à la méthode reset du sprite, 
+        // plutôt que de raycaster
+        // RESET EN DEBUT, PUIS EN FIN
+        this.resetToggleSpriteMethod();
+
         // regarde la valeur dans Talk, tu dois renvoyer "entry" dans la fenêtre de dialogue.
         const dialogue = document.getElementById("dialogue");
         const faceOutput = document.getElementById("faceOutput");
@@ -226,6 +252,11 @@ class Sprite {
         // RETABLIR && TROUVER SOLUTION
         await new Promise(resolve => setTimeout(resolve, 3000));
         
+        // on accède à la méthode reset du sprite, 
+        // plutôt que de raycaster.
+        // POST-DELAI DE 3SEC
+        this.resetToggleSpriteMethod();
+
         // ajout au terminal
         outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
 
@@ -569,6 +600,7 @@ class Raycaster {
         this.player.inventory.push(item);
     }
 
+    // ABC
     displayInventory() {
         const inventoryContent = document.getElementById("inventoryContent");
     
@@ -577,11 +609,11 @@ class Raycaster {
             this.player.inventory.forEach(item => {
                 const equippedStatus = item.equipped ? "(Equipped)" : "";
                 if (item.slot == 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item" style ="color:black; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Might: ${item.might} - Magic: ${item.magic} - Guile: ${item.guile} - Armor: ${item.armor}</button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Might: ${item.might} - Magic: ${item.magic} - Guile: ${item.guile} - Armor: ${item.armor}</button><br>`;
                 } else if (item.slot == 2) {
-                    inventoryContent.innerHTML += `<button class="inventory-item" style ="color:black; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Armor: ${item.armor}</button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Armor: ${item.armor}</button><br>`;
                 } else {
-                    inventoryContent.innerHTML += `<button class="inventory-item" style ="color:black; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Power: ${item.power}</button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Power: ${item.power}</button><br>`;
                     console.log(`Item: ${item.name}, Power: ${item.power}`);
                 }
             });
@@ -975,6 +1007,7 @@ class Raycaster {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      // ABC
     toggleEquipment() {
         // AFFICHER INVENTAIRE
         this.displayInventory();
@@ -1009,6 +1042,7 @@ class Raycaster {
         }
     }
   
+    // ABC
     resetToggle() {
         var info = document.getElementById('info');
         var stats = document.getElementById('stats');
@@ -2010,6 +2044,12 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
                 backward = false;
             }
         }
+ 
+///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
+///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
+///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
+///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
+///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
 
         if (yourTurn == true && forward == true && up || this.forwardButtonClicked && yourTurn == true && forward == true) {
 
