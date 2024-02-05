@@ -120,10 +120,12 @@ function statsUpdate(player) {
     player.magic = player.magic + Math.floor(player.intellect/10);
     player.armor = player.armor
 
+    /*
     console.log("Might :" + player.might);
     console.log("Might :" + player.guile);
     console.log("Magic :" + player.magic);
     console.log("Armor :" + player.armor);
+    */
 
     const playerMight = document.getElementById("PlayerMightOutput");
     const playerGuile = document.getElementById("PlayerGuileOutput");
@@ -555,19 +557,9 @@ class Raycaster {
 
             inventory: [stick, jacket],
 
-            // OLD ?
-            // Instaurer inertie/accélération
-            /*
-            moveSpeed: Math.round(this.tileSize / (DESIRED_FPS / 60.0 * 16)),
-            rotSpeed: 1.5 * Math.PI / 180,
-            */
+            // L'inventaire est ouvert ?
+            inventoryMenuShowed : false,
         }
-
-        /////// ajout d'objets test dans l'inventaire :
-
-
-
-        ///////
 
         const PlayerHP = document.getElementById("PlayerHPoutput");
         const PlayerMP = document.getElementById("PlayerMPoutput");
@@ -593,14 +585,14 @@ class Raycaster {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // EQUIPEMENT INVENTAIRE
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     addItemToInventory(item) {
         this.player.inventory.push(item);
     }
 
-    // ABC
+    // liste les objets de l'inventaire
     displayInventory() {
         const inventoryContent = document.getElementById("inventoryContent");
     
@@ -621,7 +613,8 @@ class Raycaster {
             inventoryContent.innerHTML = "> The inventory is empty";
         }
     }
-     
+
+    // gestion des objets équipés
     equipmentDisplay() {
         const handsContent = document.getElementById("handsContent");
         const torsoContent = document.getElementById("torsoContent");
@@ -665,7 +658,47 @@ class Raycaster {
             });
         });
     }
+    
+    toggleEquipment() {
+        // AFFICHER INVENTAIRE
+        this.displayInventory();
+        this.equipmentDisplay();
 
+        var info = document.getElementById('info');
+        var stats = document.getElementById('stats');
+        var equipment = document.getElementById('equipment');
+ 
+        var dialWindow = document.getElementById('dialogueWindow');
+        var output = document.getElementById('output');
+        var items = document.getElementById('items');
+
+        info.style.display = 'none';
+        equipment.style.display = 'block';
+        stats.style.display = 'none';
+ 
+        items.style.display = "block";
+        output.style.display = "none";
+        dialWindow.style.display = "none";
+    }
+  
+    // ABC
+    resetToggle() {
+        var info = document.getElementById('info');
+        var stats = document.getElementById('stats');
+        var equipment = document.getElementById('equipment');
+
+        var output = document.getElementById('output');
+        var items = document.getElementById('items');
+        var dialWindow = document.getElementById('dialogueWindow');
+ 
+        info.style.display = 'block';
+        equipment.style.display = 'none';
+        stats.style.display = 'none';
+ 
+        dialWindow.style.display = "none";
+        items.style.display = "none";
+        output.style.display = "block";
+    }
     
     ////////////////////////////////////
     
@@ -903,7 +936,7 @@ class Raycaster {
         // let floorimg;
         // NON -> si déclaration de variable, alors réinitialisation des textures. A faire après condition.
 
-// MARQUEUR : Chargement des textures sol plafond mur sprites
+        // MARQUEUR : Chargement des textures sol plafond mur sprites
 
         // selon le type de sol, la texture est adaptée
         if (floorTexture == 1) {
@@ -1006,60 +1039,7 @@ class Raycaster {
       }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      // ABC
-    toggleEquipment() {
-        // AFFICHER INVENTAIRE
-        this.displayInventory();
-        this.equipmentDisplay();
-
-        var info = document.getElementById('info');
-        var stats = document.getElementById('stats');
-        var equipment = document.getElementById('equipment');
- 
-        var dialWindow = document.getElementById('dialogueWindow');
-        var output = document.getElementById('output');
-        var items = document.getElementById('items');
-
- 
-        if (equipment.style.display === 'none') {
-            info.style.display = 'none';
-            equipment.style.display = 'block';
-            stats.style.display = 'none';
- 
-            items.style.display = "block";
-            output.style.display = "none";
-            dialWindow.style.display = "none";
- 
-        } else {
-            info.style.display = 'block';
-            equipment.style.display = 'none';
-            stats.style.display = 'none';
- 
-            dialWindow.style.display = "none";
-            items.style.display = "none";
-            output.style.display = "block";
-        }
-    }
-  
-    // ABC
-    resetToggle() {
-        var info = document.getElementById('info');
-        var stats = document.getElementById('stats');
-        var equipment = document.getElementById('equipment');
-
-        var output = document.getElementById('output');
-        var items = document.getElementById('items');
-        var dialWindow = document.getElementById('dialogueWindow');
- 
-        info.style.display = 'block';
-        equipment.style.display = 'none';
-        stats.style.display = 'none';
- 
-        dialWindow.style.display = "none";
-        items.style.display = "none";
-        output.style.display = "block";
-    }
+////////////////////////////////////////////////////////////////////////////
  
     //  TO CHANGE : heavily simplified for the DEMO
     handleButtonClick(buttonNumber) {
@@ -1069,20 +1049,29 @@ class Raycaster {
                 // pour la présentation : "action" = "attack"
                 // reset toggle pour éviter la superposition de div
                 this.resetToggle();
-                console.log('Attaque')
+                console.log('Action/Dialogue')
                 this.actionButtonClicked = true;
                 break;
  
             case 2: // ACTION
-                // pour éviter les bug
+                // suprimé
                 this.resetToggle();
-                console.log('Action/Dialogue');
+                console.log('DELETED');
                 this.actionButtonClicked = true;
                 break;
             case 3: // EQUIPEMENT
-                this.resetToggle();
                 console.log('Equipement');
-                this.toggleEquipment();
+
+                if (this.inventoryMenuShowed == false) {
+                    this.inventoryMenuShowed = true;
+                    this.toggleEquipment();
+                    console.log("false");
+                } else {
+                    this.inventoryMenuShowed = false;
+                    this.resetToggle();
+                    console.log("true");
+                }
+                
                 break;
             case 4:
                 // EMPTY
