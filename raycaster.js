@@ -116,24 +116,24 @@ function statsUpdate(player) {
 
     // update les stats de combat
     player.might = player.might + Math.floor(player.strength/10);
-    player.guile = player.guile + Math.floor(player.dexterity/10);
+    player.dodge = player.dexterity*2;
     player.magic = player.magic + Math.floor(player.intellect/10);
     player.armor = player.armor
 
     /*
     console.log("Might :" + player.might);
-    console.log("Might :" + player.guile);
+    console.log("Might :" + player.dodge);
     console.log("Magic :" + player.magic);
     console.log("Armor :" + player.armor);
     */
 
     const playerMight = document.getElementById("PlayerMightOutput");
-    const playerGuile = document.getElementById("PlayerGuileOutput");
+    const playerDodge = document.getElementById("PlayerDodgeOutput");
     const playerMagic = document.getElementById("PlayerMagicOutput");
     const playerArmor = document.getElementById("PlayerArmorOutput");
 
     playerMight.textContent = player.might;
-    playerGuile.textContent = player.guile;
+    playerDodge.textContent = player.dodge;
     playerMagic.textContent = player.magic; 
     playerArmor.textContent = player.armor; 
 };
@@ -254,6 +254,10 @@ class Sprite {
         // RETABLIR && TROUVER SOLUTION
         await new Promise(resolve => setTimeout(resolve, 3000));
         
+        // 06/02/24 - ajout d'une condition pour garder l'inventaire ouvert en cas de dialogue ?
+        // -> On évite, risque de conflit après fin du dialogue. Se concentrer sur l'important.
+
+
         // on accède à la méthode reset du sprite, 
         // plutôt que de raycaster.
         // POST-DELAI DE 3SEC
@@ -300,41 +304,53 @@ class Sprite {
     // Méthodes de combat (nouveauté de la version Alpha 0.5)
     // mettre spritetype en argument pour définir l'XP, le loot, les quête... etc.
 
+    //ABC
     enemyAttackUpdate(player) {
         if (this.hp <= 0) {
             let entry = "The enemy is dead. <br>  You won 10xp points !<br>";
-
             this.talk(entry,"facePlayer");
-            
             player.xp += 10;
-
             this.spriteType = 10;
         } else {
-            setTimeout(() => this.attack(player), 500);
-            console.log('tick')
+            // Calculer la chance d'échec
+            // Génère un nombre aléatoire entre 0 et 1, multiplié par 100.
+            const chanceEchec = Math.random()*100; 
+            if (chanceEchec > player.dodge) {
+                setTimeout(() => this.attack(player), 500);
+                console.log(chanceEchec)
+            } else {
+                // ajout au terminal
+                const outputElement = document.getElementById("output");
+                const consoleContent = outputElement.innerHTML;
+                outputElement.innerHTML = consoleContent + "> You dodge the attack !<br>";
+                console.log('Lattaque a échoué !');
+                console.log(chanceEchec)
+            }
         }
-
-    const playerHP = document.getElementById("PlayerHPoutput");
-    const playerMP = document.getElementById("PlayerMPoutput");
-    const playerXP = document.getElementById("PlayerXPoutput");
     
-    playerHP.textContent = player.hp;
-    playerMP.textContent = player.mp; 
-    playerXP.textContent = player.xp; 
-
-    var hpBar = document.getElementById('hpBar');
-    var mpBar = document.getElementById('mpBar');
-    var xpBar = document.getElementById('xpBar');
-
-    hpBar.value = player.hp;
-    mpBar.value = player.mp;
-    xpBar.value = player.xp;
+        // Mise à jour de l'affichage
+        const playerHP = document.getElementById("PlayerHPoutput");
+        const playerMP = document.getElementById("PlayerMPoutput");
+        const playerXP = document.getElementById("PlayerXPoutput");
     
-    hpBar.max = 10;
-    mpBar.max = 10;    
-    xpBar.max = 100;
+        playerHP.textContent = player.hp;
+        playerMP.textContent = player.mp; 
+        playerXP.textContent = player.xp; 
+    
+        var hpBar = document.getElementById('hpBar');
+        var mpBar = document.getElementById('mpBar');
+        var xpBar = document.getElementById('xpBar');
+    
+        hpBar.value = player.hp;
+        mpBar.value = player.mp;
+        xpBar.value = player.xp;
+    
+        hpBar.max = 10;
+        mpBar.max = 10;    
+        xpBar.max = 100;
     }
 }
+    
 
 // Holds information about a wall hit from a single ray
 class RayHit {
@@ -385,7 +401,7 @@ class RayState {
 // ajout de la classe objet /////////////////////////////////////////////////////
 
 class Item {
-    constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, guile, armor) {
+    constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor) {
         this.name = name;
         this.slot = slot;
         this.equipped = false;
@@ -398,7 +414,7 @@ class Item {
 
         this.might = might;
         this.magic = magic;
-        this.guile = guile;
+        this.dodge = dodge;
 
         this.armor = armor;
     }
@@ -406,7 +422,7 @@ class Item {
     displayInfo() {
         /*
         if (this.slot === 1) {
-            console.log(`Item: ${this.name}, might: ${this.might}, magic: ${this.magic}, guile: ${this.guile}, armor: ${this.armor}`);
+            console.log(`Item: ${this.name}, might: ${this.might}, magic: ${this.magic}, dodge: ${this.dodge}, armor: ${this.armor}`);
         } else if (this.slot === 2) {
             console.log(`Item: ${this.name}, Armor: ${this.armor}, Power: ${this.power}`);
         } else {
@@ -428,7 +444,7 @@ class Item {
     
             player.might += this.might || 0;
             player.magic += this.magic || 0;
-            player.guile += this.guile || 0;
+            player.dodge += this.dodge || 0;
         
             player.armor += this.armor || 0;
         
@@ -444,7 +460,7 @@ class Item {
 
             player.might -= this.might;
             player.magic -= this.magic;
-            player.guile -= this.guile;
+            player.dodge -= this.dodge;
 
             player.armor -= this.armor;
 
@@ -518,10 +534,11 @@ class Raycaster {
 
     ////////////////////////////////////////////////////////////////////
     // Créer des instances de la classe Item pour l'inventaire du joueur
-    // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, guile, armor)
+    // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
 
         const stick = new Item("Stick", 1, false, 0, 0, 0, 0, 1, 0, 0, 0);
         const jacket = new Item("Quilted jacket", 2, false, 0, 0, 0, 0, 0, 0, 0, 1);
+        const magicSword = new Item("Magic Sword", 1, false, 0, 0, 0, 0, 3, 2, 0, 0);
         const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
         const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
 
@@ -548,14 +565,14 @@ class Raycaster {
             intellect:5,
 
             might: 1,
-            guile: 1,
+            dodge: 1,
             magic: 1,
             armor: 0,
 
             hands: [],
             torso: [],
 
-            inventory: [stick, jacket],
+            inventory: [stick, jacket, magicSword],
 
             // L'inventaire est ouvert ?
             inventoryMenuShowed : false,
@@ -601,7 +618,7 @@ class Raycaster {
             this.player.inventory.forEach(item => {
                 const equippedStatus = item.equipped ? "(Equipped)" : "";
                 if (item.slot == 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Might: ${item.might} - Magic: ${item.magic} - Guile: ${item.guile} - Armor: ${item.armor}</button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Might: ${item.might} - Magic: ${item.magic} - Dodge: ${item.dodge} - Armor: ${item.armor}</button><br>`;
                 } else if (item.slot == 2) {
                     inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Armor: ${item.armor}</button><br>`;
                 } else {
@@ -753,7 +770,7 @@ class Raycaster {
             [21 * this.tileSize + tileSizeHalf, 20 * this.tileSize + tileSizeHalf, 0],
 
             // Dummy for testing
-            // [14 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 0],
+            [14 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 0],
 
             // SAC
             [7 * this.tileSize + tileSizeHalf, 12 * this.tileSize + tileSizeHalf, 17],
@@ -1054,11 +1071,12 @@ class Raycaster {
                 break;
  
             case 2: // ACTION
-                // suprimé
+                /*
                 this.resetToggle();
                 console.log('DELETED');
                 this.actionButtonClicked = true;
                 break;
+                */
             case 3: // EQUIPEMENT
                 console.log('Equipement');
 
@@ -1071,7 +1089,7 @@ class Raycaster {
                     this.resetToggle();
                     console.log("true");
                 }
-                
+
                 break;
             case 4:
                 // EMPTY
@@ -1145,11 +1163,6 @@ class Raycaster {
         }
     }
 
-    ///////////////////////////////////////////////////////
-          // Test hauteur des murs
-    
-          ///////////////////////////////////////////////////////
-    
     stripScreenHeight(screenDistance, correctDistance, heightInGame) {
         return Math.round(screenDistance / correctDistance * heightInGame);
     }
