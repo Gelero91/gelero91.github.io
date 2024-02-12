@@ -612,23 +612,48 @@ class Raycaster {
     // liste les objets de l'inventaire
     displayInventory() {
         const inventoryContent = document.getElementById("inventoryContent");
-    
+
         if (this.player.inventory.length > 0) {
             inventoryContent.innerHTML = "";
             this.player.inventory.forEach(item => {
-                const equippedStatus = item.equipped ? "(Equipped)" : "";
-                if (item.slot == 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Might: ${item.might} - Magic: ${item.magic} - Dodge: ${item.dodge} - Armor: ${item.armor}</button><br>`;
-                } else if (item.slot == 2) {
-                    inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Armor: ${item.armor}</button><br>`;
+                const equippedStatus = item.equipped ? "➜ Equipped" : "";
+
+                let statsHTML = ""; // Variable pour stocker les statistiques à afficher
+        
+                // Vérifiez chaque statistique et n'ajoutez à statsHTML que si elle n'est pas égale à zéro
+                if (item.might !== 0) {
+                    statsHTML += `+${item.might} Might<br>`;
+                }
+                if (item.magic !== 0) {
+                    statsHTML += `+${item.magic} Magic<br>`;
+                }
+                if (item.dodge !== 0) {
+                    statsHTML += `+${item.dodge} Dodge<br>`;
+                }
+                if (item.armor !== 0) {
+                    statsHTML += `+${item.armor} Armor<br>`;
+                }
+                if (item.power !== 0) {
+                    statsHTML += `${item.power} Power<br>`;
+                }
+        
+                // Supprime le dernier caractère (-) pour éviter un espace inutile à la fin
+                statsHTML = statsHTML.slice(0, -2);
+
+                if (item.slot === 1) {
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;">► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
+                } else if (item.slot === 2) {
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;">► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                 } else {
-                    inventoryContent.innerHTML += `<button class="inventory-item" style ="background-color:transparent; width:100%;" data-item="${item.name}">${item.name} ${equippedStatus}<br> Power: ${item.power}</button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;">► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                     console.log(`Item: ${item.name}, Power: ${item.power}`);
                 }
             });
         } else {
             inventoryContent.innerHTML = "> The inventory is empty";
         }
+
+        
     }
 
     // gestion des objets équipés
