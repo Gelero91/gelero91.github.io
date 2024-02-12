@@ -66,7 +66,6 @@ Gwendal L.R.
       }
 
       #infos {
-        height: 400px;
         width: 192px;
       }
 
@@ -248,7 +247,7 @@ Gwendal L.R.
           <!-- <p>HEADER DE LA PAGE</p> -->
           <div class="center">
             <!-- écran de jeux -->
-            <div id="gameWindow" class="container" style="width: 870px; height : 602px; padding : 10px;border-radius: 5px;">
+            <div id="gameWindow" class="container" style="width: 870px; height : 590px; padding : 10px;border-radius: 5px;">
               <div id="screen" style="padding: 10px;">
                 <canvas id="mainCanvas" style="border-radius: 5px; image-rendering: optimizeSpeed;"></canvas>
                 <!--pour les animations (à tester)-->
@@ -258,7 +257,7 @@ Gwendal L.R.
                 <div id="info" style="display:block;image-rendering: pixelated;">
                   <h1 style="text-align: center; padding: 10px; margin : 0px;" !>Alakir <br>lvl 1 </h1>
                   <hr>
-                  <!-- TEXT OUTPUT -->
+                  <!-- PLAYER INFO OUTPUT, old -->
                   <div style="display: grid; grid-template-columns: repeat(4, 1fr); text-align: right; padding: 10px; margin : 0px; display:none;">
                     <p id="PlayerHPoutput">XXX</p>
                     <p style="text-align: center;">/</p>
@@ -273,7 +272,7 @@ Gwendal L.R.
                     <p id="NextLevelXP">ZZZ</p>
                     <p style="font-weight: bold;"> XP </p>
                   </div>
-                  <!-- PROGRESS BAR OUTPUT -->
+                  <!-- PLAYER INFO PROGRESS BAR OUTPUT -->
                   <br>
                   <label>♥ Health</label>
                   <progress id="hpBar" value="x" max="x" style="width:100%;"></progress>
@@ -285,11 +284,15 @@ Gwendal L.R.
                   <br>
                   <label>★ Experience</label>
                   <progress id="xpBar" value="z" max="z" style="width:100%;"></progress>
-                  <p></p>
-                  <p></p>
+                  <div style="height:30px;"></div>
+                  <!--
+                  <button id="" class="grid-item controlButton" style="width:60px; height:60px;padding:0px;border-radius:50px;  background-color:  yellow
+                  (0, 22, 218); ">X</button>
+                  <br><br>
+                  <button id="" class="grid-item controlButton" style="width:60px; height:60px;padding:0px;border-radius:50px;  background-color: red; ">Y</button>
+                  -->
                 </div>
-                <!--div stats-->
-                <div id="stats" style="height : 400px;display:none;">
+                <div id="stats" style="height : 392px;display:none;">
                   <h1 style="text-align: center; padding: 10px; margin : 0px;image-rendering: pixelated;">Stats</h1>
                   <hr class="golden">
                   <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: right; padding: 10px; margin : 0px;">
@@ -302,26 +305,9 @@ Gwendal L.R.
                     <p></p>
                     <p></p>
                     <p></p>
-                    <!--saut de ligne-->
-                    <!-- A quoi ça sert...?
-                    <p style="text-align: center;">Might</p>
-                    <p style="text-align: center;">:</p>
-                    <p style="text-align: center;">1</p>
-                    <p style="text-align: center;">Skill</p>
-                    <p style="text-align: center;">:</p>
-                    <p style="text-align: center;">1</p>
-                    <p style="text-align: center;">Intel</p>
-                    <p style="text-align: center;">:</p>
-                    <p style="text-align: center;">1</p>
-                    <p style="height: 1px;"></p>
-                    <p></p>
-                    <p></p>
-                    -->
-                    <!--saut de ligne-->
                   </div>
                 </div>
-                <div id="equipment" style="height : 400px;display:none;">
-                  <!--div équipement OLD-->
+                <div id="equipment" style="height : 380px;display:none;">
                   <div style="display: none;">
                     <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">EQUIPMENT</h1>
                     <hr>
@@ -351,16 +337,10 @@ Gwendal L.R.
                     <br>
                     <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">COMBAT STATS</h1>
                     <hr>
-                    <!-- LAAAAA -->
                     <div style="  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, auto); gap: 10px; margin-top : 18px;">
                       <div>Attack</div>
                       <div style="text-align: right;">:</div>
                       <div style="text-align: right;" id="PlayerMightOutput">x</div>
-                      <!-- 06/02/2024 change : Dodge = dodge chances -->
-                      <!-- <div>Dodge</div>
-                      <div style="text-align: right;">:</div>
-                      <div style="text-align: right;" id="PlayerDodgeOutput">y</div> -->
-                      <!-- 06/02/2024 change : Dodge = dodge chances -->
                       <div>Magic</div>
                       <div style="text-align: right;">:</div>
                       <div style="text-align: right;" id="PlayerMagicOutput">z</div>
@@ -370,12 +350,12 @@ Gwendal L.R.
                     <div style="  display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, auto); gap: 10px; margin-top : 18px;">
                       <div>Armor</div>
                       <div style="text-align: right;">:</div>
+                      <div style="text-align: right;">-</div>
                       <div style="text-align: right;" id="PlayerArmorOutput">a</div>
-                      <div>-</div>
                       <div>Dodge</div>
                       <div style="text-align: right;">:</div>
+                      <div style="text-align: right;">%</div>
                       <div style="text-align: right;" id="PlayerDodgeOutput">b</div>
-                      <div>%</div>
                     </div>
                   </div>
                 </div>
@@ -410,9 +390,9 @@ Gwendal L.R.
               <!--COMMANDES-->
               <div id="commandcontainer" style="height: 192px; width: 192px; display: block; position: relative;">
                 <div class="grid-container">
-                  <button id="button1" class="grid-item controlButton" style="min-width:60px;padding:0px;border-radius:50px; background-color:  rgb(132, 0, 0);">A</button>
+                  <button id="button1" class="grid-item controlButton" style="min-width:60px;padding:0px; background-color:  rgb(132, 0, 0); border-radius:50px;">A</button>
                   <div id="button2" class="grid-item controlButton" style="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
-                  <button id="button3" class="grid-item controlButton" style="min-width:60px;padding:0px;border-radius:50px;  background-color:  rgb(17, 79, 0);">B</button>
+                  <button id="button3" class="grid-item controlButton" style="min-width:60px;padding:0px;border-radius:50px;  background-color:  rgb(17, 79, 0); ">B</button>
                   <div class="grid-item controlButton" style="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
                   <button id="button5" class="grid-item controlButton" style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↑</button>
                   <div class="grid-item controlButton" style="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
