@@ -202,7 +202,16 @@ class Sprite {
         this.spriteFlash = 0; 
     }
 
-    // ABC - modification pour régler chevauchement de div :
+    // ANIMATION DE COMBAT - ABC
+    async startAttackAnimation() {
+        this.spriteFlash = 200; 
+
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        this.spriteFlash = 0; 
+    }
+
+    // modification pour régler chevauchement de div :
     // resetToggle() est une méthode accessible depuis l'objet sprite
     resetToggleSpriteMethod() {
         var info = document.getElementById('info');
@@ -222,7 +231,6 @@ class Sprite {
         output.style.display = "block";
     }
 
-    // ABC
     async talk(entry, face) {
         // on accède à la méthode reset du sprite, 
         // plutôt que de raycaster
@@ -304,7 +312,6 @@ class Sprite {
     // Méthodes de combat (nouveauté de la version Alpha 0.5)
     // mettre spritetype en argument pour définir l'XP, le loot, les quête... etc.
 
-    //ABC
     enemyAttackUpdate(player) {
         if (this.hp <= 0) {
             let entry = "The enemy is dead. <br>  You won 10xp points !<br>";
@@ -536,9 +543,9 @@ class Raycaster {
     // Créer des instances de la classe Item pour l'inventaire du joueur
     // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
 
-        const stick = new Item("Stick", 1, false, 0, 0, 0, 0, 1, 0, 0, 0);
+        const stick = new Item("Short sword", 1, false, 0, 0, 0, 0, 1, 0, 0, 0);
         const jacket = new Item("Quilted jacket", 2, false, 0, 0, 0, 0, 0, 0, 0, 1);
-        const magicSword = new Item("Magic Sword", 1, false, 0, 0, 0, 0, 3, 2, 0, 0);
+        const magicSword = new Item("Magic sword", 1, false, 0, 0, 0, 0, 3, 2, 0, 0);
         const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
         const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
 
@@ -616,6 +623,12 @@ class Raycaster {
         if (this.player.inventory.length > 0) {
             inventoryContent.innerHTML = "";
             this.player.inventory.forEach(item => {
+
+                // on récupère l'icone de test
+                const itemIcon = document.getElementById('itemIcon').getAttribute('src');
+                const swordIcon = document.getElementById('weaponIcon').getAttribute('src');
+                const cloakIcon = document.getElementById('cloakIcon').getAttribute('src');
+
                 const equippedStatus = item.equipped ? "➜ Equipped" : "";
 
                 let statsHTML = ""; // Variable pour stocker les statistiques à afficher
@@ -641,11 +654,11 @@ class Raycaster {
                 statsHTML = statsHTML.slice(0, -2);
 
                 if (item.slot === 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;">► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${swordIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
                 } else if (item.slot === 2) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;">► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${cloakIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                 } else {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;">► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${itemIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                     console.log(`Item: ${item.name}, Power: ${item.power}`);
                 }
             });
@@ -723,7 +736,7 @@ class Raycaster {
         dialWindow.style.display = "none";
     }
   
-    // ABC
+
     resetToggle() {
         var info = document.getElementById('info');
         var stats = document.getElementById('stats');
@@ -1244,6 +1257,8 @@ class Raycaster {
             // Incrémentez animationProgress pour chaque sprite
             spriteAnimationProgress += 1;
             if (spriteAnimationProgress === 3) {
+                // problème : ça marche que pour un sprite ça
+                
                 spriteAnimationProgress = 0;
             }
             //console.log(spriteAnimationProgress);
