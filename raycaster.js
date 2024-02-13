@@ -426,18 +426,6 @@ class Item {
         this.armor = armor;
     }
 
-    displayInfo() {
-        /*
-        if (this.slot === 1) {
-            console.log(`Item: ${this.name}, might: ${this.might}, magic: ${this.magic}, dodge: ${this.dodge}, armor: ${this.armor}`);
-        } else if (this.slot === 2) {
-            console.log(`Item: ${this.name}, Armor: ${this.armor}, Power: ${this.power}`);
-        } else {
-            console.log(`Item: ${this.name}, Power: ${this.power}`);
-        }
-        */
-    }
-
     equip(player) {
         if (this.isEquipable(player)) {
         
@@ -510,17 +498,17 @@ class Raycaster {
             [1,1,1,1,1,1,1,1,3,3,3,3,3,1,9,9,1,3,3,3,3,3,3,3],
             [2,2,0,0,0,0,0,2,3,3,0,0,0,1,0,0,1,0,0,3,3,3,3,3],
             [2,2,0,0,0,0,0,2,3,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3],
-            [2,2,0,0,0,0,0,2,3,1,0,0,0,0,0,0,0,0,15,15,15,15,3],
+            [2,2,0,0,0,0,0,2,3,1,0,0,0,0,0,0,0,0,0,15,15,15,3],
             [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,14,0,0,0,15,3],
             [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,16,0,0,0,15,3],
             [2,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,14,0,0,0,15,3],
             [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,15,15,15,15,3],
             [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
             [1,0,0,0,0,0,0,1,3,1,0,0,0,0,0,0,0,0,0,0,3,0,3,3],
-            [1,0,0,0,1,1,0,1,3,0,0,0,15,16,15,14,15,0,3,3,3,3,3,3],
+            [1,0,0,0,1,1,0,1,3,0,0,0,14,16,15,14,0,0,3,3,3,3,3,3],
             [1,0,0,0,1,0,0,0,1,3,0,0,15,0,0,0,15,0,3,3,3,3,3,3],
-            [1,0,0,0,1,0,0,0,1,3,0,0,15,0,0,0,15,3,3,0,0,0,3,3],
-            [1,2,6,2,1,1,1,1,1,3,3,0,15,0,0,0,15,3,0,0,0,0,0,3],
+            [1,0,0,0,1,0,0,0,1,3,0,15,0,0,0,0,15,3,3,0,0,0,3,3],
+            [1,2,6,2,1,1,1,1,1,3,3,15,0,0,0,0,15,3,0,0,0,0,0,3],
             [3,3,0,3,3,3,3,3,3,3,3,0,15,15,15,15,15,3,3,0,3,0,0,3],
             [3,0,0,3,3,3,0,0,3,3,3,3,3,3,3,3,3,0,0,0,3,3,0,3],
             [3,0,3,3,0,0,0,0,0,3,3,3,0,0,0,0,0,0,3,0,0,3,3,3],
@@ -558,6 +546,9 @@ class Raycaster {
             dir: 0, // turn direction,  -1 for left or 1 for right.
             rot: 4.71238898038469, // rotation angle; counterclockwise is positive.
             speed: 0, // forward (speed = 1) or backwards (speed = -1).
+            
+            // orientation N, E, S, O /!\ PAS BESOIN
+            // orientation: south,
 
             // player stats
 
@@ -583,6 +574,8 @@ class Raycaster {
 
             // L'inventaire est ouvert ?
             inventoryMenuShowed : false,
+
+            joystick : true,
         }
 
         const PlayerHP = document.getElementById("PlayerHPoutput");
@@ -654,11 +647,11 @@ class Raycaster {
                 statsHTML = statsHTML.slice(0, -2);
 
                 if (item.slot === 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${swordIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${swordIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
                 } else if (item.slot === 2) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${cloakIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${cloakIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                 } else {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:100%; margin-bottom: 4px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${itemIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${itemIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                     console.log(`Item: ${item.name}, Power: ${item.power}`);
                 }
             });
@@ -727,6 +720,16 @@ class Raycaster {
         var output = document.getElementById('output');
         var items = document.getElementById('items');
 
+        // joystick adds
+        if (joystick) {
+            console.log("TOGGLE bouton inventaire en mode joystick")
+            document.getElementById('joystick-container').style.display = 'none';
+            document.getElementById('joystickBackButtonContainer').style.display = "block";
+            
+            this.player.inventoryMenuShowed = true;
+            console.log("inventoryMenuShowed, after change:", this.player.inventoryMenuShowed);
+        }
+
         info.style.display = 'none';
         equipment.style.display = 'block';
         stats.style.display = 'none';
@@ -735,7 +738,6 @@ class Raycaster {
         output.style.display = "none";
         dialWindow.style.display = "none";
     }
-  
 
     resetToggle() {
         var info = document.getElementById('info');
@@ -746,6 +748,19 @@ class Raycaster {
         var items = document.getElementById('items');
         var dialWindow = document.getElementById('dialogueWindow');
  
+        // joystick adds
+        if (joystick) {
+            console.log("RESET bouton inventaire en mode joystick")
+            
+            document.getElementById('joystick-container').style.display = 'block';
+
+            document.getElementById('joystickBackButtonContainer').style.display = 'none';
+            
+            this.player.inventoryMenuShowed = false;
+
+            console.log("inventoryMenuShowed, after change:", this.player.inventoryMenuShowed);
+        }
+
         info.style.display = 'block';
         equipment.style.display = 'none';
         stats.style.display = 'none';
@@ -755,12 +770,20 @@ class Raycaster {
         output.style.display = "block";
     }
     
-    ////////////////////////////////////
-    
-    ////////////////////////////////////////////////////////////////////////////////
+    joystickBackButton() {
+        document.getElementById('info').style.display = 'block';
+        document.getElementById('equipment').style.display = 'none';
+        document.getElementById('stats').style.display = 'none';
+ 
+        document.getElementById('dialogueWindow').style.display = "none";
+        document.getElementById('items').style.display = "none";
+        document.getElementById('output').style.display = "block";
+
+        document.getElementById('joystick-container').style.display = 'block';
+        document.getElementById('joystickBackButtonContainer').style.display = 'none';
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     
     initSprites() {
         // Put sprite in center of cell
@@ -1091,8 +1114,41 @@ class Raycaster {
         document.getElementById(buttonId).addEventListener('click', () => {
           this.handleButtonClick(buttonNumber);
         });
-      }
 
+        const self = this;
+
+        document.addEventListener('joystickchange', function(event) {
+            // le joystick est une surcouche qui fait les mêmes appels que les touches
+                if (up) {
+                    console.log("joystick up");
+                    self.handleButtonClick(5);
+                } 
+    
+                if (down) {
+                    console.log("joystick down");
+                    self.handleButtonClick(8);
+                }
+    
+                if (right) {
+                    console.log("joystick right");
+                    self.handleButtonClick(9);
+                }
+    
+                if (left) {
+                    console.log("joystick left");
+                    self.handleButtonClick(7);
+                }
+    
+            });
+
+            document.getElementById(buttonId).addEventListener('click', () => {
+                this.handleButtonClick(buttonNumber);
+              });
+
+              document.getElementById('joystickBackButton').addEventListener('click', () => {
+                this.handleButtonClick(10);
+              });
+      }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
  
@@ -1116,7 +1172,7 @@ class Raycaster {
                 break;
                 */
             case 3: // EQUIPEMENT
-                console.log('Equipement');
+                console.log('Bouton Equipement');
 
                 if (this.inventoryMenuShowed == false) {
                     this.inventoryMenuShowed = true;
@@ -1152,6 +1208,11 @@ class Raycaster {
                 // console.log('strifeRight');
                 console.log('turnRight');
                 this.turnRightButtonClicked = true;
+                break;
+            case 10:
+                // console.log('strifeRight');
+                this.joystickBackButton();
+                console.log('joystickBackButton');
                 break;
  
             default:
