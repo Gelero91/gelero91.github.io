@@ -1113,7 +1113,7 @@ bindJoystick() {
                 console.log("joystick left");
                 self.handleButtonClick(7);
             }
-        }, 100); // Définissez l'intervalle de répétition ici (en millisecondes)
+        }, 200); // Définissez l'intervalle de répétition ici (en millisecondes)
     });
 }
 
