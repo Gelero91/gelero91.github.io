@@ -927,7 +927,7 @@ class Raycaster {
         return spritesFound
     }
 
-    constructor(mainCanvas, displayWidth = 640, displayHeight = 360, tileSize = 1280, textureSize = 64, fovDegrees = 90) {
+    constructor(mainCanvas, displayWidth = 640/2, displayHeight = 360/2, tileSize = 1280, textureSize = 64, fovDegrees = 90) {
         this.initMap()
         this.stripWidth = 1 // leave this at 1 for now
         this.ceilingHeight = 1 // ceiling height in blocks
@@ -989,8 +989,8 @@ class Raycaster {
     initScreen() {
         this.mainCanvasContext = this.mainCanvas.getContext('2d');
         let screen = document.getElementById("screen");
-        screen.style.width = this.displayWidth + "px";
-        screen.style.height = this.displayHeight + "px";
+        screen.style.width = this.displayWidth*2 + "px";
+        screen.style.height = this.displayHeight*2 + "px";
         this.mainCanvas.width = this.displayWidth;
         this.mainCanvas.height = this.displayHeight;
         this.loadFloorCeilingImages();
