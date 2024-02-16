@@ -958,6 +958,7 @@ class Raycaster {
 
         this.initPlayer()
         this.initSprites()
+        this.bindJoystick()
         this.bindKeysAndButtons()
         this.initScreen()
         this.drawMiniMap()
@@ -1084,6 +1085,38 @@ class Raycaster {
 
 //////////////////////////////////////////////////////////////////////////////
 
+bindJoystick() {
+    const self = this;
+    let joystickInterval;
+
+    document.addEventListener('joystickchange', function(event) {
+        clearInterval(joystickInterval); // Arrête tout intervalle précédent pour éviter les duplications
+
+        joystickInterval = setInterval(() => {
+            // Vos actions à répéter tant que le joystick est activé
+            if (up) {
+                console.log("joystick up");
+                self.handleButtonClick(5);
+            } 
+
+            if (down) {
+                console.log("joystick down");
+                self.handleButtonClick(8);
+            }
+
+            if (right) {
+                console.log("joystick right");
+                self.handleButtonClick(9);
+            }
+
+            if (left) {
+                console.log("joystick left");
+                self.handleButtonClick(7);
+            }
+        }, 100); // Définissez l'intervalle de répétition ici (en millisecondes)
+    });
+}
+
     bindKeysAndButtons() {
         this.keysDown = [];
         let this2 = this;
@@ -1114,32 +1147,6 @@ class Raycaster {
         document.getElementById(buttonId).addEventListener('click', () => {
           this.handleButtonClick(buttonNumber);
         });
-
-        const self = this;
-
-        document.addEventListener('joystickchange', function(event) {
-            // le joystick est une surcouche qui fait les mêmes appels que les touches
-                if (up) {
-                    console.log("joystick up");
-                    self.handleButtonClick(5);
-                } 
-    
-                if (down) {
-                    console.log("joystick down");
-                    self.handleButtonClick(8);
-                }
-    
-                if (right) {
-                    console.log("joystick right");
-                    self.handleButtonClick(9);
-                }
-    
-                if (left) {
-                    console.log("joystick left");
-                    self.handleButtonClick(7);
-                }
-    
-            });
 
             document.getElementById(buttonId).addEventListener('click', () => {
                 this.handleButtonClick(buttonNumber);
@@ -1301,9 +1308,6 @@ class Raycaster {
             screenStartX = 0
         }
 
-        // Récupérez les secondes actuelles, EN DEHORS DE LA BOUCLE, pour éviter la surcharge
-        const currentTime = new Date().getSeconds();
-
         for (let texY = texStartY, screenY = screenStartY; screenY < dstEndY && screenY < this.displayHeight; screenY++, texY += texStepY) {
             for (let texX = texStartX, screenX = screenStartX; screenX < dstEndX && screenX < this.displayWidth; screenX++, texX += texStepX) {
         let textureX = Math.trunc(texX);
@@ -1313,22 +1317,25 @@ class Raycaster {
         // Récupérez les secondes actuelles, cependant, à faire EN DEHORS DE LA BOUCLE !
         // const currentTime = new Date().getSeconds();
 
+        // Récupérez les secondes actuelles, EN DEHORS DE LA BOUCLE, pour éviter la surcharge
+        const currentTime = new Date().getSeconds();
+
+        // Vérifiez si une seconde s'est écoulée depuis la dernière vérification
+        // boucle qui marche, mais s'applique à tous les sprites.
+        // créer boucle qui prends en compte une valeur d'un sprite (this.sprite.animationProgress)
+
         // Vérifiez si une seconde s'est écoulée depuis la dernière vérification
         if (currentTime !== lastTime) {
             // Incrémentez animationProgress pour chaque sprite
             spriteAnimationProgress += 1;
             if (spriteAnimationProgress === 3) {
-                // problème : ça marche que pour un sprite ça
-                
+                // problème : ça marche que pour un sprite ça, ou tous
                 spriteAnimationProgress = 0;
             }
             //console.log(spriteAnimationProgress);
         }
-
+        // applique une nouvelle valeur de comparaison pour boucle
         lastTime = currentTime;
-
-        // Vérifiez si une seconde s'est écoulée depuis la dernière vérification
-
 
         // Vérifiez si le sprite est assez large pour être animé
         // si c'est supérieur à 128, ça ne peut pas être un mur.
@@ -1372,15 +1379,13 @@ class Raycaster {
 
                 // Mettre à jour l'image en utilisant setPixel (sans modifier la fonction elle-même)
                 Raycaster.setPixel(this.backBuffer, screenX, screenY, flashedPixel.r, flashedPixel.g, flashedPixel.b, 255);
-            } else if (srcPixel.a) {
-                Raycaster.setPixel(this.backBuffer, screenX, screenY, srcPixel.r, srcPixel.g, srcPixel.b, 255);
+                } else if (srcPixel.a) {
+                    Raycaster.setPixel(this.backBuffer, screenX, screenY, srcPixel.r, srcPixel.g, srcPixel.b, 255);
+                }
             }
         }
     }
 }
-
-
-    }
 
     drawSpriteStrip(rayHit) {
         // ligne à supprimer si pas de bug dans la version > α0.6
@@ -1462,6 +1467,8 @@ class Raycaster {
                 // IDEE : créer bloc conditionnel DANS le bloc conditionnel pour éviter les redondances
                 // Pas besoin de faire le bottom dans la boucle, déjà appliquée précédemment
 
+        // Créer 3 hauteurs pour chaque type de textures
+
         // TEST : si texture à un seul étage sélectionnée, 
         // aiguille automatiquement vers la palette sur 3 étages (bottom, middle, top) selon rendu du plafond ou pas
 
@@ -1469,7 +1476,6 @@ class Raycaster {
         // Texture Unit = 64
         // On utilise cette valeur de référence qu'on multiplie par le N° de la texture choisie
         const TextureUnit = 64;
-
 
         if (textureY === TextureUnit*2) {
             if (this.ceilingHeight === 1) {
