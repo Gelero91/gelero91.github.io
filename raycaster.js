@@ -71,9 +71,6 @@ let ceilingTexture = 1;
 let spriteAnimationProgress = 0;
 let lastTime = new Date().getSeconds();
 
-// Pavé de commande :
-// 'DOMContentLoaded' doit être utilisé, pour éviter que le code ne s'execute avant l'initialisation de la page html.
-
 // initialisation du terminal
 document.addEventListener("DOMContentLoaded", function () {
     const outputElement = document.getElementById("output");
@@ -777,6 +774,7 @@ class Raycaster {
  
         document.getElementById('dialogueWindow').style.display = "none";
         document.getElementById('items').style.display = "none";
+        document.getElementById('quests').style.display = "none";
         document.getElementById('output').style.display = "block";
 
         document.getElementById('joystick-container').style.display = 'block';
@@ -1093,7 +1091,7 @@ bindJoystick() {
         clearInterval(joystickInterval); // Arrête tout intervalle précédent pour éviter les duplications
 
         joystickInterval = setInterval(() => {
-            // Vos actions à répéter tant que le joystick est activé
+
             if (up) {
                 console.log("joystick up");
                 self.handleButtonClick(5);
@@ -1113,7 +1111,7 @@ bindJoystick() {
                 console.log("joystick left");
                 self.handleButtonClick(7);
             }
-        }, 500); // Définissez l'intervalle de répétition ici (en millisecondes)
+        }, 500); // Définir l'intervalle de répétition ici (en millisecondes)
     });
 }
 
@@ -1151,9 +1149,17 @@ bindJoystick() {
             document.getElementById(buttonId).addEventListener('click', () => {
                 this.handleButtonClick(buttonNumber);
               });
-
+              
               document.getElementById('joystickBackButton').addEventListener('click', () => {
                 this.handleButtonClick(10);
+              });
+
+              document.getElementById('QuestButton').addEventListener('click', () => {
+                this.handleButtonClick(11);
+              });
+
+              document.getElementById('InventoryButton').addEventListener('click', () => {
+                this.handleButtonClick(12);
               });
       }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1221,9 +1227,33 @@ bindJoystick() {
                 this.joystickBackButton();
                 console.log('joystickBackButton');
                 break;
- 
+            case 11:
+                console.log('quest button');
+                document.getElementById('QuestButton').style.display = "none";
+                document.getElementById('InventoryButton').style.display = "block";
+
+                document.getElementById('items').style.display = "none";
+                document.getElementById('quests').style.display = "block";
+                break;
+            case 12:
+                console.log('inventory button');
+                document.getElementById('QuestButton').style.display = "block";
+                document.getElementById('InventoryButton').style.display = "none";
+
+                document.getElementById('items').style.display = "block";
+                document.getElementById('quests').style.display = "none";
+                break;
             default:
                 console.log('Bouton non reconnu');
+
+
+                document.getElementById('QuestButton').addEventListener('click', () => {
+                    this.handleButtonClick(11);
+                  });
+    
+                  document.getElementById('InventoryButton').addEventListener('click', () => {
+                    this.handleButtonClick(12);
+                  });
         }
     }
 

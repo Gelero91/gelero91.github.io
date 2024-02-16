@@ -137,16 +137,20 @@ Gwendal L.R.
       }
 
       .joystick-circle {
-        border: 2px solid rgb(62, 62, 62);
+        border: 2px solid  rgba(100, 100, 100);
         border-radius: 50%;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 1); /* Ajout d'une ombre à la boîte contenant le joystick */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+      }
+
+      .joystick-circle-shadow {
+        box-shadow: inset 0 0 10px 5px rgba(0, 0, 0, 0.5);
       }
       
       .joystick {
         position: absolute;
         width: 86px;
         height: 86px;
-        background-color: rgb(62, 62, 62);
+        background-color: rgba(100, 100, 100);
         border-radius: 50%;
         box-shadow: 0 0 10px rgba(0, 0, 0, 1); /* Ajout d'une ombre au joystick */
       }
@@ -270,7 +274,10 @@ Gwendal L.R.
       <img id="cloakIcon" src="
       data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAqtJREFUSEullk1oE0EUx9/2y5Q0GI3BDSiIValFxCIFaUEQ9CQFD/WoSOvBg4J6VfwAe/Ck4EUPFhE9taf2JIKKEFCkMfgRglopVEhkXU1JSmMtXfk/88bZj8RtncvuzszOb/7/92bfGhTQjvcecNB9/9VTI2jc29dovm8BTB448YnXmLy3jRLxDrrxeDIQJAtjfrmwnZ49cnyb8r147tCAc/L8NANyn8v0/NoSzW3qYpA0u1Th27Vf8nRqdB3fv0ybqwPk8mX6Nt4e6JQsjo1g3vSLnnAK+o5kqXtrjBXogERH5K+KSpX2X2zhZ9gzO5f5NwD29Nt//H/fX+CrvnsAErEI2eUq2ZUqj28YXODrwbRJBTJootl0qXDFAIBB+yNPdIYr7D8aFsaCQQCBHEublFkJYOeIQbeHfigAbgDZkYorBQKGVXvvRgma7zSnwinQAd5FBeYFoP9KPYDYg0nxkSbX7nXfJdBimcRCVDQEnGH//w/gtUkFGQpOt5bIKFq0UFMgu/UqkGexClecicitBL+vqwgF2BWL0LtaauqZFBqA3cOe5T3dvIPM4RlOUVEAAKR/KJRcqRoEQF+xaKlsYgVhAThgfC5qhy0I4JhJasrmlE0KAP8x+PNo3pdBKSJWIABRpJ9owJBJPVO9fgA+u5eTSy6AHuBGAF2FAGDzVauFD5yh24PJomA1AGTSmrEutvFrNsdxYIDYowPadkd54harlXQF8F+eZ5K/eA7a4pt5TlUBSByUAvgvMRi9uUjW9838Yue+12oR7w2+/9KS62dp6GwbnwU90IaUSHysMIAURamUeixlMYii12yphAJ4GH3C9UFlEcpk+4VlmhqedwHqbt8zoAMedL5Vxcd1kgG5fmlj6L8JLxwQVEPdAV/BqfcHsRIl+hq/ASBCGIMBG+kaAAAAAElFTkSuQmCC
       " style="display:none;">
-      
+      <!-- GUI ICON-->
+<img id="joystickIcon" src="
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs4c6QAAA4JJREFUeF7tnNtyo0AMBc3/f7S3EjtVuGzMEUKLLr3PM4zmtHogkM1y49+YBJYxO2WjN2APagJgA3tQAoO2itnA7pvA/X6//+1uWZZRzT5qsz+Qgd1X5LedAbs57DXgra1OONJHHOPAfrQ4sJ+qY3bh412xedqR3tZsYL+3MrA/6N31SG8F22PzhCMd2DvPJZ0sBzaw6zyGRxzdXY/08mYDWxcT2HpWt+r37/KwFVaK/dVBKjkAm9elSp/UGYPZfAh56VaO8Tryfq0UszEbs5vI/LINzMZszMbsjglgNmZ37Gvu2ZiN2ZjdMQHMxuyOfc09e5DZHRv4yJ5GfOI8EkzHOcDuSHVjT8AG9qAEBm0Vs4E9KIFBW8VsYA9KYNBWMRvYgxIYtFXMBrY9gcl/X8ye1v6MiDxPMzuiuP1I+o6IyBPYSfslHeyt78TZ/itNxe/ZEdm6zI4oKEI0YJ/wywvAjmjNxzUjsjWbXcUSpc4tVBluQ0r91jqB/YG4NcQIv4FtSFUJC7M/JOAJzsDnd6jHqog6s9XjaVDpGI8I0VP01tyIOoFt1dUwPlu42erxSLJpdoQlCvNs4Warx5MhsHfSA7bSXgfHZAs3Wz1KrFs184DWxGylKYEN7NcE/ufDmtKh/Oj1noCSm2T2+tIKeGVh5d7jGaPU6fkxxlObMlep35ozsHk3vt17ER2ndLp1jFInZhtSjfjmalheHqqAtx6J8uIHB0Zkaz7Glft3leDWe6lSs6dOYD+Je0I8KO/XaenM3rI8W3ARMKKvme63S4EdhxzYcdmmu3Jq2OnSoqC3BFwPaORZKwFg1+LlqhbYrvhqTQZ2LV6uaoHtiq/WZGDX4uWqFtiu+GpNBnYtXq5qge2Kr9ZkYNfi5aoW2K74ak0eAbvib6pEtBGwn6lO+AYPbGBHHCLXXZNj/JE9ZmP2dRZGrIzZmP3SVzygRWh2wTUxG7Mx+wLxwpfEbMzG7HDNLlgAszEbsy8QL3xJzMZszA7X7OQFFGvPWrL6i5fy78aBrbcysPWsXH8e27BM2NDysNfJRFhe/ehe5wPsHY+AHXbQ+C6M2d/za2X2WUd6J5vbHuPAxmzzvQGzzZHlmaDcy7sCHnGMW490YOeR01UJZg/6ELJl+QSbxx3jwMbs8u+6rfe2ti9VrEFMGA/sCZSfewQ2sAclMGirmA3sQQkM2uo/6KMcmhz7zdkAAAAASUVORK5CYII=
+" style="display:none;">
   </div>
   
     <!-- UX/UI - Start -->
@@ -316,8 +323,11 @@ Gwendal L.R.
                   <progress id="mpBar" value="y" max="y" style="width:100%;"></progress>
                   <br>
                   <br>
-                  <label>★ Experience</label>
-                  <progress id="xpBar" value="z" max="z" style="width:100%;"></progress>
+                  <!--rajoute 2 br pour compenser l'expérience cachée-->
+                  <br>
+                  <br>
+                  <label style="display:none;">★ Experience</label>
+                  <progress id="xpBar" value="z" max="z" style="width:100%; display:none;"></progress>
                   
                   
                   <div style="height:100px;"></div>
@@ -427,6 +437,17 @@ Gwendal L.R.
                     > The inventory is empty 
                   </div>
                 </div>
+
+                <!--QUEST-->
+                <div id="quests" style="display: none; width: 640px; height: 192px; padding-left: 10px; color: black; overflow: hidden;">
+                  <div style="font-size: 16px;"> QUESTS </div>
+                  <br>
+                  <p>Welcome to Oasis !
+                      <br>
+                      <BR>
+                    It's not fresh, but it's new.<BR> So please enjoy my little baby ! 
+                  </p>
+                </div>
                 
               </div>
               <!-- MAP -->
@@ -438,14 +459,19 @@ Gwendal L.R.
               <div id="commandcontainer" style="height: 192px; width: 192px; position: relative; display: block;">
                 <!--JOYSTICK ABC-->
                 <div style="width: 192px;height:192px;">
-                  <div id="joystick-container" class="joystick-container joystick-circle" style = "display: block;">
-                      <div id = "joystick" class="joystick"></div>
-                    
+                  <div id="joystick-container" class="joystick-container joystick-circle joystick-circle-shadow" style = "display: block;">
+                      <img id = "joystick" class="joystick"
+                      src="
+                      data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs4c6QAAA4JJREFUeF7tnNtyo0AMBc3/f7S3EjtVuGzMEUKLLr3PM4zmtHogkM1y49+YBJYxO2WjN2APagJgA3tQAoO2itnA7pvA/X6//+1uWZZRzT5qsz+Qgd1X5LedAbs57DXgra1OONJHHOPAfrQ4sJ+qY3bh412xedqR3tZsYL+3MrA/6N31SG8F22PzhCMd2DvPJZ0sBzaw6zyGRxzdXY/08mYDWxcT2HpWt+r37/KwFVaK/dVBKjkAm9elSp/UGYPZfAh56VaO8Tryfq0UszEbs5vI/LINzMZszMbsjglgNmZ37Gvu2ZiN2ZjdMQHMxuyOfc09e5DZHRv4yJ5GfOI8EkzHOcDuSHVjT8AG9qAEBm0Vs4E9KIFBW8VsYA9KYNBWMRvYgxIYtFXMBrY9gcl/X8ye1v6MiDxPMzuiuP1I+o6IyBPYSfslHeyt78TZ/itNxe/ZEdm6zI4oKEI0YJ/wywvAjmjNxzUjsjWbXcUSpc4tVBluQ0r91jqB/YG4NcQIv4FtSFUJC7M/JOAJzsDnd6jHqog6s9XjaVDpGI8I0VP01tyIOoFt1dUwPlu42erxSLJpdoQlCvNs4Warx5MhsHfSA7bSXgfHZAs3Wz1KrFs184DWxGylKYEN7NcE/ufDmtKh/Oj1noCSm2T2+tIKeGVh5d7jGaPU6fkxxlObMlep35ozsHk3vt17ER2ndLp1jFInZhtSjfjmalheHqqAtx6J8uIHB0Zkaz7Glft3leDWe6lSs6dOYD+Je0I8KO/XaenM3rI8W3ARMKKvme63S4EdhxzYcdmmu3Jq2OnSoqC3BFwPaORZKwFg1+LlqhbYrvhqTQZ2LV6uaoHtiq/WZGDX4uWqFtiu+GpNBnYtXq5qge2Kr9ZkYNfi5aoW2K74ak0eAbvib6pEtBGwn6lO+AYPbGBHHCLXXZNj/JE9ZmP2dRZGrIzZmP3SVzygRWh2wTUxG7Mx+wLxwpfEbMzG7HDNLlgAszEbsy8QL3xJzMZszA7X7OQFFGvPWrL6i5fy78aBrbcysPWsXH8e27BM2NDysNfJRFhe/ehe5wPsHY+AHXbQ+C6M2d/za2X2WUd6J5vbHuPAxmzzvQGzzZHlmaDcy7sCHnGMW490YOeR01UJZg/6ELJl+QSbxx3jwMbs8u+6rfe2ti9VrEFMGA/sCZSfewQ2sAclMGirmA3sQQkM2uo/6KMcmhz7zdkAAAAASUVORK5CYII=
+                      "
+                      ></img>  
                   </div>
                   <div id ="joystickBackButtonContainer" style="display:none;">
                     <button id="QuestButton" class="controlButton" 
                     style="width: 192px; height: 94px;margin-top :2px;margin-bottom:2px;border-radius:10px;  background-color: #140c1c; ">Quest journal</button>
-                    <br/>
+                    <button id="InventoryButton" class="controlButton" 
+                    style="width: 192px; height: 94px;margin-top :2px;margin-bottom:2px;border-radius:10px;  background-color: #140c1c; display:none;">Inventory</button>
+
                     <button id="joystickBackButton" class="controlButton" 
                     style="width: 192px; height: 94px;margin-top : 2px;margin-bottom:2px;border-radius:10px;  background-color:#140c1c;   ">Back</button>
                   </div>
