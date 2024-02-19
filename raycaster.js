@@ -13,6 +13,7 @@ const KEY_D = 68
 const KEY_F = 70
 
 // initialisation variables
+// METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
 var totalTimeElapsed = 0;
 
 // Ingame Timer
@@ -25,7 +26,7 @@ var leftAnimationProgress = 0;
 
 var rightAnimation = false;
 var rightAnimationProgress = 0;
-
+//////////////METTRE CES VARIABLES DANS OBJET JOUEUR !!!!!
 var forwardAnimation = false;
 var forwardAnimationProgress = 0;
 
@@ -219,6 +220,10 @@ class Sprite {
         var items = document.getElementById('items');
         var dialWindow = document.getElementById('dialogueWindow');
  
+
+        document.getElementById('joystick-container').style.display = 'block';
+        document.getElementById('joystickBackButtonContainer').style.display = 'none';
+
         info.style.display = 'block';
         equipment.style.display = 'none';
         stats.style.display = 'none';
@@ -606,23 +611,23 @@ class Raycaster {
         this.player.inventory.push(item);
     }
 
-    // liste les objets de l'inventaire
     displayInventory() {
         const inventoryContent = document.getElementById("inventoryContent");
-
+    
         if (this.player.inventory.length > 0) {
             inventoryContent.innerHTML = "";
             this.player.inventory.forEach(item => {
-
+    
                 // on récupère l'icone de test
                 const itemIcon = document.getElementById('itemIcon').getAttribute('src');
                 const swordIcon = document.getElementById('weaponIcon').getAttribute('src');
                 const cloakIcon = document.getElementById('cloakIcon').getAttribute('src');
-
+    
                 const equippedStatus = item.equipped ? "➜ Equipped" : "";
-
+                const equippedClass = item.equipped ? "equipped" : ""; // Ajout de la classe 'equipped' si l'élément est équipé
+    
                 let statsHTML = ""; // Variable pour stocker les statistiques à afficher
-        
+            
                 // Vérifiez chaque statistique et n'ajoutez à statsHTML que si elle n'est pas égale à zéro
                 if (item.might !== 0) {
                     statsHTML += `+${item.might} Might<br>`;
@@ -639,25 +644,25 @@ class Raycaster {
                 if (item.power !== 0) {
                     statsHTML += `${item.power} Power<br>`;
                 }
-        
+            
                 // Supprime le dernier caractère (-) pour éviter un espace inutile à la fin
                 statsHTML = statsHTML.slice(0, -2);
-
+    
                 if (item.slot === 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${swordIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'green' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${swordIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
                 } else if (item.slot === 2) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${cloakIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'green' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${cloakIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                 } else {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton" style ="line-height: 0.8;background-color: #140c1c; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${itemIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'green' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${itemIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                     console.log(`Item: ${item.name}, Power: ${item.power}`);
                 }
+                
             });
         } else {
             inventoryContent.innerHTML = "> The inventory is empty";
         }
-
-        
     }
+    
 
     // gestion des objets équipés
     equipmentDisplay() {
@@ -768,16 +773,18 @@ class Raycaster {
     }
     
     joystickBackButton() {
+        document.getElementById('stats').style.display = 'none';
         document.getElementById('info').style.display = 'block';
         document.getElementById('equipment').style.display = 'none';
-        document.getElementById('stats').style.display = 'none';
- 
-        document.getElementById('dialogueWindow').style.display = "none";
+
         document.getElementById('items').style.display = "none";
         document.getElementById('quests').style.display = "none";
         document.getElementById('output').style.display = "block";
-
+        document.getElementById('dialogueWindow').style.display = "none";
+      
         document.getElementById('joystick-container').style.display = 'block';
+        document.getElementById('QuestButton').style.display = 'block';
+        document.getElementById('InventoryButton').style.display = 'none';
         document.getElementById('joystickBackButtonContainer').style.display = 'none';
     }
 
@@ -829,7 +836,7 @@ class Raycaster {
             [21 * this.tileSize + tileSizeHalf, 20 * this.tileSize + tileSizeHalf, 0],
 
             // Dummy for testing
-            // [14 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 0],
+            [14 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 0],
 
             // SAC
             [7 * this.tileSize + tileSizeHalf, 12 * this.tileSize + tileSizeHalf, 17],
@@ -1087,33 +1094,45 @@ bindJoystick() {
     const self = this;
     let joystickInterval;
 
+    // Fonction pour gérer l'événement de changement de joystick
     document.addEventListener('joystickchange', function(event) {
         clearInterval(joystickInterval); // Arrête tout intervalle précédent pour éviter les duplications
 
-        joystickInterval = setInterval(() => {
+        // Déclencher la première action immédiatement
+        if (event.detail.up) {
+            console.log("joystick up");
+            self.handleButtonClick(5);
+        } else if (event.detail.down) {
+            console.log("joystick down");
+            self.handleButtonClick(8);
+        } else if (event.detail.right) {
+            console.log("joystick right");
+            self.handleButtonClick(9);
+        } else if (event.detail.left) {
+            console.log("joystick left");
+            self.handleButtonClick(7);
+        }
 
-            if (up) {
+        // Définir l'intervalle pour les actions suivantes
+        joystickInterval = setInterval(() => {
+            if (event.detail.up) {
                 console.log("joystick up");
                 self.handleButtonClick(5);
-            } 
-
-            if (down) {
+            } else if (event.detail.down) {
                 console.log("joystick down");
                 self.handleButtonClick(8);
-            }
-
-            if (right) {
+            } else if (event.detail.right) {
                 console.log("joystick right");
                 self.handleButtonClick(9);
-            }
-
-            if (left) {
+            } else if (event.detail.left) {
                 console.log("joystick left");
                 self.handleButtonClick(7);
             }
         }, 500); // Définir l'intervalle de répétition ici (en millisecondes)
     });
 }
+
+
 
     bindKeysAndButtons() {
         this.keysDown = [];
@@ -1246,14 +1265,6 @@ bindJoystick() {
             default:
                 console.log('Bouton non reconnu');
 
-
-                document.getElementById('QuestButton').addEventListener('click', () => {
-                    this.handleButtonClick(11);
-                  });
-    
-                  document.getElementById('InventoryButton').addEventListener('click', () => {
-                    this.handleButtonClick(12);
-                  });
         }
     }
 
@@ -1284,6 +1295,8 @@ bindJoystick() {
         // Utilisez totalTimeElapsed pour calculer un délai d'une seconde
         // la valeur est initialisé en tout début de code
         const oneSecondDelay = 2000; // 1 seconde en millisecondes
+
+// METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
 
         if (totalTimeElapsed >= oneSecondDelay) {
             // console.log("one second delay, no cpu timer")
@@ -1348,6 +1361,12 @@ bindJoystick() {
         // const currentTime = new Date().getSeconds();
 
         // Récupérez les secondes actuelles, EN DEHORS DE LA BOUCLE, pour éviter la surcharge
+        
+        
+        // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
+        // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
+        // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
+        
         const currentTime = new Date().getSeconds();
 
         // Vérifiez si une seconde s'est écoulée depuis la dernière vérification

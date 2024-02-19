@@ -71,6 +71,17 @@ Gwendal L.R.
         box-shadow: 0 0 10px rgba(20, 20, 20, 1);
       }
 
+      .underscreenDiv {
+        height: 192px;
+        width: 640px;
+        margin-left: 10px;
+        overflow-y: hidden;
+        background-color:rgba(0, 0, 0, 0.5);
+        border-radius: 5px;
+        image-rendering: pixelated;
+        box-shadow: 0 0 10px rgba(20, 20, 20, 1);
+      }
+
       #infos {
         width: 192px;
       }
@@ -153,14 +164,24 @@ Gwendal L.R.
         box-shadow: inset 0 0 10px rgba(20, 20, 20, 1);
       }
       
+      .joystick-container {
+        width: 192px;
+        height: 192px;
+      }
+
       .joystick {
         position: absolute;
-        width: 96px;
-        height: 96px;
+        width: 40%;
+        height: 40%;
         background-color: rgba(75, 75, 75);
         border-radius: 50%;
         box-shadow: 0 0 10px rgba(0, 0, 0, 1);
       }
+
+      .equipped {
+        background-color: rgb(75, 132, 1); /* Changer la couleur de fond pour les éléments équipés */
+        color: white; /* Changer la couleur du texte pour une meilleure lisibilité */
+    }    
     </style>
   </head>
   <body>
@@ -426,22 +447,35 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
               <div style="position: relative;width: 668px;padding: 0px;image-rendering: pixelated;">
                 <!--CONSOLE-->
                 <output id="output" style="display: block;"></output>
-                <!-- output fenêtre dialogue-->
+
                 <!--FENETRE DIALOGUE-->
-                <div id="dialogueWindow" style="display: none;">
+                <div id="dialogueWindow" class="underscreenDiv" style="display: none;">
                   <div style="display: flex;">
-                    <img id="faceOutput" style="position: relative;height: 192;width: 192px;padding-left:10px;border-radius: 10px; image-rendering: optimizeQuality;" src="" alt="No face error !">
                     <!-- visage -->
-                    <div id="dialogue" style="position: relative;height: 192px;width: 438px;padding-left : 10px;">
-                      <!-- dialogue -->
+                    <img id="faceOutput" style="
+                    height: 184px;
+                    width: 184px;
+                    padding:4px;
+                    border-radius: 10px;"
+                    src="" alt="No face error !">
+                    <!-- dialogue -->
+                    <div id="dialogue" style="
+                    position: relative;
+                    padding: 20px;
+                    height: auto;
+                    width: auto;">
                     </div>
                   </div>
                 </div>
                 <!--ITEMS-->
-                <div id="items" style="display: none; width: 640px; height: 192px; padding-left: 10px; color: rgb(52, 52, 52); overflow: hidden;">
-                  <div style="font-size: 16px;"> ITEMS </div>
-                  <br>
-                  <div id="inventoryContent" style="width:100%; max-height: 160px; overflow-y:scroll; border : 1px; border-color:#140c1c; border-radius:10px;"> 
+                <div id="items" style="display: none; width: 640px; height: 192px; padding-left: 10px;padding: bottom 10px;margin-top:4px; color: rgb(52, 52, 52); overflow: hidden;">
+                  <div style="font-size: 16px; padding: top 2px;display:flex; justify-content: space-between;">
+                    <div>ITEMS</div>
+                    <div>GOLD : 10GP</div>
+                </div>
+                <br>
+
+                  <div id="inventoryContent" style="width:100%; max-height: 150px; overflow-y:scroll; border : 1px; border-color:#140c1c; border-radius:10px;padding-top: 10px;"> 
                     > The inventory is empty 
                   </div>
                 </div>
@@ -453,7 +487,7 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                   <p>Welcome to Oasis !
                       <br>
                       <BR>
-                    It's not fresh, but it's new.<BR> So please enjoy my little baby ! 
+                    It's not fresh, but it's new...<BR> So please, enjoy my little baby ! 
                   </p>
                 </div>
                 
@@ -467,21 +501,20 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
               <div id="commandcontainer" style="height: 192px; width: 192px; position: relative; display: block;">
                 <!--JOYSTICK ABC-->
                 <div style="width: 192px;height:192px;">
+                  <!--SI JOYSTICK => photo, décalage lors du déplacement-->
                   <div id="joystick-container" class="joystick-container joystick-circle joystick-circle-shadow" style = "display: block;">
-                      
-                      <div class="joystick">
-                          <img id = "joystick"style="position: relative;margin: 0; padding: 12.5%; height:75%;" src="
+                      <div class="joystick" id = "joystick">
+                          <img style="position: relative; height: 100%; width:100%;" src="
                         data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs4c6QAAA4JJREFUeF7tnNtyo0AMBc3/f7S3EjtVuGzMEUKLLr3PM4zmtHogkM1y49+YBJYxO2WjN2APagJgA3tQAoO2itnA7pvA/X6//+1uWZZRzT5qsz+Qgd1X5LedAbs57DXgra1OONJHHOPAfrQ4sJ+qY3bh412xedqR3tZsYL+3MrA/6N31SG8F22PzhCMd2DvPJZ0sBzaw6zyGRxzdXY/08mYDWxcT2HpWt+r37/KwFVaK/dVBKjkAm9elSp/UGYPZfAh56VaO8Tryfq0UszEbs5vI/LINzMZszMbsjglgNmZ37Gvu2ZiN2ZjdMQHMxuyOfc09e5DZHRv4yJ5GfOI8EkzHOcDuSHVjT8AG9qAEBm0Vs4E9KIFBW8VsYA9KYNBWMRvYgxIYtFXMBrY9gcl/X8ye1v6MiDxPMzuiuP1I+o6IyBPYSfslHeyt78TZ/itNxe/ZEdm6zI4oKEI0YJ/wywvAjmjNxzUjsjWbXcUSpc4tVBluQ0r91jqB/YG4NcQIv4FtSFUJC7M/JOAJzsDnd6jHqog6s9XjaVDpGI8I0VP01tyIOoFt1dUwPlu42erxSLJpdoQlCvNs4Warx5MhsHfSA7bSXgfHZAs3Wz1KrFs184DWxGylKYEN7NcE/ufDmtKh/Oj1noCSm2T2+tIKeGVh5d7jGaPU6fkxxlObMlep35ozsHk3vt17ER2ndLp1jFInZhtSjfjmalheHqqAtx6J8uIHB0Zkaz7Glft3leDWe6lSs6dOYD+Je0I8KO/XaenM3rI8W3ARMKKvme63S4EdhxzYcdmmu3Jq2OnSoqC3BFwPaORZKwFg1+LlqhbYrvhqTQZ2LV6uaoHtiq/WZGDX4uWqFtiu+GpNBnYtXq5qge2Kr9ZkYNfi5aoW2K74ak0eAbvib6pEtBGwn6lO+AYPbGBHHCLXXZNj/JE9ZmP2dRZGrIzZmP3SVzygRWh2wTUxG7Mx+wLxwpfEbMzG7HDNLlgAszEbsy8QL3xJzMZszA7X7OQFFGvPWrL6i5fy78aBrbcysPWsXH8e27BM2NDysNfJRFhe/ehe5wPsHY+AHXbQ+C6M2d/za2X2WUd6J5vbHuPAxmzzvQGzzZHlmaDcy7sCHnGMW490YOeR01UJZg/6ELJl+QSbxx3jwMbs8u+6rfe2ti9VrEFMGA/sCZSfewQ2sAclMGirmA3sQQkM2uo/6KMcmhz7zdkAAAAASUVORK5CYII=
                         "
                         ></img>
                       </div> 
-
                     </div>
                   <div id ="joystickBackButtonContainer" style="display:none;">
                     <button id="QuestButton" class="controlButton" 
                     style="width: 192px; height: 94px;margin-top :2px;margin-bottom:2px;border-radius:10px;  background-color: #140c1c; ">Quest journal</button>
                     <button id="InventoryButton" class="controlButton" 
-                    style="width: 192px; height: 94px;margin-top :2px;margin-bottom:2px;border-radius:10px;  background-color: #140c1c; display:none;">Inventory</button>
+                    style="width: 192px; height: 94px;margin-top :2px;border-radius:10px;  background-color: #140c1c; display:none;">Inventory</button>
 
                     <button id="joystickBackButton" class="controlButton" 
                     style="width: 192px; height: 94px;margin-top : 2px;margin-bottom:2px;border-radius:10px;  background-color:#140c1c;   ">Back</button>
@@ -532,136 +565,122 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
 
 
 ////////////////////////// JOYSTICK TEST
-  ////////////////////////// JOYSTICK TEST CREER SCRIPT !!
-  ////////////////////////// JOYSTICK TEST
-  const joystick = document.querySelector('.joystick');
-  const container = document.querySelector('.joystick-container');
+////////////////////////// JOYSTICK TEST CREER SCRIPT !!
+////////////////////////// JOYSTICK TEST
+// Récupération des éléments HTML nécessaires
+const joystick = document.getElementById('joystick');
+const container = document.getElementById('joystick-container');
 
-  let isJoystickClicked = false;
+// Positions spécifiques pour chaque direction
+const positions = {
+    haut: { left: '30%', top: '0%' },
+    bas: { left: '30%', top: '60%' },
+    gauche: { left: '0%', top: '30%' },
+    droite: { left: '60%', top: '30%' }
+};
 
-  const centerPosX = container.offsetWidth / 2 - joystick.offsetWidth / 2;
-  const centerPosY = container.offsetHeight / 2 - joystick.offsetHeight / 2;
+// Position centrale
+const positionCentrale = { left: '30%', top: '30%' };
 
-  joystick.style.left = centerPosX + 'px';
-  joystick.style.top = centerPosY + 'px';
+// Fonction pour centrer le joystick au milieu du conteneur
+function centerJoystick() {
+    joystick.style.left = positionCentrale.left;
+    joystick.style.top = positionCentrale.top;
+    
+}
 
-  const zoneWidth = container.offsetWidth / 2;
-  const zoneHeight = container.offsetHeight / 2;
+// Appel initial pour centrer le joystick
+centerJoystick();
 
-  let up = false;
-  let down = false;
-  let left = false;
-  let right = false;
-
-  joystick.addEventListener('mousedown', startDrag);
-  joystick.addEventListener('touchstart', startDrag);
-
-  function startDrag(e) {
-    isJoystickClicked = true;
-    moveJoystick(e);
-    document.addEventListener('mousemove', moveJoystick);
-    document.addEventListener('touchmove', moveJoystick);
-    document.addEventListener('mouseup', stopDrag);
-    document.addEventListener('touchend', stopDrag);
-  }
-
-  function moveJoystick(e) {
-    if (isJoystickClicked) {
-      e.preventDefault();
-      const boundingBox = container.getBoundingClientRect();
-      let posX, posY;
-
-      if (e.type === 'touchmove') {
-        posX = e.touches[0].clientX - boundingBox.left;
-        posY = e.touches[0].clientY - boundingBox.top;
-      } else {
-        posX = e.clientX - boundingBox.left;
-        posY = e.clientY - boundingBox.top;
-      }
-
-      const centerX = boundingBox.width / 2;
-      const centerY = boundingBox.height / 2;
-
-      let distance = Math.sqrt((posX - centerX) ** 2 + (posY - centerY) ** 2);
-      let angle = Math.atan2(posY - centerY, posX - centerX);
-      let maxDistance = boundingBox.width / 2 - joystick.offsetWidth / 2;
-
-      if (distance > maxDistance) {
-        distance = maxDistance;
-        posX = centerX + distance * Math.cos(angle);
-        posY = centerY + distance * Math.sin(angle);
-      }
-
-      joystick.style.left = posX - joystick.offsetWidth / 2 + 'px';
-      joystick.style.top = posY - joystick.offsetHeight / 2 + 'px';
-
-      // Calculer les distances horizontale et verticale par rapport au centre
-      const deltaX = posX - centerX;
-      const deltaY = posY - centerY;
-
-      // Mettre à jour les variables de direction
-      const newUp = (deltaY < -zoneHeight / 2);
-      const newDown = (deltaY > zoneHeight / 2);
-      const newLeft = (deltaX < -zoneWidth / 2);
-      const newRight = (deltaX > zoneWidth / 2);
-
-      if (newUp !== up || newDown !== down || newLeft !== left || newRight !== right) {
-        up = newUp;
-        down = newDown;
-        left = newLeft;
-        right = newRight;
-        triggerJoystickChangeEvent();
-      }
-
-  /*
-      // DEBUGAGE - Afficher les changements de direction dans la console
-      if (up) {
-        console.log('up');
-      }
-      if (down) {
-        console.log('down');
-      }
-      if (left) {
-        console.log('left');
-      }
-      if (right) {
-        console.log('right');
-      }
-  */
-    }
-  }
-
-  function stopDrag() {
-    isJoystickClicked = false;
-    // Ramener le joystick à sa position par défaut
-    joystick.style.left = centerPosX + 'px';
-    joystick.style.top = centerPosY + 'px';
-    // Réinitialiser les variables de direction
-    up = false;
-    down = false;
-    left = false;
-    right = false;
-    document.removeEventListener('mousemove', moveJoystick);
-    document.removeEventListener('touchmove', moveJoystick);
-    document.removeEventListener('mouseup', stopDrag);
-    document.removeEventListener('touchend', stopDrag);
-  }
-
-  // Déclencher un événement personnalisé lorsque l'état du joystick change
-  function triggerJoystickChangeEvent() {
+// Fonction pour déclencher un événement de changement de joystick
+function triggerJoystickChangeEvent(up, down, left, right) {
     const joystickEvent = new CustomEvent('joystickchange', {
-      detail: {
-        up,
-        down,
-        left,
-        right
-      }
+        detail: {
+            up: up,
+            down: down,
+            left: left,
+            right: right
+        }
     });
+    console.log(joystickEvent);
     document.dispatchEvent(joystickEvent);
+}
+
+// Définir une variable pour enregistrer la dernière direction détectée
+let lastDirection = null;
+
+// Fonction pour gérer le clic sur le conteneur
+// Fonction pour gérer le clic sur le conteneur
+// Fonction pour gérer le clic sur le conteneur
+function handleMouseDown(event) {
+  // Empêcher le comportement par défaut pour éviter les sélections accidentelles
+  event.preventDefault();
+
+  // Arrêter la propagation de l'événement
+  event.stopPropagation();
+
+  // Récupération des coordonnées du clic par rapport au conteneur
+  const clickX = event.clientX - container.getBoundingClientRect().left;
+  const clickY = event.clientY - container.getBoundingClientRect().top;
+
+  // Calcul de la position horizontale et verticale du joystick
+  const joystickX = (clickX / container.offsetWidth) * 100;
+  const joystickY = (clickY / container.offsetHeight) * 100;
+
+  // Déterminer la direction du déplacement du joystick
+  let direction;
+  if (joystickX < 30) {
+      direction = 'gauche';
+  } else if (joystickX > 70) {
+      direction = 'droite';
+  } else if (joystickY < 30) {
+      direction = 'haut';
+  } else if (joystickY > 70) {
+      direction = 'bas';
+  } else {
+      direction = 'neutre'; // Ajout de la direction "neutre"
   }
 
-  ////////////////////////// JOYSTICK TEST
-  ////////////////////////// JOYSTICK TEST
+  if (direction && direction !== lastDirection) {
+      lastDirection = direction; 
+      
+      joystick.style.left = positions[direction].left;
+      joystick.style.top = positions[direction].top;
+      console.log("Position: " + direction);
+
+      triggerJoystickChangeEvent(direction === 'haut', direction === 'bas', direction === 'gauche', direction === 'droite');
+  }
+
+  container.addEventListener('mouseup', handleMouseUp);
+  container.addEventListener('mouseleave', handleMouseUp);
+}
+
+function handleMouseUp(event) {
+  centerJoystick();
+  
+  lastDirection = null;
+  
+  const joystickEvent = new CustomEvent('joystickchange', {
+      detail: {
+          up: false,
+          down: false,
+          left: false,
+          right: false
+      }
+  });
+
+  document.dispatchEvent(joystickEvent);
+  
+  container.removeEventListener('mouseup', handleMouseUp);
+  container.removeEventListener('mouseleave', handleMouseUp);
+}
+
+container.addEventListener('mousedown', handleMouseDown);
+
+joystick.addEventListener('click', triggerJoystickChangeEvent);
+
+////////////////////////// JOYSTICK TEST
+////////////////////////// JOYSTICK TEST
 ////////////////////////// JOYSTICK TEST
     </script>
   </body>
