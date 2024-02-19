@@ -836,7 +836,7 @@ class Raycaster {
             [21 * this.tileSize + tileSizeHalf, 20 * this.tileSize + tileSizeHalf, 0],
 
             // Dummy for testing
-            [14 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 0],
+            // [14 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 0],
 
             // SAC
             [7 * this.tileSize + tileSizeHalf, 12 * this.tileSize + tileSizeHalf, 17],
