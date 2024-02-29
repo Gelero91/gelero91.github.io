@@ -86,7 +86,16 @@ document.addEventListener("DOMContentLoaded", function () {
     addToConsole("Version Alpha (conception)");
 });
 
+function updateProgressBar(id, value, max) {
+    const progressBar = document.getElementById(id);
+    const progress = progressBar.querySelector('.progress');
+    const percentage = (value / max) * 100;
+  
+    progress.style.width = `${percentage}%`;
+  }
+
 function statsUpdate(player) {
+    // Old Progress bar
     const playerHP = document.getElementById("PlayerHPoutput");
     const playerMP = document.getElementById("PlayerMPoutput");
     const playerXP = document.getElementById("PlayerXPoutput");
@@ -102,6 +111,10 @@ function statsUpdate(player) {
     hpBar.value = player.hp;
     mpBar.value = player.mp;
     xpBar.value = player.xp;
+
+    // update progress bar
+    updateProgressBar('hpBar', player.hp, 10);
+    updateProgressBar('mpBar', player.mp, 10);
 
     // update les stats
     const playerStr = document.getElementById("PlayerStrOutput");
@@ -307,7 +320,7 @@ class Sprite {
     playerAttack(damage) {
         this.hp -= damage;
         this.startSpriteFlash();
-        let entry = "<font style='font-style: italic;'>You attack : <font style='font-weight: bold;'>" + damage + " dmg</font> points ! </font><br>";
+        let entry = "<font style='font-style: italic;'>You attack : <font style='font-weight: bold;'>" + damage + " dmg</font> points ! </font>";
         this.terminalLog(entry) ;
     }
 
@@ -316,7 +329,7 @@ class Sprite {
 
     enemyAttackUpdate(player) {
         if (this.hp <= 0) {
-            let entry = "The enemy is dead. <br>  You won 10xp points !<br>";
+            let entry = "The enemy is dead. <br>  You won 10xp points !";
             this.talk(entry,"facePlayer");
             player.xp += 10;
             this.spriteType = 10;
@@ -789,127 +802,145 @@ class Raycaster {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
     initSprites() {
         // Put sprite in center of cell
         const tileSizeHalf = Math.floor(this.tileSize / 2)
 
 // MARQUEUR : Sprite list liste des sprites spriteList
 
-        // intégrer information sur type de sprite ; format [x, y, type] 
-        let spritePositions = [
-            [17 * this.tileSize + tileSizeHalf, 6 * this.tileSize + tileSizeHalf, 1],
-            [9 * this.tileSize + tileSizeHalf, 5 * this.tileSize + tileSizeHalf, 2],
-            [4 * this.tileSize + tileSizeHalf, 1 * this.tileSize + tileSizeHalf, 2],
-            [14 * this.tileSize + tileSizeHalf, 13 * this.tileSize + tileSizeHalf, 3],
+      let spritePositions = [
+    // Positions des sprites avec les commentaires
+    // [x, y, type]
 
-            // décoration (à trier)
-            [7 * this.tileSize + tileSizeHalf, 16 * this.tileSize + tileSizeHalf, 4],
-            [20 * this.tileSize + tileSizeHalf, 16 * this.tileSize + tileSizeHalf, 4],
+    // Positions des personnages
+    [17, 6, 1],   // Personnage 1
+    [9, 5, 2],    // Personnage 2
+    [4, 1, 2],    // Personnage 3
+    [14, 13, 3],  // Personnage 4
 
-            [14 * this.tileSize + tileSizeHalf, 9 * this.tileSize + tileSizeHalf, 7],
-            [1 * this.tileSize + tileSizeHalf, 6 * this.tileSize + tileSizeHalf, 11],
+    // Décorations
+    [7, 16, 4],   // Décoration 1
+    [20, 16, 4],  // Décoration 2
+    [14, 9, 7],   // Décoration 3
+    [1, 6, 11],   // Décoration 4
 
-            // bushes
-            [17 * this.tileSize + tileSizeHalf, 3 * this.tileSize + tileSizeHalf, 6],
-            [15 * this.tileSize + tileSizeHalf, 7 * this.tileSize + tileSizeHalf, 6],
-            [10 * this.tileSize + tileSizeHalf, 10 * this.tileSize + tileSizeHalf, 6],
-            [12 * this.tileSize + tileSizeHalf, 3 * this.tileSize + tileSizeHalf, 6],
-            [19 * this.tileSize + tileSizeHalf, 9 * this.tileSize + tileSizeHalf, 6],  
-            [9 * this.tileSize + tileSizeHalf, 7 * this.tileSize + tileSizeHalf, 6],            
+    // Bushes
+    [17, 3, 6],   // Bush 1
+    [15, 7, 6],   // Bush 2
+    [10, 10, 6],  // Bush 3
+    [12, 3, 6],   // Bush 4
+    [19, 9, 6],   // Bush 5
+    [9, 7, 6],    // Bush 6
 
-            // "end of demo"
-            [15 * this.tileSize + tileSizeHalf, 18 * this.tileSize + tileSizeHalf, 9],  
+    // "End of demo"
+    [15, 18, 9],  // Fin de la démo
 
-            // TORCHES
-            [2 * this.tileSize + tileSizeHalf, 7 * this.tileSize + tileSizeHalf, 12],
-            [2 * this.tileSize + tileSizeHalf, 5 * this.tileSize + tileSizeHalf, 12],
-            [6 * this.tileSize + tileSizeHalf, 7 * this.tileSize + tileSizeHalf, 12],
-            [6 * this.tileSize + tileSizeHalf, 5 * this.tileSize + tileSizeHalf, 12],
-            [2 * this.tileSize + tileSizeHalf, 3 * this.tileSize + tileSizeHalf, 12],
-            [6 * this.tileSize + tileSizeHalf, 3 * this.tileSize + tileSizeHalf, 12],
-            [1 * this.tileSize + tileSizeHalf, 9 * this.tileSize + tileSizeHalf, 12],
+    // Torches
+    [2, 7, 12],   // Torche 1
+    [2, 5, 12],   // Torche 2
+    [6, 7, 12],   // Torche 3
+    [6, 5, 12],   // Torche 4
+    [2, 3, 12],   // Torche 5
+    [6, 3, 12],   // Torche 6
+    [1, 9, 12],   // Torche 7
 
-            // enemies
-            [4 * this.tileSize + tileSizeHalf, 17 * this.tileSize + tileSizeHalf, 0],
-            [19 * this.tileSize + tileSizeHalf, 15 * this.tileSize + tileSizeHalf, 0],
-            [21 * this.tileSize + tileSizeHalf, 20 * this.tileSize + tileSizeHalf, 0],
+    // Ennemis
+    [4, 17, 0],   // Ennemi 1
+    [19, 15, 0],  // Ennemi 2
+    [21, 20, 0],  // Ennemi 3
 
-            // Dummy for testing
-            // [14 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 0],
+    // Dummy for testing
+    // [14, 4, 0],   // Dummy pour tests
 
-            // SAC
-            [7 * this.tileSize + tileSizeHalf, 12 * this.tileSize + tileSizeHalf, 17],
-            [20 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 17],
-            [13 * this.tileSize + tileSizeHalf, 13 * this.tileSize + tileSizeHalf, 17],
+    // Sac
+    [7, 12, 17],  // Sac 1
+    [20, 4, 17],  // Sac 2
+    [13, 13, 17], // Sac 3
 
-            // barrel
-            [16 * this.tileSize + tileSizeHalf, 9 * this.tileSize + tileSizeHalf, 5],
-            [15 * this.tileSize + tileSizeHalf, 13 * this.tileSize + tileSizeHalf, 5],
-            [17 * this.tileSize + tileSizeHalf, 7 * this.tileSize + tileSizeHalf, 5],  
-            [5 * this.tileSize + tileSizeHalf, 11 * this.tileSize + tileSizeHalf, 5], 
-            [21 * this.tileSize + tileSizeHalf, 6 * this.tileSize + tileSizeHalf, 5],               
-            [15 * this.tileSize + tileSizeHalf, 11 * this.tileSize + tileSizeHalf, 5],  
+    // Barrel
+    [16, 9, 5],   // Barrel 1
+    [15, 13, 5],  // Barrel 2
+    [17, 7, 5],   // Barrel 3
+    [5, 11, 5],   // Barrel 4
+    [21, 6, 5],   // Barrel 5
+    [15, 11, 5],  // Barrel 6
 
-            // COLONNE
-            [3 * this.tileSize + tileSizeHalf, 7 * this.tileSize + tileSizeHalf, 16],
-            [3 * this.tileSize + tileSizeHalf, 5 * this.tileSize + tileSizeHalf, 16],
-            [5 * this.tileSize + tileSizeHalf, 5 * this.tileSize + tileSizeHalf, 16],
-            [5 * this.tileSize + tileSizeHalf, 7 * this.tileSize + tileSizeHalf, 16],
-            [2 * this.tileSize + tileSizeHalf, 1 * this.tileSize + tileSizeHalf, 16],
-            [6 * this.tileSize + tileSizeHalf, 1 * this.tileSize + tileSizeHalf, 16],
-            [3 * this.tileSize + tileSizeHalf, 11 * this.tileSize + tileSizeHalf, 16],
-            [1 * this.tileSize + tileSizeHalf, 11 * this.tileSize + tileSizeHalf, 16],
+    // Colonnes
+    [3, 7, 16],   // Colonne 1
+    [3, 5, 16],   // Colonne 2
+    [5, 5, 16],   // Colonne 3
+    [5, 7, 16],   // Colonne 4
+    [2, 1, 16],   // Colonne 5
+    [6, 1, 16],   // Colonne 6
+    [3, 11, 16],  // Colonne 7
+    [1, 11, 16],  // Colonne 8
 
-            // tree
-            [16 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf, 15],
-            [10 * this.tileSize + tileSizeHalf, 9 * this.tileSize + tileSizeHalf, 15],
-            [11 * this.tileSize + tileSizeHalf, 1 * this.tileSize + tileSizeHalf, 15],
+    // Arbres
+    [16, 4, 15],  // Arbre 1
+    [10, 9, 15],  // Arbre 2
+    [11, 1, 15],  // Arbre 3
 
-            // weeds 1
-            [13 * this.tileSize + tileSizeHalf, 5 * this.tileSize + tileSizeHalf, 13],
-            [17 * this.tileSize + tileSizeHalf, 9 * this.tileSize + tileSizeHalf, 13],
-            [12 * this.tileSize + tileSizeHalf, 8 * this.tileSize + tileSizeHalf, 13],
-            [17 * this.tileSize + tileSizeHalf, 2 * this.tileSize + tileSizeHalf, 13],
-            [10 * this.tileSize + tileSizeHalf, 11 * this.tileSize + tileSizeHalf, 13],
-            // Weeds2
-            [14 * this.tileSize + tileSizeHalf/2, 5 * this.tileSize + tileSizeHalf/2, 13],
-            [14 * this.tileSize + tileSizeHalf*1.5, 5 * this.tileSize - tileSizeHalf*1.5, 13],
-            [14 * this.tileSize + tileSizeHalf, 5 * this.tileSize + tileSizeHalf*1.5, 13],
-            //weeds3
-            [17 * this.tileSize + tileSizeHalf/2, 8 * this.tileSize + tileSizeHalf/2, 13],
-            [17 * this.tileSize + tileSizeHalf*1.5, 8 * this.tileSize - tileSizeHalf*1.5, 13],
-            [17 * this.tileSize + tileSizeHalf, 8 * this.tileSize + tileSizeHalf*1.5, 13],
-            [16 * this.tileSize + tileSizeHalf/2, 6 * this.tileSize + tileSizeHalf/2, 13],
-            [16 * this.tileSize + tileSizeHalf*1.5, 6 * this.tileSize - tileSizeHalf*1.5, 13],
-            // Weeds4
-            [10 * this.tileSize + tileSizeHalf/2, 4 * this.tileSize + tileSizeHalf/2, 13],
-            [10 * this.tileSize + tileSizeHalf*1.5, 4 * this.tileSize - tileSizeHalf*1.5, 13],
-            [10 * this.tileSize + tileSizeHalf, 4 * this.tileSize + tileSizeHalf*1.5, 13],
-            // Weeds5
-            [11 * this.tileSize + tileSizeHalf/2, 7 * this.tileSize + tileSizeHalf/2, 13],
-            [11 * this.tileSize + tileSizeHalf*1.5, 7 * this.tileSize - tileSizeHalf*1.5, 13],
-            [11 * this.tileSize + tileSizeHalf, 7 * this.tileSize + tileSizeHalf*1.5, 13],
-            // Weeds6
-            [14 * this.tileSize + tileSizeHalf/2, 8 * this.tileSize + tileSizeHalf/2, 13],
-            [14 * this.tileSize + tileSizeHalf*1.5, 8 * this.tileSize - tileSizeHalf*1.5, 13],          
-        ];
+    // Mauvaises herbes 1
+    [10,1,13],[11,1,13],[12,1,13],[17,1,13],[18,1,13],[9,2,13],[11,2,13],[15,2,13],[17,2,13],[19,2,13],[10,3,13],[11,3,13],[12,3,13],[10,4,13],[14,4,13],[11,5,13],[13,5,13],[15,5,13],[10,7,13],[14,7,13],[16,7,13],[22,7,13],[10,8,13],[12,8,13],[15,8,13],[20,8,13],[21,8,13],[22,8,13],[10,9,13],[11,9,13],[17,9,13],[18,9,13],[19,9,13],[21,9,13],[9,10,13],[17,10,13],[10,11,13],[17,11,13],[10,12,13],[11,12,13],[11,13,13],[11,14,13],
+    ];
 
-        this.sprites = [];
+    this.sprites = [];
 
-        // format   constructor(x=0, y=0, z=0, w=128, h=128, spriteType=0)
-        for (let pos of spritePositions) {
-            let sprite = new Sprite(pos[0], pos[1], 0, this.tileSize, this.tileSize, pos[2]);
-            console.log(JSON.stringify(sprite))
-            this.sprites.push(sprite)
-            console.log('sprite enregistré !');
-        }
+    for (let pos of spritePositions) {
+        let x = pos[0] * this.tileSize + tileSizeHalf;
+        let y = pos[1] * this.tileSize + tileSizeHalf;
+        let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, pos[2]);
+        // console.log(JSON.stringify(sprite));
+        this.sprites.push(sprite);
+        // console.log('sprite enregistré !');
+    }
 
-        // analyse le type de sprite
-        for (let i = 0; i < this.sprites.length; i++) {
-            this.sprites[i].spriteType = spritePositions[i][2];
+    let spriteCount = 0;
+    let additionalDecoration = [];
+    let additionalDecorationCount =0;
+    let additionalDecorationSpriteCount = 1;
+
+    // Analyse le type de sprite et associe les types de sprite appropriés
+    for (let i = 0; i < this.sprites.length; i++) {
+        let spriteType = spritePositions[i][2];
+
+        // Vérifie si le type de sprite est une herbe (type 13)
+        if (spriteType === 13) {
+            // Générer des herbes supplémentaires et stockez-les dans additionalDecoration
+            for (let j = 0; j < 3; j++) {
+                let x = this.sprites[i].x + (Math.random() * 2 - 1) * tileSizeHalf;
+                let y = this.sprites[i].y + (Math.random() * 2 - 1) * tileSizeHalf;
+                let newDecoration = new Sprite(x, y, 0, this.tileSize, this.tileSize, 13);
+                newDecoration.spriteType = 13; // Assignez le bon spriteType aux herbes supplémentaires
+                
+                additionalDecoration.push(newDecoration);
+
+                additionalDecorationCount++;
+                // console.log('3 herbes générées.')
+            }
+
+            additionalDecorationSpriteCount++;
+
+            // Supprimez l'herbe d'origine de this.sprites
+            // bug du sprite.spriteType O qui apparait. Problème JS je pense.
+            this.sprites.splice(i, 1);
+            i--; // Décrémentez i pour compenser la suppression de l'entrée et éviter de sauter un sprite
+        } else {
+            this.sprites[i].spriteType = spriteType;
             console.log(this.sprites[i].spriteType);
+            spriteCount++;
         }
+    }
+
+    console.log(spriteCount +" sprites créés.")
+    console.log(additionalDecorationCount+" sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.")
+
+    // Ajoutez les herbes supplémentaires générées à this.sprites
+    for (let newDecoration of additionalDecoration) {
+        this.sprites.push(newDecoration);
+    }
+
     }
 
     resetSpriteHits() {
