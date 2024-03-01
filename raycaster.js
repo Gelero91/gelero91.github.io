@@ -1046,6 +1046,13 @@ class Raycaster {
         canvas.height = this.textureSize * 22;
         let context = canvas.getContext('2d');
         
+        // Skybox Test
+        // multiplier texture size selon taille de la texture, 
+        // sinon réglé comme un sprite
+            let skyboximg = document.getElementById('skybox1');
+            context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
+            this.skyboxImageData = context.getImageData(0, 0, this.textureSize*2, this.textureSize*3);    
+        // -----------
 
         // initialisation de la variable floorimg qui stoque la texture en base64 (pixels)
         // let floorimg;
@@ -1770,21 +1777,57 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     // SkyBox
     //////////////////////////////////////////////////////////////////////
 
-    drawSolidCeiling() {
+    drawSkybox() {
+        // Calculer les facteurs d'échelle pour les coordonnées de texture
+        let scaleX = this.skyboxImageData.width / this.displayWidth;
+        let scaleY = this.skyboxImageData.height / this.displayHeight;
+    
         for (let y = 0; y < this.displayHeight / 2; ++y) {
-            // Calculez l'indice de dégradé en fonction de la position verticale (plus bas = plus foncé)
-            let gradientIndex = (y / (this.displayHeight / 2)) * 200;
-        
-            // Couleur bleue dégradée
-            let r = 50+gradientIndex;  // Aucune valeur rouge
-            let g = 100+gradientIndex;  // Valeur verte réduite
-            let b = 180 + gradientIndex;  // Nuance de bleu
-        
+            // Calculer les coordonnées de texture pour cette ligne de pixels
+            let textureY = Math.floor(y * scaleY);
+    
             for (let x = 0; x < this.displayWidth; ++x) {
-                Raycaster.setPixel(this.backBuffer, x, y, r, g, b, 255);
+                // Calculer les coordonnées de texture pour ce pixel
+                let textureX = Math.floor(x * scaleX);
+    
+                // Trouver l'index du pixel dans le tableau de données de l'image
+                let index = (textureX + textureY * this.skyboxImageData.width) * 4;
+    
+                // Extraire les valeurs de couleur du pixel
+                let r = this.skyboxImageData.data[index];
+                let g = this.skyboxImageData.data[index + 1];
+                let b = this.skyboxImageData.data[index + 2];
+                let a = this.skyboxImageData.data[index + 3];
+    
+                // Trouver l'index du pixel dans le tableau de données du backBuffer
+                let backBufferIndex = (x + y * this.displayWidth) * 4;
+    
+                // Modifier les données du backBuffer pour mettre à jour le pixel
+                this.backBuffer.data[backBufferIndex] = r;
+                this.backBuffer.data[backBufferIndex + 1] = g;
+                this.backBuffer.data[backBufferIndex + 2] = b;
+                this.backBuffer.data[backBufferIndex + 3] = a;
             }
         }
     }
+    
+    /*
+        drawSolidCeiling() {
+            for (let y = 0; y < this.displayHeight / 2; ++y) {
+                // Calculez l'indice de dégradé en fonction de la position verticale (plus bas = plus foncé)
+                let gradientIndex = (y / (this.displayHeight / 2)) * 200;
+            
+                // Couleur bleue dégradée
+                let r = 50+gradientIndex;  // Aucune valeur rouge
+                let g = 100+gradientIndex;  // Valeur verte réduite
+                let b = 180 + gradientIndex;  // Nuance de bleu
+            
+                for (let x = 0; x < this.displayWidth; ++x) {
+                    Raycaster.setPixel(this.backBuffer, x, y, r, g, b, 255);
+                }
+            }
+        }
+    */
 
     drawTexturedFloor(rayHits) {
 
@@ -1868,7 +1911,9 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         if (texturedCeilingOn) {
             this.drawTexturedCeiling(rayHits);
         } else {
-            this.drawSolidCeiling()
+            //SKYBOX
+            this.drawSkybox();
+            // this.drawSolidCeiling()
         }
         for (let rayHit of rayHits) {
             if (rayHit.sprite) {
