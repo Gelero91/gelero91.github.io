@@ -846,12 +846,12 @@ class Raycaster {
     [1, 9, 12],   // Torche 7
 
     // Ennemis
-    [4, 17, 0],   // Ennemi 1
-    [19, 15, 0],  // Ennemi 2
-    [21, 20, 0],  // Ennemi 3
+    [4, 17, "A"],   // Ennemi 1
+    [19, 15, "A"],  // Ennemi 2
+    [21, 20, "A"],  // Ennemi 3
 
-    // Dummy for testing
-    // [14, 4, 0],   // Dummy pour tests
+    // Dummy for testing, traversable car sur décorations
+    // [14, 4, "A"],   // Dummy pour tests
 
     // Sac
     [7, 12, 17],  // Sac 1
@@ -1490,7 +1490,7 @@ bindJoystick() {
 
         // Créez un objet (ou tableau) pour stocker les données associées à chaque spriteType
             const spriteData = {
-                0: this.spriteImageData8,     // NPC TEST ENEMY
+                A: this.spriteImageData8,     // NPC TEST ENEMY
                 1: this.spriteImageData1,     // PNJ1
                 2: this.spriteImageData2,     // PNJ2
                 3: this.spriteImageData3,     // Garde
@@ -2583,7 +2583,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
                 // case selon type de sprite, invoque ses propres arguments plutôt que les injecter dans le corps de la case.
 
                     switch (spriteType) {
-                        case 0:
+                        case "A":
                             // Créer fonction pour le combat en général, avec condition sort, etc...
                             // Timer entre les deux, utiliser timer général.
 

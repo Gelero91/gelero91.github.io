@@ -179,15 +179,21 @@
       <div class="container">
         <div class="export">
           <button onclick="resetMap()">Réinitialiser la carte</button>
+          <p>World Map exportée :</p>
           <input type="text" id="mapDataInput" readonly>
-          <button onclick="exportMap()">Exporter en JSON</button>
-          <button onclick="copyToClipboard()">Copier le JSON</button>
+          <!--caché pour l'instant-->
+          <button onclick="exportMap()" style="display: none;">Exporter en JSON</button>
+          <!--caché pour l'instant-->
+          <button onclick="copyToClipboard()" style="display:none;">Copier le JSON</button>
+          <p>Sprite exportés :</p>
           <textarea id="spriteDataInput" readonly style="white-space: pre-line;"></textarea>
-          <button onclick="exportSprites()">Exporter les sprites</button>
+          <button onclick="exportSprites(); exportMap();">Exporter les cartes</button>
           <br>
           <button id = "teleportEditor">Éditeur de téléporteurs</button>
           <br>
           <button onclick="toggleMapView()">Sprite Map / World Map</button>
+          <div id="coordinates">Coordonnées : <span id="coordinatesText">-</span></div>
+              <!-- Nouveau bouton "Créer un sprite" -->
         </div>
         <div class="map"></div>
         <!--SpriteMap-->
@@ -196,6 +202,9 @@
         <!--MAP PALETTE-->
         <div class="mapPalette" id="mapPalette" style="display: flex;">
           <div>
+            <!--revoir fonction
+            <button onclick="deselectTileType()">Désélectionner type</button>
+            -->
             <button onclick="selectTileType(0)">0 - Sol</button>
             <button onclick="selectTileType(1)">1 - mur de pierre</button>
             <button onclick="selectTileType(2)">2 - Mur orné</button>
@@ -223,7 +232,10 @@
         <!--Sprite Palette-->
         <div class="spritePalette" id="spritePalette" style="display: none;">
           <div>
-            <button onclick="selectTileType(0)">0 - Enemi TEST</button>
+         <!--revoir fonction
+            <button onclick="deselectTileType()">Désélectionner type</button>
+            -->
+            <button onclick="selectTileType(0)">0 - Vide</button>
             <button onclick="selectTileType(1)">1 - PNJ1</button>
             <button onclick="selectTileType(2)">2 - PNJ2</button>
             <button onclick="selectTileType(3)">3 - Garde</button>
@@ -241,6 +253,7 @@
             <button onclick="selectTileType(15)">15 - Arbre</button>
             <button onclick="selectTileType(16)">16 - Colonne</button>
             <button onclick="selectTileType(17)">17 - Sac</button>
+            <button onclick="selectTileType('A')">A - Ennemis</button>
         </div>
        </div>
 
@@ -307,6 +320,16 @@
 
       var isMapSelected = true; // Par défaut, la carte est sélectionnée
 
+      function deselectTileType() {
+        selectedTile = -1;
+        updateCoordinates('-', '-'); // Réinitialise les coordonnées
+      }
+
+      function updateCoordinates(x, y) {
+        var coordinatesText = document.getElementById('coordinatesText');
+        coordinatesText.textContent = 'x: ' + x + ', y: ' + y;
+      }
+
       function toggleMapView() {
         var mapContainer = document.querySelector('.map');
         var spriteMapContainer = document.querySelector('.sprite-map');
@@ -357,6 +380,8 @@
       ];
       
       var worldSpriteMap = generateWorldMap(24,24,0,0);
+
+
 
       // Définir toggleTeleportEditor() en dehors de la fonction d'écouteur d'événement
       var isTeleportPaletteVisible = false; // Ajouter une variable pour suivre l'état de la palette de téléporteur
@@ -570,6 +595,7 @@
               var y = parseInt(this.getAttribute('data-y'));
               if (selectedTile !== -1) {
                 setTile(x, y, selectedTile);
+                updateCoordinates(x, y);
               }
             });
             mapContainer.appendChild(tile);
@@ -591,6 +617,7 @@
               if (selectedTile !== -1) {
                 // Si aucune valeur n'est sélectionnée, affiche les coordonnées
                 setTile(x, y, selectedTile);
+                updateCoordinates(x, y);
               }
             });
             spriteMapContainer.appendChild(tile);
