@@ -1778,38 +1778,42 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     //////////////////////////////////////////////////////////////////////
 
     drawSkybox() {
-        // Calculer les facteurs d'échelle pour les coordonnées de texture
-        let scaleX = this.skyboxImageData.width / this.displayWidth;
-        let scaleY = this.skyboxImageData.height / this.displayHeight;
-    
-        for (let y = 0; y < this.displayHeight / 2; ++y) {
-            // Calculer les coordonnées de texture pour cette ligne de pixels
-            let textureY = Math.floor(y * scaleY);
-    
-            for (let x = 0; x < this.displayWidth; ++x) {
-                // Calculer les coordonnées de texture pour ce pixel
-                let textureX = Math.floor(x * scaleX);
-    
-                // Trouver l'index du pixel dans le tableau de données de l'image
-                let index = (textureX + textureY * this.skyboxImageData.width) * 4;
-    
-                // Extraire les valeurs de couleur du pixel
-                let r = this.skyboxImageData.data[index];
-                let g = this.skyboxImageData.data[index + 1];
-                let b = this.skyboxImageData.data[index + 2];
-                let a = this.skyboxImageData.data[index + 3];
-    
-                // Trouver l'index du pixel dans le tableau de données du backBuffer
-                let backBufferIndex = (x + y * this.displayWidth) * 4;
-    
-                // Modifier les données du backBuffer pour mettre à jour le pixel
-                this.backBuffer.data[backBufferIndex] = r;
-                this.backBuffer.data[backBufferIndex + 1] = g;
-                this.backBuffer.data[backBufferIndex + 2] = b;
-                this.backBuffer.data[backBufferIndex + 3] = a;
-            }
+    // Calculer les facteurs d'échelle pour les coordonnées de texture
+    let scaleX = this.skyboxImageData.width / this.displayWidth;
+    let scaleY = this.skyboxImageData.height / this.displayHeight;
+
+    // Calculer le décalage horizontal en fonction de l'angle de la caméra
+    let offsetX = Math.floor(-this.player.rot / (2 * Math.PI) * this.skyboxImageData.width);
+
+    for (let y = 0; y < this.displayHeight / 2; ++y) {
+        // Calculer les coordonnées de texture pour cette ligne de pixels
+        let textureY = Math.floor(y * scaleY);
+
+        for (let x = 0; x < this.displayWidth; ++x) {
+            // Calculer les coordonnées de texture pour ce pixel
+            let textureX = Math.floor((x + offsetX) * scaleX) % this.skyboxImageData.width;
+
+            // Trouver l'index du pixel dans le tableau de données de l'image
+            let index = (textureX + textureY * this.skyboxImageData.width) * 4;
+
+            // Extraire les valeurs de couleur du pixel
+            let r = this.skyboxImageData.data[index];
+            let g = this.skyboxImageData.data[index + 1];
+            let b = this.skyboxImageData.data[index + 2];
+            let a = this.skyboxImageData.data[index + 3];
+
+            // Trouver l'index du pixel dans le tableau de données du backBuffer
+            let backBufferIndex = (x + y * this.displayWidth) * 4;
+
+            // Modifier les données du backBuffer pour mettre à jour le pixel
+            this.backBuffer.data[backBufferIndex] = r;
+            this.backBuffer.data[backBufferIndex + 1] = g;
+            this.backBuffer.data[backBufferIndex + 2] = b;
+            this.backBuffer.data[backBufferIndex + 3] = a;
         }
     }
+}
+
     
     /*
         drawSolidCeiling() {
