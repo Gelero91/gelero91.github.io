@@ -9,6 +9,11 @@ const KEY_S = 83
 const KEY_A = 81
 const KEY_D = 68
 
+let joystickForwardClicked = false;
+let joystickBackwardClicked = false;
+let joystickLeftClicked = false;
+let joystickRightClicked = false;
+
 // ACTION KEY: strike, open, teleport [...]
 const KEY_F = 70
 
@@ -233,7 +238,6 @@ class Sprite {
         var items = document.getElementById('items');
         var dialWindow = document.getElementById('dialogueWindow');
  
-
         document.getElementById('joystick-container').style.display = 'block';
         document.getElementById('joystickBackButtonContainer').style.display = 'none';
 
@@ -510,9 +514,9 @@ class Raycaster {
     initMap() {
         this.map = 
         [
-            [1,1,1,1,1,1,1,1,3,3,3,3,3,1,9,9,1,3,3,3,3,3,3,3],
-            [2,2,0,0,0,0,0,2,3,3,0,0,0,1,0,0,1,0,0,3,3,3,3,3],
-            [2,2,0,0,0,0,0,2,3,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3],
+            [1,1,1,1,1,1,1,1,3,24,24,24,24,1,9,9,1,24,24,24,3,3,3,3],
+            [2,2,0,0,0,0,0,2,24,24,0,0,0,1,0,0,1,0,0,24,3,3,3,3],
+            [2,2,0,0,0,0,0,2,24,0,0,0,0,0,0,0,0,0,0,0,24,3,3,3],
             [2,2,0,0,0,0,0,2,3,1,0,0,0,0,0,0,0,0,0,15,15,15,3],
             [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,14,0,0,0,15,3],
             [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,16,0,0,0,15,3],
@@ -546,8 +550,8 @@ class Raycaster {
     // Créer des instances de la classe Item pour l'inventaire du joueur
     // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
 
-        const stick = new Item("Short sword", 1, false, 0, 0, 0, 0, 1, 0, 0, 0);
-        const jacket = new Item("Quilted jacket", 2, false, 0, 0, 0, 0, 0, 0, 0, 1);
+        const shortSwordAndShield = new Item("Short Sword and Shield", 1, true, 0, 0, 0, 0, 2, 0, 0, 1);
+        const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
         const magicSword = new Item("Magic sword", 1, false, 0, 0, 0, 0, 3, 2, 0, 0);
         const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
         const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
@@ -564,6 +568,9 @@ class Raycaster {
             
             // orientation N, E, S, O /!\ PAS BESOIN
             // orientation: south,
+            /* FPS */
+            moveSpeed : Math.round(this.tileSize/(DESIRED_FPS/60.0*16)),
+            rotSpeed : 1.5 * Math.PI / 180,
 
             // player stats
 
@@ -585,7 +592,7 @@ class Raycaster {
             hands: [],
             torso: [],
 
-            inventory: [stick, jacket, magicSword],
+            inventory: [shortSwordAndShield, jacket, magicSword],
 
             // L'inventaire est ouvert ?
             inventoryMenuShowed : false,
@@ -662,11 +669,11 @@ class Raycaster {
                 statsHTML = statsHTML.slice(0, -2);
     
                 if (item.slot === 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'green' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${swordIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'rgb(0, 60, 0)' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${swordIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
                 } else if (item.slot === 2) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'green' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${cloakIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'rgb(0, 60, 0)' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${cloakIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                 } else {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'green' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${itemIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${item.equipped ? 'rgb(0, 60, 0)' : '#140c1c'}; width:99%; margin-bottom: 5px; padding : 15px;" id="${item.name}" data-item="${item.name}"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${itemIcon}"> ► ${item.name} ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                     console.log(`Item: ${item.name}, Power: ${item.power}`);
                 }
                 
@@ -807,139 +814,139 @@ class Raycaster {
         // Put sprite in center of cell
         const tileSizeHalf = Math.floor(this.tileSize / 2)
 
-// MARQUEUR : Sprite list liste des sprites spriteList
+    // MARQUEUR : Sprite list liste des sprites spriteList
 
-      let spritePositions = [
-    // Positions des sprites avec les commentaires
-    // [x, y, type]
+        let spritePositions = [
+        // Positions des sprites avec les commentaires
+        // [x, y, type]
 
-    // Positions des personnages
-    [17, 6, 1],   // Personnage 1
-    [9, 5, 2],    // Personnage 2
-    [4, 1, 2],    // Personnage 3
-    [14, 13, 3],  // Personnage 4
+        // Positions des personnages
+        [17, 6, 1],   // Personnage 1
+        [9, 5, 2],    // Personnage 2
+        [4, 1, 2],    // Personnage 3
+        [14, 13, 3],  // Personnage 4
 
-    // Décorations
-    [7, 16, 4],   // Décoration 1
-    [20, 16, 4],  // Décoration 2
-    [14, 9, 7],   // Décoration 3
-    [1, 6, 11],   // Décoration 4
+        // Décorations
+        [7, 16, 4],   // Décoration 1
+        [20, 16, 4],  // Décoration 2
+        [14, 9, 7],   // Décoration 3
+        [1, 6, 11],   // Décoration 4
 
-    // Bushes
-    [17, 3, 6],   // Bush 1
-    [15, 7, 6],   // Bush 2
-    [10, 10, 6],  // Bush 3
-    [12, 3, 6],   // Bush 4
-    [19, 9, 6],   // Bush 5
-    [9, 7, 6],    // Bush 6
+        // Bushes
+        [17, 3, 6],   // Bush 1
+        [15, 7, 6],   // Bush 2
+        [10, 10, 6],  // Bush 3
+        [12, 3, 6],   // Bush 4
+        [19, 9, 6],   // Bush 5
+        [9, 7, 6],    // Bush 6
 
-    // "End of demo"
-    [15, 18, 9],  // Fin de la démo
+        // "End of demo"
+        [15, 18, 9],  // Fin de la démo
 
-    // Torches
-    [2, 7, 12],   // Torche 1
-    [2, 5, 12],   // Torche 2
-    [6, 7, 12],   // Torche 3
-    [6, 5, 12],   // Torche 4
-    [2, 3, 12],   // Torche 5
-    [6, 3, 12],   // Torche 6
-    [1, 9, 12],   // Torche 7
+        // Torches
+        [2, 7, 12],   // Torche 1
+        [2, 5, 12],   // Torche 2
+        [6, 7, 12],   // Torche 3
+        [6, 5, 12],   // Torche 4
+        [2, 3, 12],   // Torche 5
+        [6, 3, 12],   // Torche 6
+        [1, 9, 12],   // Torche 7
 
-    // Ennemis
-    [4, 17, "A"],   // Ennemi 1
-    [19, 15, "A"],  // Ennemi 2
-    [21, 20, "A"],  // Ennemi 3
+        // Ennemis
+        [4, 17, "A"],   // Ennemi 1
+        [19, 15, "A"],  // Ennemi 2
+        [21, 20, "A"],  // Ennemi 3
 
-    // Dummy for testing, traversable car sur décorations
-    // [14, 4, "A"],   // Dummy pour tests
+        // Dummy for testing, traversable car sur décorations
+        // [14, 4, "A"],   // Dummy pour tests
 
-    // Sac
-    [7, 12, 17],  // Sac 1
-    [20, 4, 17],  // Sac 2
-    [13, 13, 17], // Sac 3
+        // Sac
+        [7, 12, 17],  // Sac 1
+        [20, 4, 17],  // Sac 2
+        [13, 13, 17], // Sac 3
 
-    // Barrel
-    [16, 9, 5],   // Barrel 1
-    [15, 13, 5],  // Barrel 2
-    [17, 7, 5],   // Barrel 3
-    [5, 11, 5],   // Barrel 4
-    [21, 6, 5],   // Barrel 5
-    [15, 11, 5],  // Barrel 6
+        // Barrel
+        [16, 9, 5],   // Barrel 1
+        [15, 13, 5],  // Barrel 2
+        [17, 7, 5],   // Barrel 3
+        [5, 11, 5],   // Barrel 4
+        [21, 6, 5],   // Barrel 5
+        [15, 11, 5],  // Barrel 6
 
-    // Colonnes
-    [3, 7, 16],   // Colonne 1
-    [3, 5, 16],   // Colonne 2
-    [5, 5, 16],   // Colonne 3
-    [5, 7, 16],   // Colonne 4
-    [2, 1, 16],   // Colonne 5
-    [6, 1, 16],   // Colonne 6
-    [3, 11, 16],  // Colonne 7
-    [1, 11, 16],  // Colonne 8
+        // Colonnes
+        [3, 7, 16],   // Colonne 1
+        [3, 5, 16],   // Colonne 2
+        [5, 5, 16],   // Colonne 3
+        [5, 7, 16],   // Colonne 4
+        [2, 1, 16],   // Colonne 5
+        [6, 1, 16],   // Colonne 6
+        [3, 11, 16],  // Colonne 7
+        [1, 11, 16],  // Colonne 8
 
-    // Arbres
-    [16, 4, 15],  // Arbre 1
-    [10, 9, 15],  // Arbre 2
-    [11, 1, 15],  // Arbre 3
+        // Arbres
+        [16, 4, 15],  // Arbre 1
+        [10, 9, 15],  // Arbre 2
+        [11, 1, 15],  // Arbre 3
 
-    // Mauvaises herbes 1
-    [10,1,13],[11,1,13],[12,1,13],[17,1,13],[18,1,13],[9,2,13],[11,2,13],[15,2,13],[17,2,13],[19,2,13],[10,3,13],[11,3,13],[12,3,13],[10,4,13],[14,4,13],[11,5,13],[13,5,13],[15,5,13],[10,7,13],[14,7,13],[16,7,13],[22,7,13],[10,8,13],[12,8,13],[15,8,13],[20,8,13],[21,8,13],[22,8,13],[10,9,13],[11,9,13],[17,9,13],[18,9,13],[19,9,13],[21,9,13],[9,10,13],[17,10,13],[10,11,13],[17,11,13],[10,12,13],[11,12,13],[11,13,13],[11,14,13],
-    ];
+        // Mauvaises herbes 1
+        [10,1,13],[11,1,13],[12,1,13],[17,1,13],[18,1,13],[9,2,13],[11,2,13],[15,2,13],[17,2,13],[19,2,13],[10,3,13],[11,3,13],[12,3,13],[10,4,13],[14,4,13],[11,5,13],[13,5,13],[15,5,13],[10,7,13],[14,7,13],[16,7,13],[22,7,13],[10,8,13],[12,8,13],[15,8,13],[20,8,13],[21,8,13],[22,8,13],[10,9,13],[11,9,13],[17,9,13],[18,9,13],[19,9,13],[21,9,13],[9,10,13],[17,10,13],[10,11,13],[17,11,13],[10,12,13],[11,12,13],[11,13,13],[11,14,13],
+        ];
 
-    this.sprites = [];
+        this.sprites = [];
 
-    for (let pos of spritePositions) {
-        let x = pos[0] * this.tileSize + tileSizeHalf;
-        let y = pos[1] * this.tileSize + tileSizeHalf;
-        let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, pos[2]);
-        // console.log(JSON.stringify(sprite));
-        this.sprites.push(sprite);
-        // console.log('sprite enregistré !');
-    }
-
-    let spriteCount = 0;
-    let additionalDecoration = [];
-    let additionalDecorationCount =0;
-    let additionalDecorationSpriteCount = 1;
-
-    // Analyse le type de sprite et associe les types de sprite appropriés
-    for (let i = 0; i < this.sprites.length; i++) {
-        let spriteType = spritePositions[i][2];
-
-        // Vérifie si le type de sprite est une herbe (type 13)
-        if (spriteType === 13) {
-            // Générer des herbes supplémentaires et stockez-les dans additionalDecoration
-            for (let j = 0; j < 3; j++) {
-                let x = this.sprites[i].x + (Math.random() * 2 - 1) * tileSizeHalf;
-                let y = this.sprites[i].y + (Math.random() * 2 - 1) * tileSizeHalf;
-                let newDecoration = new Sprite(x, y, 0, this.tileSize, this.tileSize, 13);
-                newDecoration.spriteType = 13; // Assignez le bon spriteType aux herbes supplémentaires
-                
-                additionalDecoration.push(newDecoration);
-
-                additionalDecorationCount++;
-                // console.log('3 herbes générées.')
-            }
-
-            additionalDecorationSpriteCount++;
-
-            // Supprimez l'herbe d'origine de this.sprites
-            // bug du sprite.spriteType O qui apparait. Problème JS je pense.
-            this.sprites.splice(i, 1);
-            i--; // Décrémentez i pour compenser la suppression de l'entrée et éviter de sauter un sprite
-        } else {
-            this.sprites[i].spriteType = spriteType;
-            console.log(this.sprites[i].spriteType);
-            spriteCount++;
+        for (let pos of spritePositions) {
+            let x = pos[0] * this.tileSize + tileSizeHalf;
+            let y = pos[1] * this.tileSize + tileSizeHalf;
+            let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, pos[2]);
+            // console.log(JSON.stringify(sprite));
+            this.sprites.push(sprite);
+            // console.log('sprite enregistré !');
         }
-    }
 
-    console.log(spriteCount +" sprites créés.")
-    console.log(additionalDecorationCount+" sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.")
+        let spriteCount = 0;
+        let additionalDecoration = [];
+        let additionalDecorationCount =0;
+        let additionalDecorationSpriteCount = 1;
 
-    // Ajoutez les herbes supplémentaires générées à this.sprites
-    for (let newDecoration of additionalDecoration) {
-        this.sprites.push(newDecoration);
-    }
+        // Analyse le type de sprite et associe les types de sprite appropriés
+        for (let i = 0; i < this.sprites.length; i++) {
+            let spriteType = spritePositions[i][2];
+
+            // Vérifie si le type de sprite est une herbe (type 13)
+            if (spriteType === 13) {
+                // Générer des herbes supplémentaires et stockez-les dans additionalDecoration
+                for (let j = 0; j < 3; j++) {
+                    let x = this.sprites[i].x + (Math.random() * 2 - 1) * tileSizeHalf;
+                    let y = this.sprites[i].y + (Math.random() * 2 - 1) * tileSizeHalf;
+                    let newDecoration = new Sprite(x, y, 0, this.tileSize, this.tileSize, 13);
+                    newDecoration.spriteType = 13; // Assignez le bon spriteType aux herbes supplémentaires
+                    
+                    additionalDecoration.push(newDecoration);
+
+                    additionalDecorationCount++;
+                    // console.log('3 herbes générées.')
+                }
+
+                additionalDecorationSpriteCount++;
+
+                // Supprimez l'herbe d'origine de this.sprites
+                // bug du sprite.spriteType O qui apparait. Problème JS je pense.
+                this.sprites.splice(i, 1);
+                i--; // Décrémentez i pour compenser la suppression de l'entrée et éviter de sauter un sprite
+            } else {
+                this.sprites[i].spriteType = spriteType;
+                // console.log(this.sprites[i].spriteType);
+                spriteCount++;
+            }
+        }
+
+        console.log(spriteCount +" sprites créés.")
+        console.log(additionalDecorationCount+" sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.")
+
+        // Ajoutez les herbes supplémentaires générées à this.sprites
+        for (let newDecoration of additionalDecoration) {
+            this.sprites.push(newDecoration);
+        }
 
     }
 
@@ -965,7 +972,7 @@ class Raycaster {
         return spritesFound
     }
 
-    constructor(mainCanvas, displayWidth = 640/2, displayHeight = 360/2, tileSize = 1280, textureSize = 64, fovDegrees = 90) {
+    constructor(mainCanvas, displayWidth = 320, displayHeight = 190, tileSize = 1280, textureSize = 64, fovDegrees = 90) {
         this.initMap()
         this.stripWidth = 1 // leave this at 1 for now
         this.ceilingHeight = 1 // ceiling height in blocks
@@ -994,7 +1001,6 @@ class Raycaster {
 
         this.initPlayer()
         this.initSprites()
-        this.bindJoystick()
         this.bindKeysAndButtons()
         this.initScreen()
         this.drawMiniMap()
@@ -1043,7 +1049,7 @@ class Raycaster {
         //x correspond au nombre de textures (de haut en bas) sur imgWall
         //exemple : texture n°4 = 4ème texture, soit entre 3*64px et 4*64px
         canvas.width = this.textureSize * 2;
-        canvas.height = this.textureSize * 22;
+        canvas.height = this.textureSize * 24;
         let context = canvas.getContext('2d');
         
         // Skybox Test
@@ -1128,100 +1134,6 @@ class Raycaster {
 
 //////////////////////////////////////////////////////////////////////////////
 
-bindJoystick() {
-    const self = this;
-    let joystickInterval;
-
-    // Fonction pour gérer l'événement de changement de joystick
-    document.addEventListener('joystickchange', function(event) {
-        clearInterval(joystickInterval); // Arrête tout intervalle précédent pour éviter les duplications
-
-        // Déclencher la première action immédiatement
-        if (event.detail.up) {
-            console.log("joystick up");
-            self.handleButtonClick(5);
-        } else if (event.detail.down) {
-            console.log("joystick down");
-            self.handleButtonClick(8);
-        } else if (event.detail.right) {
-            console.log("joystick right");
-            self.handleButtonClick(9);
-        } else if (event.detail.left) {
-            console.log("joystick left");
-            self.handleButtonClick(7);
-        }
-
-        // Définir l'intervalle pour les actions suivantes
-        joystickInterval = setInterval(() => {
-            if (event.detail.up) {
-                console.log("joystick up");
-                self.handleButtonClick(5);
-            } else if (event.detail.down) {
-                console.log("joystick down");
-                self.handleButtonClick(8);
-            } else if (event.detail.right) {
-                console.log("joystick right");
-                self.handleButtonClick(9);
-            } else if (event.detail.left) {
-                console.log("joystick left");
-                self.handleButtonClick(7);
-            }
-        }, 500); // Définir l'intervalle de répétition ici (en millisecondes)
-    });
-}
-
-
-
-    bindKeysAndButtons() {
-        this.keysDown = [];
-        let this2 = this;
-    
-        // Liaison des touches
-        document.onkeydown = function(e) {
-          e = e || window.event;
-          this2.keysDown[e.keyCode] = true;
-        };
-        document.onkeyup = function(e) {
-          e = e || window.event;
-          this2.keysDown[e.keyCode] = false;
-        };
-    
-        // Liaison des boutons
-        this.bindButton('button1', 1);
-        this.bindButton('button2', 2);
-        this.bindButton('button3', 3);
-        // this.bindButton('button4', 4);
-        this.bindButton('button5', 5);
-        // this.bindButton('button6', 6);
-        this.bindButton('button7', 7);
-        this.bindButton('button8', 8);
-        this.bindButton('button9', 9);
-    }
-
-    bindButton(buttonId, buttonNumber) {
-        document.getElementById(buttonId).addEventListener('click', () => {
-          this.handleButtonClick(buttonNumber);
-        });
-
-            document.getElementById(buttonId).addEventListener('click', () => {
-                this.handleButtonClick(buttonNumber);
-              });
-              
-              document.getElementById('joystickBackButton').addEventListener('click', () => {
-                this.handleButtonClick(10);
-              });
-
-              document.getElementById('QuestButton').addEventListener('click', () => {
-                this.handleButtonClick(11);
-              });
-
-              document.getElementById('InventoryButton').addEventListener('click', () => {
-                this.handleButtonClick(12);
-              });
-      }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
- 
     //  TO CHANGE : heavily simplified for the DEMO
     handleButtonClick(buttonNumber) {
         switch (buttonNumber) {
@@ -1260,7 +1172,7 @@ bindJoystick() {
                 break;
             case 5:
                 console.log('forward');
-                this.forwardButtonClicked = true;
+                this.joystickForwardClicked = true;
                 break;
             case 6:
                 // EMPTY
@@ -1305,6 +1217,89 @@ bindJoystick() {
 
         }
     }
+
+    bindKeysAndButtons() {
+        this.keysDown = [];
+        let this2 = this;
+    
+        // Liaison des touches
+        document.onkeydown = function(e) {
+          e = e || window.event;
+          this2.keysDown[e.keyCode] = true;
+        };
+        document.onkeyup = function(e) {
+          e = e || window.event;
+          this2.keysDown[e.keyCode] = false;
+        };
+
+        /////////////////////////////////////////////////////////
+            //  JOYSTICK
+        /////////////////////////////////////////////////////////
+
+        document.addEventListener('joystickchange', function(event) {
+            const { up, down, left, right } = event.detail;
+            if (up) {
+                // Traitement pour le mouvement vers le haut
+                // console.log("Up event detected");
+                joystickForwardClicked = true;
+            } else if (down) {
+                // Traitement pour le mouvement vers le bas
+                // console.log("Down event detected");
+                joystickBackwardClicked = true;
+            } else if (left) {
+                // Traitement pour le mouvement vers la gauche
+                // console.log("Left event detected");
+                joystickLeftClicked = true;
+            } else if (right) {
+                // Traitement pour le mouvement vers la droite
+                // console.log("Right event detected");
+                joystickRightClicked = true;
+            } else {
+                joystickForwardClicked=false;
+                joystickBackwardClicked = false;
+                joystickLeftClicked = false;
+                joystickRightClicked = false;
+            }
+        });
+
+        /////////////////////////////////////////////////////////
+            //  END - JOYSTICK
+        /////////////////////////////////////////////////////////
+
+        // Liaison des boutons
+        this.bindButton('button1', 1);
+        this.bindButton('button2', 2);
+        this.bindButton('button3', 3);
+        // this.bindButton('button4', 4);
+        this.bindButton('button5', 5);
+        // this.bindButton('button6', 6);
+        this.bindButton('button7', 7);
+        this.bindButton('button8', 8);
+        this.bindButton('button9', 9);
+    }
+
+    
+    bindButton(buttonId, buttonNumber) {
+        document.getElementById(buttonId).addEventListener('click', () => {
+          this.handleButtonClick(buttonNumber);
+        });
+
+            document.getElementById(buttonId).addEventListener('click', () => {
+                this.handleButtonClick(buttonNumber);
+              });
+              
+              document.getElementById('joystickBackButton').addEventListener('click', () => {
+                this.handleButtonClick(10);
+              });
+
+              document.getElementById('QuestButton').addEventListener('click', () => {
+                this.handleButtonClick(11);
+              });
+
+              document.getElementById('InventoryButton').addEventListener('click', () => {
+                this.handleButtonClick(12);
+              });
+      }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1620,6 +1615,14 @@ bindJoystick() {
             }
         }
 
+        // forêt
+            else if (textureY == 1472) {
+                this.drawTexturedRect(this.wallsImageData, textureX, 1472, swidth, sheight, imgx, imgy, imgw, imgh);
+                textureY =  1408;
+                this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - wallScreenHeight, imgw, imgh);
+             
+                }
+
         // COMPORTEMENT PAR DEFAUT
         // + étages spéciaux selon sélection (blocs "if")
         else {
@@ -1777,43 +1780,44 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     // SkyBox
     //////////////////////////////////////////////////////////////////////
 
+
     drawSkybox() {
-    // Calculer les facteurs d'échelle pour les coordonnées de texture
-    let scaleX = this.skyboxImageData.width / this.displayWidth;
-    let scaleY = this.skyboxImageData.height / this.displayHeight;
-
-    // Calculer le décalage horizontal en fonction de l'angle de la caméra
-    let offsetX = Math.floor(-this.player.rot / (2 * Math.PI) * this.skyboxImageData.width);
-
-    for (let y = 0; y < this.displayHeight / 2; ++y) {
-        // Calculer les coordonnées de texture pour cette ligne de pixels
-        let textureY = Math.floor(y * scaleY);
-
-        for (let x = 0; x < this.displayWidth; ++x) {
-            // Calculer les coordonnées de texture pour ce pixel
-            let textureX = Math.floor((x + offsetX) * scaleX) % this.skyboxImageData.width;
-
-            // Trouver l'index du pixel dans le tableau de données de l'image
-            let index = (textureX + textureY * this.skyboxImageData.width) * 4;
-
-            // Extraire les valeurs de couleur du pixel
-            let r = this.skyboxImageData.data[index];
-            let g = this.skyboxImageData.data[index + 1];
-            let b = this.skyboxImageData.data[index + 2];
-            let a = this.skyboxImageData.data[index + 3];
-
-            // Trouver l'index du pixel dans le tableau de données du backBuffer
-            let backBufferIndex = (x + y * this.displayWidth) * 4;
-
-            // Modifier les données du backBuffer pour mettre à jour le pixel
-            this.backBuffer.data[backBufferIndex] = r;
-            this.backBuffer.data[backBufferIndex + 1] = g;
-            this.backBuffer.data[backBufferIndex + 2] = b;
-            this.backBuffer.data[backBufferIndex + 3] = a;
+        // Calculer les facteurs d'échelle pour les coordonnées de texture
+        let scaleX = this.skyboxImageData.width / this.displayWidth;
+        let scaleY = this.skyboxImageData.height / this.displayHeight;
+    
+        // Calculer le décalage horizontal en fonction de l'angle de la caméra
+        let offsetX = Math.floor(-this.player.rot / (2 * Math.PI) * this.skyboxImageData.width);
+    
+        for (let y = 0; y < this.displayHeight / 2; ++y) {
+            // Calculer les coordonnées de texture pour cette ligne de pixels
+            let textureY = Math.floor(y * scaleY);
+    
+            for (let x = 0; x < this.displayWidth; ++x) {
+                // Calculer les coordonnées de texture pour ce pixel
+                let textureX = Math.floor((x + offsetX) * scaleX) % this.skyboxImageData.width;
+    
+                // Trouver l'index du pixel dans le tableau de données de l'image
+                let index = (textureX + textureY * this.skyboxImageData.width) * 4;
+    
+                // Extraire les valeurs de couleur du pixel
+                let r = this.skyboxImageData.data[index];
+                let g = this.skyboxImageData.data[index + 1];
+                let b = this.skyboxImageData.data[index + 2];
+                let a = this.skyboxImageData.data[index + 3];
+    
+                // Trouver l'index du pixel dans le tableau de données du backBuffer
+                let backBufferIndex = (x + y * this.displayWidth) * 4;
+    
+                // Modifier les données du backBuffer pour mettre à jour le pixel
+                this.backBuffer.data[backBufferIndex] = r;
+                this.backBuffer.data[backBufferIndex + 1] = g;
+                this.backBuffer.data[backBufferIndex + 2] = b;
+                this.backBuffer.data[backBufferIndex + 3] = a;
+            }
         }
     }
-}
-
+    
     
     /*
         drawSolidCeiling() {
@@ -2196,370 +2200,275 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         objectCtx.closePath();
         objectCtx.stroke();
     }
+    
 
-    // MOVE EST ASYNCHRONE !
-    // C'était la cause des ralentissements et "bugs" visuels
     async move(timeElapsed) {
-        const up = this.keysDown[KEY_UP] || this.keysDown[KEY_W]
-        const down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S]
-        const left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A]
-        const right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D]
+        // écoute des changement d'état des variables
+        let up = this.keysDown[KEY_UP] || this.keysDown[KEY_W];
+        let down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S];
+        let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A];
+        let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D];
+        const action = this.keysDown[KEY_F] || this.actionButtonClicked;
 
-        // UNITE TEMPORELLE  
-        ////////////////////////////////////////////////////////
-
-        // NE PAS TOUCHER, c'est présent dans le code initial
-        // let timeBasedFactor = timeElapsed / UPDATE_INTERVAL;
-
-        // TELEPORT  
-        /////////////////////////////////////////////////////////
-        const action = this.keysDown[KEY_F];
-
-        //  Algorithme d'avancée case par case
-        /////////////////////////////////////////////////////////
-
-        // math.trunc() suprime les décimales pour ne garder que l'entier inférieur 
-        const x = Math.floor(this.player.x / this.tileSize);
-        const y = Math.floor(this.player.y / this.tileSize);
-
-        const northDir = this.map[y - 1][x];
-        const estDir = this.map[y][x + 1];
-        const southDir = this.map[y + 1][x];
-        const ouestDir = this.map[y][x - 1];
-
-// TEST DETECTION COLLISION SPRITE      ////////////////////////////////////////////////////////   
-
-        // détection de collision avec les murs (avant-arrière)
-        // autre condition : if sprite.type == 10 (cadavre) pas de collision, 13 = herbe, etc [...]
-
-        if (this.player.rot === nord) {
-            if (northDir === 0) {
-                forward = true;
-            } else {
-                forward = false;
-            }
-
-            if (southDir === 0) {
-                backward = true;
-            } else {
-                backward = false;
-            }
-
-        } else if (this.player.rot === est) {
-            if (estDir === 0) {
-                forward = true;
-            } else {
-                forward = false;
-            }
-
-            if (ouestDir === 0) {
-                backward = true;
-            } else {
-                backward = false;
-            }
-        } else if (this.player.rot === sud) {
-            if (southDir === 0) {
-                forward = true;
-            } else {
-                forward = false;
-            }
-
-            if (northDir === 0) {
-                backward = true;
-            } else {
-                backward = false;
-            }
-        } else if (this.player.rot === ouest) {
-            if (ouestDir === 0) {
-                forward = true;
-            } else {
-                forward = false;
-            }
-
-            if (estDir === 0) {
-                backward = true;
-            } else {
-                backward = false;
-            }
-        }
- 
-///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
-///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
-///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
-///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
-///////////////////////REVOIR DEPLACEMENT, RENDRE PLUS FLUIDE
-
-        if (yourTurn == true && forward == true && up || this.forwardButtonClicked && yourTurn == true && forward == true) {
-
-            setTimeout(() => {
-                this.forwardButtonClicked = false;
-              }, 200);
-
-            // établissement de la position cible (avance)
-            if (this.player.rot == est) {
-                moveTargetX = this.player.x + 1280; // Déplacement horizontal
-                moveTargetY = this.player.y;
-            } else if (this.player.rot == ouest) {
-                moveTargetX = this.player.x - 1280; // Déplacement horizontal en sens inverse
-                moveTargetY = this.player.y;
-            } else if (this.player.rot == nord) {
-                moveTargetY = this.player.y - 1280; // Déplacement vertical
-                moveTargetX = this.player.x;
-            } else if (this.player.rot == sud) {
-                moveTargetY = this.player.y + 1280; // Déplacement vertical en sens inverse
-                moveTargetX = this.player.x;
-            } else {
-                console.log("this.player.rot isn't fixed - need exact angle in radians")
-            }
-            
+        // FPS MOVES
         
-            let obstacleOnPath = false; // Initialisez une variable pour suivre si un obstacle est trouvé
+        let timeBasedFactor = timeElapsed / UPDATE_INTERVAL;
 
-            // on compare la distance-cible (movetarget) avec la position des sprites
-            // si les coordonnées correspondent à un sprite, ça bloque,
-            // sauf si le sprite == 10 (mort) (exemple en fonction)
-            for (let i = 0; i < this.sprites.length; i++) {
-                if (Math.floor(moveTargetX / this.tileSize) === Math.floor(this.sprites[i].x / this.tileSize)
-                 && Math.floor(moveTargetY / this.tileSize) === Math.floor(this.sprites[i].y / this.tileSize)) {
-                
-                    const spriteType = this.sprites[i].spriteType; 
-                    console.log(spriteType);
-                    obstacleOnPath = true;
-                    // DETECTION COLLISION SPRITE
-                    // si cadavre(10) ou objet traversable [ex: herbe(13)], on peut avancer.
-                    // MARCHE AVANT
-                    if (spriteType == 10 || spriteType == 13) {
-                        obstacleOnPath = false;
-                    }
-                }
-            }
-            
-            if (obstacleOnPath) {
-                console.log("there's something on my path");
-            } else {
-                forwardAnimation = true;
-                yourTurn = false;
-            }
-            
-        
-        } else if (yourTurn === true && backward === true && down  || this.BackwardButtonClicked && yourTurn === true && backward === true) {
-        
-            setTimeout(() => {
-                this.BackwardButtonClicked = false;
-              }, 200);
+        let moveStep = this.player.speed * this.player.moveSpeed * timeBasedFactor;
 
-            // Établissement de la position cible (marche arrière)
-            if (this.player.rot === est) {
-                moveTargetX = this.player.x - 1280; // Déplacement horizontal en arrière
-                moveTargetY = this.player.y;
-            } else if (this.player.rot === ouest) {
-                moveTargetX = this.player.x + 1280; // Déplacement horizontal en arrière
-                moveTargetY = this.player.y;
-            } else if (this.player.rot === nord) {
-                moveTargetX = this.player.x;
-                moveTargetY = this.player.y + 1280; // Déplacement vertical en arrière
-            } else if (this.player.rot === sud) {
-                moveTargetX = this.player.x;
-                moveTargetY = this.player.y - 1280; // Déplacement vertical en arrière
-            } else {
-                console.log("this.player.rot isn't fixed - need exact angle in radiant")
-            }
-        
-            let obstacleOnPath = false;
-        
-            for (let i = 0; i < this.sprites.length; i++) {
-                if (Math.floor(moveTargetX / this.tileSize) === Math.floor(this.sprites[i].x / this.tileSize)
-                 && Math.floor(moveTargetY / this.tileSize) === Math.floor(this.sprites[i].y / this.tileSize)) {
+        this.player.rot += -this.player.dir * this.player.rotSpeed * timeBasedFactor;
 
-                        const spriteType = this.sprites[i].spriteType; 
-                        console.log(spriteType);
-                        obstacleOnPath = true;
-                        
-                        // si cadavre ou objet traversable, on peut avancer.
-                        // MARCHE ARRIERE : à implémenter
-                        if (spriteType == 10 || spriteType == 13) {
-                            obstacleOnPath = false;
-                        }
-                }
-            }
-        
-            if (obstacleOnPath) {
-                console.log("there's something on my path");
-            } else {
-                backwardAnimation = true;
-                yourTurn = false;
-            }
-        }
-
-        if (forwardAnimation || backwardAnimation) {
-        
-            // Code inutilisé, mais logique intéressante pour les futur IA.
-            /*
-            const northFrontY = y - 1;
-            const northFrontX = x;
-            const estFrontY = y;
-            const estFrontX = x + 1;
-            const southFrontY = y + 1;
-            const southFrontX = x;
-            const ouestFrontY = y;
-            const ouestFrontX = x - 1;
-            */
-
-            // avant : positif ; arrière : négatif.
-            if (forwardAnimation) {
-                animationDirection = 1; // Avance (positif)
-            } else {
-                animationDirection = -1; // Recule (négatif)
-            }
-
-            // selon l'angle de la camera, avance sur X ou Y
-            if (this.player.rot == est) {
-                this.player.x += animationDirection * 128; // Déplacement horizontal
-            } else if (this.player.rot == ouest) {
-                this.player.x -= animationDirection * 128; // Déplacement horizontal
-            } else if (this.player.rot == nord) {
-                this.player.y -= animationDirection * 128; // Déplacement vertical
-            } else if (this.player.rot == sud) {
-                this.player.y += animationDirection * 128; // Déplacement vertical
-            } else {
-                console.log("this.player.rot isn't fixed - need exact angle in radiant")
-            }
-
-            // Incrémente la progression de l'animation
-            // vérification de la distance parcourue
-            if (forwardAnimation) {
-                forwardAnimationProgress += 1;
-            } else {
-                backwardAnimationProgress += 1;
-            }
-
-            // Vérifie si l'animation est terminée
-            if (forwardAnimationProgress == 10 || backwardAnimationProgress == 10) {
-                
-                forwardAnimation = false;
-                backwardAnimation = false;
-                forwardAnimationProgress = 0;
-                backwardAnimationProgress = 0;
-
-                // centrage automatique
-                this.player.y = Math.floor(this.player.y/1280)*1280+640;
-                this.player.x = Math.floor(this.player.x/1280)*1280+640;
-
-                yourTurn = true;
-            }
-        }
-
-        /////////////////////////////////////////////////////////
-        //  RIGHT ou LEFT : Algorithme de rotation à angle fixe
-        /////////////////////////////////////////////////////////
-
-        if (right && yourTurn == true || this.turnRightButtonClicked && yourTurn == true) {
-            setTimeout(() => {
-                this.turnRightButtonClicked = false;
-              }, 200);
-
-            rightAnimation = true;
-            yourTurn = false;
-            animationProgress = 0; // Initialisez animationProgress à 0
-
-            // pour éviter les erreurs de calcul, les décalages, les virgules flottantes, on target des valeures-étalon.
-            if (this.player.rot == nord) {
-                orientationTarget = est;
-            } else if (this.player.rot == est) {
-                orientationTarget = sud;
-            } else if (this.player.rot == sud) {
-                orientationTarget = ouest;
-            } else if (this.player.rot == ouest) {
-                orientationTarget = nord;
-            }
-
-            // console.log("action")
-        } else if (left && yourTurn == true || this.turnLeftButtonClicked && yourTurn == true) {
-            setTimeout(() => {
-                this.turnLeftButtonClicked = false;
-              }, 200);
-
-            leftAnimation = true;
-            yourTurn = false;
-            animationProgress = 0;
-
-            if (this.player.rot == nord) {
-                orientationTarget = ouest;
-            } else if (this.player.rot == ouest) {
-                orientationTarget = sud;
-            } else if (this.player.rot == sud) {
-                orientationTarget = est;
-            } else if (this.player.rot == est) {
-                orientationTarget = nord;
-            }
-        }
-
-        if (rightAnimation || leftAnimation) {
-            if (rightAnimation) {
-                animationDirection = -1; // Sens horaire (négatif)
-            } else {
-                animationDirection = 1; // Sens antihoraire (positif)
-            }
-
-            // Calcule l'angle de rotation en fonction de la progression
-            // facteur positif ou negatif pour déterminer le sens de rotation  (*1 ou *-1)
-            // UTILISATION DES RADIANS !
-            const rotationAngle = 0.1;
-
-            // Applique l'angle de rotation à this.player.rot
-            if (rightAnimation) {
-                this.player.rot -= rotationAngle;
-            } else if (leftAnimation) {
-                this.player.rot += rotationAngle;
-            }
-
-            // Incrémente la progression de l'animation
-            animationProgress += 1;
-
-            // Vérifie si l'animation est terminée
-            if (animationProgress === 15) {
-                // reviens systématiquement à un angle en radiant positif.
-                if (this.player.rot < 0) {
-                    this.player.rot -= 2 * Math.PI;
-                } else if (this.player.rot > 2 * Math.PI) {
-                    this.player.rot += 2 * Math.PI;
-                }
-
-                // centrage automatique de la caméra
-                this.player.rot = orientationTarget;
-
-                rightAnimation = false;
-                leftAnimation = false;
-                rightAnimationProgress = 0;
-                leftAnimationProgress = 0;
-                yourTurn = true;
-
-                console.log("angle :" + this.player.rot)
-            }
-        }
-
-        /////////////////////////////////////////////////////////
-        //  UP ou DOWN : Algorithme d'avancée case par case
-        /////////////////////////////////////////////////////////
-
-        let newX = this.player.x;
-        let newY = this.player.y;
-
-        // Round down to integers
-        newX = Math.floor(newX);
-        newY = Math.floor(newY);
+        let newX = Math.trunc(this.player.x + Math.cos(this.player.rot) * moveStep);
+        let newY = Math.trunc(this.player.y + -Math.sin(this.player.rot) * moveStep);
 
         let cellX = newX / this.tileSize;
         let cellY = newY / this.tileSize;
 
-        // ISBLOCKING était là à l'orgine
-        if (this.isBlocking(cellX, cellY)) { // are we allowed to move to the new position?
-            return; // no, bail out.
+        this.player.speed = 0
+        this.player.dir = 0
+
+        let obstacleOnPath;
+
+        // normalizing angle (contenu entre 0 et 2*pi)
+        if (this.player.rot <= 0) {
+            this.player.rot += 2 * Math.PI;
+            console.log('changing angle');
+        } else if (this.player.rot >= 2 * Math.PI) {
+            this.player.rot -= 2 * Math.PI;
+            console.log('changing angle');
+        } else {
+            // rien
         }
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
-        ///////////////////////////////////////////////////////////////////////////////////////////////
+        if (up ||  joystickForwardClicked === true) {
+            this.player.speed = 0.75
+          }
+          else if (down ||  joystickBackwardClicked === true) {
+            this.player.speed = -0.75
+          }
+          if (left ||  joystickLeftClicked === true) {
+            this.player.dir = -1
+          }
+          else if (right ||  joystickRightClicked === true) {
+            this.player.dir = 1
+          }
+  
+          // c'était l'origine du problème, vérifier fonction
+          if (this.isBlocking(cellX, cellY)) {
+              return;
+            }
+  
+        // algo de vérification des blocage de sprites
+        for (let i = 0; i < this.sprites.length; i++) {
+            if (Math.floor(cellX) === Math.floor(this.sprites[i].x / this.tileSize)
+             && Math.floor(cellY) === Math.floor(this.sprites[i].y / this.tileSize)) {
+            
+                const spriteType = this.sprites[i].spriteType; 
+                // console.log(spriteType);
+
+                obstacleOnPath = true;
+                // console.log(obstacleOnPath);
+
+                // DETECTION COLLISION SPRITE
+                // si cadavre(10) ou objet traversable [ex: herbe(13)], on peut avancer.
+                if (spriteType == 10 || spriteType == 13) {
+                    obstacleOnPath = false;
+                    // console.log(obstacleOnPath);
+                }
+            }
+        }
+
+        if (obstacleOnPath===true) {
+            // console.log("obstacle !")
+            return;
+        } else {
+            // ok, tout va
+        }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+        // ACTION ET TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Calculate the direction based on the player's rotation
+        let quadrant;
+        if (this.player.rot >= 337.5 * (Math.PI / 180) && this.player.rot < 360 * (Math.PI / 180) || this.player.rot >= 0 && this.player.rot < 22.5 * (Math.PI / 180)) {
+            quadrant = "ouest";
+        } else if (this.player.rot >= 22.5 * (Math.PI / 180) && this.player.rot < 67.5 * (Math.PI / 180)) {
+            quadrant = "nord-ouest";
+        } else if (this.player.rot >= 67.5 * (Math.PI / 180) && this.player.rot < 112.5 * (Math.PI / 180)) {
+            quadrant = "nord";
+        } else if (this.player.rot >= 112.5 * (Math.PI / 180) && this.player.rot < 157.5 * (Math.PI / 180)) {
+            quadrant = "nord-est";
+        } else if (this.player.rot >= 157.5 * (Math.PI / 180) && this.player.rot < 202.5 * (Math.PI / 180)) {
+            quadrant = "est";
+        } else if (this.player.rot >= 202.5 * (Math.PI / 180) && this.player.rot < 247.5 * (Math.PI / 180)) {
+            quadrant = "sud-est";
+        } else if (this.player.rot >= 247.5 * (Math.PI / 180) && this.player.rot < 292.5 * (Math.PI / 180)) {
+            quadrant = "sud";
+        } else if (this.player.rot >= 292.5 * (Math.PI / 180) && this.player.rot < 337.5 * (Math.PI / 180)) {
+            quadrant = "sud-ouest";
+        } else {
+            console.log("rot is out of range - need angle in radians between 0 and 2PI");
+        }
+        // console.log(quadrant);
+
+        if (action || this.actionButtonClicked) {
+
+            // mettre un timeout pour "débloquer" le statut de "this.actionButtonClicked"
+            setTimeout(() => {
+                this.actionButtonClicked = false;
+            }, 200);
+        
+            // dialogue NPC
+            // Calculate the coordinates of the tile in front of the player based on the quadrant
+            let frontX;
+            let frontY;
+
+            if (quadrant === "nord-ouest") {
+                // nord-ouest
+                frontX = Math.floor((this.player.x + this.tileSize / 2) / this.tileSize);
+                frontY = Math.floor((this.player.y - this.tileSize / 2) / this.tileSize);
+            } else if (quadrant === "nord") {
+                // nord
+                frontX = Math.floor(this.player.x / this.tileSize);
+                frontY = Math.floor((this.player.y - this.tileSize) / this.tileSize);
+            } else if (quadrant === "nord-est") {
+                // nord-est
+                frontX = Math.floor((this.player.x - this.tileSize / 2) / this.tileSize);
+                frontY = Math.floor((this.player.y - this.tileSize / 2) / this.tileSize);
+            } else if (quadrant === "est") {
+                // est
+                frontX = Math.floor((this.player.x - this.tileSize) / this.tileSize);
+                frontY = Math.floor(this.player.y / this.tileSize);
+            } else if (quadrant === "sud-est") {
+                // sud-est
+                frontX = Math.floor((this.player.x - this.tileSize / 2) / this.tileSize);
+                frontY = Math.floor((this.player.y + this.tileSize) / this.tileSize);
+            } else if (quadrant === "sud") {
+                // sud
+                frontX = Math.floor(this.player.x / this.tileSize);
+                frontY = Math.floor((this.player.y + this.tileSize) / this.tileSize);
+            } else if (quadrant === "sud-ouest") {
+                // sud-ouest
+                frontX = Math.floor((this.player.x + this.tileSize / 2) / this.tileSize);
+                frontY = Math.floor((this.player.y + this.tileSize) / this.tileSize);
+            } else if (quadrant === "ouest") {
+                // ouest
+                frontX = Math.floor((this.player.x + this.tileSize) / this.tileSize);
+                frontY = Math.floor(this.player.y / this.tileSize);
+            }
+                
+            // Vérification si la case devant le joueur contient un sprite 
+            for (let i = 0; i < this.sprites.length; i++) {
+                const spriteType = this.sprites[i].spriteType; // Récupérez le sprite actuel dans la boucle
+                const spriteX = Math.floor(this.sprites[i].x / this.tileSize);
+                const spriteY = Math.floor(this.sprites[i].y / this.tileSize);
+        
+                if (spriteX === frontX && spriteY === frontY) {
+                    yourTurn = false;
+        
+                    switch (spriteType) {
+                        case "A":
+                            setTimeout(() => this.sprites[i].playerAttack(this.player.might), 250);
+                            setTimeout(() => this.sprites[i].enemyAttackUpdate(this.player), 500);
+                            break;
+        
+                        case 1:
+                            this.resetToggle();
+                            let entry1 = 'Kali says : <br>  <font style="font-style: italic;">"Hey ! whatya up to ?"</font>';
+                            let face1 = "faceThief";
+                            this.sprites[i].talk(entry1, face1);
+                            break;
+        
+                        case 2:
+                            this.resetToggle();
+                            let entry2 = 'Guard says : <br>  <font style="font-style: italic;">"Get outta my way."</font>';
+                            let face2 = "faceGuard";
+                            this.sprites[i].talk(entry2, face2);
+                            break;
+        
+                        case 3:
+                            this.resetToggle();
+                            let entry3 = 'Siggar says : <br> <font style="font-style: italic;">"Oy mate ! Want to buy something ? The function is not implemented yet."</font>';
+                            let face3 = "faceMerchant";
+                            this.sprites[i].talk(entry3, face3);
+                            break;
+        
+                        case 4:
+                            this.resetToggle();
+                            let entry4 = 'Cant be Emma Stone, Right ?';
+                            let face4 = "facePlayer";
+                            this.sprites[i].talk(entry4, face4);
+                            break;
+        
+                        case 5:
+                            this.resetToggle();
+                            let entry5 = 'I want to throw that on a plumber.';
+                            let face5 = "facePlayer";
+                            this.sprites[i].talk(entry5, face5);
+                            break;
+        
+                        case 6:
+                            this.resetToggle();
+                            let entry6 = 'Wanna beat around the bush ?';
+                            let face6 = "facePlayer";
+                            this.sprites[i].talk(entry6, face6);
+                            break;
+        
+                        case 7:
+                            this.resetToggle();
+                            let entry7 = '"The Wailing Tavern" : spooky ! And sad...';
+                            let face7 = "facePlayer";
+                            this.sprites[i].talk(entry7, face7);
+                            break;
+        
+                        case 8:
+                            this.resetToggle();
+                            let entry8 = 'PLACEHOLDER';
+                            let face8 = "facePlayer";
+                            this.sprites[i].talk(entry8, face8);
+                            break;
+        
+                        case 9:
+                            this.resetToggle();
+                            let entry9 = 'You found the treasure !<br><br>  Your adventure pays off, thanks for playing.';
+                            let face9 = "facePlayer";
+                            this.sprites[i].talk(entry9, face9);
+                            break;
+        
+                        case 10:
+                            this.resetToggle();
+                            let entry10 = "It's dead...";
+                            let face10 = "facePlayer";
+                            this.sprites[i].talk(entry10, face10);
+                            break;
+        
+                        case 11:
+                            this.resetToggle();
+                            let entry11 = 'A statue of the Goddess. She looks happy !';
+                            let face11 = "facePlayer";
+                            this.sprites[i].talk(entry11, face11);
+                            break;
+        
+                        case 14:
+                            this.resetToggle();
+                            let entry14 = 'A bat ! Hardly a danger.';
+                            let face14 = "facePlayer";
+                            this.sprites[i].talk(entry14, face14);
+                            break;
+        
+                        default:
+                            this.resetToggle();
+                    }
+                }
+            }
+        }
+
+        // vérification téléporteurs
+        /* 
+        Memo organisation des téléporteurs
+        const mapEventX = [[Y, X, Rotation, RenduPlafond, TexturePlafond, HauteurPlafond, TextureSol, Contextualisation],]];
+        */
 
         // from outside
         const mapEventA = [
@@ -2576,181 +2485,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
             [2,14, sud, true, 1, 1, 1, "It's a pretty scary place..."]
         ];
 
-        if (action && yourTurn || this.actionButtonClicked && yourTurn) {
-
-            // mettre un timeout pour "débloquer" le statut de "this.actionButtonClicked"
-            setTimeout(() => {
-                this.actionButtonClicked = false;
-              }, 200);
-
-            // dialogue NPC
-            // Reprends la logique de détection de collision (attention /!\ répétition)
-            const playerX = this.player.x;
-            const playerY = this.player.y;
-            const playerRot = this.player.rot;
-        
-            let frontX, frontY;
-        
-            // Calcul des coordonnées de la case devant le joueur en fonction de sa rotation
-            if (playerRot === nord) {
-                frontX = Math.floor(playerX / this.tileSize);
-                frontY = Math.floor((playerY - this.tileSize) / this.tileSize);
-            } else if (playerRot === est) {
-                frontX = Math.floor((playerX + this.tileSize) / this.tileSize);
-                frontY = Math.floor(playerY / this.tileSize);
-            } else if (playerRot === sud) {
-                frontX = Math.floor(playerX / this.tileSize);
-                frontY = Math.floor((playerY + this.tileSize) / this.tileSize);
-            } else if (playerRot === ouest) {
-                frontX = Math.floor((playerX - this.tileSize) / this.tileSize);
-                frontY = Math.floor(playerY / this.tileSize);
-            }
-
-            // Vérification si la case devant le joueur contient un sprite
-            for (let i = 0; i < this.sprites.length; i++) {
-                // Optimisation requise
-                // Selon le type de sprite, les comportements seront différents
-                // type et textures doivent être différencier
-                // En suite, selon type de sprite, appelle la fonction liée
-                // attaque, talk, shop
-            
-                const spriteType = this.sprites[i].spriteType; // Récupérez le sprite actuel dans la boucle
-                const spriteX = Math.floor(this.sprites[i].x / this.tileSize);
-                const spriteY = Math.floor(this.sprites[i].y / this.tileSize);
-
-                // définir l'output pour la console
-                /* DEPRECATED : définit dans les méthode, plus besoin de le déclarer.
-                const outputElement = document.getElementById("output");
-                const PlayerHPoutput = document.getElementById("playerHPoutput")
-                */
-
-                if (spriteX === frontX && spriteY === frontY) {
-                    yourTurn = false;
-
-                // REFACTORING 'SPRITETYPE'; alpha V0.5.1
-                // mieux, mais peut être améliorée.
-                // case selon type de sprite, invoque ses propres arguments plutôt que les injecter dans le corps de la case.
-
-                    switch (spriteType) {
-                        case "A":
-                            // Créer fonction pour le combat en général, avec condition sort, etc...
-                            // Timer entre les deux, utiliser timer général.
-
-                            // changer la condition de lancement de la méthode "player attack",
-                            // si bouton créé sur la page, il n'y aura plus de porblème de "chevauchement"
-                            // de l'action lors de l'appuis de la touche "f" (le bouton sera désactivé temporairement - basé sur l'heure réelle)
-                            setTimeout(() => this.sprites[i].playerAttack(this.player.might), 250);
-                            setTimeout(() => this.sprites[i].enemyAttackUpdate(this.player), 500);
-                            break;
-                
-                        case 1:
-                            this.resetToggle();
-                            let entry1 = 'Kali says : <br>  <font style="font-style: italic;">"Hey ! whatya up to ?"</font>';
-                            let face1 = "faceThief";
-                            this.sprites[i].talk(entry1, face1);
-                            break;
-                
-                        case 2:
-                            this.resetToggle();
-                            let entry2 = 'Guard says : <br>  <font style="font-style: italic;">"Get outta my way."</font>';
-                            let face2 = "faceGuard";
-                            this.sprites[i].talk(entry2, face2);
-                            break;
-                
-                        case 3:
-                            this.resetToggle();
-                            let entry3 = 'Siggar says : <br> <font style="font-style: italic;">"Oy mate ! Want to buy something ? The function is not implemented yet."</font>';
-                            let face3 = "faceMerchant";
-                            this.sprites[i].talk(entry3, face3);
-                            break;
-                
-                        case 4:
-                            this.resetToggle();
-                            let entry4 = 'Cant be Emma Stone, Right ?';
-                            let face4 = "facePlayer";
-                            this.sprites[i].talk(entry4, face4);
-                            break;
-                
-                        case 5:
-                            this.resetToggle();
-                            let entry5 = 'I want to throw that on a plumber.';
-                            let face5 = "facePlayer";
-                            this.sprites[i].talk(entry5, face5);
-                            break;
-                
-                        case 6:
-                            this.resetToggle();
-                            let entry6 = 'Wanna beat around the bush ?';
-                            let face6 = "facePlayer";
-                            this.sprites[i].talk(entry6, face6);
-                            break;
-                
-                        case 7:
-                            this.resetToggle();
-                            let entry7 = '"The Wailing Tavern" : spooky ! And sad...';
-                            let face7 = "facePlayer";
-                            this.sprites[i].talk(entry7, face7);
-                            break;
-                
-                        case 8:
-                            this.resetToggle();
-                            let entry8 = 'PLACEHOLDER';
-                            let face8 = "facePlayer";
-                            this.sprites[i].talk(entry8, face8);
-                            break;
-                
-                        case 9:
-                            this.resetToggle();
-                            let entry9 = 'You found the treasure !<br><br>  Your adventure pays off, thanks for playing.';
-                            let face9 = "facePlayer";
-                            this.sprites[i].talk(entry9, face9);
-                            break;
-                
-                        case 10:                
-                            this.resetToggle();
-                            let entry10 = "It's dead...";
-                            let face10 = "facePlayer";
-                            this.sprites[i].talk(entry10, face10);
-                            break;
-                
-                        case 11:
-                            this.resetToggle();    
-                            let entry11 = 'A statue of the Goddess. She looks happy !';
-                            let face11 = "facePlayer";
-                            this.sprites[i].talk(entry11, face11);
-                            break;
-                
-                        case 14:
-                            this.resetToggle();    
-                            let entry14 = 'A bat ! Hardly a danger.';
-                            let face14 = "facePlayer";
-                            this.sprites[i].talk(entry14, face14);
-                            break;
-                
-                        // Add more cases as needed...
-                
-                        default:
-                            this.resetToggle();
-                            // Handle the default case, if needed.
-                    }
-                }
-                
-            }
-
-            // formule pour log la position
-            // console.log(Math.floor(newX/this.tileSize));
-            // console.log(Math.floor(newY/this.tileSize));
-
-            // faire boucle pour comparer tous les évenements listés
-            // comparer les valeur de référence avec celle du joueur (A/B[i][0] = playerX, A/B[i][1] = playerY)
-            // La liste A et B sont des mirroir: A[1] téléportera à B[1], ainsi de suite et vice versa.
-            // La  position dans la liste A ou B réfère au même event/téléporteur A/B[1]...[2]...[3]...
-            
-            /*
-            Memo organisation des téléporteurs
-        const mapEventX = [[Y, X, Rotation, RenduPlafond, TexturePlafond, HauteurPlafond, TextureSol, Contextualisation],]];
-            */
-
+        if (action || this.actionButtonClicked) {
             for (var i = 0; i < mapEventA.length; i++) {
                 if (
                     Math.floor(newX / this.tileSize) === mapEventA[i][0] &&
@@ -2806,8 +2541,8 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
                 }
             }
         }
-
-        this.player.x = newX; // set new position
+        // set new position
+        this.player.x = newX;
         this.player.y = newY;
     }
 
@@ -2815,16 +2550,42 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     // BLOCAGE
     ///////////////////////////////////////////////////////////////////////////////////////////////
     
-    cellIsBlocking(x, y) {
-        // Plus nécessaire en mode "dungeon crawler"
+    isSpriteBlocking(moveTargetX, moveTargetY) {
+        // ancienne fonction (dungeon crawler)
+        
+        // on compare la distance-cible (movetarget) avec la position des sprites
+        // si les coordonnées correspondent à un sprite, ça bloque,
+        // sauf si le sprite == 10 (mort) (exemple en fonction)
+            for (let i = 0; i < this.sprites.length; i++) {
+                if (Math.floor(moveTargetX / this.tileSize) === Math.floor(this.sprites[i].x / this.tileSize)
+                 && Math.floor(moveTargetY / this.tileSize) === Math.floor(this.sprites[i].y / this.tileSize)) {
+                
+                    const spriteType = this.sprites[i].spriteType; 
+
+                    console.log(spriteType);
+
+                    obstacleOnPath = true;
+                    console.log(obstacleOnPath);
+                    // DETECTION COLLISION SPRITE
+                    // si cadavre(10) ou objet traversable [ex: herbe(13)], on peut avancer.
+                    // MARCHE AVANT
+                    if (spriteType == 10 || spriteType == 13) {
+                        obstacleOnPath = false;
+                        console.log(obstacleOnPath);
+                    }
+                }
+            }
     }
 
     isBlocking(x, y) {
         // first make sure that we cannot move outside the boundaries of the level
         if (y < 0 || y >= this.mapHeight || x < 0 || x >= this.mapWidth)
             return true;
+    
+        // return true if the map block is not 0, ie. if there is a blocking wall.
+        return (this.map[Math.floor(y)][Math.floor(x)] != 0);
     }
-
+    
     updateMiniMap() {
 
         let miniMap = document.getElementById("minimap");
