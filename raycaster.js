@@ -1390,9 +1390,8 @@ class Raycaster {
         // pour la présentation : "action" = "attack"
         // reset toggle pour éviter la superposition de div
         this.resetToggle();
-        console.log("Action/Dialogue");
-        console.log(this.player.turn);
-        this.player.turn = true;
+        console.log('Action/Dialogue')
+        this.actionButtonClicked = true;
         break;
 
       case 2: // ACTION
@@ -2577,7 +2576,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     let down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S];
     let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A];
     let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D];
-    const action = this.keysDown[KEY_F] || this.keysDown[KEY_SPACE] || this.actionButtonClicked; 
+    const action =  this.actionButtonClicked || this.keysDown[KEY_F] || this.keysDown[KEY_SPACE]; 
 
     // FPS MOVES
 
@@ -2633,9 +2632,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
       // rien
     }
 
-
     // rotation
-
     if (left || joystickLeftClicked === true) {
       this.player.dir = -1;
     } else if (right || joystickRightClicked === true) {
@@ -2733,8 +2730,12 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
 
 
     // YOUTURN
-    if (action && yourTurn === true || this.actionButtonClicked && yourTurn === true ) {
+    if (action && yourTurn === true) {
       // Yourturn passe en false pour éviter les doublons
+      setTimeout(() => {
+        this.actionButtonClicked = false;
+      }, 200);
+    
         console.log("Player Turn = false")
         yourTurn = false;
 
