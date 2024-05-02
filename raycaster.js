@@ -95,16 +95,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // impossible d'utiliser la fonction addToConsole() en dehors -> trouver solution
   addToConsole("Welcome in Oasis !");
-  addToConsole("Version Alpha (conception)");
+  addToConsole("Version pre-Alpha (conception)");
   addToConsole("");
   addToConsole("HOW TO PLAY :");
-  addToConsole("'←,↑,→,↓' key arrows to move.");
+  addToConsole("'← ↑ → ↓' or use the joystick to move.");
   addToConsole("'A' button or 'space' to interact/fight.");
   addToConsole("'B' button to access your inventory/stats.");
   addToConsole("");
   addToConsole("N.B. : the joystick is crappy, sorry ♥");
-  addToConsole("==========================================");
   addToConsole("");
+  addToConsole("=========================================");
 });
 
 function updateProgressBar(id, value, max) {
@@ -633,34 +633,10 @@ class Raycaster {
     ////////////////////////////////////////////////////////////////////
     // Créer des instances de la classe Item pour l'inventaire du joueur
     // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
-
-    const shortSwordAndShield = new Item(
-      "Short Sword and Shield",
-      1,
-      true,
-      0,
-      0,
-      0,
-      0,
-      2,
-      0,
-      0,
-      1
-    );
+    // Set d'objets test
+    const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0,0,1);
     const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
-    const magicSword = new Item(
-      "Magic sword",
-      1,
-      false,
-      0,
-      0,
-      0,
-      0,
-      3,
-      2,
-      0,
-      0
-    );
+    const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
     const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
     const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
 
@@ -682,6 +658,7 @@ class Raycaster {
 
       // player stats
 
+      // bientôt inutile
       level: 1,
 
       hp: 10,
@@ -702,11 +679,11 @@ class Raycaster {
       hands: [],
       torso: [],
 
-      inventory: [shortSwordAndShield, jacket, magicSword],
+      inventory: [shortSwordAndShield, jacket],
 
-      // L'inventaire est ouvert ?
+      // a déplacer en variable générale, ça parasite l'exportation
       inventoryMenuShowed: false,
-
+      // a déplacer aussi
       joystick: true,
     };
 
@@ -1144,7 +1121,9 @@ class Raycaster {
     tileSize = 1280,
     textureSize = 64,
     fovDegrees = 90
-  ) {
+  ) 
+  
+  {
     this.initMap();
     this.stripWidth = 1; // leave this at 1 for now
     this.ceilingHeight = 1; // ceiling height in blocks
@@ -1229,13 +1208,7 @@ class Raycaster {
     // sinon réglé comme un sprite
     let skyboximg = document.getElementById("skybox1");
     context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
-    this.skyboxImageData = context.getImageData(
-      0,
-      0,
-      this.textureSize * 2,
-      this.textureSize * 3
-    );
-    // -----------
+    this.skyboxImageData = context.getImageData(0,0,this.textureSize * 2,this.textureSize * 3);
 
     // initialisation de la variable floorimg qui stoque la texture en base64 (pixels)
     // let floorimg;
@@ -1247,80 +1220,40 @@ class Raycaster {
     if (floorTexture == 1) {
       let floorimg = document.getElementById("floorimg1");
       context.drawImage(floorimg, 0, 0, floorimg.width, floorimg.height);
-      this.floorImageData = context.getImageData(
-        0,
-        0,
-        this.textureSize,
-        this.textureSize
-      );
+      this.floorImageData = context.getImageData(0,0,this.textureSize,this.textureSize);
     } else if (floorTexture == 2) {
       let floorimg = document.getElementById("floorimg2");
       context.drawImage(floorimg, 0, 0, floorimg.width, floorimg.height);
-      this.floorImageData = context.getImageData(
-        0,
-        0,
-        this.textureSize,
-        this.textureSize
-      );
+      this.floorImageData = context.getImageData(0,0,this.textureSize,this.textureSize);
     } else if (floorTexture == 3) {
       let floorimg = document.getElementById("floorimg3");
       context.drawImage(floorimg, 0, 0, floorimg.width, floorimg.height);
-      this.floorImageData = context.getImageData(
-        0,
-        0,
-        this.textureSize,
-        this.textureSize
-      );
+      this.floorImageData = context.getImageData(0,0,this.textureSize,this.textureSize);
     } else if (floorTexture == 4) {
       let floorimg = document.getElementById("floorimg4");
       context.drawImage(floorimg, 0, 0, floorimg.width, floorimg.height);
-      this.floorImageData = context.getImageData(
-        0,
-        0,
-        this.textureSize,
-        this.textureSize
-      );
+      this.floorImageData = context.getImageData(0,0,this.textureSize,this.textureSize);
     }
 
     // Save ceiling image pixels
     if (ceilingTexture == 1) {
       let ceilingimg = document.getElementById("ceilingimg1");
       context.drawImage(ceilingimg, 0, 0, ceilingimg.width, ceilingimg.height);
-      this.ceilingImageData = context.getImageData(
-        0,
-        0,
-        this.textureSize,
-        this.textureSize
-      );
+      this.ceilingImageData = context.getImageData(0,0,this.textureSize,this.textureSize);
     } else if (ceilingTexture == 2) {
       let ceilingimg = document.getElementById("ceilingimg2");
       context.drawImage(ceilingimg, 0, 0, ceilingimg.width, ceilingimg.height);
-      this.ceilingImageData = context.getImageData(
-        0,
-        0,
-        this.textureSize,
-        this.textureSize
-      );
+      this.ceilingImageData = context.getImageData(0,0,this.textureSize,this.textureSize);
     } else if (ceilingTexture == 3) {
       let ceilingimg = document.getElementById("ceilingimg3");
       context.drawImage(ceilingimg, 0, 0, ceilingimg.width, ceilingimg.height);
-      this.ceilingImageData = context.getImageData(
-        0,
-        0,
-        this.textureSize,
-        this.textureSize
-      );
+      this.ceilingImageData = context.getImageData(0,0,this.textureSize,this.textureSize);
     }
 
     // Save walls image pixels
     let wallsImage = document.getElementById("wallsImage");
     context.drawImage(wallsImage, 0, 0, wallsImage.width, wallsImage.height);
-    this.wallsImageData = context.getImageData(
-      0,
-      0,
-      wallsImage.width,
-      wallsImage.height
-    );
+    this.wallsImageData = context.getImageData(0,0,wallsImage.width,wallsImage.height);
     console.log("wallsImage.width=" + wallsImage.width);
 
     // Save sprite image pixels
@@ -1362,19 +1295,8 @@ class Raycaster {
       canvas.width = spriteImage.width;
       canvas.height = spriteImage.height;
       // animation sprite marqueur xxx
-      context.drawImage(
-        spriteImage,
-        0,
-        0,
-        spriteImage.width,
-        spriteImage.height
-      );
-      this["spriteImageData" + (index + 1)] = context.getImageData(
-        0,
-        0,
-        spriteImage.width,
-        spriteImage.height
-      );
+      context.drawImage(spriteImage,0,0,spriteImage.width,spriteImage.height);
+      this["spriteImageData" + (index + 1)] = context.getImageData(0,0,spriteImage.width,spriteImage.height);
       console.log(`spriteImage${index + 1}.width = ${spriteImage.width}`);
     });
   }
@@ -1575,7 +1497,7 @@ class Raycaster {
 
     // Utilisez totalTimeElapsed pour calculer un délai d'une seconde
     // la valeur est initialisé en tout début de code
-    const oneSecondDelay = 1500; // 1.5 seconde en millisecondes
+    const oneSecondDelay = 1000; // 1.5 seconde en millisecondes
 
     // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
 
@@ -1820,17 +1742,8 @@ class Raycaster {
       const spriteFlash = rayHit.sprite.spriteFlash;
 
       if (spriteData.hasOwnProperty(spriteType)) {
-        this.drawTexturedRect(
-          spriteData[spriteType],
-          srcX,
-          0,
-          srcW,
-          this.textureSize,
-          dstX,
-          rc.y,
-          this.stripWidth,
-          rc.h,
-          spriteFlash
+        this.drawTexturedRect(spriteData[spriteType],srcX,0,srcW,
+          this.textureSize,dstX,rc.y,this.stripWidth,rc.h,spriteFlash
         );
       }
     }
@@ -2597,12 +2510,9 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
 
     let obstacleOnPath;
 
-    this.player.dir = 0;
-
-    // ACCELERATION
     // ACCELERATION
     const accelerationRate = 0.05; // Taux d'accélération
-    const decelerationRate = 0.2; // Taux de décélération
+    const decelerationRate = 0.15; // Taux de décélération
 
   if (up || joystickForwardClicked === true) {
       // Accélération vers l'avant
@@ -2622,21 +2532,25 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
   }
 
     // normalizing angle (contenu entre 0 et 2*pi)
+    // + BONUS : anti-bug angle 0 (parallaxe et sprite), on ajoute ou enlève 1° (pi/180) selon l'angle.
     if (this.player.rot <= 0) {
-      this.player.rot += 2 * Math.PI;
+      this.player.rot += 2 * Math.PI  - (Math.PI/180);
       console.log("changing angle");
     } else if (this.player.rot >= 2 * Math.PI) {
-      this.player.rot -= 2 * Math.PI;
+      this.player.rot -= 2 * Math.PI + (Math.PI/180);
       console.log("changing angle");
     } else {
-      // rien
+      // nothing
     }
 
-    // rotation
+    // inertie rotation
     if (left || joystickLeftClicked === true) {
-      this.player.dir = -1;
+      this.player.dir = Math.max(this.player.dir - accelerationRate*2, -1);
     } else if (right || joystickRightClicked === true) {
-      this.player.dir = 1;
+      this.player.dir = Math.min(this.player.dir + accelerationRate*2, 1);
+    } else {
+      // Arrêt direct, sans décélération
+      this.player.dir = 0;
     }
 
     // c'était l'origine du problème, vérifier fonction
@@ -2667,6 +2581,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
       }
     }
 
+    // retun est la ligique de blocage
     if (obstacleOnPath === true) {
       // console.log("obstacle !")
       return;
@@ -2679,6 +2594,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     // Calculate the direction based on the player's rotation
+    // calcul des quadrants (nécessaire pour collision glissante)
     let quadrant;
     if (
       (this.player.rot >= 337.5 * (Math.PI / 180) &&
@@ -2726,12 +2642,14 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         "rot is out of range - need angle in radians between 0 and 2PI"
       );
     }
-    // console.log(quadrant);
+    //console.log(quadrant);
 
 
     // YOUTURN
     if (action && yourTurn === true) {
       // Yourturn passe en false pour éviter les doublons
+
+      // pas terrible, on devrait mettre ça dans le bindButton
       setTimeout(() => {
         this.actionButtonClicked = false;
       }, 200);
@@ -2741,6 +2659,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
 
       // dialogue NPC
       // Calculate the coordinates of the tile in front of the player based on the quadrant
+      // Permet une bien meilleure précision en mode FPS
       let frontX;
       let frontY;
 
@@ -2790,6 +2709,8 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         frontY = Math.floor(this.player.y / this.tileSize);
       }
 
+
+      // turn
       // Vérification si la case devant le joueur contient un sprite
       for (let i = 0; i < this.sprites.length; i++) {
         const spriteType = this.sprites[i].spriteType; // Récupérez le sprite actuel dans la boucle
@@ -2999,46 +2920,17 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     this.player.y = newY;
   }
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////
-  // BLOCAGE
-  ///////////////////////////////////////////////////////////////////////////////////////////////
-
-  isSpriteBlocking(moveTargetX, moveTargetY) {
-    // ancienne fonction (dungeon crawler)
-    // on compare la distance-cible (movetarget) avec la position des sprites
-    // si les coordonnées correspondent à un sprite, ça bloque,
-    // sauf si le sprite == 10 (mort) (exemple en fonction)
-    for (let i = 0; i < this.sprites.length; i++) {
-      if (
-        Math.floor(moveTargetX / this.tileSize) ===
-          Math.floor(this.sprites[i].x / this.tileSize) &&
-        Math.floor(moveTargetY / this.tileSize) ===
-          Math.floor(this.sprites[i].y / this.tileSize)
-      ) {
-        const spriteType = this.sprites[i].spriteType;
-
-        console.log(spriteType);
-
-        obstacleOnPath = true;
-        console.log(obstacleOnPath);
-        // DETECTION COLLISION SPRITE
-        // si cadavre(10) ou objet traversable [ex: herbe(13)], on peut avancer.
-        // MARCHE AVANT
-        if (spriteType == 10 || spriteType == 13) {
-          obstacleOnPath = false;
-          console.log(obstacleOnPath);
-        }
-      }
-    }
-  }
-
+// collision glissante
   isBlocking(x, y) {
     // first make sure that we cannot move outside the boundaries of the level
     if (y < 0 || y >= this.mapHeight || x < 0 || x >= this.mapWidth)
       return true;
 
     // return true if the map block is not 0, ie. if there is a blocking wall.
-    return this.map[Math.floor(y)][Math.floor(x)] != 0;
+    if (this.map[Math.floor(y)][Math.floor(x)] != 0) 
+    {
+      return true
+    }
   }
 
   updateMiniMap() {
