@@ -2553,49 +2553,10 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
       this.player.dir = 0;
     }
 
-    // c'était l'origine du problème, vérifier fonction
-    if (this.isBlocking(cellX, cellY)) {
-      return;
-    }
-
-    // COLLISION GLISSANTE
-
-    // algo de vérification des blocage de sprites
-    for (let i = 0; i < this.sprites.length; i++) {
-      if (
-        Math.floor(cellX) === Math.floor(this.sprites[i].x / this.tileSize) &&
-        Math.floor(cellY) === Math.floor(this.sprites[i].y / this.tileSize)
-      ) {
-        const spriteType = this.sprites[i].spriteType;
-        // console.log(spriteType);
-
-        obstacleOnPath = true;
-        // console.log(obstacleOnPath);
-
-        // DETECTION COLLISION SPRITE
-        // si cadavre(10) ou objet traversable [ex: herbe(13)], on peut avancer.
-        if (spriteType == 10 || spriteType == 13) {
-          obstacleOnPath = false;
-          // console.log(obstacleOnPath);
-        }
-      }
-    }
-
-    // retun est la ligique de blocage
-    if (obstacleOnPath === true) {
-      // console.log("obstacle !")
-      return;
-    } else {
-      // ok, tout va
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // ACTION ET TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
     // Calculate the direction based on the player's rotation
     // calcul des quadrants (nécessaire pour collision glissante)
     let quadrant;
+    
     if (
       (this.player.rot >= 337.5 * (Math.PI / 180) &&
         this.player.rot < 360 * (Math.PI / 180)) ||
@@ -2644,6 +2605,92 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     }
     //console.log(quadrant);
 
+    // c'était l'origine du problème, vérifier fonction
+
+      /*  
+        // notes pour détection sprite
+        // ce sont ces variables qui sont utilisées par "isBlocking"
+
+        console.log("coordonnée matricielle -  x : " + Math.floor(this.player.y/this.tileSize) + ", y :" + Math.floor(this.player.y/this.tileSize));
+        console.log("Type de case : "+ this.map[Math.floor(this.player.y/this.tileSize)][Math.floor(this.player.x/this.tileSize)]);
+      */
+
+    // collision glissante = conséquence de isBlocking(true)
+    // isBlocking est muni d'un système de collision glissante très rudimentaire
+    // la collision glissante prend en compte 360°, excluant les angles 0, 90, 180, 270 (360 = 0):
+    // pas de "glissade" si on est parfaitement perpendiculaire ou parallèle aux murs.
+    if (this.isBlocking(cellX, cellY)) {
+          // sud ouest :
+             if ( this.player.rot > 270 * (Math.PI / 180) &&
+                  this.player.rot < 360 * (Math.PI / 180)) {
+          if (this.map[Math.floor((this.player.y + 11)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
+            this.player.y += 10;
+          } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x + 11) /this.tileSize)] === 0) {
+            this.player.x += 10;
+          }
+
+          // sud est :
+      } else if ( this.player.rot > 180 * (Math.PI / 180) &&
+                  this.player.rot < 270 * (Math.PI / 180)) {
+        if (this.map[Math.floor((this.player.y + 11)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
+            this.player.y += 10;
+          } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 11)/this.tileSize)] === 0) {
+            this.player.x -= 10;
+          }
+
+          // nord ouest :
+      } else if ( this.player.rot > 0 * (Math.PI / 180) &&
+                  this.player.rot < 90 * (Math.PI / 180)) {
+        if (this.map[Math.floor((this.player.y - 11)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
+          this.player.y -= 10;
+        } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 11)/this.tileSize)] === 0) {
+          this.player.x += 10;
+        }
+        // nord est
+      } else if ( this.player.rot > 90 * (Math.PI / 180) &&
+                  this.player.rot < 180 * (Math.PI / 180)) {
+        if (this.map[Math.floor((this.player.y - 11)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
+          this.player.y -= 10;
+        } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 11)/this.tileSize)] === 0) {
+          this.player.x -= 10;
+        }
+      }
+      return;
+    }
+
+    // COLLISION SPRITE
+    // algo de vérification des blocage de sprites
+    for (let i = 0; i < this.sprites.length; i++) {
+      if (
+        Math.floor(cellX) === Math.floor(this.sprites[i].x / this.tileSize) &&
+        Math.floor(cellY) === Math.floor(this.sprites[i].y / this.tileSize)
+      ) {
+        const spriteType = this.sprites[i].spriteType;
+        // console.log(spriteType);
+
+        obstacleOnPath = true;
+        // console.log(obstacleOnPath);
+
+        // DETECTION COLLISION SPRITE
+        // si cadavre(10) ou objet traversable [ex: herbe(13)], on peut avancer.
+        if (spriteType == 10 || spriteType == 13) {
+          obstacleOnPath = false;
+          // console.log(obstacleOnPath);
+        }
+      }
+    }
+
+    // Suite détection sprite
+    if (obstacleOnPath === true) {
+      // console.log("obstacle !")
+      return;
+    } else {
+      // ok, tout va
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // ACTION ET TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     // YOUTURN
     if (action && yourTurn === true) {
@@ -2925,6 +2972,21 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     // first make sure that we cannot move outside the boundaries of the level
     if (y < 0 || y >= this.mapHeight || x < 0 || x >= this.mapWidth)
       return true;
+
+      /*  
+        // notes pour détection sprite
+        // ce sont ces variables qui sont utilisées par "isBlocking"
+        let cellX = newX / this.tileSize;
+        let cellY = newY / this.tileSize;
+  
+        // nord-ouest
+        frontX = Math.floor(
+          (this.player.x + this.tileSize / 2) / this.tileSize
+        );
+        frontY = Math.floor(
+          (this.player.y - this.tileSize / 2) / this.tileSize
+        );
+      */
 
     // return true if the map block is not 0, ie. if there is a blocking wall.
     if (this.map[Math.floor(y)][Math.floor(x)] != 0) 
