@@ -424,6 +424,19 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                           <div class="progress" style="width: 0%; background-color:rgb(0, 0, 110);"></div>
                           <label>Mana</label>
                        </div>
+                      <!--SPELLS-->
+                      <div style="height:10px;">
+                    <!--compensation des boutons SPELL-->
+                      </div>
+                      <div id="joystickButtonAB" style="display: flex;">
+                        <button id="previousSpell" class="controlButton"
+                            style="width:64px;height:64px;padding:0px; border-radius:64px 0 0 64px; background-color: rgb(52, 52, 52);">◄</button>
+                            <button id="castSpell" class="controlButton" style="width:64px;padding:0px;background-color: rgb(52, 52, 52); border-radius: 0px;">❂</button>
+                            <button id="nextSpell" class="controlButton"
+                            style="width:64px;height:64px;padding:0px;border-radius:0 64px 64px 0;  background-color: rgb(52, 52, 52);">►</button>
+                    </div>
+                   
+                      <!--SPELLS-->
                        <div class="progress-bar" id="xpBar" style="display:none;">
                           <i class="icon">★</i>
                           <div class="progress" style="width: 0%; "></div>
@@ -448,8 +461,9 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                        <progress id="xpBar" value="z" max="z" style="width:100%; display:none;"></progress>
                     </div>
                     <div>
-                       <div style="height:115px;">
-                          <!--compensation des boutons AB-->
+                      <!--compensation des boutons AB-->
+                       <div style="height:40px;">
+                      <!--compensation des boutons AB-->
                        </div>
                        <div style="display: none;">
                           <div id="joystickButtonAB" style="display: flex;height: 60px;">
@@ -510,23 +524,33 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                           <br>
                        </div>
                     </div>
+                    <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">PLAYER STATS</h1>
+
                     <div>
-                       <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">PLAYER STATS</h1>
-                       <hr>
-                       <div
-                          style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, auto); gap: 10px; margin-top : 18px;">
-                          <div>Strength</div>
-                          <div style="text-align: right;">:</div>
-                          <div id="PlayerStrOutput" style="text-align: right;">x</div>
-                          <div>Dexterity</div>
-                          <div style="text-align: right;">:</div>
-                          <div id="PlayerDexOutput" style="text-align: right;">y</div>
-                          <div>Intellect</div>
-                          <div style="text-align: right;">:</div>
-                          <div id="PlayerIntOutput" style="text-align: right;">z</div>
-                       </div>
-                       <br>
-                       <br>
+                      <div id="grid-container" style="margin-top: 10px;">
+                        <div id="grid-container" style="margin-top: 10px;">
+
+                          <div class="progress-bar" id="strengthBar" style="display: flex; justify-content: space-between; align-items: center;">
+                            <p class="progress-label">Strenth</p>
+                            <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
+                            <p id="PlayerStrOutput">x</p>
+                          </div>
+    
+                          <div class="progress-bar" id="dexterityBar" style="display: flex; justify-content: space-between; align-items: center;">
+                            <p class="progress-label">Dexterity</p>
+                            <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
+                            <p id="PlayerDexOutput">y</p>
+                          </div>
+    
+                          <div class="progress-bar" id="intellectBar" style="display: flex; justify-content: space-between; align-items: center;">
+                            <p class="progress-label">Intellect</p>
+                            <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
+                            <p id="PlayerIntOutput">z</p>
+                          </div>
+                      
+                      </div>
+                    
+                    </div>
                        <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">COMBAT STATS
                        </h1>
                        <hr>
@@ -599,14 +623,13 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                     style="display: none; width: 640px; height: 192px; padding-left: 10px; color: black; overflow: hidden;">
                     <div style="font-size: 16px; padding: top 2px;display:flex; justify-content: space-between;">
                        <div>QUEST JOURNAL</div>
-                       <div>1/1</div>
+                       <div>-</div>
                     </div>
                     <br>
-                    <p>Welcome to Oasis !
-                       <br>
-                       <BR>
-                       It's not fresh, but it's new...<BR> So please, enjoy my little baby !
-                    </p>
+                    <div id="questContent"
+                       style="width:100%; max-height: 150px; overflow-y:scroll; border : 1px; border-color:#140c1c; border-radius:10px;padding-top: 10px;">
+                       > No quest in progress
+                    </div>
                  </div>
               </div>
               <!-- MAP -->
@@ -681,136 +704,138 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
       let raycaster = new Raycaster(document.getElementById("mainCanvas"))
       raycaster.gameCycle()
     }
+/////////////////////////////////////////////////////
+//  JOYSTICK
+/////////////////////////////////////////////////////
 
-    /////////////////////////////////////////////////////////
-    //  JOYSTICK
-    /////////////////////////////////////////////////////////
+// Récupération des éléments HTML nécessaires
+const joystick = document.querySelector('.joystick');
+const container = document.querySelector('.joystick-container');
 
-    // Récupération des éléments HTML nécessaires
-    const joystick = document.querySelector('.joystick');
-    const container = document.querySelector('.joystick-container');
+let isJoystickClicked = false;
 
-    let isJoystickClicked = false;
+const centerPosX = container.offsetWidth / 2 - joystick.offsetWidth / 2;
+const centerPosY = container.offsetHeight / 2 - joystick.offsetHeight / 2;
 
-    const centerPosX = container.offsetWidth / 2 - joystick.offsetWidth / 2;
-    const centerPosY = container.offsetHeight / 2 - joystick.offsetHeight / 2;
+joystick.style.left = centerPosX + 'px';
+joystick.style.top = centerPosY + 'px';
 
-    joystick.style.left = centerPosX + 'px';
-    joystick.style.top = centerPosY + 'px';
+// Réduire de moitié la zone de déplacement horizontal (gauche et droite)
+const zoneWidth = container.offsetWidth / 4; // Vous pouvez ajuster le dénominateur pour réduire ou élargir la zone
+// Conserver la zone de déplacement vertical (haut et bas) inchangée
+const zoneHeight = container.offsetHeight / 2; // Vous pouvez ajuster le dénominateur pour élargir ou resserrer la zone
 
-    const zoneWidth = container.offsetWidth / 2;
-    const zoneHeight = container.offsetHeight / 2;
+let up = false;
+let down = false;
+let left = false;
+let right = false;
 
-    let up = false;
-    let down = false;
-    let left = false;
-    let right = false;
+joystick.addEventListener('mousedown', startDrag);
+joystick.addEventListener('touchstart', startDrag);
 
-    joystick.addEventListener('mousedown', startDrag);
-    joystick.addEventListener('touchstart', startDrag);
+function disableEventsAfterClick() {
+  up = false;
+  down = false;
+  left = false;
+  right = false;
+  triggerJoystickChangeEvent();
+}
 
-    function disableEventsAfterClick() {
-      up = false;
-      down = false;
-      left = false;
-      right = false;
+function startDrag(e) {
+  isJoystickClicked = true;
+  moveJoystick(e);
+  document.addEventListener('mousemove', moveJoystick);
+  document.addEventListener('touchmove', moveJoystick);
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('touchend', stopDrag);
+}
+
+function moveJoystick(e) {
+  if (isJoystickClicked) {
+    e.preventDefault();
+    const boundingBox = container.getBoundingClientRect();
+    let posX, posY;
+
+    if (e.type === 'touchmove') {
+      posX = e.touches[0].clientX - boundingBox.left;
+      posY = e.touches[0].clientY - boundingBox.top;
+    } else {
+      posX = e.clientX - boundingBox.left;
+      posY = e.clientY - boundingBox.top;
+    }
+
+    const centerX = boundingBox.width / 2;
+    const centerY = boundingBox.height / 2;
+
+    let distance = Math.sqrt((posX - centerX) ** 2 + (posY - centerY) ** 2);
+    let angle = Math.atan2(posY - centerY, posX - centerX);
+    let maxDistance = boundingBox.height / 2 - joystick.offsetHeight / 2;
+
+    if (distance > maxDistance) {
+      distance = maxDistance;
+      posX = centerX + distance * Math.cos(angle);
+      posY = centerY + distance * Math.sin(angle);
+    }
+
+    joystick.style.left = posX - joystick.offsetWidth / 2 + 'px';
+    joystick.style.top = posY - joystick.offsetHeight / 2 + 'px';
+
+    // Calculer les distances horizontale et verticale par rapport au centre
+    const deltaX = posX - centerX;
+    const deltaY = posY - centerY;
+
+    // Mettre à jour les variables de direction
+    const newUp = (deltaY < -zoneHeight / 2);
+    const newDown = (deltaY > zoneHeight / 2);
+    const newLeft = (deltaX < -zoneWidth / 2);
+    const newRight = (deltaX > zoneWidth / 2);
+
+    if (newUp !== up || newDown !== down || newLeft !== left || newRight !== right) {
+      up = newUp;
+      down = newDown;
+      left = newLeft;
+      right = newRight;
       triggerJoystickChangeEvent();
     }
+  }
+}
 
-    function startDrag(e) {
-      isJoystickClicked = true;
-      moveJoystick(e);
-      document.addEventListener('mousemove', moveJoystick);
-      document.addEventListener('touchmove', moveJoystick);
-      document.addEventListener('mouseup', stopDrag);
-      document.addEventListener('touchend', stopDrag);
+function stopDrag() {
+  isJoystickClicked = false;
+
+  // Ramener le joystick à sa position par défaut
+  joystick.style.left = centerPosX + 'px';
+  joystick.style.top = centerPosY + 'px';
+
+  // Réinitialiser les variables de direction
+  up = false;
+  down = false;
+  left = false;
+  right = false;
+
+  // Désactiver les événements après un clic
+  disableEventsAfterClick();
+
+  document.removeEventListener('mousemove', moveJoystick);
+  document.removeEventListener('touchmove', moveJoystick);
+  document.removeEventListener('mouseup', stopDrag);
+  document.removeEventListener('touchend', stopDrag);
+}
+
+// Déclencher un événement personnalisé lorsque l'état du joystick change
+function triggerJoystickChangeEvent() {
+  const joystickEvent = new CustomEvent('joystickchange', {
+    detail: {
+      up,
+      down,
+      left,
+      right
     }
+  });
+  console.log(joystickEvent);
+  document.dispatchEvent(joystickEvent);
+}
 
-    function moveJoystick(e) {
-      if (isJoystickClicked) {
-        e.preventDefault();
-        const boundingBox = container.getBoundingClientRect();
-        let posX, posY;
-
-        if (e.type === 'touchmove') {
-          posX = e.touches[0].clientX - boundingBox.left;
-          posY = e.touches[0].clientY - boundingBox.top;
-        } else {
-          posX = e.clientX - boundingBox.left;
-          posY = e.clientY - boundingBox.top;
-        }
-
-        const centerX = boundingBox.width / 2;
-        const centerY = boundingBox.height / 2;
-
-        let distance = Math.sqrt((posX - centerX) ** 2 + (posY - centerY) ** 2);
-        let angle = Math.atan2(posY - centerY, posX - centerX);
-        let maxDistance = boundingBox.width / 2 - joystick.offsetWidth / 2;
-
-        if (distance > maxDistance) {
-          distance = maxDistance;
-          posX = centerX + distance * Math.cos(angle);
-          posY = centerY + distance * Math.sin(angle);
-        }
-
-        joystick.style.left = posX - joystick.offsetWidth / 2 + 'px';
-        joystick.style.top = posY - joystick.offsetHeight / 2 + 'px';
-
-        // Calculer les distances horizontale et verticale par rapport au centre
-        const deltaX = posX - centerX;
-        const deltaY = posY - centerY;
-
-        // Mettre à jour les variables de direction
-        const newUp = (deltaY < -zoneHeight / 2);
-        const newDown = (deltaY > zoneHeight / 2);
-        const newLeft = (deltaX < -zoneWidth / 2);
-        const newRight = (deltaX > zoneWidth / 2);
-
-        if (newUp !== up || newDown !== down || newLeft !== left || newRight !== right) {
-          up = newUp;
-          down = newDown;
-          left = newLeft;
-          right = newRight;
-          triggerJoystickChangeEvent();
-        }
-      }
-    }
-
-    function stopDrag() {
-      isJoystickClicked = false;
-
-      // Ramener le joystick à sa position par défaut
-      joystick.style.left = centerPosX + 'px';
-      joystick.style.top = centerPosY + 'px';
-
-      // Réinitialiser les variables de direction
-      up = false;
-      down = false;
-      left = false;
-      right = false;
-
-      // Désactiver les événements après un clic
-      disableEventsAfterClick();
-
-      document.removeEventListener('mousemove', moveJoystick);
-      document.removeEventListener('touchmove', moveJoystick);
-      document.removeEventListener('mouseup', stopDrag);
-      document.removeEventListener('touchend', stopDrag);
-    }
-
-    // Déclencher un événement personnalisé lorsque l'état du joystick change
-    function triggerJoystickChangeEvent() {
-      const joystickEvent = new CustomEvent('joystickchange', {
-        detail: {
-          up,
-          down,
-          left,
-          right
-        }
-      });
-      console.log(joystickEvent);
-      document.dispatchEvent(joystickEvent);
-    }
     /////////////////////////////////////////////////////////
     //  END - JOYSTICK
     /////////////////////////////////////////////////////////

@@ -22,6 +22,7 @@ const KEY_SPACE = 32;
 // initialisation variables
 // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
 var totalTimeElapsed = 0;
+var timeSinceLastSecond = 0;
 
 // Ingame Timer
 var yourTurn = true;
@@ -30,23 +31,6 @@ var yourTurn = true;
 async function pause(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-// Etat animation
-// A déclarer en dehors des fonctions /!\
-var leftAnimation = false;
-var leftAnimationProgress = 0;
-
-var rightAnimation = false;
-var rightAnimationProgress = 0;
-//////////////METTRE CES VARIABLES DANS OBJET JOUEUR !!!!!
-var forwardAnimation = false;
-var forwardAnimationProgress = 0;
-
-var backwardAnimation = false;
-var backwardAnimationProgress = 0;
-
-let animationDirection; // Variable pour stocker la direction de l'animation
-let animationProgress; // Variable pour stocker la progression de l'animation
 
 // Direction  - Orientation caméra
 // Valeur étalon
@@ -94,6 +78,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // impossible d'utiliser la fonction addToConsole() en dehors -> trouver solution
+  // maintenant si: Sprite.terminalLog() ; mais on ne peut pas l'utiliser avant initialisation.
+  // on garde cette version pour le moment, on va devoir clean le code.
   addToConsole("Welcome in Oasis !");
   addToConsole("Version pre-Alpha (conception)");
   addToConsole("");
@@ -145,6 +131,19 @@ function statsUpdate(player) {
   playerStr.textContent = player.strength;
   playerDex.textContent = player.dexterity;
   playerInt.textContent = player.intellect;
+
+  updateProgressBar("strengthBar", player.XPstrength, 10);
+  updateProgressBar("dexterityBar", player.XPdexterity, 10);
+  updateProgressBar("intellectBar", player.XPintellect, 10);
+
+  // Régénération Mana
+  if (player.mp < 10) {
+    player.mp += (player.intellect / 10);
+    // console.log("mana regen" + player.intellect / 10);
+    // console.log(player.mp);
+  } else {
+    // console.log("Your mana is full")
+  }
 
   // update les stats de combat
   player.might = player.might + Math.floor(player.strength / 10);
@@ -274,8 +273,7 @@ class Sprite {
     var dialWindow = document.getElementById("dialogueWindow");
 
     document.getElementById("joystick-container").style.display = "block";
-    document.getElementById("joystickBackButtonContainer").style.display =
-      "none";
+    document.getElementById("joystickBackButtonContainer").style.display = "none";
 
     info.style.display = "block";
     equipment.style.display = "none";
@@ -337,30 +335,30 @@ class Sprite {
     outputElement.scrollTop = outputElement.scrollHeight;
   }
 
-  async terminalLog(entry) {
+  static terminalLog(entry) {
     const outputElement = document.getElementById("output");
     const consoleContent = outputElement.innerHTML;
     outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
     outputElement.scrollTop = outputElement.scrollHeight;
   }
 
-  async attack(target) {
+  attack(target) {
     if (target.armor >= this.dmg) {
       let entry =
         "<font style='font-style: italic;'>Your armor absorbs all the damages.</font>";
-      this.terminalLog(entry);
+      Sprite.terminalLog(entry);
     } else {
       let entry =
         "<font style='font-style: italic;'>The opponent attacks : <font style='font-weight: bold;'>" +
         (this.dmg - target.armor) +
         " dmg !</font></font>";
-      this.terminalLog(entry);
+      Sprite.terminalLog(entry);
       playerDamageFlash();
       target.hp -= this.dmg - target.armor;
     }
   }
 
-  async playerAttack(damage, criti) {
+  playerAttack(damage, criti, player) {
     const chanceCriti = Math.floor(Math.random() * 100);
     var factor = 1;
 
@@ -373,6 +371,10 @@ class Sprite {
       // console.log("Coup critique !");
       entry = "Critical ! "
       // console.log(chanceCriti);
+
+      // gain d'expérience dexterité
+      player.XPdexterity += 1;
+      console.log(player.XPdexterity + "pts dexterity experience.");
     }
 
     // console.log("facteur : " + factor);
@@ -381,22 +383,25 @@ class Sprite {
 
     this.startSpriteFlash();
     
+    // gain d'expérience force
+    player.XPstrength += 1;
+    console.log(player.XPstrength + "pts strength experience.");
+    
     entry +=
       "<font style='font-style: italic;'>You attack : <font style='font-weight: bold;'>" +
       damage*factor +
       " dmg</font> points ! </font>";
 
-    this.terminalLog(entry);
+    Sprite.terminalLog(entry);
   }
 
   // Méthodes de combat (nouveauté de la version Alpha 0.5)
   // mettre spritetype en argument pour définir l'XP, le loot, les quête... etc.
 
-  async enemyAttackUpdate(player) {
+  enemyAttackUpdate(player) {
     if (this.hp <= 0) {
-      let entry = "The enemy is dead. <br>  You won 10xp points !";
+      let entry = "The enemy is dead! <br>";
       this.talk(entry, "facePlayer");
-      player.xp += 10;
       this.spriteType = 10;
     } else {
       // Calculer la chance d'échec
@@ -415,6 +420,10 @@ class Sprite {
           consoleContent + "> You dodge the attack !<br>";
         // console.log("Lattaque a échoué !");
         // console.log(chanceEchec);
+
+        // gain d'expérience dextérité
+        player.XPdexterity += 1;
+        console.log(player.XPdexterity + "pts dexterity experience.");
       }
     }
 
@@ -443,9 +452,14 @@ class Sprite {
   // envisager une fonction de combat pour normaliser le process
   async combat(target, damage, criti, player) {
       attack(target);
-      playerAttack(damage, criti);
+      playerAttack(damage, criti, player);
       enemyAttackUpdate(player);
   }
+
+  ////////////////// SPELLS ////////////////////////////////
+  // On laisse dans les sprites ? (je pense que oui, ça fait partie des animations combats)
+  // il faudra préciser les fonctions "static", pour les buffs, car ne s'applique pas aux sprites/events.
+  ////////////////// SPELLS ////////////////////////////////
 }
 
 // Holds information about a wall hit from a single ray
@@ -583,6 +597,107 @@ class Item {
   }
 }
 
+////////////////////////////////////////////////////////////////////
+    // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
+    // Set d'objets test
+    const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0,0,1);
+    const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
+    const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
+    const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
+    const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
+////////////////////////////////////////////////////////////////////
+
+// ajout de la classe spells /////////////////////////////////////////////////////
+// ajout de la classe spells /////////////////////////////////////////////////////
+// ajout de la classe spells /////////////////////////////////////////////////////
+
+class Spell {
+  constructor(name, manaCost, description, effect) {
+      this.name = name;
+      this.manaCost = manaCost;
+      this.description = description;
+      this.effect = effect; // Fonction représentant l'effet du sort
+  }
+
+  // Méthode pour lancer le sort
+  cast(caster, target) {
+      if (caster.mp >= this.manaCost) {
+          // Vérifie si le lanceur a suffisamment de mana pour lancer le sort
+          caster.mp -= this.manaCost; // Réduire le mana du lanceur
+
+          // Appliquer l'effet du sort sur la cible
+          this.effect(caster, target);
+
+          Sprite.terminalLog(`${caster.name} lance ${this.name} sur ${target.name}`);
+      } else {
+        Sprite.terminalLog(`${caster.name} n'a pas assez de mana pour lancer ${this.name}`);
+      }
+  }
+
+  // Fonction représentant l'effet de soins
+  healEffect(caster, target) {
+    // Suppose que le sort rend 15 points de vie à la cible
+    // gain d'xp
+    playerDamageFlash();
+
+    caster.XPintellect += 1;
+
+    target.hp += 15;
+
+    Sprite.terminalLog(`${target.name} récupère 15 points de vie.`);
+  }
+
+  // Fonction représentant l'effet de dégâts
+  damageEffect(caster, target) {
+    // Suppose que le sort inflige 20 points de dégâts à la cible
+    target.hp -= 20;
+    Sprite.terminalLog(`${target.name} subit 20 points de dégâts de la part de ${caster.name}`);
+  }
+}
+
+// Création d'un sort de soins
+  let healSpell = new Spell(
+    "Guérison",
+    8,
+    "Rend 15 points de vie au joueur",
+    function(caster, target) {
+      return healSpell.healEffect(caster, target);
+    }
+  );
+
+// Création d'un sort de dégâts
+  let fireballSpell = new Spell(
+    "Boule de feu",
+    10,
+    "Inflige 20 points de dégâts à l'ennemi",
+    function(caster, target) {
+      return fireballSpell.damageEffect(caster, target);
+    }
+  );
+
+// ajout de la classe quête /////////////////////////////////////////////////////
+
+class Quest {
+  constructor(title, description, reward) {
+      this.title = title;
+      this.description = description;
+      this.reward = reward;
+      this.completed = false;
+  }
+
+  // Méthode pour marquer une quête comme complétée
+  complete() {
+      this.completed = true;
+      console.log(`La quête "${this.title}" a été complétée ! Récompense : ${this.reward}`);
+  }
+}
+
+const testQuest = new Quest(
+  "Welcome to Oasis !",
+  "It's not fresh, but it's new...So please, enjoy my little baby !",
+  "<3"
+);
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 class Raycaster {
@@ -630,19 +745,9 @@ class Raycaster {
   initPlayer() {
     const tileSizeHalf = Math.floor(this.tileSize / 2);
 
-    ////////////////////////////////////////////////////////////////////
-    // Créer des instances de la classe Item pour l'inventaire du joueur
-    // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
-    // Set d'objets test
-    const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0,0,1);
-    const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
-    const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
-    const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
-    const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
-
-    ////////////////////////////////////////////////////////////////////
-
     this.player = {
+      name: "Alakir",
+
       x: 14 * this.tileSize + tileSizeHalf, // current x, y position in game units
       y: 1 * this.tileSize + tileSizeHalf,
       z: 0,
@@ -658,9 +763,6 @@ class Raycaster {
 
       // player stats
 
-      // bientôt inutile
-      level: 1,
-
       hp: 10,
       mp: 10,
       xp: 0,
@@ -671,6 +773,10 @@ class Raycaster {
       dexterity: 5,
       intellect: 5,
 
+      XPstrength: 0,
+      XPdexterity: 0,
+      XPintellect:0,
+
       might: 1,
       dodge: 1,
       magic: 1,
@@ -680,6 +786,14 @@ class Raycaster {
       torso: [],
 
       inventory: [shortSwordAndShield, jacket],
+
+    // Sorts que le joueur possède
+      spells: {
+        healSpell: healSpell,
+        fireballSpell: fireballSpell
+      },
+
+      quests: [testQuest],
 
       // a déplacer en variable générale, ça parasite l'exportation
       inventoryMenuShowed: false,
@@ -884,6 +998,30 @@ class Raycaster {
     dialWindow.style.display = "none";
   }
 
+  // gestion des sorts : 
+  // C.F. classe "Spells"
+
+  // gestion des quêtes
+  displayQuests() {
+    const questContent = document.getElementById("questContent");
+
+    if (this.player.quests.length > 0) {
+        questContent.innerHTML = "";
+        this.player.quests.forEach((quest) => {
+            const questStatus = quest.completed ? "Completed" : "In progress";
+            const statusClass = quest.completed ? "completed" : ""; // Ajout de la classe 'completed' si la quête est complétée
+
+            questContent.innerHTML += `<div class="quest-item ${statusClass}">
+                                            <h3>${quest.title}</h3>
+                                            <p>${quest.description}</p>
+                                            <p>Status: ${questStatus}</p>
+                                        </div>`;
+        });
+    } else {
+        questContent.innerHTML = "> No quests in progress";
+    }
+  }
+
   resetToggle() {
     var info = document.getElementById("info");
     var stats = document.getElementById("stats");
@@ -915,7 +1053,7 @@ class Raycaster {
     info.style.display = "block";
     equipment.style.display = "none";
     stats.style.display = "none";
-    quests.style.display = "non";
+    quests.style.display = "none";
 
     dialWindow.style.display = "none";
     items.style.display = "none";
@@ -1312,20 +1450,18 @@ class Raycaster {
         // pour la présentation : "action" = "attack"
         // reset toggle pour éviter la superposition de div
         this.resetToggle();
-        console.log('Action/Dialogue')
-        this.actionButtonClicked = true;
+        if (yourTurn == true) {
+          console.log('Action/Dialogue')
+          this.actionButtonClicked = true;
+        } else {
+          // on arrête directement
+          break
+          // console.log("not your turn.")
+        }
         break;
-
       case 2: // ACTION
-      /*
-                this.resetToggle();
-                console.log('DELETED');
-                this.actionButtonClicked = true;
-                break;
-                */
       case 3: // EQUIPEMENT
         console.log("Bouton Equipement");
-
         if (this.inventoryMenuShowed == false) {
           this.inventoryMenuShowed = true;
           this.toggleEquipment();
@@ -1371,6 +1507,10 @@ class Raycaster {
         document.getElementById("QuestButton").style.display = "none";
         document.getElementById("InventoryButton").style.display = "block";
 
+        
+        this.displayQuests();
+                
+
         document.getElementById("items").style.display = "none";
         document.getElementById("quests").style.display = "block";
         break;
@@ -1382,6 +1522,26 @@ class Raycaster {
         document.getElementById("items").style.display = "block";
         document.getElementById("quests").style.display = "none";
         break;
+      case 13:
+        console.log("previous spell !")
+        // previous spell
+        break
+      case 14:
+        if (yourTurn == true) {
+          
+          // Utilisation du sort de guérison par le joueur
+          this.player.spells.healSpell.cast(this.player, this.player);
+
+        } else {
+          // on arrête le code directement, évite les répétitions
+          break
+        }
+        // cast spell
+        break
+      case 15:
+        console.log("next spell !")
+        // next spell
+        break
       default:
         console.log("Bouton non reconnu");
     }
@@ -1469,6 +1629,24 @@ class Raycaster {
     document.getElementById("InventoryButton").addEventListener("click", () => {
       this.handleButtonClick(12);
     });
+
+
+    document.getElementById("previousSpell").addEventListener("click", () => {
+      // previous spell
+      this.handleButtonClick(13);
+    });
+    
+
+    document.getElementById("castSpell").addEventListener("click", () => {
+      // cast spell
+      this.handleButtonClick(14);
+    });
+    
+
+    document.getElementById("nextSpell").addEventListener("click", () => {
+      //next spell
+      this.handleButtonClick(15);
+    });
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1496,25 +1674,33 @@ class Raycaster {
     totalTimeElapsed += timeElapsed;
 
     // Utilisez totalTimeElapsed pour calculer un délai d'une seconde
-    // la valeur est initialisé en tout début de code
-    const oneSecondDelay = 1000; // 1.5 seconde en millisecondes
+    // la valeur est initialisée en tout début de code
+    const oneSecond = 1000; // 1 seconde en millisecondes
 
     // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
 
-    if (totalTimeElapsed >= oneSecondDelay) {
+    // Ajoutez le temps écoulé à une variable qui mesure le temps écoulé depuis le dernier traitement de la seconde
+    timeSinceLastSecond += timeElapsed;
+
+    if (timeSinceLastSecond >= oneSecond) {
       // console.log("one second delay, no cpu timer")
 
       // action lorsque le délai d'une seconde est atteint
       // MAJ des infos du joueur
       statsUpdate(this.player);
-
+      
       // Bouléen pour tour par tour
       yourTurn = true;
 
-      // Réinitialisez totalTimeElapsed pour commencer à suivre le temps écoulé depuis le début de la prochaine seconde
-      totalTimeElapsed -= oneSecondDelay;
+      // console.log(yourTurn);
+
+      // Réinitialisez timeSinceLastSecond pour commencer à suivre le temps écoulé depuis le début de la prochaine seconde
+      timeSinceLastSecond -= oneSecond;
+
+      // console.log("une seconde")
     }
   }
+
 
   stripScreenHeight(screenDistance, correctDistance, heightInGame) {
     return Math.round((screenDistance / correctDistance) * heightInGame);
@@ -1960,7 +2146,7 @@ class Raycaster {
             }
         }
     }
-} 
+  } 
 
 /*  
 //note pour comprendre
@@ -2623,35 +2809,35 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
           // sud ouest :
              if ( this.player.rot > 270 * (Math.PI / 180) &&
                   this.player.rot < 360 * (Math.PI / 180)) {
-          if (this.map[Math.floor((this.player.y + 11)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
+          if (this.map[Math.floor((this.player.y + 30)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
             this.player.y += 10;
-          } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x + 11) /this.tileSize)] === 0) {
+          } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x + 30) /this.tileSize)] === 0) {
             this.player.x += 10;
           }
 
           // sud est :
       } else if ( this.player.rot > 180 * (Math.PI / 180) &&
                   this.player.rot < 270 * (Math.PI / 180)) {
-        if (this.map[Math.floor((this.player.y + 11)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
+        if (this.map[Math.floor((this.player.y + 30)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
             this.player.y += 10;
-          } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 11)/this.tileSize)] === 0) {
+          } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 30)/this.tileSize)] === 0) {
             this.player.x -= 10;
           }
 
           // nord ouest :
       } else if ( this.player.rot > 0 * (Math.PI / 180) &&
                   this.player.rot < 90 * (Math.PI / 180)) {
-        if (this.map[Math.floor((this.player.y - 11)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
+        if (this.map[Math.floor((this.player.y - 30)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
           this.player.y -= 10;
-        } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 11)/this.tileSize)] === 0) {
+        } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 30)/this.tileSize)] === 0) {
           this.player.x += 10;
         }
         // nord est
       } else if ( this.player.rot > 90 * (Math.PI / 180) &&
                   this.player.rot < 180 * (Math.PI / 180)) {
-        if (this.map[Math.floor((this.player.y - 11)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
+        if (this.map[Math.floor((this.player.y - 30)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
           this.player.y -= 10;
-        } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 11)/this.tileSize)] === 0) {
+        } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 30)/this.tileSize)] === 0) {
           this.player.x -= 10;
         }
       }
@@ -2693,17 +2879,15 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     // YOUTURN
-    if (action && yourTurn === true) {
+    if (action && yourTurn == true) {
       // Yourturn passe en false pour éviter les doublons
+      // console.log("Player Turn = false")
+      
+      yourTurn = false;
 
       // pas terrible, on devrait mettre ça dans le bindButton
-      setTimeout(() => {
-        this.actionButtonClicked = false;
-      }, 200);
+      this.actionButtonClicked = false;
     
-        console.log("Player Turn = false")
-        yourTurn = false;
-
       // dialogue NPC
       // Calculate the coordinates of the tile in front of the player based on the quadrant
       // Permet une bien meilleure précision en mode FPS
@@ -2756,7 +2940,6 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         frontY = Math.floor(this.player.y / this.tileSize);
       }
 
-
       // turn
       // Vérification si la case devant le joueur contient un sprite
       for (let i = 0; i < this.sprites.length; i++) {
@@ -2765,22 +2948,20 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         const spriteY = Math.floor(this.sprites[i].y / this.tileSize);
 
         if (spriteX === frontX && spriteY === frontY) {
-
           switch (spriteType) {
             case "A":            
-                yourTurn = false;
-                
-                this.sprites[i].playerAttack(this.player.might, this.player.criti),
+                this.sprites[i].playerAttack(this.player.might, this.player.criti, this.player),
+
 
                 await pause(250);
 
                 this.sprites[i].enemyAttackUpdate(this.player),
                 
-                console.log("Player Turn = true")
 
-                await pause(500);
-                yourTurn = false;
+                // test yourturn = true hors delay
+                yourTurn = true;
 
+                // console.log("Player Turn = true")
               break
             case 1:
               this.resetToggle();
@@ -2871,8 +3052,6 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
               break;
 
             default:
-              console.log("Player Turn = true")
-              yourTurn == true 
               this.resetToggle();
               break;
           }
@@ -2900,7 +3079,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
       [2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."],
     ];
 
-    if (action || this.actionButtonClicked) {
+    if (action) {
       for (var i = 0; i < mapEventA.length; i++) {
         if (
           Math.floor(newX / this.tileSize) === mapEventA[i][0] &&
