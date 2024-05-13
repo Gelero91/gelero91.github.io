@@ -166,8 +166,8 @@ function statsUpdate(player) {
   // update les stats de combat 
   player.hpMax = 10 + (player.strength - 5);
   player.mpMax = 10 + (player.intellect - 5);
-  player.might = 1 + (player.strength - 5);
-  player.magic = 1 + (player.intellect - 5);
+  player.might = player.might +  (player.strength - 5);
+  player.magic = player.magic + (player.intellect - 5);
   player.dodge = player.dexterity * 2;
   player.armor = player.armor;
   player.criti = player.dexterity * 2;
@@ -379,10 +379,9 @@ class Sprite {
 
     if (chanceCriti < criti) {
       factor = 2
-      entry = "Critical ! "
+      //entry = "Critical ! "
+      Sprite.terminalLog('Critical hit !');
       player.XPdexterity += 1;
-
-      // console.log(player.XPdexterity + "pts dexterity experience.");
     }
 
     this.hp -= damage * factor;
@@ -390,8 +389,7 @@ class Sprite {
     this.startSpriteFlash();
     
     player.XPstrength += 1;
-    //console.log(player.XPstrength + "pts strength experience.");
-    
+
     var entry =
       "<font style='font-style: italic;'>You attack : <font style='font-weight: bold;'>" +
       damage*factor +
@@ -402,20 +400,19 @@ class Sprite {
 
   enemyAttackUpdate(player) {
     if (this.hp <= 0) {
+
       let entry = "The enemy is dead! <br>";
       this.talk(entry, "facePlayer");
       this.spriteType = 10;
+
     } else {
-      // Calculer la chance d'échec
-      // Génère un nombre aléatoire entre 0 et 1, multiplié par 100.
+
       const chanceEchec = Math.floor(Math.random() * 100);
 
       if (chanceEchec > player.dodge) {
-        setTimeout(() => this.attack(player), 500);
 
-        // console.log(chanceEchec);
+        setTimeout(() => this.attack(player), 500);
       } else {
-        // ajout au terminal
         const outputElement = document.getElementById("output");
         const consoleContent = outputElement.innerHTML;
         outputElement.innerHTML =
@@ -451,7 +448,6 @@ class Sprite {
     xpBar.max = 100;
   }
 
-  // envisager une fonction de combat pour normaliser le process
   async combat(damage, criti, player) {
     if (player.turn == true) {
         
@@ -466,14 +462,10 @@ class Sprite {
     
     }
   }
-
-  ////////////////// SPELLS ////////////////////////////////
-  // On laisse dans les sprites ? (je pense que oui, ça fait partie des animations combats)
-  // il faudra préciser les fonctions "static", pour les buffs, car ne s'applique pas aux sprites/events.
-  ////////////////// SPELLS ////////////////////////////////
 }
 
 // Holds information about a wall hit from a single ray
+
 class RayHit {
   constructor() {
     this.x = 0; // world coordinates of hit
@@ -609,6 +601,7 @@ class Item {
 }
 
 ////////////////////////////////////////////////////////////////////
+
     // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
     // Set d'objets test
     const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0,0,1);
@@ -616,6 +609,7 @@ class Item {
     const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
     const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
     const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
+
 ////////////////////////////////////////////////////////////////////
 
   class Spell {
@@ -629,8 +623,7 @@ class Item {
     // Méthode pour lancer le sort
     cast(caster, target) {
       if (caster.turn == true) {
-        
-        // zzzzzzzzzzzzzzzzzzz
+
         caster.turn = false;
 
         if (caster.mp >= this.manaCost) {
@@ -640,9 +633,9 @@ class Item {
             // Appliquer l'effet du sort sur la cible
             this.effect(caster, target);
 
-            Sprite.terminalLog(`${caster.name} lance ${this.name} sur ${target.name}`);
+            Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`);
         } else {
-          Sprite.terminalLog(`${caster.name} n'a pas assez de mana pour lancer ${this.name}`);
+          Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
         }
       } else {
         console.log("not your turn");
@@ -651,19 +644,19 @@ class Item {
 
     // Fonction représentant l'effet de soins
     healEffect(caster, target) {
-      // Suppose que le sort rend 15 points de vie à la cible
+      // Suppose que le sort rend 10 points de vie à la cible
       // gain d'xp
       playerDamageFlash();
 
       caster.XPintellect += 1;
 
-      target.hp += 15;
+      target.hp += 10;
 
       if (target.hp > target.hpMax) {
         target.hp = target.hpMax;
         Sprite.terminalLog(`${target.name} is completely healed.`);
       } else {
-        Sprite.terminalLog(`${target.name} is healed for 15hp.`);
+        Sprite.terminalLog(`${target.name} is healed for 10hp.`);
       }
     }
 
@@ -677,9 +670,9 @@ class Item {
 
   // Création d'un sort de soins
     let healSpell = new Spell(
-      "Guérison",
+      "Heal I",
       8,
-      "Rend 15 points de vie au joueur",
+      "Heal the player for 10hp.",
       function(caster, target) {
         return healSpell.healEffect(caster, target);
       }
