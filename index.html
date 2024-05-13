@@ -428,12 +428,15 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                       <div style="height:10px;">
                     <!--compensation des boutons SPELL-->
                       </div>
-                      <div id="joystickButtonAB" style="display: flex;">
+                      <div id="SpellButtons" style="display: flex;">
                         <button id="previousSpell" class="controlButton"
                             style="width:64px;height:64px;padding:0px; border-radius:64px 0 0 64px; background-color: rgb(52, 52, 52);">◄</button>
                             <button id="castSpell" class="controlButton" style="width:64px;padding:0px;background-color: rgb(52, 52, 52); border-radius: 0px;">❂</button>
                             <button id="nextSpell" class="controlButton"
                             style="width:64px;height:64px;padding:0px;border-radius:0 64px 64px 0;  background-color: rgb(52, 52, 52);">►</button>
+                    </div>
+                    <div>
+                      <p id="selectedSpell" style="text-align: center;">Heal I</p>
                     </div>
                    
                       <!--SPELLS-->
@@ -462,9 +465,6 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                     </div>
                     <div>
                       <!--compensation des boutons AB-->
-                       <div style="height:40px;">
-                      <!--compensation des boutons AB-->
-                       </div>
                        <div style="display: none;">
                           <div id="joystickButtonAB" style="display: flex;height: 60px;">
                              <button id="button7" class="grid-item controlButton"
@@ -475,7 +475,6 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                                 style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif; border-radius: 0 30px 30px 0;">►</button>
                           </div>
                        </div>
-                       <div style="height: 10px;"></div>
                        <br />
                        <br />
                        <!-- a modifier pour rendre utilisable-->
@@ -529,25 +528,44 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                     <div>
                       <div id="grid-container" style="margin-top: 10px;">
                         <div id="grid-container" style="margin-top: 10px;">
+                          <div class="progress-bar" id="strengthBar">
+                            <p class="progress-label" style="
+                            position: absolute;
+                            left: 10px;
+                            transform: translateY(-50%);
+                            z-index: 1;">Strength</p>
 
-                          <div class="progress-bar" id="strengthBar" style="display: flex; justify-content: space-between; align-items: center;">
-                            <p class="progress-label">Strenth</p>
+                            <p id="PlayerStrOutput" style="position: absolute;
+                            right: 10px;
+                            transform: translateY(-50%);
+                            ">x</p>
                             <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
-                            <p id="PlayerStrOutput">x</p>
-                          </div>
-    
-                          <div class="progress-bar" id="dexterityBar" style="display: flex; justify-content: space-between; align-items: center;">
-                            <p class="progress-label">Dexterity</p>
+                        </div>
+                        
+                        <div class="progress-bar" id="dexterityBar">
+                            <p class="progress-label" style="
+                            position: absolute;
+                            left: 10px;
+                            transform: translateY(-50%);
+                            z-index: 1;">Dexterity</p>
+                            <p id="PlayerDexOutput" style="position: absolute;
+                            right: 10px;
+                            transform: translateY(-50%);">y</p>
                             <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
-                            <p id="PlayerDexOutput">y</p>
-                          </div>
-    
-                          <div class="progress-bar" id="intellectBar" style="display: flex; justify-content: space-between; align-items: center;">
-                            <p class="progress-label">Intellect</p>
+                        </div>
+                        
+                        <div class="progress-bar" id="intellectBar">
+                            <p class="progress-label" style="
+                            position: absolute;
+                            left: 10px;
+                            transform: translateY(-50%);
+                            z-index: 1;">Intellect</p>
+                            <p id="PlayerIntOutput" style="position: absolute;
+                            right: 10px;
+                            transform: translateY(-50%);">z</p>
                             <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
-                            <p id="PlayerIntOutput">z</p>
-                          </div>
-                      
+                        </div>
+                        
                       </div>
                     
                     </div>
