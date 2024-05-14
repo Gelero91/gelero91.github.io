@@ -24,8 +24,6 @@ const KEY_SPACE = 32;
 var totalTimeElapsed = 0;
 var timeSinceLastSecond = 0;
 
-// Ingame Timer
-var yourTurn = true;
 
 // Ingame 1sec Pause Timer
 async function pause(ms) {
@@ -99,106 +97,6 @@ function updateProgressBar(id, value, max) {
   const percentage = (value / max) * 100;
 
   progress.style.width = `${percentage}%`;
-}
-
-function statsUpdate(player) {
-  // Old Progress bar
-  const playerHP = document.getElementById("PlayerHPoutput");
-  const playerMP = document.getElementById("PlayerMPoutput");
-  const playerXP = document.getElementById("PlayerXPoutput");
-
-  playerHP.textContent = player.hp;
-  playerMP.textContent = player.mp;
-  playerXP.textContent = player.xp;
-
-  var hpBar = document.getElementById("hpBar");
-  var mpBar = document.getElementById("mpBar");
-  var xpBar = document.getElementById("xpBar");
-
-  hpBar.value = player.hp;
-  mpBar.value = player.mp;
-
-  updateProgressBar("hpBar", player.hp, 10);
-  updateProgressBar("mpBar", player.mp, 10);
-
-  const playerStr = document.getElementById("PlayerStrOutput");
-  const playerDex = document.getElementById("PlayerDexOutput");
-  const playerInt = document.getElementById("PlayerIntOutput");
-
-  playerStr.textContent = player.strength;
-  playerDex.textContent = player.dexterity;
-  playerInt.textContent = player.intellect;
-
-  if (player.XPstrength >= 10) {
-    player.XPstrength = 0;
-    player.strength +=1;
-    console.log("Strength leveled up !")
-  }
-
-  if (player.XPdexterity >= 10) {
-    player.XPdexterity = 0;
-    player.dexterity +=1;
-    console.log("Dexterity leveled up !")
-  }
-
-  if (player.XPintellect >= 10) {
-    player.XPintellect = 0;
-    player.intellect +=1;
-    console.log("Intellect leveled up !")
-  }
-
-  updateProgressBar("strengthBar", player.XPstrength, 10);
-  updateProgressBar("dexterityBar", player.XPdexterity, 10);
-  updateProgressBar("intellectBar", player.XPintellect, 10);
-
-  // Mana regen
-  if (player.mp < 10) {
-    player.mp += (player.intellect / 10);
-  } else {
-  }
-  
-  // Maximum hp
-  if (player.hp > player.hpMax) {
-   player.hp = player.hpMax;
-  } else {
-  }
-
-  // update les stats de combat 
-  player.hpMax = 10 + (player.strength - 5);
-  player.mpMax = 10 + (player.intellect - 5);
-  player.might = player.might +  (player.strength - 5);
-  player.magic = player.magic + (player.intellect - 5);
-  player.dodge = player.dexterity * 2;
-  player.armor = player.armor;
-  player.criti = player.dexterity * 2;
-
-  const playerMight = document.getElementById("PlayerMightOutput");
-  const playerDodge = document.getElementById("PlayerDodgeOutput");
-  const playerMagic = document.getElementById("PlayerMagicOutput");
-  const playerArmor = document.getElementById("PlayerArmorOutput");
-  const playerCriti = document.getElementById("PlayerCritiOutput");
-
-  playerMight.textContent = player.might;
-  playerDodge.textContent = player.dodge;
-  playerMagic.textContent = player.magic;
-  playerArmor.textContent = player.armor;
-  playerCriti.textContent = player.criti;
-}
-
-// flash dégâts sur joueur (backgroundcolor pour commencer)
-async function playerDamageFlash() {
-  var element = document.getElementById("gameWindow");
-
-  // Changement de couleur
-  element.style.backgroundColor = "rgba(255, 0, 0, 0.05)";
-  element.style.filter = "drop-shadow(0 0 15px red)";
-
-  // Rétablissement de la couleur d'origine après 0.1 seconde (100 millisecondes)
-  setTimeout(function () {
-    // laisser vide pour éviter de cumuler style et classe
-    element.style.backgroundColor = "";
-    element.style.filter = "";
-  }, 100);
 }
 
 class Sprite {
@@ -368,7 +266,7 @@ class Sprite {
         (this.dmg - target.armor) +
         " dmg !</font></font>";
       Sprite.terminalLog(entry);
-      playerDamageFlash();
+      Raycaster.playerDamageFlash();
       target.hp -= this.dmg - target.armor;
     }
   }
@@ -646,7 +544,7 @@ class Item {
     healEffect(caster, target) {
       // Suppose que le sort rend 10 points de vie à la cible
       // gain d'xp
-      playerDamageFlash();
+      Raycaster.playerHealFlash();
 
       caster.XPintellect += 1;
 
@@ -680,7 +578,7 @@ class Item {
 
   // Création d'un sort de dégâts
     let fireballSpell = new Spell(
-      "Boule de feu",
+      "Fire spray",
       10,
       "Inflige 20 points de dégâts à l'ennemi",
       function(caster, target) {
@@ -795,6 +693,12 @@ class Raycaster {
       XPdexterity: 0,
       XPintellect:0,
 
+      // variable pour vérifier l'évolution de strength
+      // et éviter une incrémentation à chaque statsUpdate(player)
+      // METTRE VALEUR DE BASE STRENGTH ET INTELLECT
+      oldStrength : 5,
+      oldIntellect : 5,
+
       might: 1,
       dodge: 1,
       magic: 1,
@@ -841,6 +745,148 @@ class Raycaster {
     mpBar.max = 10;
     xpBar.max = 100;
   }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// fonction update
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+statsUpdate(player) {
+  // Old Progress bar
+  const playerHP = document.getElementById("PlayerHPoutput");
+  const playerMP = document.getElementById("PlayerMPoutput");
+  const playerXP = document.getElementById("PlayerXPoutput");
+
+  playerHP.textContent = player.hp;
+  playerMP.textContent = player.mp;
+  playerXP.textContent = player.xp;
+
+  var hpBar = document.getElementById("hpBar");
+  var mpBar = document.getElementById("mpBar");
+  var xpBar = document.getElementById("xpBar");
+
+  hpBar.value = player.hp;
+  mpBar.value = player.mp;
+
+  updateProgressBar("hpBar", player.hp, 10);
+  updateProgressBar("mpBar", player.mp, 10);
+
+  const playerStr = document.getElementById("PlayerStrOutput");
+  const playerDex = document.getElementById("PlayerDexOutput");
+  const playerInt = document.getElementById("PlayerIntOutput");
+
+  playerStr.textContent = player.strength;
+  playerDex.textContent = player.dexterity;
+  playerInt.textContent = player.intellect;
+
+  if (player.XPstrength >= 10) {
+    player.XPstrength = 0;
+    player.strength +=1;
+    console.log("Strength leveled up !")
+  }
+
+  if (player.XPdexterity >= 10) {
+    player.XPdexterity = 0;
+    player.dexterity +=1;
+    console.log("Dexterity leveled up !")
+  }
+
+  if (player.XPintellect >= 10) {
+    player.XPintellect = 0;
+    player.intellect +=1;
+    console.log("Intellect leveled up !")
+  }
+
+  updateProgressBar("strengthBar", player.XPstrength, 10);
+  updateProgressBar("dexterityBar", player.XPdexterity, 10);
+  updateProgressBar("intellectBar", player.XPintellect, 10);
+
+  // Mana regen
+  if (player.mp < 10) {
+    player.mp += (player.intellect / 10);
+  } else {
+  }
+  
+  // Maximum hp
+  if (player.hp > player.hpMax) {
+   player.hp = player.hpMax;
+  } else {
+  }
+
+  // On base les HP sur la force & MP sur l'intellect
+  player.hpMax = 10 + (player.strength - 5);
+  player.mpMax = 10 + (player.intellect - 5);
+
+  // on vérifie s'il y a une différence entre l'ancienne valeur et la nouvelle
+  // puis on met à jour la valeure référente
+  // permet d'éviter les incrémentations à chaque tick
+  if (player.strength !== player.oldStrength) {
+    player.might += (player.strength - 5);
+    player.oldStrength = player.strength;
+  }
+  
+  if (player.intellect !== player.oldIntellect) {
+    player.might += (player.intellect - 5);
+    player.oldIntellect = player.intellect;
+  }
+
+  player.dodge = player.dexterity * 2;
+  player.armor = player.armor;
+  player.criti = player.dexterity * 2;
+
+  const playerMight = document.getElementById("PlayerMightOutput");
+  const playerDodge = document.getElementById("PlayerDodgeOutput");
+  const playerMagic = document.getElementById("PlayerMagicOutput");
+  const playerArmor = document.getElementById("PlayerArmorOutput");
+  const playerCriti = document.getElementById("PlayerCritiOutput");
+
+  playerMight.textContent = player.might;
+  playerDodge.textContent = player.dodge;
+  playerMagic.textContent = player.magic;
+  playerArmor.textContent = player.armor;
+  playerCriti.textContent = player.criti;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ANIMATION JOUEUR
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// flash dégâts sur joueur (backgroundcolor pour commencer)
+static playerDamageFlash() {
+  var element = document.getElementById("gameWindow");
+
+  // Ajout de l'effet de transition CSS
+  element.style.transition = "background-color 0.5s, filter 0.5s";
+
+  // Changement de couleur en rouge
+  element.style.backgroundColor = "rgba(255, 0, 0, 0.05)";
+  element.style.filter = "drop-shadow(0 0 15px red)";
+
+  // Rétablissement de la couleur d'origine après 0.1 seconde (100 millisecondes)
+  setTimeout(function () {
+    // laisser vide pour éviter de cumuler style et classe
+    element.style.backgroundColor = "";
+    element.style.filter = "";
+  }, 100);
+}
+
+static playerHealFlash() {
+  var element = document.getElementById("gameWindow");
+
+  // Ajout de l'effet de transition CSS
+  element.style.transition = "background-color 0.5s, filter 0.5s";
+
+  // Changement de couleur en turquoise
+  element.style.backgroundColor = "rgba(64, 224, 208, 0.05)";
+  element.style.filter = "drop-shadow(0 0 15px turquoise)";
+
+  // Rétablissement de la couleur d'origine après 0.1 seconde (100 millisecondes)
+  setTimeout(function () {
+    // laisser vide pour éviter de cumuler style et classe
+    element.style.backgroundColor = "";
+    element.style.filter = "";
+  }, 100);
+}
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // EQUIPEMENT INVENTAIRE
@@ -1460,24 +1506,25 @@ class Raycaster {
   }
 
   //////////////////////////////////////////////////////////////////////////////
+  /// CONTROLES
+  //////////////////////////////////////////////////////////////////////////////
 
-  //  TO CHANGE : heavily simplified for the DEMO
+  // Case selon type de bouton appuyée, les ID sont liées à un nombre dans "bindKeysAndButtons"
   handleButtonClick(buttonNumber) {
     switch (buttonNumber) {
       case 1: 
-        // ATTAQUE
-        // va falloir changer la logique combat/action
-        // pour la présentation : "action" = "attack"
-        // reset toggle pour éviter la superposition de div
         this.resetToggle();
-        if (yourTurn == true) {
+  
+        if (this.player.turn == true) {
           console.log('Action/Dialogue')
+  
+          // actionButtonClicked est simplement le fait d'appuyer sur la touche action (bouton A)
           this.actionButtonClicked = true;
+
         } else {
-          // on arrête directement
           break
-          // console.log("not your turn.")
         }
+        
         break;
       case 2: // ACTION
       case 3: // EQUIPEMENT
@@ -1491,7 +1538,7 @@ class Raycaster {
           this.resetToggle();
           console.log("true");
         }
-
+  
         break;
       case 4:
         // EMPTY
@@ -1526,9 +1573,9 @@ class Raycaster {
         console.log("quest button");
         document.getElementById("QuestButton").style.display = "none";
         document.getElementById("InventoryButton").style.display = "block";
-
+  
         this.displayQuests();
-
+  
         document.getElementById("items").style.display = "none";
         document.getElementById("quests").style.display = "block";
         break;
@@ -1536,31 +1583,39 @@ class Raycaster {
         console.log("inventory button");
         document.getElementById("QuestButton").style.display = "block";
         document.getElementById("InventoryButton").style.display = "none";
-
+  
         document.getElementById("items").style.display = "block";
         document.getElementById("quests").style.display = "none";
         break;
       case 13:
         console.log("previous spell !")
         // previous spell
-        break
+        break;
       case 14:
         this.player.spells.healSpell.cast(this.player, this.player);
         // cast spell
-        break
+        break;
       case 15:
         console.log("next spell !")
         // next spell
-        break
+        break;
       default:
         console.log("Bouton non reconnu");
     }
   }
-
+  
+  // Méthode améliorée pour éviter les redites et tout centraliser
+  bindButton(buttonId, buttonNumber) {
+    document.getElementById(buttonId).addEventListener("click", () => {
+      this.handleButtonClick(buttonNumber);
+    });
+  }
+  
+  // méthode d'interface, permet de centraliser les commandes et eventlistener
   bindKeysAndButtons() {
     this.keysDown = [];
     let this2 = this;
-
+  
     // Liaison des touches
     document.onkeydown = function (e) {
       e = e || window.event;
@@ -1570,11 +1625,11 @@ class Raycaster {
       e = e || window.event;
       this2.keysDown[e.keyCode] = false;
     };
-
+  
     /////////////////////////////////////////////////////////
     //  JOYSTICK
     /////////////////////////////////////////////////////////
-
+  
     document.addEventListener("joystickchange", function (event) {
       const { up, down, left, right } = event.detail;
       if (up) {
@@ -1600,11 +1655,11 @@ class Raycaster {
         joystickRightClicked = false;
       }
     });
-
+  
     /////////////////////////////////////////////////////////
     //  END - JOYSTICK
     /////////////////////////////////////////////////////////
-
+  
     // Liaison des boutons
     this.bindButton("button1", 1);
     this.bindButton("button2", 2);
@@ -1615,48 +1670,17 @@ class Raycaster {
     this.bindButton("button7", 7);
     this.bindButton("button8", 8);
     this.bindButton("button9", 9);
+    this.bindButton("joystickBackButton", 10);
+    this.bindButton("QuestButton", 11);
+    this.bindButton("InventoryButton", 12);
+    this.bindButton("previousSpell", 13);
+    this.bindButton("castSpell", 14);
+    this.bindButton("nextSpell", 15);
   }
-
-  bindButton(buttonId, buttonNumber) {
-    document.getElementById(buttonId).addEventListener("click", () => {
-      this.handleButtonClick(buttonNumber);
-    });
-
-    document.getElementById(buttonId).addEventListener("click", () => {
-      this.handleButtonClick(buttonNumber);
-    });
-
-    document
-      .getElementById("joystickBackButton")
-      .addEventListener("click", () => {
-        this.handleButtonClick(10);
-      });
-
-    document.getElementById("QuestButton").addEventListener("click", () => {
-      this.handleButtonClick(11);
-    });
-
-    document.getElementById("InventoryButton").addEventListener("click", () => {
-      this.handleButtonClick(12);
-    });
-
-    document.getElementById("previousSpell").addEventListener("click", () => {
-      // previous spell
-      this.handleButtonClick(13);
-    });
-    
-    document.getElementById("castSpell").addEventListener("click", () => {
-      // cast spell
-      this.handleButtonClick(14);
-    });
-    
-    document.getElementById("nextSpell").addEventListener("click", () => {
-      //next spell
-      this.handleButtonClick(15);
-    });
-  }
-
-  ///////////////////////////////////////////////////////////////////////////////////////////
+  
+  //////////////////////////////////////////////////////////////////////////////
+  /// CONTROLES
+  //////////////////////////////////////////////////////////////////////////////
 
   gameCycle() {
     const now = Date.now();
@@ -1693,7 +1717,7 @@ class Raycaster {
       // console.log("one second delay, no cpu timer")
       // action lorsque le délai d'une seconde est atteint
       // MAJ des infos du joueur
-      statsUpdate(this.player);
+      this.statsUpdate(this.player);
       
       // Bouléen pour tour par tour
       this.player.turn = true;
@@ -1704,7 +1728,6 @@ class Raycaster {
       // console.log("une seconde")
     }
   }
-
 
   stripScreenHeight(screenDistance, correctDistance, heightInGame) {
     return Math.round((screenDistance / correctDistance) * heightInGame);
@@ -1890,18 +1913,22 @@ class Raycaster {
       rayHit.sprite.screenPosition = this.spriteScreenPosition(rayHit.sprite);
     }
     let rc = rayHit.sprite.screenPosition;
+
     // sprite first strip is ahead of current strip
     if (rc.x > rayHit.strip) {
       return;
     }
+    
     // sprite last strip is before current strip
     if (rc.x + rc.w < rayHit.strip) {
       return;
     }
+
     let diffX = Math.trunc(rayHit.strip - rc.x);
     let dstX = rc.x + diffX; // skip left parts of sprite already drawn
     let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
     let srcW = 1;
+
     if (srcX >= 0 && srcX < this.textureSize) {
       // Créez un objet (ou tableau) pour stocker les données associées à chaque spriteType
       const spriteData = {
@@ -2887,7 +2914,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
       // Yourturn passe en false pour éviter les doublons
       // console.log("Player Turn = false")
       
-      // pas terrible, on devrait mettre ça dans le bindButton
+      // actionButtonClicked est simplement le fait d'appuyer sur la touche action (bouton A)
       this.actionButtonClicked = false;
     
       // dialogue NPC
@@ -2953,7 +2980,6 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
           switch (spriteType) {
             case "A":            
 
-            //  zzzzzzzzzzzzzzzzzzzzzzz
             this.sprites[i].combat(this.player.might,  this.player.criti, this.player); 
             
             break;
@@ -3144,6 +3170,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         }
       }
     }
+
     // set new position
     this.player.x = newX;
     this.player.y = newY;
