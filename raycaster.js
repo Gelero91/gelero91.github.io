@@ -148,7 +148,7 @@ class Sprite {
 
     this.animationProgress = animationProgress;
 
-    this.name = "pas encore de nom, lol"
+    this.name = "(no name yet)"
   }
 
   async startSpriteFlash() {
