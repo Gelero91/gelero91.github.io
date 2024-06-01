@@ -1,5 +1,6 @@
 const DESIRED_FPS = 60;
 const UPDATE_INTERVAL = Math.trunc(1000 / DESIRED_FPS);
+
 const KEY_UP = 38;
 const KEY_DOWN = 40;
 const KEY_LEFT = 37;
@@ -10,25 +11,13 @@ const KEY_S = 83;
 const KEY_A = 81;
 const KEY_D = 68;
 
+const KEY_F = 70;
+const KEY_SPACE = 32;
+
 let joystickForwardClicked = false;
 let joystickBackwardClicked = false;
 let joystickLeftClicked = false;
 let joystickRightClicked = false;
-
-// ACTION KEY: strike, open, teleport [...]
-const KEY_F = 70;
-const KEY_SPACE = 32;
-
-// initialisation variables
-// METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
-var totalTimeElapsed = 0;
-var timeSinceLastSecond = 0;
-
-
-// Ingame 1sec Pause Timer
-async function pause(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 // Direction  - Orientation caméra
 // Valeur étalon
@@ -61,10 +50,18 @@ let ceilingRender = false;
 let floorTexture = 3;
 let ceilingTexture = 1;
 
+var totalTimeElapsed = 0;
+var timeSinceLastSecond = 0;
+
 // animation referee
-// ZZZ, problème de gestion du temps, prends trop de ressource
+// problème de gestion du temps, prends trop de ressource
 let spriteAnimationProgress = 0;
 let lastTime = new Date().getSeconds();
+
+// Ingame 1sec Pause Timer
+async function pause(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // initialisation du terminal
 document.addEventListener("DOMContentLoaded", function () {
@@ -150,11 +147,10 @@ class Sprite {
     this.turn = turn;
 
     this.animationProgress = animationProgress;
+
+    this.name = "pas encore de nom, lol"
   }
 
-  // en faire une méthode Asynchrone, comme pour la fenêtre de dialogue ?
-  // ça a l'air de fonctionner
-  // Permet d'avoir les IA et le reste du code pendant l'animation.
   async startSpriteFlash() {
     // Augmente l'intensité du flash à 200 (blanc, grosso modo...)
     this.spriteFlash = 200;
@@ -165,7 +161,6 @@ class Sprite {
     this.spriteFlash = 0;
   }
 
-  // ANIMATION DE COMBAT - ABC
   async startAttackAnimation() {
     this.spriteFlash = 200;
 
@@ -176,6 +171,8 @@ class Sprite {
 
   // modification pour régler chevauchement de div :
   // resetToggle() est une méthode accessible depuis l'objet sprite
+  // en faire une méthode statique
+  // à déplacer
   resetToggleSpriteMethod() {
     var info = document.getElementById("info");
     var stats = document.getElementById("stats");
@@ -248,6 +245,7 @@ class Sprite {
     outputElement.scrollTop = outputElement.scrollHeight;
   }
 
+  // à déplacer
   static terminalLog(entry) {
     const outputElement = document.getElementById("output");
     const consoleContent = outputElement.innerHTML;
@@ -348,16 +346,25 @@ class Sprite {
 
   async combat(damage, criti, player) {
     if (player.turn == true) {
-        
       player.turn = false;
-
       this.playerAttack(damage, criti, player);
       this.enemyAttackUpdate(player);
-
     } else {
-
       console.log('not your turn');
-    
+    }
+  }
+
+  async combatSpell(player, target) {
+    if (player.turn == true) {
+      console.log(player.spells[player.selectedSpell].name)
+      
+      player.spells[player.selectedSpell].cast(player, target);
+      
+      this.enemyAttackUpdate(player);
+      player.turn = false;
+      player.combatSpell = false;
+    } else {
+      console.log('not your turn');
     }
   }
 }
@@ -498,52 +505,49 @@ class Item {
   }
 }
 
-////////////////////////////////////////////////////////////////////
+// constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
+// Set d'objets test
 
-    // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
-    // Set d'objets test
-    const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0,0,1);
-    const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
-    const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
-    const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
-    const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
+const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0,0,1);
+  const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
+  const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
+  const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
+  const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
 
-////////////////////////////////////////////////////////////////////
+// Ajout de la classe Spell //////////////////////////////////////////////////////////////////
 
-  class Spell {
-    constructor(name, manaCost, description, effect) {
-        this.name = name;
-        this.manaCost = manaCost;
-        this.description = description;
-        this.effect = effect; // Fonction représentant l'effet du sort
-    }
+class Spell {
+  constructor(name, manaCost, description, effect, selfCast) {
+      this.name = name;
+      this.manaCost = manaCost;
+      this.description = description;
+      this.effect = effect; // Fonction représentant l'effet du sort
+      this.selfCast = selfCast;
+  }
 
-    // Méthode pour lancer le sort
-    cast(caster, target) {
-      if (caster.turn == true) {
+  // Méthode pour lancer le sort
+  cast(caster, target) {
+      if (caster.turn) {
+          caster.turn = false;
 
-        caster.turn = false;
+          if (caster.mp >= this.manaCost) {
+              // Vérifie si le lanceur a suffisamment de mana pour lancer le sort
+              caster.mp -= this.manaCost; // Réduire le mana du lanceur
 
-        if (caster.mp >= this.manaCost) {
-            // Vérifie si le lanceur a suffisamment de mana pour lancer le sort
-            caster.mp -= this.manaCost; // Réduire le mana du lanceur
+              // Appliquer l'effet du sort sur la cible
+              this.effect(caster, target);
 
-            // Appliquer l'effet du sort sur la cible
-            this.effect(caster, target);
-
-            Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`);
-        } else {
-          Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
-        }
+              Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`);
+          } else {
+              Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
+          }
       } else {
-        console.log("not your turn");
+          console.log("not your turn");
       }
-    }
+  }
 
-    // Fonction représentant l'effet de soins
-    healEffect(caster, target) {
-      // Suppose que le sort rend 10 points de vie à la cible
-      // gain d'xp
+  // Fonction représentant l'effet de soins
+  healEffect(caster, target) {
       Raycaster.playerHealFlash();
 
       caster.XPintellect += 1;
@@ -551,42 +555,48 @@ class Item {
       target.hp += 10;
 
       if (target.hp > target.hpMax) {
-        target.hp = target.hpMax;
-        Sprite.terminalLog(`${target.name} is completely healed.`);
+          target.hp = target.hpMax;
+          Sprite.terminalLog(`${target.name} is completely healed.`);
       } else {
-        Sprite.terminalLog(`${target.name} is healed for 10hp.`);
+          Sprite.terminalLog(`${target.name} is healed for 10hp.`);
       }
-    }
-
-    // Fonction représentant l'effet de dégâts
-    damageEffect(caster, target) {
-      // Suppose que le sort inflige 20 points de dégâts à la cible
-      target.hp -= 20;
-      Sprite.terminalLog(`${target.name} subit 20 points de dégâts de la part de ${caster.name}`);
-    }
+      target.startSpriteFlash()
   }
 
-  // Création d'un sort de soins
-    let healSpell = new Spell(
-      "Heal I",
-      8,
-      "Heal the player for 10hp.",
-      function(caster, target) {
-        return healSpell.healEffect(caster, target);
-      }
-    );
+  // Fonction représentant l'effet de dégâts
+  damageEffect(caster, target) {
+      Raycaster.playerHealFlash();
+      target.startSpriteFlash();
+      target.hp -= 2;
+      caster.XPintellect += 1;
+      Sprite.terminalLog(`${target.name} suffured 2 points of damage from ${caster.name}`);
+  }
+}
 
-  // Création d'un sort de dégâts
-    let fireballSpell = new Spell(
-      "Fire spray",
-      10,
-      "Inflige 20 points de dégâts à l'ennemi",
-      function(caster, target) {
-        return fireballSpell.damageEffect(caster, target);
-      }
-    );
+// Création d'un sort de soins
+const healSpell = new Spell(
+  "Heal I",
+  8,
+  "Heal the player for 10hp.",
+  function(caster, target) {
+      healSpell.healEffect(caster, target);
+  },
+  true
+);
 
-  // ajout de la classe quête /////////////////////////////////////////////////////
+// Création d'un sort de dégâts
+const fireballSpell = new Spell(
+  "Fire spray",
+  2,
+  "Inflige 2 points de dégâts à l'ennemi",
+  function(caster, target) {
+      fireballSpell.damageEffect(caster, target);
+  },
+  false
+);
+
+
+// ajout de la classe quête /////////////////////////////////////////////////////
 
 class Quest {
   constructor(title, description, reward, completed) {
@@ -612,7 +622,7 @@ class Quest {
     false
   );
 
-///////////////////////////////////////////////////////////////////////////////////
+// moteur de jeu /////////////////////////////////////////////////////////////////////////////////
 
 class Raycaster {
   static get TWO_PI() {
@@ -662,20 +672,18 @@ class Raycaster {
     this.player = {
       name: "Alakir",
 
-      x: 14 * this.tileSize + tileSizeHalf, // current x, y position in game units
+      x: 14 * this.tileSize + tileSizeHalf,
       y: 1 * this.tileSize + tileSizeHalf,
       z: 0,
-      dir: 0, // turn direction,  -1 for left or 1 for right.
-      rot: 4.71238898038469, // rotation angle; counterclockwise is positive.
-      speed: 0, // forward (speed = 1) or backwards (speed = -1).
+      dir: 0,
+      rot: 4.71238898038469,
+      speed: 0,
 
       // orientation N, E, S, O /!\ PAS BESOIN
       // orientation: south,
       /* FPS */
       moveSpeed: Math.round(this.tileSize / ((DESIRED_FPS / 60.0) * 16)),
       rotSpeed: (1.5 * Math.PI) / 180,
-
-      // player stats
 
       hp: 10,
       mp: 10,
@@ -689,15 +697,14 @@ class Raycaster {
       dexterity: 5,
       intellect: 5,
 
+      // Valeur de référence pour pour éviter incrémentation infinie de statsUpdate(player)
+      oldStrength : 5,
+      oldDexterity : 5,
+      oldIntellect : 5,
+
       XPstrength: 0,
       XPdexterity: 0,
       XPintellect:0,
-
-      // variable pour vérifier l'évolution de strength
-      // et éviter une incrémentation à chaque statsUpdate(player)
-      // METTRE VALEUR DE BASE STRENGTH ET INTELLECT
-      oldStrength : 5,
-      oldIntellect : 5,
 
       might: 1,
       dodge: 1,
@@ -708,17 +715,13 @@ class Raycaster {
       torso: [],
 
       inventory: [shortSwordAndShield, jacket],
-
-    // Sorts que le joueur possède
-      spells: {
-        healSpell: healSpell,
-        fireballSpell: fireballSpell
-      },
-
-      // zzzzzzzzzzzzz
-      quests: [testQuest],
-
       inventoryMenuShowed: false,
+
+      spells: [healSpell, fireballSpell],
+      selectedSpell : 0,
+      combatSpell : false,
+
+      quests: [testQuest],
       
       joystick: true,
     };
@@ -747,150 +750,204 @@ class Raycaster {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// sélection et lancement de sort
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  nextSpell() {
+    this.player.selectedSpell++;
+    if (this.player.selectedSpell >= this.player.spells.length) {
+        this.player.selectedSpell = 0;
+    }
+    
+    const currentSpell = document.getElementById("selectedSpell");
+    currentSpell.textContent = this.player.spells[this.player.selectedSpell].name;
+  }
+
+  previousSpell() {
+    this.player.selectedSpell--;
+    if (this.player.selectedSpell < 0) {
+        this.player.selectedSpell = this.player.spells.length - 1;
+    }
+
+    const currentSpell = document.getElementById("selectedSpell");
+    currentSpell.textContent = this.player.spells[this.player.selectedSpell].name;
+  }
+
+
+  castSelectedSpell() {
+    // c'est utile ?
+    // Hum... à méditer, la réponse dépend de l'architecture voulue.
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // fonction update
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-statsUpdate(player) {
-  // Old Progress bar
-  const playerHP = document.getElementById("PlayerHPoutput");
-  const playerMP = document.getElementById("PlayerMPoutput");
-  const playerXP = document.getElementById("PlayerXPoutput");
+  statsUpdate(player) {
+    // Old Progress bar
+    const playerHP = document.getElementById("PlayerHPoutput");
+    const playerMP = document.getElementById("PlayerMPoutput");
+    const playerXP = document.getElementById("PlayerXPoutput");
 
-  playerHP.textContent = player.hp;
-  playerMP.textContent = player.mp;
-  playerXP.textContent = player.xp;
+    playerHP.textContent = player.hp;
+    playerMP.textContent = player.mp;
+    playerXP.textContent = player.xp;
 
-  var hpBar = document.getElementById("hpBar");
-  var mpBar = document.getElementById("mpBar");
-  var xpBar = document.getElementById("xpBar");
+    var hpBar = document.getElementById("hpBar");
+    var mpBar = document.getElementById("mpBar");
+    var xpBar = document.getElementById("xpBar");
 
-  hpBar.value = player.hp;
-  mpBar.value = player.mp;
+    hpBar.value = player.hp;
+    mpBar.value = player.mp;
 
-  updateProgressBar("hpBar", player.hp, 10);
-  updateProgressBar("mpBar", player.mp, 10);
+    updateProgressBar("hpBar", player.hp, 10);
+    updateProgressBar("mpBar", player.mp, 10);
 
-  const playerStr = document.getElementById("PlayerStrOutput");
-  const playerDex = document.getElementById("PlayerDexOutput");
-  const playerInt = document.getElementById("PlayerIntOutput");
+    const playerStr = document.getElementById("PlayerStrOutput");
+    const playerDex = document.getElementById("PlayerDexOutput");
+    const playerInt = document.getElementById("PlayerIntOutput");
 
-  playerStr.textContent = player.strength;
-  playerDex.textContent = player.dexterity;
-  playerInt.textContent = player.intellect;
+    playerStr.textContent = player.strength;
+    playerDex.textContent = player.dexterity;
+    playerInt.textContent = player.intellect;
 
-  if (player.XPstrength >= 10) {
-    player.XPstrength = 0;
-    player.strength +=1;
-    console.log("Strength leveled up !")
+    if (player.XPstrength >= 10) {
+      player.XPstrength = 0;
+      player.strength +=1;
+      console.log("Strength leveled up !")
+    }
+
+    if (player.XPdexterity >= 10) {
+      player.XPdexterity = 0;
+      player.dexterity +=1;
+      console.log("Dexterity leveled up !")
+    }
+
+    if (player.XPintellect >= 10) {
+      player.XPintellect = 0;
+      player.intellect +=1;
+      console.log("Intellect leveled up !")
+    }
+
+    updateProgressBar("strengthBar", player.XPstrength, 10);
+    updateProgressBar("dexterityBar", player.XPdexterity, 10);
+    updateProgressBar("intellectBar", player.XPintellect, 10);
+
+    // Mana regen + maximum mana
+    if (player.mp < player.mpMax) {
+      player.mp += (player.intellect / 10);
+    } else {
+      player.mp = player.mpMax;
+    }
+    
+    // Maximum hp
+    if (player.hp > player.hpMax) {
+    player.hp = player.hpMax;
+    } else {
+    }
+
+    // FONCTION DEATH
+    if (player.hp > 0) {
+    } else {
+      Raycaster.death();
+    }
+
+    // On base les HP sur la force & MP sur l'intellect
+    player.hpMax = 10 + (player.strength - 5);
+    player.mpMax = 10 + (player.intellect - 5);
+
+    // on vérifie s'il y a une différence entre l'ancienne valeur et la nouvelle
+    // puis on met à jour la valeure référente
+    // permet d'éviter les incrémentations à chaque tick
+    if (player.strength !== player.oldStrength) {
+      player.might += (player.strength - 5);
+      player.oldStrength = player.strength;
+    }
+    
+    if (player.intellect !== player.oldIntellect) {
+      player.might += (player.intellect - 5);
+      player.oldIntellect = player.intellect;
+    }
+
+    player.dodge = player.dexterity * 2;
+    player.armor = player.armor;
+    player.criti = player.dexterity * 2;
+
+    const playerMight = document.getElementById("PlayerMightOutput");
+    const playerDodge = document.getElementById("PlayerDodgeOutput");
+    const playerMagic = document.getElementById("PlayerMagicOutput");
+    const playerArmor = document.getElementById("PlayerArmorOutput");
+    const playerCriti = document.getElementById("PlayerCritiOutput");
+
+    playerMight.textContent = player.might;
+    playerDodge.textContent = player.dodge;
+    playerMagic.textContent = player.magic;
+    playerArmor.textContent = player.armor;
+    playerCriti.textContent = player.criti;
+
+    // affichage du sort sélectionné
+    const currentSpell = document.getElementById("selectedSpell");
+    currentSpell.textContent = player.spells[player.selectedSpell].name;
+
   }
-
-  if (player.XPdexterity >= 10) {
-    player.XPdexterity = 0;
-    player.dexterity +=1;
-    console.log("Dexterity leveled up !")
-  }
-
-  if (player.XPintellect >= 10) {
-    player.XPintellect = 0;
-    player.intellect +=1;
-    console.log("Intellect leveled up !")
-  }
-
-  updateProgressBar("strengthBar", player.XPstrength, 10);
-  updateProgressBar("dexterityBar", player.XPdexterity, 10);
-  updateProgressBar("intellectBar", player.XPintellect, 10);
-
-  // Mana regen
-  if (player.mp < 10) {
-    player.mp += (player.intellect / 10);
-  } else {
-  }
-  
-  // Maximum hp
-  if (player.hp > player.hpMax) {
-   player.hp = player.hpMax;
-  } else {
-  }
-
-  // On base les HP sur la force & MP sur l'intellect
-  player.hpMax = 10 + (player.strength - 5);
-  player.mpMax = 10 + (player.intellect - 5);
-
-  // on vérifie s'il y a une différence entre l'ancienne valeur et la nouvelle
-  // puis on met à jour la valeure référente
-  // permet d'éviter les incrémentations à chaque tick
-  if (player.strength !== player.oldStrength) {
-    player.might += (player.strength - 5);
-    player.oldStrength = player.strength;
-  }
-  
-  if (player.intellect !== player.oldIntellect) {
-    player.might += (player.intellect - 5);
-    player.oldIntellect = player.intellect;
-  }
-
-  player.dodge = player.dexterity * 2;
-  player.armor = player.armor;
-  player.criti = player.dexterity * 2;
-
-  const playerMight = document.getElementById("PlayerMightOutput");
-  const playerDodge = document.getElementById("PlayerDodgeOutput");
-  const playerMagic = document.getElementById("PlayerMagicOutput");
-  const playerArmor = document.getElementById("PlayerArmorOutput");
-  const playerCriti = document.getElementById("PlayerCritiOutput");
-
-  playerMight.textContent = player.might;
-  playerDodge.textContent = player.dodge;
-  playerMagic.textContent = player.magic;
-  playerArmor.textContent = player.armor;
-  playerCriti.textContent = player.criti;
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ANIMATION JOUEUR
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  // flash dégâts sur joueur (backgroundcolor pour commencer)
+  // à déplacer
+  static playerDamageFlash() {
+    var element = document.getElementById("gameWindow");
 
-// flash dégâts sur joueur (backgroundcolor pour commencer)
-static playerDamageFlash() {
-  var element = document.getElementById("gameWindow");
+    // Ajout de l'effet de transition CSS
+    element.style.transition = "background-color 0.5s, filter 0.5s";
 
-  // Ajout de l'effet de transition CSS
-  element.style.transition = "background-color 0.5s, filter 0.5s";
+    // Changement de couleur en rouge
+    element.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
+    element.style.filter = "drop-shadow(0 0 15px red)";
 
-  // Changement de couleur en rouge
-  element.style.backgroundColor = "rgba(255, 0, 0, 0.05)";
-  element.style.filter = "drop-shadow(0 0 15px red)";
+    // Rétablissement de la couleur d'origine après 0.1 seconde (100 millisecondes)
+    setTimeout(function () {
+      // laisser vide pour éviter de cumuler style et classe
+      element.style.backgroundColor = "";
+      element.style.filter = "";
+    }, 100);
+  }
 
-  // Rétablissement de la couleur d'origine après 0.1 seconde (100 millisecondes)
-  setTimeout(function () {
-    // laisser vide pour éviter de cumuler style et classe
-    element.style.backgroundColor = "";
-    element.style.filter = "";
-  }, 100);
-}
+  static playerHealFlash() {
+    var element = document.getElementById("gameWindow");
 
-static playerHealFlash() {
-  var element = document.getElementById("gameWindow");
+    // Ajout de l'effet de transition CSS
+    element.style.transition = "background-color 0.5s, filter 0.5s";
 
-  // Ajout de l'effet de transition CSS
-  element.style.transition = "background-color 0.5s, filter 0.5s";
+    // Changement de couleur en turquoise
+    element.style.backgroundColor = "rgba(64, 224, 208, 0.3)";
+    element.style.filter = "drop-shadow(0 0 15px turquoise)";
 
-  // Changement de couleur en turquoise
-  element.style.backgroundColor = "rgba(64, 224, 208, 0.05)";
-  element.style.filter = "drop-shadow(0 0 15px turquoise)";
+    // Rétablissement de la couleur d'origine après 0.1 seconde (100 millisecondes)
+    setTimeout(function () {
+      // laisser vide pour éviter de cumuler style et classe
+      element.style.backgroundColor = "";
+      element.style.filter = "";
+    }, 100);
+  }
 
-  // Rétablissement de la couleur d'origine après 0.1 seconde (100 millisecondes)
-  setTimeout(function () {
-    // laisser vide pour éviter de cumuler style et classe
-    element.style.backgroundColor = "";
-    element.style.filter = "";
-  }, 100);
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// fonction DEATHHHH
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // EQUIPEMENT INVENTAIRE
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  static async death() {
+    Sprite.terminalLog("YOOOU'RE DEEEAD !");
+    Sprite.terminalLog("The page is going to refresh in 3seconds...");
+    Sprite.terminalLog("HEAL AND EQUIP YOURSELF, GODDAMIT !")
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+    location.reload();
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EQUIPEMENT INVENTAIRE
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   addItemToInventory(item) {
     this.player.inventory.push(item);
@@ -1063,9 +1120,6 @@ static playerHealFlash() {
     output.style.display = "none";
     dialWindow.style.display = "none";
   }
-
-  // gestion des sorts : 
-  // C.F. classe "Spells"
 
   // gestion des quêtes
   displayQuests() {
@@ -1507,6 +1561,7 @@ static playerHealFlash() {
 
   //////////////////////////////////////////////////////////////////////////////
   /// CONTROLES
+  /// voir si déplaçable
   //////////////////////////////////////////////////////////////////////////////
 
   // Case selon type de bouton appuyée, les ID sont liées à un nombre dans "bindKeysAndButtons"
@@ -1518,13 +1573,12 @@ static playerHealFlash() {
         if (this.player.turn == true) {
           console.log('Action/Dialogue')
   
-          // actionButtonClicked est simplement le fait d'appuyer sur la touche action (bouton A)
+          // actionButtonClicked est simplement le fait d'appuyer
+          // sur la touche action (bouton A)
           this.actionButtonClicked = true;
 
-        } else {
-          break
         }
-        
+
         break;
       case 2: // ACTION
       case 3: // EQUIPEMENT
@@ -1588,16 +1642,36 @@ static playerHealFlash() {
         document.getElementById("quests").style.display = "none";
         break;
       case 13:
-        console.log("previous spell !")
-        // previous spell
+        // console.log("previous spell !")
+        this.previousSpell();
+        
         break;
       case 14:
-        this.player.spells.healSpell.cast(this.player, this.player);
-        // cast spell
+        // console.log(this.player.spells[this.player.selectedSpell].name)
+
+        if (this.player.spells[this.player.selectedSpell].selfCast == true) {
+          console.log("self cast !")
+          this.player.spells[this.player.selectedSpell].cast(this.player, this.player);
+
+        } else {
+          console.log("not a selfCast")
+          console.log("magic combat = true")          
+
+          if (this.player.turn == true) {
+            // console.log('Action/Dialogue')
+            console.log('Attack spell casted')
+            // actionButtonClicked est simplement le fait d'appuyer
+            // sur la touche action (bouton A)
+            this.actionButtonClicked = true;
+            this.player.combatSpell = true;
+          }
+        }
+
         break;
       case 15:
-        console.log("next spell !")
-        // next spell
+        // console.log("next spell !")
+        this.nextSpell();
+        
         break;
       default:
         console.log("Bouton non reconnu");
@@ -1679,7 +1753,7 @@ static playerHealFlash() {
   }
   
   //////////////////////////////////////////////////////////////////////////////
-  /// CONTROLES
+  /// 
   //////////////////////////////////////////////////////////////////////////////
 
   gameCycle() {
@@ -1792,7 +1866,7 @@ static playerHealFlash() {
         let textureX = Math.trunc(texX);
         let textureY = Math.trunc(texY);
 
-        // ZZZ problème de gestion du temps, demande beaucoup trop de ressources
+        // problème de gestion du temps, demande beaucoup trop de ressources
         // Récupérez les secondes actuelles, cependant, à faire EN DEHORS DE LA BOUCLE !
         // const currentTime = new Date().getSeconds();
 
@@ -2890,6 +2964,8 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
 
         // DETECTION COLLISION SPRITE
         // si cadavre(10) ou objet traversable [ex: herbe(13)], on peut avancer.
+
+        // A CHANGER : prendre en compte la valeur "blocking" de l'objet sprite
         if (spriteType == 10 || spriteType == 13) {
           obstacleOnPath = false;
           // console.log(obstacleOnPath);
@@ -2908,6 +2984,9 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // ACTION ET TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
     ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    // action = true quand appuie sur sort d'attaque
+    // bouléen pour préciser que c'est la fonction d'attaque
 
     // YOUTURN
     if (action) {
@@ -2980,8 +3059,12 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
           switch (spriteType) {
             case "A":            
 
-            this.sprites[i].combat(this.player.might,  this.player.criti, this.player); 
-            
+            if (this.player.combatSpell === false) {
+              this.sprites[i].combat(this.player.might, this.player.criti, this.player); 
+            } else {
+              this.sprites[i].combatSpell(this.player, this.sprites[i]);
+            }
+
             break;
 
             case 1:
@@ -3045,7 +3128,6 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
 
             case 9:
               
-              // zzzzzzzzzzz
               this.player.quests[0].complete();
 
               this.resetToggle();
