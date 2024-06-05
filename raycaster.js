@@ -72,9 +72,6 @@ document.addEventListener("DOMContentLoaded", function () {
     outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
   }
 
-  // impossible d'utiliser la fonction addToConsole() en dehors -> trouver solution
-  // maintenant si: Sprite.terminalLog() ; mais on ne peut pas l'utiliser avant initialisation.
-  // on garde cette version pour le moment, on va devoir clean le code.
   addToConsole("Welcome in Oasis !");
   addToConsole("Version pre-Alpha (conception)");
   addToConsole("");
@@ -103,52 +100,84 @@ class Sprite {
     z = 0,
     w = 128,
     h = 128,
-    ang,
+    ang = 0,
     spriteType = 0,
     isBlocking = true,
     attackable = false,
     turn = true,
     hp = 3,
     dmg = 3,
-    animationProgress = 0
-    // ajouter dialogue
-    // ajouter complétion de quête
-    // ajouter boutique
-    // ajouter loot
+    animationProgress = 0,
+    spriteName = '',
+    spriteFace = '',
+    spriteTalk = ''
   ) {
     this.x = x;
     this.y = y;
-    this.z = w;
+    this.z = z; // Correction de z pour éviter l'erreur de copier w
     this.w = w;
     this.h = h;
 
     this.hit = false;
-    this.screenPosition = null; // calculated screen positiona
+    this.screenPosition = null; // calculated screen position
 
     this.spriteFlash = 0;
 
-    // ang == "angle"
     this.ang = ang;
 
-    //la
     this.spriteType = spriteType;
 
-    // collision detection
     this.isBlocking = isBlocking;
 
-    // Enemies ?
     this.attackable = attackable;
 
-    // stats
     this.hp = hp;
     this.dmg = dmg;
 
-    // pour plus tard
     this.turn = turn;
 
     this.animationProgress = animationProgress;
 
-    this.name = "(no name yet)"
+    this.spriteName = spriteName;
+    this.spriteFace = spriteFace;
+    this.spriteTalk = spriteTalk;
+  }
+
+  static terminalLog(entry) {
+    const outputElement = document.getElementById("output");
+    const consoleContent = outputElement.innerHTML;
+
+    outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
+    outputElement.scrollTop = outputElement.scrollHeight;
+  }
+
+  async talk(entry, face) {
+    this.resetToggleSpriteMethod();
+
+    const dialogue = document.getElementById("dialogue");
+    const faceOutput = document.getElementById("faceOutput");
+    const dialWindow = document.getElementById("dialogueWindow");
+    const outputElement = document.getElementById("output");
+
+    const consoleContent = outputElement.innerHTML;
+
+    outputElement.style.display = "none";
+    dialWindow.style.display = "block";
+    dialogue.innerHTML = entry;
+
+    // affichage sprite (à envisager pour les personnages sans visage !)
+    var imgElement = document.getElementById(face);
+    faceOutput.src = imgElement.src;
+
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    this.resetToggleSpriteMethod();
+
+    // on n'utilise pas la méthode statique "terminalLog" : problème de doublons.
+    outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
+    dialWindow.style.display = "none";
+    outputElement.style.display = "block";
+    outputElement.scrollTop = outputElement.scrollHeight;
   }
 
   async startSpriteFlash() {
@@ -192,65 +221,6 @@ class Sprite {
     dialWindow.style.display = "none";
     items.style.display = "none";
     output.style.display = "block";
-  }
-
-  async talk(entry, face) {
-    // on accède à la méthode reset du sprite,
-    // plutôt que de raycaster
-    // RESET EN DEBUT, PUIS EN FIN
-    this.resetToggleSpriteMethod();
-
-    // regarde la valeur dans Talk, tu dois renvoyer "entry" dans la fenêtre de dialogue.
-    const dialogue = document.getElementById("dialogue");
-    const faceOutput = document.getElementById("faceOutput");
-    const dialWindow = document.getElementById("dialogueWindow");
-    const outputElement = document.getElementById("output");
-
-    const consoleContent = outputElement.innerHTML;
-
-    // on cache le terminal pour afficher la fenêtre de dialogue
-    outputElement.style.display = "none";
-    dialWindow.style.display = "block";
-    dialogue.innerHTML = entry;
-
-    // affichage sprite (à envisager pour les personnages sans visage !)
-    // var imgElement = document.getElementById("Face");
-    // Modifier l'attribut src de la balise <img> pour afficher une nouvelle image en base64
-    var imgElement = document.getElementById(face);
-    faceOutput.src = imgElement.src;
-
-    // routine du terminal de jeux (C.F. terminalLog() - envisager d'intégrer la méthode à la place)
-
-    // ATTENTION, LA METHODE EST DESORMAIS ASYNCRONE
-    // RETABLIR && TROUVER SOLUTION
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    // 06/02/24 - ajout d'une condition pour garder l'inventaire ouvert en cas de dialogue ?
-    // -> On évite, risque de conflit après fin du dialogue. Se concentrer sur l'important.
-
-    // on accède à la méthode reset du sprite,
-    // plutôt que de raycaster.
-    // POST-DELAI DE 3SEC
-    this.resetToggleSpriteMethod();
-
-    // ajout au terminal
-    outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
-
-    // Cette partie du code est désactivée, car entre en conflit avec les autres fonctions.
-    // on cache la fenêtre de dialogue pour afficher le terminal
-    dialWindow.style.display = "none";
-    outputElement.style.display = "block";
-
-    // Déroulement du terminal
-    outputElement.scrollTop = outputElement.scrollHeight;
-  }
-
-  // à déplacer
-  static terminalLog(entry) {
-    const outputElement = document.getElementById("output");
-    const consoleContent = outputElement.innerHTML;
-    outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
-    outputElement.scrollTop = outputElement.scrollHeight;
   }
 
   attack(target) {
@@ -356,7 +326,7 @@ class Sprite {
 
   async combatSpell(player, target) {
     if (player.turn == true) {
-      console.log(player.spells[player.selectedSpell].name)
+      // console.log(player.spells[player.selectedSpell].name)
       
       player.spells[player.selectedSpell].cast(player, target);
       
@@ -586,7 +556,7 @@ const healSpell = new Spell(
 
 // Création d'un sort de dégâts
 const fireballSpell = new Spell(
-  "Fire spray",
+  "Fire Spray",
   2,
   "Inflige 2 points de dégâts à l'ennemi",
   function(caster, target) {
@@ -724,6 +694,9 @@ class Raycaster {
       quests: [testQuest],
       
       joystick: true,
+
+      // zzz
+      playerFace: "playerFace",
     };
 
     const PlayerHP = document.getElementById("PlayerHPoutput");
@@ -835,7 +808,7 @@ class Raycaster {
 
     // Mana regen + maximum mana
     if (player.mp < player.mpMax) {
-      player.mp += (player.intellect / 10);
+      player.mp += (player.intellect / 50);
     } else {
       player.mp = player.mpMax;
     }
@@ -1247,7 +1220,7 @@ class Raycaster {
       [21, 20, "A"],  // Ennemi 3
   
       // Dummy for testing, traversable car sur décorations
-      [14, 4, "A"],   // Dummy pour tests
+      // [14, 4, "A"],
   
       // Sac
       [7, 12, 17],  // Sac 1
@@ -1282,14 +1255,85 @@ class Raycaster {
       ];
 
     this.sprites = [];
-
+    
     for (let pos of spritePositions) {
       let x = pos[0] * this.tileSize + tileSizeHalf;
       let y = pos[1] * this.tileSize + tileSizeHalf;
-      let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, pos[2]);
-      // console.log(JSON.stringify(sprite));
+
+      let name = '';
+      let face = '';
+      let dialogue = '';
+
+      switch (pos[2]) {
+        case 1:
+          name = "Thief";
+          face = "faceThief";        
+          dialogue = 'Kali says : <br>  <font style="font-style: italic;">"Hey ! whatya up to ?"</font>';
+          break;
+        case 2:
+          name = "Guard";
+          face = "faceGuard";        
+          dialogue = 'Guard says : <br>  <font style="font-style: italic;">"Get outta my way."</font>';
+          break;
+        case 3:
+          name = "Merchant";
+          face = "faceMerchant";
+          dialogue = 'Siggar says : <br> <font style="font-style: italic;">"Oy mate ! Want to buy something ? The function is not implemented yet."</font>';
+          break;
+        case 4:
+          name = "Roche";
+          face = "facePlayer";
+          dialogue = "Cant be Emma Stone, Right ?";
+          break;
+        case 5:
+          name = "Barel";
+          face = "facePlayer";        
+          dialogue = "I want to throw that on a plumber.";
+          break;
+        case 6:
+          name = "Bush";
+          face = "facePlayer";        
+          dialogue = "Wanna beat around the bush ?";
+          break;
+        case 7:
+          name = "Wailing Tavern Sign";
+          face = "facePlayer";
+          dialogue =  '"The Wailing Tavern" : spooky ! And sad...';
+          break;
+        case 8:
+          name = "PLACEHOLDER";
+          face = "facePlayer";
+          dialogue = "PLACEHOLDER";
+          break;
+        case 9:
+          name = "Teasure Chest";
+          face = "facePlayer";        
+          dialogue = "You found the treasure !<br><br>  Your adventure pays off, thanks for playing";
+          break;
+        case 10:
+          name = "Corpse";
+          face = "facePlayer";        
+          dialogue = "It's dead...";
+          break;
+        case 11:
+          name = "Goddess Statue";
+          face = "facePlayer";
+          dialogue = "A statue of the Goddess. She looks happy !";
+          break;
+        case "A":
+          name = "Bat";
+          face = "facePlayer";
+          dialogue = "It's dead...";
+          break;
+        default :
+          name = "error";
+          face = "facePlayer";
+          dialogue = "Sprite dialogue not found.";
+          break;
+      }
+
+      let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, pos[2], true, false, true, 3, 3, 0, name, face, dialogue);
       this.sprites.push(sprite);
-      // console.log('sprite enregistré !');
     }
 
     let spriteCount = 0;
@@ -1380,7 +1424,6 @@ class Raycaster {
     textureSize = 64,
     fovDegrees = 90
   ) 
-  
   {
     this.initMap();
     this.stripWidth = 1; // leave this at 1 for now
@@ -1561,7 +1604,6 @@ class Raycaster {
 
   //////////////////////////////////////////////////////////////////////////////
   /// CONTROLES
-  /// voir si déplaçable
   //////////////////////////////////////////////////////////////////////////////
 
   // Case selon type de bouton appuyée, les ID sont liées à un nombre dans "bindKeysAndButtons"
@@ -1753,7 +1795,7 @@ class Raycaster {
   }
   
   //////////////////////////////////////////////////////////////////////////////
-  /// 
+  /// HORLOGE DU JEUX / GAMECYCLE
   //////////////////////////////////////////////////////////////////////////////
 
   gameCycle() {
@@ -2805,22 +2847,22 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     const accelerationRate = 0.05; // Taux d'accélération
     const decelerationRate = 0.15; // Taux de décélération
 
-  if (up || joystickForwardClicked === true) {
-      // Accélération vers l'avant
-      this.player.speed = Math.min(this.player.speed + accelerationRate, 1);
-    } else if (down || joystickBackwardClicked === true) {
-      // Accélération vers l'arrière
-      this.player.speed = Math.max(this.player.speed - accelerationRate, -1);
-    } else {
-    // Décélération si aucune touche n'est enfoncée
-    if (this.player.speed > 0) {
-      // Si la vitesse est positive, décélérer vers 0
-      this.player.speed = Math.max(this.player.speed - decelerationRate, 0);
-    } else if (this.player.speed < 0) {
-      // Si la vitesse est négative, décélérer vers 0
-      this.player.speed = Math.min(this.player.speed + decelerationRate, 0);
+    if (up || joystickForwardClicked === true) {
+        // Accélération vers l'avant
+        this.player.speed = Math.min(this.player.speed + accelerationRate, 1);
+      } else if (down || joystickBackwardClicked === true) {
+        // Accélération vers l'arrière
+        this.player.speed = Math.max(this.player.speed - accelerationRate, -1);
+      } else {
+      // Décélération si aucune touche n'est enfoncée
+      if (this.player.speed > 0) {
+        // Si la vitesse est positive, décélérer vers 0
+        this.player.speed = Math.max(this.player.speed - decelerationRate, 0);
+      } else if (this.player.speed < 0) {
+        // Si la vitesse est négative, décélérer vers 0
+        this.player.speed = Math.min(this.player.speed + decelerationRate, 0);
+      }
     }
-  }
 
     // normalizing angle (contenu entre 0 et 2*pi)
     // + BONUS : anti-bug angle 0 (parallaxe et sprite), on ajoute ou enlève 1° (pi/180) selon l'angle.
@@ -2845,7 +2887,6 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     }
 
     // Calculate the direction based on the player's rotation
-    // calcul des quadrants (nécessaire pour collision glissante)
     let quadrant;
     
     if (
@@ -2910,6 +2951,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     // isBlocking est muni d'un système de collision glissante très rudimentaire
     // la collision glissante prend en compte 360°, excluant les angles 0, 90, 180, 270 (360 = 0):
     // pas de "glissade" si on est parfaitement perpendiculaire ou parallèle aux murs.
+
     if (this.isBlocking(cellX, cellY)) {
           // sud ouest :
              if ( this.player.rot > 270 * (Math.PI / 180) &&
@@ -3058,110 +3100,28 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         if (spriteX === frontX && spriteY === frontY) {
           switch (spriteType) {
             case "A":            
-
-            if (this.player.combatSpell === false) {
-              this.sprites[i].combat(this.player.might, this.player.criti, this.player); 
-            } else {
-              this.sprites[i].combatSpell(this.player, this.sprites[i]);
-            }
-
-            break;
-
+              if (this.player.combatSpell === false) {
+                this.sprites[i].combat(this.player.might, this.player.criti, this.player); 
+              } else {
+                this.sprites[i].combatSpell(this.player, this.sprites[i]);
+              }
+              break;
             case 1:
-              this.resetToggle();
-              let entry1 =
-                'Kali says : <br>  <font style="font-style: italic;">"Hey ! whatya up to ?"</font>';
-              let face1 = "faceThief";
-              this.sprites[i].talk(entry1, face1);
-              break;
-
             case 2:
-              this.resetToggle();
-              let entry2 =
-                'Guard says : <br>  <font style="font-style: italic;">"Get outta my way."</font>';
-              let face2 = "faceGuard";
-              this.sprites[i].talk(entry2, face2);
-              break;
-
             case 3:
-              this.resetToggle();
-              let entry3 =
-                'Siggar says : <br> <font style="font-style: italic;">"Oy mate ! Want to buy something ? The function is not implemented yet."</font>';
-              let face3 = "faceMerchant";
-              this.sprites[i].talk(entry3, face3);
-              break;
-
             case 4:
-              this.resetToggle();
-              let entry4 = "Cant be Emma Stone, Right ?";
-              let face4 = "facePlayer";
-              this.sprites[i].talk(entry4, face4);
-              break;
-
             case 5:
-              this.resetToggle();
-              let entry5 = "I want to throw that on a plumber.";
-              let face5 = "facePlayer";
-              this.sprites[i].talk(entry5, face5);
-              break;
-
             case 6:
-              this.resetToggle();
-              let entry6 = "Wanna beat around the bush ?";
-              let face6 = "facePlayer";
-              this.sprites[i].talk(entry6, face6);
-              break;
-
             case 7:
-              this.resetToggle();
-              let entry7 = '"The Wailing Tavern" : spooky ! And sad...';
-              let face7 = "facePlayer";
-              this.sprites[i].talk(entry7, face7);
-              break;
-
             case 8:
-              this.resetToggle();
-              let entry8 = "PLACEHOLDER";
-              let face8 = "facePlayer";
-              this.sprites[i].talk(entry8, face8);
-              break;
-
-            case 9:
-              
-              this.player.quests[0].complete();
-
-              this.resetToggle();
-              
-              /*
-                let entry9 =
-                  "You found the treasure !<br><br>  Your adventure pays off, thanks for playing.";
-                let face9 = "facePlayer";
-                this.sprites[i].talk(entry9, face9);
-              */
-
-              break;
-
             case 10:
-              this.resetToggle();
-              let entry10 = "It's dead...";
-              let face10 = "facePlayer";
-              this.sprites[i].talk(entry10, face10);
-              break;
-
             case 11:
-              this.resetToggle();
-              let entry11 = "A statue of the Goddess. She looks happy !";
-              let face11 = "facePlayer";
-              this.sprites[i].talk(entry11, face11);
-              break;
-
             case 14:
-              this.resetToggle();
-              let entry14 = "A bat ! Hardly a danger.";
-              let face14 = "facePlayer";
-              this.sprites[i].talk(entry14, face14);
+              this.sprites[i].talk(this.sprites[i].spriteTalk, this.sprites[i].spriteFace);
               break;
-
+            case 9:
+              this.player.quests[0].complete();
+              this.resetToggle();
             default:
               this.resetToggle();
               break;
