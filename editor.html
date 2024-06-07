@@ -210,22 +210,19 @@
             <button onclick="selectTileType(2)">2 - Mur orné</button>
             <button onclick="selectTileType(3)">3 - Roche</button>
             <button onclick="selectTileType(4)">4 - Mur de Granite</button>
-            <button onclick="selectTileType(5)">5 - Carreaux</button>
-            <button onclick="selectTileType(6)">6 - Grilles</button>
-            <button onclick="selectTileType(7)">7 - Sol</button>
-            <button onclick="selectTileType(8)">8 - mur de pierre</button>
-            <button onclick="selectTileType(9)">9 - Mur orné</button>
-            <button onclick="selectTileType(10)">10 - Roche</button>
-            <button onclick="selectTileType(11)">11 - Mur de Granite</button>
-            <button onclick="selectTileType(12)">12 - Carreaux</button>
-            <button onclick="selectTileType(13)">13 - Grilles</button>
-            <button onclick="selectTileType(14)">14 - Sol</button>
-            <button onclick="selectTileType(15)">15 - mur de pierre</button>
-            <button onclick="selectTileType(16)">16 - Mur orné</button>
-            <button onclick="selectTileType(17)">17 - Roche</button>
-            <button onclick="selectTileType(18)">18 - Mur de Granite</button>
-            <button onclick="selectTileType(19)">19 - Carreaux</button>
-            <button onclick="selectTileType(20)">20 - Grilles</button>
+            <button onclick="selectTileType(5)">5 - porte maison</button>
+            <button onclick="selectTileType(6)">6 - porte ornée</button>
+            <button onclick="selectTileType(7)">7 - ?</button>
+            <button onclick="selectTileType(8)">8 - ?</button>
+            <button onclick="selectTileType(9)">9 - grille</button>
+            <button onclick="selectTileType(10)">10 - ?</button>
+            <button onclick="selectTileType(11)">11 - ?</button>
+            <button onclick="selectTileType(12)">12 - ?</button>
+            <button onclick="selectTileType(13)">13 - ?</button>
+            <button onclick="selectTileType(14)">14 - fenêtre maison</button>
+            <button onclick="selectTileType(15)">15 - mur maison</button>
+            <button onclick="selectTileType(16)">16 - porte maison</button>
+            <button onclick="selectTileType(24)">24 - Foret</button>
           </div>
         </div>
 
@@ -236,13 +233,13 @@
             <button onclick="deselectTileType()">Désélectionner type</button>
             -->
             <button onclick="selectTileType(0)">0 - Vide</button>
-            <button onclick="selectTileType(1)">1 - PNJ1</button>
-            <button onclick="selectTileType(2)">2 - PNJ2</button>
-            <button onclick="selectTileType(3)">3 - Garde</button>
+            <button onclick="selectTileType(1)">1 - PNJ1 (voleur)</button>
+            <button onclick="selectTileType(2)">2 - PNJ2 (Garde)</button>
+            <button onclick="selectTileType(3)">3 - PNJ3 (Marchand)</button>
             <button onclick="selectTileType(4)">4 - Roche</button>
-            <button onclick="selectTileType(5)">5 - Buisson</button>
-            <button onclick="selectTileType(6)">6 - Pancarte</button>
-            <button onclick="selectTileType(7)">7 - IMP (test)</button>
+            <button onclick="selectTileType(5)">5 - Tonneau</button>
+            <button onclick="selectTileType(6)">6 - Buisson</button>
+            <button onclick="selectTileType(7)">7 - Pancarte</button>
             <button onclick="selectTileType(8)">8 - IMP (test)</button>
             <button onclick="selectTileType(9)">9 - Tresor</button>
             <button onclick="selectTileType(10)">10 - Cadavre</button>
@@ -352,32 +349,70 @@
         }
     }
     
-      var worldMap = [
-        [1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 1, 6, 6, 1, 3, 3, 3, 3, 3, 3, 3],
-        [2, 0, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0, 1, 0, 0, 1, 0, 0, 3, 3, 3, 3, 3],
-        [2, 0, 0, 0, 0, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3],
-        [2, 0, 0, 0, 0, 0, 0, 2, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 3, 3],
-        [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 3],
-        [2, 2, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1, 3],
-        [2, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 3],
-        [2, 2, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 3],
-        [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
-        [1, 0, 0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 3],
-        [1, 0, 0, 0, 1, 1, 0, 1, 3, 0, 0, 0, 4, 5, 4, 4, 4, 0, 3, 3, 3, 3, 3, 3],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0, 4, 0, 0, 0, 4, 0, 3, 3, 3, 3, 3, 3],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0, 4, 0, 0, 0, 4, 3, 3, 0, 0, 0, 3, 3],
-        [1, 2, 6, 2, 1, 1, 1, 1, 1, 3, 3, 0, 4, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3],
-        [3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 4, 4, 4, 4, 4, 3, 3, 0, 3, 0, 0, 3],
-        [3, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 0, 3],
-        [3, 0, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 3, 3],
-        [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3],
-        [3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 3, 3],
-        [3, 0, 0, 3, 3, 3, 0, 3, 3, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 3, 3, 0, 3, 3],
-        [3, 0, 0, 3, 3, 3, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 3, 0, 0, 0, 3],
-        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 3, 0, 3, 3, 0, 3, 0, 0, 0, 3],
-        [3, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 0, 0, 0, 0, 3, 0, 0, 0, 3],
-        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-      ];
+      var worldMap = [[
+        3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 24, 24, 24, 1, 9, 1, 24, 24, 24, 24,
+        24, 24,
+      ],
+      [
+        3, 0, 0, 0, 3, 3, 3, 1, 1, 1, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 24, 24,
+        24, 24,
+      ],
+      [
+        3, 0, 0, 0, 3, 3, 3, 1, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24,
+        24,
+      ],
+      [
+        3, 0, 0, 0, 0, 0, 3, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24,
+        24,
+      ],
+      [
+        3, 0, 0, 0, 3, 0, 3, 15, 15, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        24, 24,
+      ],
+      [
+        3, 0, 0, 0, 3, 0, 3, 15, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24,
+        24,
+      ],
+      [
+        3, 3, 3, 3, 3, 0, 3, 15, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24,
+        24,
+      ],
+      [
+        3, 3, 3, 0, 0, 0, 3, 15, 15, 0, 15, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24,
+        24, 24,
+      ],
+      [
+        3, 0, 0, 0, 0, 0, 3, 15, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24,
+        24,
+      ],
+      [
+        3, 0, 3, 3, 3, 3, 3, 15, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24,
+        24,
+      ],
+      [
+        3, 0, 0, 0, 0, 3, 3, 15, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24,
+        24,
+      ],
+      [
+        3, 3, 0, 0, 0, 3, 3, 15, 15, 14, 15, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        24, 24,
+      ],
+      [3, 3, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24],
+      [3, 3, 3, 6, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24],
+      [
+        1, 1, 1, 0, 1, 1, 1, 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24,
+        24,
+      ],
+      [
+        1, 1, 0, 0, 0, 1, 1, 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24,24,],
+      [1, 1, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24],
+      [1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
+      [1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1],
+      [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 3, 3, 1],
+      [2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 2, 6, 2, 1, 0, 0, 1, 1, 1],
+      [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
       
       var worldSpriteMap = generateWorldMap(24,24,0,0);
 
