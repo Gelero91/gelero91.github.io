@@ -110,7 +110,7 @@ class Sprite {
     animationProgress = 0,
     spriteName = '',
     spriteFace = '',
-    spriteTalk = ''
+    spriteTalk = []
   ) {
     this.x = x;
     this.y = y;
@@ -151,33 +151,62 @@ class Sprite {
     outputElement.scrollTop = outputElement.scrollHeight;
   }
 
-  async talk(entry, face) {
+  // zzz
+  // Méthode pour détecter le nombre de listes dans spriteTalk
+  countDialogues() {
+    return this.spriteTalk.length;
+  }
+
+  talk() {
     this.resetToggleSpriteMethod();
 
     const dialogue = document.getElementById("dialogue");
     const faceOutput = document.getElementById("faceOutput");
     const dialWindow = document.getElementById("dialogueWindow");
     const outputElement = document.getElementById("output");
+    const nextButton = document.getElementById("nextButton");
 
-    const consoleContent = outputElement.innerHTML;
+    // Réinitialiser le contenu de la fenêtre de dialogue
+    dialogue.innerHTML = "";
+    faceOutput.src = "";
+
+    // Retirer tout ancien gestionnaire d'événements du bouton "Next"
+    const newNextButton = nextButton.cloneNode(true);
+    nextButton.parentNode.replaceChild(newNextButton, nextButton);
 
     outputElement.style.display = "none";
     dialWindow.style.display = "block";
-    dialogue.innerHTML = entry;
 
-    // affichage sprite (à envisager pour les personnages sans visage !)
-    var imgElement = document.getElementById(face);
-    faceOutput.src = imgElement.src;
+    let currentDialogue = 0;
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    const showNextDialogue = () => {
+      if (currentDialogue < this.spriteTalk.length) {
+        const [face, name, entry] = this.spriteTalk[currentDialogue];
 
-    this.resetToggleSpriteMethod();
+        // Vérifiez que face, name et entry ne sont pas undefined
+        if (face && name && entry) {
+          dialogue.innerHTML = `<font style="font-weight: bold;">${name} </font> : <br> <font style="font-style: italic;"> ${entry} </font>`;
 
-    // on n'utilise pas la méthode statique "terminalLog" : problème de doublons.
-    outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
-    dialWindow.style.display = "none";
-    outputElement.style.display = "block";
-    outputElement.scrollTop = outputElement.scrollHeight;
+          // affichage sprite (à envisager pour les personnages sans visage !)
+          var imgElement = document.getElementById(face);
+          faceOutput.src = imgElement ? imgElement.src : '';
+
+          Sprite.terminalLog(`<font style="font-weight: bold;">${name} </font> : <br> <font style="font-style: italic;"> ${entry} </font>`);
+        }
+
+        currentDialogue++;
+      } else {
+        // Fin du dialogue
+        outputElement.style.display = "block";
+        dialWindow.style.display = "none";
+        newNextButton.removeEventListener("click", showNextDialogue);
+      }
+    };
+
+    newNextButton.addEventListener("click", showNextDialogue);
+
+    // Affiche le premier dialogue immédiatement
+    showNextDialogue();
   }
 
   async startSpriteFlash() {
@@ -266,11 +295,10 @@ class Sprite {
 
   enemyAttackUpdate(player) {
     if (this.hp <= 0) {
-
-      let entry = "The enemy is dead! <br>";
-      this.talk(entry, "facePlayer");
+      let entry = "The enemy is dead!";
+      // zzz
       this.spriteType = 10;
-
+      this.talk(entry, this.spriteFace);
     } else {
 
       const chanceEchec = Math.floor(Math.random() * 100);
@@ -649,9 +677,6 @@ class Raycaster {
       rot: 4.71238898038469,
       speed: 0,
 
-      // orientation N, E, S, O /!\ PAS BESOIN
-      // orientation: south,
-      /* FPS */
       moveSpeed: Math.round(this.tileSize / ((DESIRED_FPS / 60.0) * 16)),
       rotSpeed: (1.5 * Math.PI) / 180,
 
@@ -695,7 +720,6 @@ class Raycaster {
       
       joystick: true,
 
-      // zzz
       playerFace: "playerFace",
     };
 
@@ -707,7 +731,6 @@ class Raycaster {
     PlayerMP.textContent = this.player.mp;
     PlayerXP.textContent = this.player.xp;
 
-    // Mise à jour des barres de progression
     var hpBar = document.getElementById("hpBar");
     var mpBar = document.getElementById("mpBar");
     var xpBar = document.getElementById("xpBar");
@@ -716,7 +739,6 @@ class Raycaster {
     mpBar.value = this.player.mp;
     xpBar.value = this.player.xp;
 
-    // changer quand on aura établis les pv/mp/xp max !
     hpBar.max = 10;
     mpBar.max = 10;
     xpBar.max = 100;
@@ -861,15 +883,12 @@ class Raycaster {
     // affichage du sort sélectionné
     const currentSpell = document.getElementById("selectedSpell");
     currentSpell.textContent = player.spells[player.selectedSpell].name;
-
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ANIMATION JOUEUR
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  // flash dégâts sur joueur (backgroundcolor pour commencer)
-  // à déplacer
   static playerDamageFlash() {
     var element = document.getElementById("gameWindow");
 
@@ -1008,7 +1027,6 @@ class Raycaster {
     }
   }
 
-  // gestion des objets équipés
   equipmentDisplay() {
     const handsContent = document.getElementById("handsContent");
     const torsoContent = document.getElementById("torsoContent");
@@ -1094,6 +1112,10 @@ class Raycaster {
     dialWindow.style.display = "none";
   }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Quêtes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   // gestion des quêtes
   displayQuests() {
     const questContent = document.getElementById("questContent");
@@ -1115,6 +1137,10 @@ class Raycaster {
     }
   }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Contrôle UI
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   resetToggle() {
     var info = document.getElementById("info");
     var stats = document.getElementById("stats");
@@ -1125,22 +1151,10 @@ class Raycaster {
     var items = document.getElementById("items");
     var dialWindow = document.getElementById("dialogueWindow");
 
-    // joystick adds
     if (joystick) {
-      // console.log("RESET bouton inventaire en mode joystick");
-
       document.getElementById("joystick-container").style.display = "block";
-
-      document.getElementById("joystickBackButtonContainer").style.display =
-        "none";
-
+      document.getElementById("joystickBackButtonContainer").style.display = "none";
       this.player.inventoryMenuShowed = false;
-      /*
-            console.log(
-              "inventoryMenuShowed, after change:",
-              this.player.inventoryMenuShowed
-            );
-      */
     }
 
     info.style.display = "block";
@@ -1151,6 +1165,9 @@ class Raycaster {
     dialWindow.style.display = "none";
     items.style.display = "none";
     output.style.display = "block";
+
+    const outputElement = document.getElementById("output");
+    outputElement.scrollTop = outputElement.scrollHeight;
   }
 
   joystickBackButton() {
@@ -1251,7 +1268,7 @@ class Raycaster {
       [11, 1, 15],  // Arbre 3
   
       // Mauvaises herbes 1
-      [10,1,13],[11,1,13],[12,1,13],[17,1,13],[18,1,13],[9,2,13],[11,2,13],[15,2,13],[17,2,13],[19,2,13],[10,3,13],[11,3,13],[12,3,13],[10,4,13],[14,4,13],[11,5,13],[13,5,13],[15,5,13],[10,7,13],[14,7,13],[16,7,13],[22,7,13],[10,8,13],[12,8,13],[15,8,13],[20,8,13],[21,8,13],[22,8,13],[10,9,13],[11,9,13],[17,9,13],[18,9,13],[19,9,13],[21,9,13],[9,10,13],[17,10,13],[10,11,13],[17,11,13],[10,12,13],[11,12,13],[11,13,13],[11,14,13],
+      [10,1,13],[11,1,13],[12,1,13],[17,1,13],[18,1,13],[9,2,13],[11,2,13],[15,2,13],[17,2,13],[19,2,13],[10,3,13],[11,3,13],[12,3,13],[10,4,13],[11,5,13],[13,5,13],[15,5,13],[10,7,13],[14,7,13],[16,7,13],[22,7,13],[10,8,13],[12,8,13],[15,8,13],[20,8,13],[21,8,13],[22,8,13],[10,9,13],[11,9,13],[17,9,13],[18,9,13],[19,9,13],[21,9,13],[9,10,13],[17,10,13],[10,11,13],[17,11,13],[10,12,13],[11,12,13],[11,13,13],[11,14,13],
       ];
 
     this.sprites = [];
@@ -1266,71 +1283,101 @@ class Raycaster {
 
       switch (pos[2]) {
         case 1:
-          name = "Thief";
-          face = "faceThief";        
-          dialogue = 'Kali says : <br>  <font style="font-style: italic;">"Hey ! whatya up to ?"</font>';
-          break;
+            name = "Thief";
+            face = "faceThief";
+            dialogue = [
+                ["facePlayer", "Alakir", "Hello there! What's the news?"],
+                [face, name, "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
+                ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
+            ];
+            break;
         case 2:
-          name = "Guard";
-          face = "faceGuard";        
-          dialogue = 'Guard says : <br>  <font style="font-style: italic;">"Get outta my way."</font>';
-          break;
+            name = "Guard";
+            face = "faceGuard";
+            dialogue = [
+                ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+                [face, name, "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+                ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+            ];
+            break;
         case 3:
-          name = "Merchant";
-          face = "faceMerchant";
-          dialogue = 'Siggar says : <br> <font style="font-style: italic;">"Oy mate ! Want to buy something ? The function is not implemented yet."</font>';
-          break;
+            name = "Merchant";
+            face = "faceMerchant";
+            dialogue = [
+                ["facePlayer", "Alakir", "Hey!"],
+                [face, name, "Oy mate! Want to buy something? <br> The function is not implemented yet."],
+                ["facePlayer", "Alakir", "See you later then."]
+            ];
+            break;
         case 4:
-          name = "Roche";
-          face = "facePlayer";
-          dialogue = "Cant be Emma Stone, Right ?";
-          break;
+            name = "Roche";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", "Can't be Emma Stone, right?"],
+            ];
+            break;
         case 5:
-          name = "Barel";
-          face = "facePlayer";        
-          dialogue = "I want to throw that on a plumber.";
-          break;
+            name = "Barel";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", "I want to throw that at a plumber."],
+            ];
+            break;
         case 6:
-          name = "Bush";
-          face = "facePlayer";        
-          dialogue = "Wanna beat around the bush ?";
-          break;
+            name = "Bush";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", "Wanna beat around the bush?"],
+            ];
+            break;
         case 7:
-          name = "Wailing Tavern Sign";
-          face = "facePlayer";
-          dialogue =  '"The Wailing Tavern" : spooky ! And sad...';
-          break;
+            name = "Wailing Tavern Sign";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", '"The Wailing Tavern": spooky! And sad...'],
+            ];
+            break;
         case 8:
-          name = "PLACEHOLDER";
-          face = "facePlayer";
-          dialogue = "PLACEHOLDER";
-          break;
+            name = "PLACEHOLDER";
+            face = "facePlayer";
+            dialogue = "PLACEHOLDER";
+            break;
         case 9:
-          name = "Teasure Chest";
-          face = "facePlayer";        
-          dialogue = "You found the treasure !<br><br>  Your adventure pays off, thanks for playing";
-          break;
+            name = "Treasure Chest";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", "You found the treasure!<br><br> Your adventure pays off, thanks for playing"],
+            ];
+            break;
         case 10:
-          name = "Corpse";
-          face = "facePlayer";        
-          dialogue = "It's dead...";
-          break;
+            name = "Corpse";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", "It's dead..."],
+            ];
+            break;
         case 11:
-          name = "Goddess Statue";
-          face = "facePlayer";
-          dialogue = "A statue of the Goddess. She looks happy !";
-          break;
+            name = "Goddess Statue";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", "A statue of the Goddess. She looks happy!"],
+            ];
+            break;
         case "A":
-          name = "Bat";
-          face = "facePlayer";
-          dialogue = "It's dead...";
-          break;
-        default :
-          name = "error";
-          face = "facePlayer";
-          dialogue = "Sprite dialogue not found.";
-          break;
-      }
+            name = "Bat";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", "It's dead..."],
+            ];
+            break;
+        default:
+            name = "Error";
+            face = "facePlayer";
+            dialogue = [
+                ["facePlayer", "Alakir", "Sprite dialogue not found."],
+            ];
+            break;
+    }
 
       let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, pos[2], true, false, true, 3, 3, 0, name, face, dialogue);
       this.sprites.push(sprite);
@@ -1613,12 +1660,12 @@ class Raycaster {
         this.resetToggle();
   
         if (this.player.turn == true) {
+
           console.log('Action/Dialogue')
   
           // actionButtonClicked est simplement le fait d'appuyer
           // sur la touche action (bouton A)
           this.actionButtonClicked = true;
-
         }
 
         break;
@@ -3030,17 +3077,18 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     // action = true quand appuie sur sort d'attaque
     // bouléen pour préciser que c'est la fonction d'attaque
 
+    // au moindre movement ou click, la fenêtre de dialogue se réinitialise
+    if ( action || left || right || down || up || joystickLeftClicked || joystickRightClicked || joystickBackwardClicked || joystickForwardClicked ) {
+      if (this.player.turn === true) {
+        this.resetToggle()
+      }
+    }
+
     // YOUTURN
-    if (action) {
-      // Yourturn passe en false pour éviter les doublons
-      // console.log("Player Turn = false")
-      
-      // actionButtonClicked est simplement le fait d'appuyer sur la touche action (bouton A)
+    if (action && this.player.turn == true) {
+
       this.actionButtonClicked = false;
     
-      // dialogue NPC
-      // Calculate the coordinates of the tile in front of the player based on the quadrant
-      // Permet une bien meilleure précision en mode FPS
       let frontX;
       let frontY;
 
@@ -3118,6 +3166,7 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
             case 11:
             case 14:
               this.sprites[i].talk(this.sprites[i].spriteTalk, this.sprites[i].spriteFace);
+              this.player.turn = false;
               break;
             case 9:
               this.player.quests[0].complete();
