@@ -391,7 +391,7 @@ class Sprite {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     // zzz
-    // ça devrait être une fonction sprite
+    // ça devrait être une fonction de quest
     giveQuest (player) {
 
     }
@@ -553,12 +553,13 @@ const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0
 // Ajout de la classe Spell //////////////////////////////////////////////////////////////////
 
 class Spell {
-  constructor(name, manaCost, description, effect, selfCast) {
+  constructor(name, manaCost, description, effect, selfCast, icon) {
       this.name = name;
       this.manaCost = manaCost;
       this.description = description;
       this.effect = effect; // Fonction représentant l'effet du sort
       this.selfCast = selfCast;
+      this.icon = icon;
   }
 
   // Méthode pour lancer le sort
@@ -617,18 +618,20 @@ const healSpell = new Spell(
   function(caster, target) {
       healSpell.healEffect(caster, target);
   },
-  true
+  true,
+  "✙"
 );
 
 // Création d'un sort de dégâts
 const fireballSpell = new Spell(
-  "Fire Spray",
+  "Sparks",
   2,
-  "Inflige 2 points de dégâts à l'ennemi",
+  "Inflict 2pts of electric damage.",
   function(caster, target) {
       fireballSpell.damageEffect(caster, target);
   },
-  false
+  false,
+  "🗲"
 );
 
 
@@ -791,9 +794,11 @@ class Raycaster {
     if (this.player.selectedSpell >= this.player.spells.length) {
         this.player.selectedSpell = 0;
     }
-    
-    const currentSpell = document.getElementById("selectedSpell");
-    currentSpell.textContent = this.player.spells[this.player.selectedSpell].name;
+    const currentSpellIcon = document.getElementById("castSpell");
+    currentSpellIcon.textContent = this.player.spells[this.player.selectedSpell].icon;
+
+    const currentSpellName = document.getElementById("selectedSpell");
+    currentSpellName.textContent = this.player.spells[this.player.selectedSpell].name;
   }
 
   previousSpell() {
@@ -801,6 +806,8 @@ class Raycaster {
     if (this.player.selectedSpell < 0) {
         this.player.selectedSpell = this.player.spells.length - 1;
     }
+    const currentSpellIcon = document.getElementById("castSpell");
+    currentSpellIcon.textContent = this.player.spells[this.player.selectedSpell].icon;
 
     const currentSpell = document.getElementById("selectedSpell");
     currentSpell.textContent = this.player.spells[this.player.selectedSpell].name;
@@ -1534,8 +1541,11 @@ class Raycaster {
   initScreen() {
     this.mainCanvasContext = this.mainCanvas.getContext("2d");
     let screen = document.getElementById("screen");
+    //faible resolution
     screen.style.width = this.displayWidth*2 + "px";
     screen.style.height = this.displayHeight*2 + "px";
+    //screen.style.width = this.displayWidth + "px";
+    //screen.style.height = this.displayHeight + "px";
     this.mainCanvas.width = this.displayWidth;
     this.mainCanvas.height = this.displayHeight;
     this.loadFloorCeilingImages();
