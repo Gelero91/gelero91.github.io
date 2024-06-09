@@ -390,7 +390,6 @@ class Sprite {
 // Quêtes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    // zzz
     // ça devrait être une fonction de quest
     giveQuest (player) {
 
@@ -623,12 +622,12 @@ const healSpell = new Spell(
 );
 
 // Création d'un sort de dégâts
-const fireballSpell = new Spell(
+const sparksSpell = new Spell(
   "Sparks",
   2,
   "Inflict 2pts of electric damage.",
   function(caster, target) {
-      fireballSpell.damageEffect(caster, target);
+      sparksSpell.damageEffect(caster, target);
   },
   false,
   "🗲"
@@ -685,14 +684,14 @@ class Raycaster {
       [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,16,0,0,0,15,3],
       [2,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,14,0,0,0,15,3],
       [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,15,15,15,15,3],
-      [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
-      [1,0,0,0,0,0,0,1,3,1,0,0,0,0,0,0,0,0,0,0,3,0,3,3],
-      [1,0,0,0,1,1,0,1,3,0,0,0,14,16,15,14,0,0,3,3,3,3,3,3],
-      [1,0,0,0,1,0,0,0,1,3,0,0,15,0,0,0,15,0,3,3,3,3,3,3],
-      [1,0,0,0,1,0,0,0,1,3,0,15,0,0,0,0,15,3,3,0,0,0,3,3],
-      [1,2,6,2,1,1,1,1,1,3,3,15,0,0,0,0,15,3,0,0,0,0,0,3],
-      [3,3,0,3,3,3,3,3,3,3,3,0,15,15,15,15,15,3,3,0,3,0,0,3],
-      [3,0,0,3,3,3,0,0,3,3,3,3,3,3,3,3,3,0,0,0,3,3,0,3],
+      [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,24,24],
+      [1,0,0,0,0,0,0,1,24,1,0,0,0,0,0,0,0,0,0,0,24,0,24,24],
+      [1,0,0,0,1,1,0,1,24,0,0,0,14,16,15,14,0,0,24,24,24,24,24,24],
+      [1,0,0,0,1,0,0,0,1,24,0,0,15,0,0,0,15,0,24,3,3,3,3,3],
+      [1,0,0,0,1,0,0,0,1,24,0,15,0,0,0,0,15,24,24,3,0,0,3,3],
+      [1,2,6,2,1,1,1,1,1,3,24,15,0,0,0,0,15,3,3,3,0,0,0,3],
+      [3,3,0,3,3,3,3,3,3,3,24,0,15,15,15,15,15,3,0,0,3,0,0,3],
+      [3,0,0,3,3,3,0,0,3,3,3,24,3,3,3,3,3,0,0,0,3,3,0,3],
       [3,0,3,3,0,0,0,0,0,3,3,3,0,0,0,0,0,0,3,0,0,3,3,3],
       [3,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,0,0,0,3,3],
       [3,3,3,3,0,0,0,0,0,3,3,3,3,3,0,0,0,3,0,0,3,0,3,3],
@@ -753,7 +752,7 @@ class Raycaster {
       inventory: [shortSwordAndShield, jacket],
       inventoryMenuShowed: false,
 
-      spells: [healSpell, fireballSpell],
+      spells: [healSpell, sparksSpell],
       selectedSpell : 0,
       combatSpell : false,
 
@@ -813,10 +812,9 @@ class Raycaster {
     currentSpell.textContent = this.player.spells[this.player.selectedSpell].name;
   }
 
-
   castSelectedSpell() {
     // c'est utile ?
-    // Hum... à méditer, la réponse dépend de l'architecture voulue.
+    // à méditer, la réponse dépend de l'architecture voulue.
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1684,6 +1682,7 @@ class Raycaster {
       case 2: // ACTION
       case 3: // EQUIPEMENT
         console.log("Bouton Equipement");
+        // zz
         if (this.inventoryMenuShowed == false) {
           this.inventoryMenuShowed = true;
           this.toggleEquipment();
