@@ -41,6 +41,8 @@ var backward;
 // Accès à l'élément de sortie en utilisant son ID
 // Variable pour stocker le contenu de la console
 let consoleContent = "";
+// valeurs pour vérification des doublons de terminalLog()
+let lastEntry = "";
 
 // Valeur hauteur de plafond
 let ceilingHeight = 2;
@@ -147,18 +149,54 @@ class Sprite {
     const outputElement = document.getElementById("output");
     const consoleContent = outputElement.innerHTML;
 
-    outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
-    outputElement.scrollTop = outputElement.scrollHeight;
+    if (entry === lastEntry) {
+      outputElement.scrollTop = outputElement.scrollHeight;
+      
+    } else {
+      outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
+      outputElement.scrollTop = outputElement.scrollHeight;
+
+    }
+
+    lastEntry = entry;
   }
 
-  // zzz
-  // Méthode pour détecter le nombre de listes dans spriteTalk
+  static resetToggle() {
+    const outputElement = document.getElementById("output");
+    outputElement.scrollTop = outputElement.scrollHeight;
+
+    var info = document.getElementById("info");
+    var stats = document.getElementById("stats");
+    var equipment = document.getElementById("equipment");
+
+    var output = document.getElementById("output");
+    var items = document.getElementById("items");
+    var dialWindow = document.getElementById("dialogueWindow");
+
+    document.getElementById("quests").style.display = "none";
+
+    document.getElementById("joystick-container").style.display = "block";
+    document.getElementById("joystickBackButtonContainer").style.display = "none";
+
+    info.style.display = "block";
+    equipment.style.display = "none";
+    stats.style.display = "none";
+
+    dialWindow.style.display = "none";
+    items.style.display = "none";
+    output.style.display = "block";
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Gestion des dialogues avec Sprite
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   countDialogues() {
     return this.spriteTalk.length;
   }
 
   talk() {
-    this.resetToggleSpriteMethod();
+    Sprite.resetToggle();
 
     const dialogue = document.getElementById("dialogue");
     const faceOutput = document.getElementById("faceOutput");
@@ -209,6 +247,10 @@ class Sprite {
     showNextDialogue();
   }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Animation de combat
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   async startSpriteFlash() {
     // Augmente l'intensité du flash à 200 (blanc, grosso modo...)
     this.spriteFlash = 200;
@@ -227,31 +269,10 @@ class Sprite {
     this.spriteFlash = 0;
   }
 
-  // modification pour régler chevauchement de div :
-  // resetToggle() est une méthode accessible depuis l'objet sprite
-  // en faire une méthode statique
-  // à déplacer
-  resetToggleSpriteMethod() {
-    var info = document.getElementById("info");
-    var stats = document.getElementById("stats");
-    var equipment = document.getElementById("equipment");
-
-    var output = document.getElementById("output");
-    var items = document.getElementById("items");
-    var dialWindow = document.getElementById("dialogueWindow");
-
-    document.getElementById("joystick-container").style.display = "block";
-    document.getElementById("joystickBackButtonContainer").style.display = "none";
-
-    info.style.display = "block";
-    equipment.style.display = "none";
-    stats.style.display = "none";
-
-    dialWindow.style.display = "none";
-    items.style.display = "none";
-    output.style.display = "block";
-  }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Gestion Combat Sprite
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
   attack(target) {
     if (target.armor >= this.dmg) {
       let entry =
@@ -296,25 +317,24 @@ class Sprite {
   enemyAttackUpdate(player) {
     if (this.hp <= 0) {
       let entry = "The enemy is dead!";
-      // zzz
+      Sprite.terminalLog(entry);
+
       this.spriteType = 10;
-      this.talk(entry, this.spriteFace);
+      this.dialogue = [["facePlayer", "Alakir", "It's dead..."]];
+
     } else {
 
       const chanceEchec = Math.floor(Math.random() * 100);
 
       if (chanceEchec > player.dodge) {
-
         setTimeout(() => this.attack(player), 500);
+
       } else {
         const outputElement = document.getElementById("output");
         const consoleContent = outputElement.innerHTML;
-        outputElement.innerHTML =
-          consoleContent + "> You dodge the attack !<br>";
-        // console.log("Lattaque a échoué !");
-        // console.log(chanceEchec);
+        
+        outputElement.innerHTML = consoleContent + "> You dodge the attack !<br>";
 
-        // gain d'expérience dextérité
         player.XPdexterity += 1;
         console.log(player.XPdexterity + "pts dexterity experience.");
       }
@@ -355,20 +375,38 @@ class Sprite {
   async combatSpell(player, target) {
     if (player.turn == true) {
       // console.log(player.spells[player.selectedSpell].name)
-      
       player.spells[player.selectedSpell].cast(player, target);
       
       this.enemyAttackUpdate(player);
+
       player.turn = false;
       player.combatSpell = false;
     } else {
       console.log('not your turn');
     }
   }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Quêtes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    // zzz
+    // ça devrait être une fonction sprite
+    giveQuest (player) {
+
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Bouutiques
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   
+    giveItem(player) {
+
+    }
+
 }
 
 // Holds information about a wall hit from a single ray
-
 class RayHit {
   constructor() {
     this.x = 0; // world coordinates of hit
@@ -1091,16 +1129,9 @@ class Raycaster {
     if (joystick) {
       console.log("TOGGLE bouton inventaire en mode joystick");
       document.getElementById("joystick-container").style.display = "none";
-      document.getElementById("joystickBackButtonContainer").style.display =
-        "block";
+      document.getElementById("joystickBackButtonContainer").style.display = "block";
 
       this.player.inventoryMenuShowed = true;
-      /* 
-        console.log(
-        "inventoryMenuShowed, after change:",
-        this.player.inventoryMenuShowed
-        );
-      */
     }
 
     info.style.display = "none";
@@ -1115,6 +1146,7 @@ class Raycaster {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quêtes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
   // gestion des quêtes
   displayQuests() {
@@ -1141,35 +1173,6 @@ class Raycaster {
 // Contrôle UI
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  resetToggle() {
-    var info = document.getElementById("info");
-    var stats = document.getElementById("stats");
-    var equipment = document.getElementById("equipment");
-    var quests = document.getElementById("quests");
-
-    var output = document.getElementById("output");
-    var items = document.getElementById("items");
-    var dialWindow = document.getElementById("dialogueWindow");
-
-    if (joystick) {
-      document.getElementById("joystick-container").style.display = "block";
-      document.getElementById("joystickBackButtonContainer").style.display = "none";
-      this.player.inventoryMenuShowed = false;
-    }
-
-    info.style.display = "block";
-    equipment.style.display = "none";
-    stats.style.display = "none";
-    quests.style.display = "none";
-
-    dialWindow.style.display = "none";
-    items.style.display = "none";
-    output.style.display = "block";
-
-    const outputElement = document.getElementById("output");
-    outputElement.scrollTop = outputElement.scrollHeight;
-  }
-
   joystickBackButton() {
     document.getElementById("stats").style.display = "none";
     document.getElementById("info").style.display = "block";
@@ -1183,8 +1186,7 @@ class Raycaster {
     document.getElementById("joystick-container").style.display = "block";
     document.getElementById("QuestButton").style.display = "block";
     document.getElementById("InventoryButton").style.display = "none";
-    document.getElementById("joystickBackButtonContainer").style.display =
-      "none";
+    document.getElementById("joystickBackButtonContainer").style.display = "none";
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1237,7 +1239,7 @@ class Raycaster {
       [21, 20, "A"],  // Ennemi 3
   
       // Dummy for testing, traversable car sur décorations
-      // [14, 4, "A"],
+      [14, 4, "A"],
   
       // Sac
       [7, 12, 17],  // Sac 1
@@ -1283,7 +1285,7 @@ class Raycaster {
 
       switch (pos[2]) {
         case 1:
-            name = "Thief";
+            name = "Tarik the Thief";
             face = "faceThief";
             dialogue = [
                 ["facePlayer", "Alakir", "Hello there! What's the news?"],
@@ -1301,7 +1303,7 @@ class Raycaster {
             ];
             break;
         case 3:
-            name = "Merchant";
+            name = "Quill the Merchant";
             face = "faceMerchant";
             dialogue = [
                 ["facePlayer", "Alakir", "Hey!"],
@@ -1310,7 +1312,7 @@ class Raycaster {
             ];
             break;
         case 4:
-            name = "Roche";
+            name = "Rock";
             face = "facePlayer";
             dialogue = [
                 ["facePlayer", "Alakir", "Can't be Emma Stone, right?"],
@@ -1657,7 +1659,7 @@ class Raycaster {
   handleButtonClick(buttonNumber) {
     switch (buttonNumber) {
       case 1: 
-        this.resetToggle();
+        Sprite.resetToggle();
   
         if (this.player.turn == true) {
 
@@ -1678,7 +1680,7 @@ class Raycaster {
           console.log("false");
         } else {
           this.inventoryMenuShowed = false;
-          this.resetToggle();
+          Sprite.resetToggle();
           console.log("true");
         }
   
@@ -1710,6 +1712,8 @@ class Raycaster {
       case 10:
         // console.log('strifeRight');
         this.joystickBackButton();
+        // correction nécéssité double clic après reset toggle
+        this.inventoryMenuShowed = false;
         console.log("joystickBackButton");
         break;
       case 11:
@@ -1962,14 +1966,9 @@ class Raycaster {
         // Récupérez les secondes actuelles, EN DEHORS DE LA BOUCLE, pour éviter la surcharge
 
         // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
-        // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
-        // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
-
         const currentTime = new Date().getSeconds();
 
-        // Vérifiez si une seconde s'est écoulée depuis la dernière vérification
-        // boucle qui marche, mais s'applique à tous les sprites.
-        // créer boucle qui prends en compte une valeur d'un sprite (this.sprite.animationProgress)
+        // créer boucle qui prends en compte une valeur de chaque sprite (this.sprite.animationProgress)
 
         // Vérifiez si une seconde s'est écoulée depuis la dernière vérification
         if (currentTime !== lastTime) {
@@ -2342,37 +2341,10 @@ class Raycaster {
     }
   } 
 
-/*  
-//note pour comprendre
+  //////////////////////////////////////////////////////////////////////
+  // Coloration sol si pas de texture
+  //////////////////////////////////////////////////////////////////////
 
-let canvas = document.createElement('canvas');
-canvas.width = this.textureSize * 2
-canvas.height = this.textureSize * 6
-let context = canvas.getContext('2d');
-
-canvas = document.createElement('canvas');
-context = canvas.getContext('2d');
-
-let image = document.getElementById(image);
-canvas.width = image.width;
-canvas.height = Image.height;
-context.drawImage(image, 0, 0, floorimg.width, floorimg.height);
-this.floorImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);    
-
-static setPixel(imageData, x, y, r, g, b, a) {
-    let index = (x + y * imageData.width) * 4;
-    imageData.data[index + 0] = r;
-    imageData.data[index + 1] = g;
-    imageData.data[index + 2] = b;
-    imageData.data[index + 3] = a;
-} 
-
-this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this.displayHeight);
-
-                let srcPixel = Raycaster.getPixel(this.floorImageData, textureX, textureY)
-                Raycaster.setPixel(this.backBuffer, screenX, screenY, srcPixel.r, srcPixel.g, srcPixel.b, 255)
-           
-*/
   drawSolidFloor() {
     for (let y = this.displayHeight / 2; y < this.displayHeight; ++y) {
       for (let x = 0; x < this.displayWidth; ++x) {
@@ -2986,20 +2958,13 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
 
     // c'était l'origine du problème, vérifier fonction
 
-      /*  
-        // notes pour détection sprite
-        // ce sont ces variables qui sont utilisées par "isBlocking"
-
-        console.log("coordonnée matricielle -  x : " + Math.floor(this.player.y/this.tileSize) + ", y :" + Math.floor(this.player.y/this.tileSize));
-        console.log("Type de case : "+ this.map[Math.floor(this.player.y/this.tileSize)][Math.floor(this.player.x/this.tileSize)]);
-      */
+    if (this.isBlocking(cellX, cellY)) {
 
     // collision glissante = conséquence de isBlocking(true)
     // isBlocking est muni d'un système de collision glissante très rudimentaire
     // la collision glissante prend en compte 360°, excluant les angles 0, 90, 180, 270 (360 = 0):
     // pas de "glissade" si on est parfaitement perpendiculaire ou parallèle aux murs.
 
-    if (this.isBlocking(cellX, cellY)) {
           // sud ouest :
              if ( this.player.rot > 270 * (Math.PI / 180) &&
                   this.player.rot < 360 * (Math.PI / 180)) {
@@ -3046,13 +3011,8 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
         Math.floor(cellY) === Math.floor(this.sprites[i].y / this.tileSize)
       ) {
         const spriteType = this.sprites[i].spriteType;
-        // console.log(spriteType);
 
         obstacleOnPath = true;
-        // console.log(obstacleOnPath);
-
-        // DETECTION COLLISION SPRITE
-        // si cadavre(10) ou objet traversable [ex: herbe(13)], on peut avancer.
 
         // A CHANGER : prendre en compte la valeur "blocking" de l'objet sprite
         if (spriteType == 10 || spriteType == 13) {
@@ -3080,7 +3040,9 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
     // au moindre movement ou click, la fenêtre de dialogue se réinitialise
     if ( action || left || right || down || up || joystickLeftClicked || joystickRightClicked || joystickBackwardClicked || joystickForwardClicked ) {
       if (this.player.turn === true) {
-        this.resetToggle()
+        Sprite.resetToggle();
+        // correction du double clic après reset toggle après un mouvement.
+        this.inventoryMenuShowed = false;
       }
     }
 
@@ -3170,9 +3132,9 @@ this.backBuffer = this.mainCanvasContext.createImageData(this.displayWidth, this
               break;
             case 9:
               this.player.quests[0].complete();
-              this.resetToggle();
+              Sprite.resetToggle();
             default:
-              this.resetToggle();
+              Sprite.resetToggle();
               break;
           }
         }
