@@ -95,6 +95,7 @@ function updateProgressBar(id, value, max) {
   progress.style.width = `${percentage}%`;
 }
 
+// zzz spriteConstructor
 class Sprite {
   constructor(
     x = 0,
@@ -112,7 +113,8 @@ class Sprite {
     animationProgress = 0,
     spriteName = '',
     spriteFace = '',
-    spriteTalk = []
+    spriteTalk = [],
+    spriteSell = [magicSword, robe, fist],
   ) {
     this.x = x;
     this.y = y;
@@ -143,7 +145,12 @@ class Sprite {
     this.spriteName = spriteName;
     this.spriteFace = spriteFace;
     this.spriteTalk = spriteTalk;
+    this.spriteSell = spriteSell;
   }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Contrôle UI & terminal log
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   static terminalLog(entry) {
     const outputElement = document.getElementById("output");
@@ -174,6 +181,7 @@ class Sprite {
     var dialWindow = document.getElementById("dialogueWindow");
 
     document.getElementById("quests").style.display = "none";
+    document.getElementById("shop").style.display = "none";
 
     document.getElementById("joystick-container").style.display = "block";
     document.getElementById("joystickBackButtonContainer").style.display = "none";
@@ -185,6 +193,91 @@ class Sprite {
     dialWindow.style.display = "none";
     items.style.display = "none";
     output.style.display = "block";
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// boutique
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //zzz
+  displayItemsForSale(player) {
+    var output = document.getElementById("output");
+    var dialWindow = document.getElementById("dialogueWindow");
+    output.style.display = "none";
+    dialWindow.style.display = "none";
+
+    const shopContent = document.getElementById("shopContent");
+    document.getElementById("shop").style.display = "block";
+
+    if (this.spriteSell.length > 0) {
+      shopContent.innerHTML = "";
+
+      this.spriteSell.forEach((item) => {
+        const itemIcon = document.getElementById("itemIcon").getAttribute("src");
+        const swordIcon = document.getElementById("weaponIcon").getAttribute("src");
+        const cloakIcon = document.getElementById("cloakIcon").getAttribute("src");
+
+        let statsHTML = ""; 
+        if (item.might !== 0) { statsHTML += `+${item.might} Might<br>`; }
+        if (item.magic !== 0) { statsHTML += `+${item.magic} Magic<br>`; }
+        if (item.dodge !== 0) { statsHTML += `+${item.dodge} Dodge<br>`; }
+        if (item.armor !== 0) { statsHTML += `+${item.armor} Armor<br>`; }
+        if (item.power !== 0) { statsHTML += `${item.power} Power<br>`; }
+        statsHTML = statsHTML.slice(0, -2);
+
+        let itemIconSrc = itemIcon;
+        if (item.slot === 1) {
+          itemIconSrc = swordIcon;
+        } else if (item.slot === 2) {
+          itemIconSrc = cloakIcon;
+        }
+
+        shopContent.innerHTML += `
+          <button class="shop-item controlButton" style="line-height: 0.8;background-color: #140c1c; width:99%; margin-bottom: 5px; padding: 15px;" id="${item.name}" data-item="${item.name}">
+            <div style="font-size: 15px; text-align: left; padding-top:5px;">
+              <img src="${itemIconSrc}"> ► ${item.name}
+            </div>
+            <br>
+            <div style="text-align: right; line-height: 1.15;">${statsHTML}</div>
+          </button><br>`;
+      });
+
+      // Ajoute des écouteurs d'événements aux boutons des objets
+      document.querySelectorAll('.shop-item').forEach(button => {
+        button.addEventListener('click', (event) => {
+          const itemName = event.currentTarget.getAttribute('data-item');
+          const itemToBuy = this.spriteSell.find(item => item.name === itemName);
+          if (itemToBuy) {
+            console.log("Buying item:", itemName);
+            this.giveItemToPlayer(itemToBuy, player);
+          }
+        });
+      });
+    } else {
+      shopContent.innerHTML = "> No items for sale";
+    }
+  }
+
+  addItemToInventory(item, player) {
+    player.inventory.push(item);
+  }
+
+  giveItemToPlayer(item, player) {
+    if (player) {
+      console.log("Adding item to inventory:", item.name);
+      this.addItemToInventory(item, player);
+
+      // Check if the item is added to the player's inventory
+      console.log("Player's inventory:", player.inventory);
+
+      // Retirez l'objet de la liste des articles à vendre
+      this.spriteSell = this.spriteSell.filter(sellItem => sellItem !== item);
+
+      // Rafraîchissez l'affichage des articles à vendre
+      this.displayItemsForSale(player);
+    } else {
+      console.log("Player not defined");
+    }
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -453,6 +546,7 @@ class RayState {
 
 // ajout de la classe objet /////////////////////////////////////////////////////
 
+// zzz
 class Item {
   constructor(
     name,
@@ -534,7 +628,6 @@ class Item {
     );
   }
 
-  // Méthode pour obtenir le nom de l'emplacement en fonction du slot
   getSlotName() {
     return this.slot === 1 ? "hands" : this.slot === 2 ? "torso" : "";
   }
@@ -544,10 +637,10 @@ class Item {
 // Set d'objets test
 
 const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0,0,1);
-  const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
-  const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
-  const fist = new Item("fist", 1, 0, 10, 5, 0, 0);
-  const robe = new Item("robe", 2, 0, 0, 5, 10, 0);
+const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
+const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
+const fist = new Item("fist",1,false,0,0,0,0,3,2,0,0);
+const robe = new Item("robe", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
 
 // Ajout de la classe Spell //////////////////////////////////////////////////////////////////
 
@@ -984,10 +1077,6 @@ class Raycaster {
 // EQUIPEMENT INVENTAIRE
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  addItemToInventory(item) {
-    this.player.inventory.push(item);
-  }
-
   displayInventory() {
     const inventoryContent = document.getElementById("inventoryContent");
 
@@ -1125,10 +1214,10 @@ class Raycaster {
     var info = document.getElementById("info");
     var stats = document.getElementById("stats");
     var equipment = document.getElementById("equipment");
-
-    var dialWindow = document.getElementById("dialogueWindow");
-    var output = document.getElementById("output");
+    
     var items = document.getElementById("items");
+    var output = document.getElementById("output");
+    var dialWindow = document.getElementById("dialogueWindow");
 
     // joystick adds
     if (joystick) {
@@ -1152,8 +1241,6 @@ class Raycaster {
 // Quêtes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-  // gestion des quêtes
   displayQuests() {
     const questContent = document.getElementById("questContent");
 
@@ -1194,7 +1281,10 @@ class Raycaster {
     document.getElementById("joystickBackButtonContainer").style.display = "none";
   }
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   initSprites() {
     // Put sprite in center of cell
@@ -3127,7 +3217,6 @@ class Raycaster {
               break;
             case 1:
             case 2:
-            case 3:
             case 4:
             case 5:
             case 6:
@@ -3139,9 +3228,15 @@ class Raycaster {
               this.sprites[i].talk(this.sprites[i].spriteTalk, this.sprites[i].spriteFace);
               this.player.turn = false;
               break;
+            case 3:
+              //zzz
+              this.player.turn = false;
+              this.sprites[i].displayItemsForSale(this.player); 
+              break
             case 9:
               this.player.quests[0].complete();
               Sprite.resetToggle();
+              break
             default:
               Sprite.resetToggle();
               break;
