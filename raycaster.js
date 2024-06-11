@@ -1282,7 +1282,7 @@ class Raycaster {
       [21, 20, "A"],  // Ennemi 3
   
       // Dummy for testing, traversable car sur décorations
-      [14, 4, "A"],
+      // [14, 4, "A"],
   
       // Sac
       [7, 12, 17],  // Sac 1
