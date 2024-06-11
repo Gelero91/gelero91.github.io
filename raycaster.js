@@ -38,8 +38,6 @@ var forward;
 var backward;
 
 // Terminal du moteur
-// Accès à l'élément de sortie en utilisant son ID
-// Variable pour stocker le contenu de la console
 let consoleContent = "";
 // valeurs pour vérification des doublons de terminalLog()
 let lastEntry = "";
@@ -55,8 +53,7 @@ let ceilingTexture = 1;
 var totalTimeElapsed = 0;
 var timeSinceLastSecond = 0;
 
-// animation referee
-// problème de gestion du temps, prends trop de ressource
+// animation referee : problème de gestion du temps, prends trop de ressource
 let spriteAnimationProgress = 0;
 let lastTime = new Date().getSeconds();
 
@@ -65,7 +62,7 @@ async function pause(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// initialisation du terminal
+// initialisation du message d'intro du terminal, terminalLog n'est pas encore définit
 document.addEventListener("DOMContentLoaded", function () {
   const outputElement = document.getElementById("output");
 
@@ -95,7 +92,6 @@ function updateProgressBar(id, value, max) {
   progress.style.width = `${percentage}%`;
 }
 
-// zzz spriteConstructor
 class Sprite {
   constructor(
     x = 0,
@@ -114,7 +110,7 @@ class Sprite {
     spriteName = '',
     spriteFace = '',
     spriteTalk = [],
-    spriteSell = [magicSword, robe, fist],
+    spriteSell = [],
   ) {
     this.x = x;
     this.y = y;
@@ -196,10 +192,9 @@ class Sprite {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// boutique
+// boutique, pas de prix pour le moment
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  //zzz
   displayItemsForSale(player) {
     var output = document.getElementById("output");
     var dialWindow = document.getElementById("dialogueWindow");
@@ -209,6 +204,9 @@ class Sprite {
     const shopContent = document.getElementById("shopContent");
     document.getElementById("shop").style.display = "block";
 
+    const shopName = document.getElementById("shopName");
+    shopName.textContent = "'"+this.spriteName+"'";
+    
     if (this.spriteSell.length > 0) {
       shopContent.innerHTML = "";
 
@@ -233,11 +231,12 @@ class Sprite {
         }
 
         shopContent.innerHTML += `
-          <button class="shop-item controlButton" style="line-height: 0.8;background-color: #140c1c; width:99%; margin-bottom: 5px; padding: 15px;" id="${item.name}" data-item="${item.name}">
+          <button class="shop-item controlButton" style="line-height: 0.8;background-color: #281102; width:99%; margin-bottom: 5px; padding: 15px;" id="${item.name}" data-item="${item.name}">
             <div style="font-size: 15px; text-align: left; padding-top:5px;">
               <img src="${itemIconSrc}"> ► ${item.name}
             </div>
-            <br>
+            <p style="font-size: 15px; text-align: left; padding-top:5px;">
+            <font style="font-size: 25px;">$</font> ► FREE</p>
             <div style="text-align: right; line-height: 1.15;">${statsHTML}</div>
           </button><br>`;
       });
@@ -267,13 +266,10 @@ class Sprite {
       console.log("Adding item to inventory:", item.name);
       this.addItemToInventory(item, player);
 
-      // Check if the item is added to the player's inventory
       console.log("Player's inventory:", player.inventory);
 
-      // Retirez l'objet de la liste des articles à vendre
       this.spriteSell = this.spriteSell.filter(sellItem => sellItem !== item);
 
-      // Rafraîchissez l'affichage des articles à vendre
       this.displayItemsForSale(player);
     } else {
       console.log("Player not defined");
@@ -314,11 +310,10 @@ class Sprite {
       if (currentDialogue < this.spriteTalk.length) {
         const [face, name, entry] = this.spriteTalk[currentDialogue];
 
-        // Vérifiez que face, name et entry ne sont pas undefined
+        // Vérifiez qu'ils ne sont pas undefined :
         if (face && name && entry) {
           dialogue.innerHTML = `<font style="font-weight: bold;">${name} </font> : <br> <font style="font-style: italic;"> ${entry} </font>`;
 
-          // affichage sprite (à envisager pour les personnages sans visage !)
           var imgElement = document.getElementById(face);
           faceOutput.src = imgElement ? imgElement.src : '';
 
@@ -345,20 +340,14 @@ class Sprite {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   async startSpriteFlash() {
-    // Augmente l'intensité du flash à 200 (blanc, grosso modo...)
     this.spriteFlash = 200;
-    // Définir la durée du flash à 200 ms
     await new Promise((resolve) => setTimeout(resolve, 200));
-    // Utiliser "this" pour accéder au contexte de l'objet actuel
-    // Remettre "spriteFlash" à 0 après la durée du flash
     this.spriteFlash = 0;
   }
 
   async startAttackAnimation() {
     this.spriteFlash = 200;
-
     await new Promise((resolve) => setTimeout(resolve, 200));
-
     this.spriteFlash = 0;
   }
 
@@ -388,7 +377,6 @@ class Sprite {
 
     if (chanceCriti < criti) {
       factor = 2
-      //entry = "Critical ! "
       Sprite.terminalLog('Critical hit !');
       player.XPdexterity += 1;
     }
@@ -410,11 +398,12 @@ class Sprite {
   enemyAttackUpdate(player) {
     if (this.hp <= 0) {
       let entry = "The enemy is dead!";
+
       Sprite.terminalLog(entry);
 
       this.spriteType = 10;
       this.dialogue = [["facePlayer", "Alakir", "It's dead..."]];
-
+      this.isBlocking = false;
     } else {
 
       const chanceEchec = Math.floor(Math.random() * 100);
@@ -432,27 +421,7 @@ class Sprite {
         console.log(player.XPdexterity + "pts dexterity experience.");
       }
     }
-
-    // Mise à jour de l'affichage
-    const playerHP = document.getElementById("PlayerHPoutput");
-    const playerMP = document.getElementById("PlayerMPoutput");
-    const playerXP = document.getElementById("PlayerXPoutput");
-
-    playerHP.textContent = player.hp;
-    playerMP.textContent = player.mp;
-    playerXP.textContent = player.xp;
-
-    var hpBar = document.getElementById("hpBar");
-    var mpBar = document.getElementById("mpBar");
-    var xpBar = document.getElementById("xpBar");
-
-    hpBar.value = player.hp;
-    mpBar.value = player.mp;
-    xpBar.value = player.xp;
-
-    hpBar.max = 10;
-    mpBar.max = 10;
-    xpBar.max = 100;
+    Sprite.resetToggle();
   }
 
   async combat(damage, criti, player) {
@@ -478,24 +447,6 @@ class Sprite {
       console.log('not your turn');
     }
   }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Quêtes
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    // ça devrait être une fonction de quest
-    giveQuest (player) {
-
-    }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Bouutiques
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   
-    giveItem(player) {
-
-    }
-
 }
 
 // Holds information about a wall hit from a single ray
@@ -544,9 +495,10 @@ class RayState {
   }
 }
 
-// ajout de la classe objet /////////////////////////////////////////////////////
-
-// zzz
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Objets
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
 class Item {
   constructor(
     name,
@@ -639,10 +591,12 @@ class Item {
 const shortSwordAndShield = new Item("Short Sword and Shield",1,true,0,0,0,0,2,0,0,1);
 const jacket = new Item("Quilted jacket", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
 const magicSword = new Item("Magic sword",1,false,0,0,0,0,3,2,0,0);
-const fist = new Item("fist",1,false,0,0,0,0,3,2,0,0);
 const robe = new Item("robe", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
 
-// Ajout de la classe Spell //////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Sortilèges
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Spell {
   constructor(name, manaCost, description, effect, selfCast, icon) {
@@ -689,7 +643,6 @@ class Spell {
       } else {
           Sprite.terminalLog(`${target.name} is healed for 10hp.`);
       }
-      target.startSpriteFlash()
   }
 
   // Fonction représentant l'effet de dégâts
@@ -727,7 +680,9 @@ const sparksSpell = new Spell(
 );
 
 
-// ajout de la classe quête /////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Quêtes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Quest {
   constructor(title, description, reward, completed) {
@@ -739,10 +694,12 @@ class Quest {
 
   // Méthode pour marquer une quête comme complétée
   complete() {
-    if (this.completed === false) {
-      this.completed =  true;
-      Sprite.terminalLog(`The quest "${this.title}" has been completed ! Reward : ${this.reward}`)
-    } 
+    this.completed =  true;
+    Sprite.terminalLog(`The quest "${this.title}" has been completed ! Reward : ${this.reward}`)
+  }
+
+  giveQuest() {
+
   }
 }
 
@@ -793,8 +750,7 @@ class Raycaster {
       [3,0,0,0,0,0,0,0,0,3,0,0,0,3,3,0,3,3,0,3,0,0,0,3],
       [3,0,0,3,3,3,3,3,3,3,0,0,0,3,3,0,0,0,0,3,0,0,0,3],
       [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
-  ]
-    ;
+  ];
   }
 
   initPlayer() {
@@ -905,11 +861,6 @@ class Raycaster {
     currentSpell.textContent = this.player.spells[this.player.selectedSpell].name;
   }
 
-  castSelectedSpell() {
-    // c'est utile ?
-    // à méditer, la réponse dépend de l'architecture voulue.
-  }
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // fonction update
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -988,8 +939,7 @@ class Raycaster {
     player.mpMax = 10 + (player.intellect - 5);
 
     // on vérifie s'il y a une différence entre l'ancienne valeur et la nouvelle
-    // puis on met à jour la valeure référente
-    // permet d'éviter les incrémentations à chaque tick
+  
     if (player.strength !== player.oldStrength) {
       player.might += (player.strength - 5);
       player.oldStrength = player.strength;
@@ -1016,9 +966,12 @@ class Raycaster {
     playerArmor.textContent = player.armor;
     playerCriti.textContent = player.criti;
 
-    // affichage du sort sélectionné
+    // affichage du sort sélectionné et de son icone
     const currentSpell = document.getElementById("selectedSpell");
     currentSpell.textContent = player.spells[player.selectedSpell].name;
+
+    const currentSpellIcon = document.getElementById("castSpell");
+    currentSpellIcon.textContent = this.player.spells[this.player.selectedSpell].icon;
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1281,16 +1234,11 @@ class Raycaster {
     document.getElementById("joystickBackButtonContainer").style.display = "none";
   }
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   initSprites() {
     // Put sprite in center of cell
     const tileSizeHalf = Math.floor(this.tileSize / 2);
-
-    // MARQUEUR : Sprite list liste des sprites spriteList
 
     let spritePositions = [
       // Positions des sprites avec les commentaires
@@ -1334,7 +1282,7 @@ class Raycaster {
       [21, 20, "A"],  // Ennemi 3
   
       // Dummy for testing, traversable car sur décorations
-      // [14, 4, "A"],
+      [14, 4, "A"],
   
       // Sac
       [7, 12, 17],  // Sac 1
@@ -1370,6 +1318,7 @@ class Raycaster {
 
     this.sprites = [];
     
+    // zzz
     for (let pos of spritePositions) {
       let x = pos[0] * this.tileSize + tileSizeHalf;
       let y = pos[1] * this.tileSize + tileSizeHalf;
@@ -1377,8 +1326,14 @@ class Raycaster {
       let name = '';
       let face = '';
       let dialogue = '';
-
+      // par défaut, les Sprites sont bloquant lors de leur création
+      let isBlocking = true; // Valeur par défaut
+      let hp = 1;
+      let dmg = 1;
+      let spriteSell = [];
+    
       switch (pos[2]) {
+        // "0" should be a corpse
         case 1:
             name = "Tarik the Thief";
             face = "faceThief";
@@ -1405,6 +1360,7 @@ class Raycaster {
                 [face, name, "Oy mate! Want to buy something? <br> The function is not implemented yet."],
                 ["facePlayer", "Alakir", "See you later then."]
             ];
+            spriteSell = [magicSword, robe];
             break;
         case 4:
             name = "Rock";
@@ -1460,12 +1416,18 @@ class Raycaster {
                 ["facePlayer", "Alakir", "A statue of the Goddess. She looks happy!"],
             ];
             break;
+        
+        // Enemies (letters):
         case "A":
             name = "Bat";
             face = "facePlayer";
             dialogue = [
                 ["facePlayer", "Alakir", "It's dead..."],
             ];
+
+            // définition des caractéristiques de l'ennemi
+            hp = 2;
+            dmg = 2;
             break;
         default:
             name = "Error";
@@ -1476,7 +1438,8 @@ class Raycaster {
             break;
     }
 
-      let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, pos[2], true, false, true, 3, 3, 0, name, face, dialogue);
+      // Création du sprite en utilisant les valeurs définies
+      let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, pos[2], isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell);
       this.sprites.push(sprite);
     }
 
@@ -1503,12 +1466,15 @@ class Raycaster {
             this.tileSize,
             13
           );
-          newDecoration.spriteType = 13; // Assignez le bon spriteType aux herbes supplémentaires
+
+          newDecoration.spriteType = 13;
+
+          newDecoration.isBlocking = false;
 
           additionalDecoration.push(newDecoration);
 
-          additionalDecorationCount++;
           // console.log('3 herbes générées.')
+          additionalDecorationCount++;
         }
 
         additionalDecorationSpriteCount++;
@@ -1519,7 +1485,6 @@ class Raycaster {
         i--; // Décrémentez i pour compenser la suppression de l'entrée et éviter de sauter un sprite
       } else {
         this.sprites[i].spriteType = spriteType;
-        // console.log(this.sprites[i].spriteType);
         spriteCount++;
       }
     }
@@ -1532,7 +1497,6 @@ class Raycaster {
         " cases de décorations."
     );
 
-    // Ajoutez les herbes supplémentaires générées à this.sprites
     for (let newDecoration of additionalDecoration) {
       this.sprites.push(newDecoration);
     }
@@ -1753,27 +1717,24 @@ class Raycaster {
   /// CONTROLES
   //////////////////////////////////////////////////////////////////////////////
 
+  // zzz
   // Case selon type de bouton appuyée, les ID sont liées à un nombre dans "bindKeysAndButtons"
   handleButtonClick(buttonNumber) {
     switch (buttonNumber) {
-      case 1: 
+      case 1: // ACTION
         Sprite.resetToggle();
-  
-        if (this.player.turn == true) {
-
+          if (this.player.turn == true) {
           console.log('Action/Dialogue')
-  
-          // actionButtonClicked est simplement le fait d'appuyer
-          // sur la touche action (bouton A)
+          // actionButtonClicked clic sur la touche action (bouton A)
           this.actionButtonClicked = true;
         }
-
         break;
-      case 2: // ACTION
+      case 2:
       case 3: // EQUIPEMENT
         console.log("Bouton Equipement");
         // zz
         if (this.inventoryMenuShowed == false) {
+          Sprite.resetToggle();
           this.inventoryMenuShowed = true;
           this.toggleEquipment();
           console.log("false");
@@ -1782,7 +1743,6 @@ class Raycaster {
           Sprite.resetToggle();
           console.log("true");
         }
-  
         break;
       case 4:
         // EMPTY
@@ -1795,7 +1755,6 @@ class Raycaster {
         // EMPTY
         break;
       case 7:
-        // console.log('strifeLeft');
         console.log("turnLeft");
         this.turnLeftButtonClicked = true;
         break;
@@ -1804,14 +1763,13 @@ class Raycaster {
         this.BackwardButtonClicked = true;
         break;
       case 9:
-        // console.log('strifeRight');
         console.log("turnRight");
         this.turnRightButtonClicked = true;
         break;
       case 10:
         // console.log('strifeRight');
         this.joystickBackButton();
-        // correction nécéssité double clic après reset toggle
+        // correction nécéssitée double clic après reset toggle
         this.inventoryMenuShowed = false;
         console.log("joystickBackButton");
         break;
@@ -1834,36 +1792,24 @@ class Raycaster {
         document.getElementById("quests").style.display = "none";
         break;
       case 13:
-        // console.log("previous spell !")
-        this.previousSpell();
-        
+        this.previousSpell();        
         break;
       case 14:
-        // console.log(this.player.spells[this.player.selectedSpell].name)
-
         if (this.player.spells[this.player.selectedSpell].selfCast == true) {
           console.log("self cast !")
           this.player.spells[this.player.selectedSpell].cast(this.player, this.player);
-
         } else {
           console.log("not a selfCast")
           console.log("magic combat = true")          
-
           if (this.player.turn == true) {
-            // console.log('Action/Dialogue')
             console.log('Attack spell casted')
-            // actionButtonClicked est simplement le fait d'appuyer
-            // sur la touche action (bouton A)
             this.actionButtonClicked = true;
             this.player.combatSpell = true;
           }
         }
-
         break;
       case 15:
-        // console.log("next spell !")
         this.nextSpell();
-        
         break;
       default:
         console.log("Bouton non reconnu");
@@ -1899,20 +1845,12 @@ class Raycaster {
     document.addEventListener("joystickchange", function (event) {
       const { up, down, left, right } = event.detail;
       if (up) {
-        // Traitement pour le mouvement vers le haut
-        // console.log("Up event detected");
         joystickForwardClicked = true;
       } else if (down) {
-        // Traitement pour le mouvement vers le bas
-        // console.log("Down event detected");
         joystickBackwardClicked = true;
       } else if (left) {
-        // Traitement pour le mouvement vers la gauche
-        // console.log("Left event detected");
         joystickLeftClicked = true;
       } else if (right) {
-        // Traitement pour le mouvement vers la droite
-        // console.log("Right event detected");
         joystickRightClicked = true;
       } else {
         joystickForwardClicked = false;
@@ -1964,34 +1902,26 @@ class Raycaster {
       this2.gameCycle();
     });
 
-    // UNITE TEMPORELLE : 1 SECONDE
-    ///////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+/// UNITE TEMPORELLE ("TOUR")
+//////////////////////////////////////////////////////////////////////////////
 
-    // Ajoutez une nouvelle variable pour suivre le temps total écoulé depuis le début du jeu
+    // NOTE : 
+    // GESTION DES ANIMATIONS PAR VARIABLE POUR CHAQUE INSTANCE DE SPRITE
+
+    // Utilisation de totalTimeElapsed pour calculer un délai d'une seconde
+    // La valeur est initialisée au début du code
     totalTimeElapsed += timeElapsed;
 
-    // Utilisez totalTimeElapsed pour calculer un délai d'une seconde
-    // la valeur est initialisée en tout début de code
     const oneSecond = 1000; // 1 seconde en millisecondes
 
-    // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
-
-    // Ajoutez le temps écoulé à une variable qui mesure le temps écoulé depuis le dernier traitement de la seconde
     timeSinceLastSecond += timeElapsed;
 
     if (timeSinceLastSecond >= oneSecond) {
-      // console.log("one second delay, no cpu timer")
-      // action lorsque le délai d'une seconde est atteint
-      // MAJ des infos du joueur
+      // console.log("Délai d'un tour atteint, pas de minuterie CPU")
       this.statsUpdate(this.player);
-      
-      // Bouléen pour tour par tour
       this.player.turn = true;
-
-      // Réinitialisez timeSinceLastSecond pour commencer à suivre le temps écoulé depuis le début de la prochaine seconde
       timeSinceLastSecond -= oneSecond;
-
-      // console.log("une seconde")
     }
   }
 
@@ -2942,8 +2872,6 @@ class Raycaster {
     let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D];
     const action =  this.actionButtonClicked || this.keysDown[KEY_F] || this.keysDown[KEY_SPACE]; 
 
-    // FPS MOVES
-
     let timeBasedFactor = timeElapsed / UPDATE_INTERVAL;
 
     let moveStep = this.player.speed * this.player.moveSpeed * timeBasedFactor;
@@ -2966,18 +2894,14 @@ class Raycaster {
     const decelerationRate = 0.15; // Taux de décélération
 
     if (up || joystickForwardClicked === true) {
-        // Accélération vers l'avant
         this.player.speed = Math.min(this.player.speed + accelerationRate, 1);
       } else if (down || joystickBackwardClicked === true) {
-        // Accélération vers l'arrière
         this.player.speed = Math.max(this.player.speed - accelerationRate, -1);
       } else {
-      // Décélération si aucune touche n'est enfoncée
+      // Inertie/décélération si aucune touche n'est enfoncée
       if (this.player.speed > 0) {
-        // Si la vitesse est positive, décélérer vers 0
         this.player.speed = Math.max(this.player.speed - decelerationRate, 0);
       } else if (this.player.speed < 0) {
-        // Si la vitesse est négative, décélérer vers 0
         this.player.speed = Math.min(this.player.speed + decelerationRate, 0);
       }
     }
@@ -3102,27 +3026,25 @@ class Raycaster {
       return;
     }
 
+
+    // zzz
     // COLLISION SPRITE
     // algo de vérification des blocage de sprites
+    // NOUVEAU : prends en compte la valeur "blocking" dans Sprite
+    // Si le sprite est bloquant (isBlocking==true), obstacle on path est true (bloquant)
+
     for (let i = 0; i < this.sprites.length; i++) {
       if (
         Math.floor(cellX) === Math.floor(this.sprites[i].x / this.tileSize) &&
         Math.floor(cellY) === Math.floor(this.sprites[i].y / this.tileSize)
       ) {
-        const spriteType = this.sprites[i].spriteType;
-
-        obstacleOnPath = true;
-
-        // A CHANGER : prendre en compte la valeur "blocking" de l'objet sprite
-        if (spriteType == 10 || spriteType == 13) {
-          obstacleOnPath = false;
-          // console.log(obstacleOnPath);
-        }
+        // Si le sprite est bloquant (isBlocking==true), obstacle on path est true (bloquant)
+        obstacleOnPath = this.sprites[i].isBlocking;
       }
     }
 
     // Suite détection sprite
-    if (obstacleOnPath === true) {
+    if (obstacleOnPath) {
       // console.log("obstacle !")
       return;
     } else {
@@ -3140,7 +3062,6 @@ class Raycaster {
     if ( action || left || right || down || up || joystickLeftClicked || joystickRightClicked || joystickBackwardClicked || joystickForwardClicked ) {
       if (this.player.turn === true) {
         Sprite.resetToggle();
-        // correction du double clic après reset toggle après un mouvement.
         this.inventoryMenuShowed = false;
       }
     }
@@ -3199,10 +3120,11 @@ class Raycaster {
         frontY = Math.floor(this.player.y / this.tileSize);
       }
 
+      // zzz
       // turn
       // Vérification si la case devant le joueur contient un sprite
       for (let i = 0; i < this.sprites.length; i++) {
-        const spriteType = this.sprites[i].spriteType; // Récupérez le sprite actuel dans la boucle
+        const spriteType = this.sprites[i].spriteType;
         const spriteX = Math.floor(this.sprites[i].x / this.tileSize);
         const spriteY = Math.floor(this.sprites[i].y / this.tileSize);
 
@@ -3215,6 +3137,7 @@ class Raycaster {
                 this.sprites[i].combatSpell(this.player, this.sprites[i]);
               }
               break;
+            case 0:
             case 1:
             case 2:
             case 4:
@@ -3229,7 +3152,6 @@ class Raycaster {
               this.player.turn = false;
               break;
             case 3:
-              //zzz
               this.player.turn = false;
               this.sprites[i].displayItemsForSale(this.player); 
               break
@@ -3327,7 +3249,6 @@ class Raycaster {
         }
       }
     }
-
     // set new position
     this.player.x = newX;
     this.player.y = newY;
