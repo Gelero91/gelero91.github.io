@@ -92,6 +92,7 @@ function updateProgressBar(id, value, max) {
   progress.style.width = `${percentage}%`;
 }
 
+// zzz
 class Sprite {
   constructor(
     x = 0,
@@ -101,6 +102,7 @@ class Sprite {
     h = 128,
     ang = 0,
     spriteType = 0,
+    spriteTexture = 0,
     isBlocking = true,
     attackable = false,
     turn = true,
@@ -126,6 +128,8 @@ class Sprite {
     this.ang = ang;
 
     this.spriteType = spriteType;
+
+    this.spriteTexture = spriteTexture;
 
     this.isBlocking = isBlocking;
 
@@ -401,7 +405,8 @@ class Sprite {
 
       Sprite.terminalLog(entry);
 
-      this.spriteType = 10;
+      this.spriteType = 0;
+      this.spriteTexture = 10;
       this.dialogue = [["facePlayer", "Alakir", "It's dead..."]];
       this.isBlocking = false;
     } else {
@@ -470,8 +475,7 @@ class RayHit {
     let rayHit = new RayHit();
     rayHit.sprite = sprite;
 
-    //la
-    rayHit.sprite.spriteType = sprite.spriteType;
+    rayHit.sprite.spriteTexture = sprite.spriteTexture;
     rayHit.strip = strip;
     rayHit.rayAngle = rayAngle;
     rayHit.distance = Math.sqrt(squaredDistance);
@@ -812,25 +816,8 @@ class Raycaster {
       playerFace: "playerFace",
     };
 
-    const PlayerHP = document.getElementById("PlayerHPoutput");
-    const PlayerMP = document.getElementById("PlayerMPoutput");
-    const PlayerXP = document.getElementById("PlayerXPoutput");
-
-    PlayerHP.textContent = this.player.hp;
-    PlayerMP.textContent = this.player.mp;
-    PlayerXP.textContent = this.player.xp;
-
-    var hpBar = document.getElementById("hpBar");
-    var mpBar = document.getElementById("mpBar");
-    var xpBar = document.getElementById("xpBar");
-
-    hpBar.value = this.player.hp;
-    mpBar.value = this.player.mp;
-    xpBar.value = this.player.xp;
-
-    hpBar.max = 10;
-    mpBar.max = 10;
-    xpBar.max = 100;
+    // ajout de "this.statsUpdate", pour remplacer les manipulations HTML redondantes
+    this.statsUpdate(this.player)
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1236,270 +1223,170 @@ class Raycaster {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  // zzz
   initSprites() {
-    // Put sprite in center of cell
+    // Mettre le sprite au centre de la cellule
     const tileSizeHalf = Math.floor(this.tileSize / 2);
 
-    let spritePositions = [
-      // Positions des sprites avec les commentaires
-      // [x, y, type]
-  
-      // Positions des personnages
-      [17, 6, 1],   // Personnage 1
-      [9, 5, 2],    // Personnage 2
-      [4, 1, 2],    // Personnage 3
-      [14, 13, 3],  // Personnage 4
-  
-      // Décorations
-      [7, 16, 4],   // Décoration 1
-      [20, 16, 4],  // Décoration 2
-      [14, 9, 7],   // Décoration 3
-      [1, 6, 11],   // Décoration 4
-  
-      // Bushes
-      [17, 3, 6],   // Bush 1
-      [15, 7, 6],   // Bush 2
-      [10, 10, 6],  // Bush 3
-      [12, 3, 6],   // Bush 4
-      [19, 9, 6],   // Bush 5
-      [9, 7, 6],    // Bush 6
-  
-      // "End of demo"
-      [15, 18, 9],  // Fin de la démo
-  
-      // Torches
-      [2, 7, 12],   // Torche 1
-      [2, 5, 12],   // Torche 2
-      [6, 7, 12],   // Torche 3
-      [6, 5, 12],   // Torche 4
-      [2, 3, 12],   // Torche 5
-      [6, 3, 12],   // Torche 6
-      [1, 9, 12],   // Torche 7
-  
-      // Ennemis
-      [4, 17, "A"],   // Ennemi 1
-      [19, 15, "A"],  // Ennemi 2
-      [21, 20, "A"],  // Ennemi 3
-  
-      // Dummy for testing, traversable car sur décorations
-      // [14, 4, "A"],
-  
-      // Sac
-      [7, 12, 17],  // Sac 1
-      [20, 4, 17],  // Sac 2
-      [13, 13, 17], // Sac 3
-  
-      // Barrel
-      [16, 9, 5],   // Barrel 1
-      [15, 13, 5],  // Barrel 2
-      [17, 7, 5],   // Barrel 3
-      [5, 11, 5],   // Barrel 4
-      [21, 6, 5],   // Barrel 5
-      [15, 11, 5],  // Barrel 6
-  
-      // Colonnes
-      [3, 7, 16],   // Colonne 1
-      [3, 5, 16],   // Colonne 2
-      [5, 5, 16],   // Colonne 3
-      [5, 7, 16],   // Colonne 4
-      [2, 1, 16],   // Colonne 5
-      [6, 1, 16],   // Colonne 6
-      [3, 11, 16],  // Colonne 7
-      [1, 11, 16],  // Colonne 8
-  
-      // Arbres
-      [16, 4, 15],  // Arbre 1
-      [10, 9, 15],  // Arbre 2
-      [11, 1, 15],  // Arbre 3
-  
-      // Mauvaises herbes 1
-      [10,1,13],[11,1,13],[12,1,13],[17,1,13],[18,1,13],[9,2,13],[11,2,13],[15,2,13],[17,2,13],[19,2,13],[10,3,13],[11,3,13],[12,3,13],[10,4,13],[11,5,13],[13,5,13],[15,5,13],[10,7,13],[14,7,13],[16,7,13],[22,7,13],[10,8,13],[12,8,13],[15,8,13],[20,8,13],[21,8,13],[22,8,13],[10,9,13],[11,9,13],[17,9,13],[18,9,13],[19,9,13],[21,9,13],[9,10,13],[17,10,13],[10,11,13],[17,11,13],[10,12,13],[11,12,13],[11,13,13],[11,14,13],
-      ];
-
     this.sprites = [];
-    
-    // zzz
-    for (let pos of spritePositions) {
-      let x = pos[0] * this.tileSize + tileSizeHalf;
-      let y = pos[1] * this.tileSize + tileSizeHalf;
 
-      let name = '';
-      let face = '';
-      let dialogue = '';
-      // par défaut, les Sprites sont bloquant lors de leur création
-      let isBlocking = true; // Valeur par défaut
-      let hp = 1;
-      let dmg = 1;
-      let spriteSell = [];
-    
-      switch (pos[2]) {
-        // "0" should be a corpse
-        case 1:
-            name = "Tarik the Thief";
-            face = "faceThief";
-            dialogue = [
-                ["facePlayer", "Alakir", "Hello there! What's the news?"],
-                [face, name, "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
-                ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
-            ];
-            break;
-        case 2:
-            name = "Guard";
-            face = "faceGuard";
-            dialogue = [
-                ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-                [face, name, "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
-                ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
-            ];
-            break;
-        case 3:
-            name = "Quill the Merchant";
-            face = "faceMerchant";
-            dialogue = [
-                ["facePlayer", "Alakir", "Hey!"],
-                [face, name, "Oy mate! Want to buy something? <br> The function is not implemented yet."],
-                ["facePlayer", "Alakir", "See you later then."]
-            ];
-            spriteSell = [magicSword, robe];
-            break;
-        case 4:
-            name = "Rock";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", "Can't be Emma Stone, right?"],
-            ];
-            break;
-        case 5:
-            name = "Barel";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", "I want to throw that at a plumber."],
-            ];
-            break;
-        case 6:
-            name = "Bush";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", "Wanna beat around the bush?"],
-            ];
-            break;
-        case 7:
-            name = "Wailing Tavern Sign";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", '"The Wailing Tavern": spooky! And sad...'],
-            ];
-            break;
-        case 8:
-            name = "PLACEHOLDER";
-            face = "facePlayer";
-            dialogue = "PLACEHOLDER";
-            break;
-        case 9:
-            name = "Treasure Chest";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", "You found the treasure!<br><br> Your adventure pays off, thanks for playing"],
-            ];
-            break;
-        case 10:
-            name = "Corpse";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", "It's dead..."],
-            ];
-            break;
-        case 11:
-            name = "Goddess Statue";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", "A statue of the Goddess. She looks happy!"],
-            ];
-            break;
-        
-        // Enemies (letters):
-        case "A":
-            name = "Bat";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", "It's dead..."],
-            ];
-
-            // définition des caractéristiques de l'ennemi
-            hp = 2;
-            dmg = 2;
-            break;
-        default:
-            name = "Error";
-            face = "facePlayer";
-            dialogue = [
-                ["facePlayer", "Alakir", "Sprite dialogue not found."],
-            ];
-            break;
-    }
-
-      // Création du sprite en utilisant les valeurs définies
-      let sprite = new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, pos[2], isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell);
-      this.sprites.push(sprite);
-    }
-
-    let spriteCount = 0;
+    // Liste pour stocker les sprites décoratifs supplémentaires
     let additionalDecoration = [];
     let additionalDecorationCount = 0;
-    let additionalDecorationSpriteCount = 1;
+    let additionalDecorationSpriteCount = 0;
 
-    // Analyse le type de sprite et associe les types de sprite appropriés
-    for (let i = 0; i < this.sprites.length; i++) {
-      let spriteType = spritePositions[i][2];
+    // Positions des sprites avec les commentaires
+    // [x, y, type, texture, face, name, dialogue, spriteSell]
 
-      // Vérifie si le type de sprite est une herbe (type 13)
-      if (spriteType === 13) {
-        // Générer des herbes supplémentaires et stockez-les dans additionalDecoration
-        for (let j = 0; j < 3; j++) {
-          let x = this.sprites[i].x + (Math.random() * 2 - 1) * tileSizeHalf;
-          let y = this.sprites[i].y + (Math.random() * 2 - 1) * tileSizeHalf;
-          let newDecoration = new Sprite(
-            x,
-            y,
-            0,
-            this.tileSize,
-            this.tileSize,
-            13
-          );
+      // Liste des positions des sprites avec les valeurs supplémentaires
+      let spritePositions = [
+        // [x, y, type, texture, face, name, dialogue, spriteSell]
+        [17, 6, 2, 1, "faceThief", "Tarik the Thief", [
+            ["facePlayer", "Alakir", "Hello there! What's the news?"],
+            ["faceThief", "Tarik the Thief", "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
+            ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
+        ], []], // Personnage 1
+        [9, 5, 2, 2, "faceGuard", "Guard", [
+            ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+            ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+            ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+        ], []], // Personnage 2
+        [4, 1, 2, 2, "faceGuard", "Guard", [
+            ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+            ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+            ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+        ], []], // Personnage 3
+        [14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
+            ["facePlayer", "Alakir", "Hey!"],
+            ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something? <br> The function is not implemented yet."],
+            ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
+        ], [robe, magicSword]], // PNJ marchant
+        
+      // Décorations
+      [7, 16, 4, 4],   // Décoration 1
+      [20, 16, 4, 4],  // Décoration 2
+      [14, 9, 7, 7],   // Décoration 3
+      [1, 6, 11, 11],  // Décoration 4
 
-          newDecoration.spriteType = 13;
+      // Bushes
+      [17, 3, 6, 6],   // Bush 1
+      [15, 7, 6, 6],   // Bush 2
+      [10, 10, 6, 6],  // Bush 3
+      [12, 3, 6, 6],   // Bush 4
+      [19, 9, 6, 6],   // Bush 5
+      [9, 7, 6, 6],    // Bush 6
 
-          newDecoration.isBlocking = false;
+      // "End of demo"
+      [15, 18, 5, 9],  // Fin de la démo
 
-          additionalDecoration.push(newDecoration);
+      // Torches
+      [2, 7, 12, 12],   // Torche 1
+      [2, 5, 12, 12],   // Torche 2
+      [6, 7, 12, 12],   // Torche 3
+      [6, 5, 12, 12],   // Torche 4
+      [2, 3, 12, 12],   // Torche 5
+      [6, 3, 12, 12],   // Torche 6
+      [1, 9, 12, 12],   // Torche 7
 
-          // console.log('3 herbes générées.')
-          additionalDecorationCount++;
+      // Ennemis
+      [4, 17, "A", "A"],   // Ennemi 1
+      [19, 15, "A", "A"],  // Ennemi 2
+      [21, 20, "A", "A"],  // Ennemi 3
+
+      // Dummy for testing
+      // [14, 4, "A", "A"],
+
+      // Sac
+      [7, 12, 17, 17],  // Sac 1
+      [20, 4, 17, 17],  // Sac 2
+      [13, 13, 17, 17], // Sac 3
+
+      // Barrel
+      [16, 9, 5, 5],   // Barrel 1
+      [15, 13, 5, 5],  // Barrel 2
+      [17, 7, 5, 5],   // Barrel 3
+      [5, 11, 5, 5],   // Barrel 4
+      [21, 6, 5, 5],   // Barrel 5
+      [15, 11, 5, 5],  // Barrel 6
+
+      // Colonnes
+      [3, 7, 16, 16],   // Colonne 1
+      [3, 5, 16, 16],   // Colonne 2
+      [5, 5, 16, 16],   // Colonne 3
+      [5, 7, 16, 16],   // Colonne 4
+      [2, 1, 16, 16],   // Colonne 5
+      [6, 1, 16, 16],   // Colonne 6
+      [3, 11, 16, 16],  // Colonne 7
+      [1, 11, 16, 16],  // Colonne 8
+
+      // Arbres
+      [16, 4, 15, 15],  // Arbre 1
+      [10, 9, 15, 15],  // Arbre 2
+      [11, 1, 15, 15],  // Arbre 3
+
+      // Mauvaises herbes 1
+      [10, 1, 13, 13], [11, 1, 13, 13], [12, 1, 13, 13], [17, 1, 13, 13], [18, 1, 13, 13], [9, 2, 13, 13], [11, 2, 13, 13], [15, 2, 13, 13], [17, 2, 13, 13], [19, 2, 13, 13], [10, 3, 13, 13], [11, 3, 13, 13], [12, 3, 13, 13], [10, 4, 13, 13], [11, 5, 13, 13], [13, 5, 13, 13], [15, 5, 13, 13], [10, 7, 13, 13], [14, 7, 13, 13], [16, 7, 13, 13], [22, 7, 13, 13], [10, 8, 13, 13], [12, 8, 13, 13], [15, 8, 13, 13], [20, 8, 13, 13], [21, 8, 13, 13], [22, 8, 13, 13], [10, 9, 13, 13], [11, 9, 13, 13], [17, 9, 13, 13], [18, 9, 13, 13], [19, 9, 13, 13], [21, 9, 13, 13], [9, 10, 13, 13], [17, 10, 13, 13], [10, 11, 13, 13], [17, 11, 13, 13], [10, 12, 13, 13], [11, 12, 13, 13], [11, 13, 13, 13], [11, 14, 13, 13],
+    ];
+
+    for (let pos of spritePositions) {
+        let x = pos[0] * this.tileSize + tileSizeHalf;
+        let y = pos[1] * this.tileSize + tileSizeHalf;
+
+        let type = pos[2];
+        let texture = pos[3];
+        let face = pos[4];
+        let name = pos[5];
+        let dialogue = pos[6];
+        let spriteSell = pos[7] || [];
+
+        // valeur par défaut, 
+        // à changer selon la liste ou le type (pour l'instant osef)
+        let hp = 2;
+        let dmg = 1;
+
+        // cette étape de vérification fait planter la génération de spriteDecoratifs.
+        // Logique, car il vérifie si le type est == 13, or, si pas de visage, nom, dialogue => sprite.type = 1
+        /*
+        // Si les valeurs de dialogue, face et name ne sont pas définies, le sprite est considéré comme un décor sans interaction (type 1)
+        if (!dialogue && !face && !name) {
+            type = 1;
         }
+        */
 
-        additionalDecorationSpriteCount++;
+        // Si le type de sprite est 13 (herbe), générez des décorations supplémentaires
+        if (type === 13) {
+          // Générer des herbes supplémentaires et stockez-les dans additionalDecoration
+          for (let j = 0; j < 3; j++) {
+              // positionnement aléatoire
+              let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
+              let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
+              
+              let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
 
-        // Supprimez l'herbe d'origine de this.sprites
-        // bug du sprite.spriteType O qui apparait. Problème JS je pense.
-        this.sprites.splice(i, 1);
-        i--; // Décrémentez i pour compenser la suppression de l'entrée et éviter de sauter un sprite
-      } else {
-        this.sprites[i].spriteType = spriteType;
-        spriteCount++;
-      }
+              newDecoration.spriteTexture = 13;
+
+              newDecoration.spriteType = 1; // Type 1 pour les décorations sans interaction
+              newDecoration.isBlocking = false;
+
+              additionalDecoration.push(newDecoration);
+
+              additionalDecorationCount++;
+          }
+          additionalDecorationSpriteCount++;
+        } else {
+          // Créer le sprite avec isBlocking en fonction du type
+          let isBlocking = true;
+          this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell));
+        }
     }
 
-    console.log(spriteCount + " sprites créés.");
-    console.log(
-      additionalDecorationCount +
-        " sprites décoratifs générés pour " +
-        additionalDecorationSpriteCount +
-        " cases de décorations."
-    );
-
+    // Ajoutez les décorations supplémentaires à la liste principale de sprites
     for (let newDecoration of additionalDecoration) {
-      this.sprites.push(newDecoration);
+        this.sprites.push(newDecoration);
     }
+
+    console.log(this.sprites.length + " sprites créés.");
+    console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
   }
 
   resetSpriteHits() {
@@ -1717,7 +1604,6 @@ class Raycaster {
   /// CONTROLES
   //////////////////////////////////////////////////////////////////////////////
 
-  // zzz
   // Case selon type de bouton appuyée, les ID sont liées à un nombre dans "bindKeysAndButtons"
   handleButtonClick(buttonNumber) {
     switch (buttonNumber) {
@@ -2120,6 +2006,7 @@ class Raycaster {
     let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
     let srcW = 1;
 
+    // zzz
     if (srcX >= 0 && srcX < this.textureSize) {
       // Créez un objet (ou tableau) pour stocker les données associées à chaque spriteType
       const spriteData = {
@@ -2146,11 +2033,11 @@ class Raycaster {
       };
 
       // Utilisez la structure de données pour accéder aux données appropriées en fonction de spriteType
-      const spriteType = rayHit.sprite.spriteType;
+      const spriteTexture = rayHit.sprite.spriteTexture;
       const spriteFlash = rayHit.sprite.spriteFlash;
 
-      if (spriteData.hasOwnProperty(spriteType)) {
-        this.drawTexturedRect(spriteData[spriteType],srcX,0,srcW,
+      if (spriteData.hasOwnProperty(spriteTexture)) {
+        this.drawTexturedRect(spriteData[spriteTexture],srcX,0,srcW,
           this.textureSize,dstX,rc.y,this.stripWidth,rc.h,spriteFlash
         );
       }
@@ -3027,10 +2914,9 @@ class Raycaster {
     }
 
 
-    // zzz
+
     // COLLISION SPRITE
-    // algo de vérification des blocage de sprites
-    // NOUVEAU : prends en compte la valeur "blocking" dans Sprite
+    // prends en compte la valeur "blocking" dans Sprite
     // Si le sprite est bloquant (isBlocking==true), obstacle on path est true (bloquant)
 
     for (let i = 0; i < this.sprites.length; i++) {
@@ -3121,7 +3007,6 @@ class Raycaster {
       }
 
       // zzz
-      // turn
       // Vérification si la case devant le joueur contient un sprite
       for (let i = 0; i < this.sprites.length; i++) {
         const spriteType = this.sprites[i].spriteType;
@@ -3138,26 +3023,33 @@ class Raycaster {
               }
               break;
             case 0:
+              // cadavre
+              this.sprites[i].talk(this.sprites[i].spriteTalk, this.sprites[i].spriteFace);
+              this.player.turn = false;
+              break;
             case 1:
+              // décoration
+              // les décorations traversables peuvent rester ainsi (car générée automatiquement avec isBlocking = false)
+              break;
             case 2:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 10:
-            case 11:
-            case 14:
+              // PNJ dialogue
               this.sprites[i].talk(this.sprites[i].spriteTalk, this.sprites[i].spriteFace);
               this.player.turn = false;
               break;
             case 3:
+              // PNJ vendeur
               this.player.turn = false;
               this.sprites[i].displayItemsForSale(this.player); 
               break
-            case 9:
+            case 4:
+              // Quest Giver
+              break;
+            case 5:
+              // Quest Objective
               this.player.quests[0].complete();
               Sprite.resetToggle();
+              break;
+            case 9:
               break
             default:
               Sprite.resetToggle();
