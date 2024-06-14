@@ -92,7 +92,10 @@ function updateProgressBar(id, value, max) {
   progress.style.width = `${percentage}%`;
 }
 
-// zzz
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Sprite Class
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class Sprite {
   constructor(
     x = 0,
@@ -106,8 +109,8 @@ class Sprite {
     isBlocking = true,
     attackable = false,
     turn = true,
-    hp = 3,
-    dmg = 3,
+    hp = 1,
+    dmg = 1,
     animationProgress = 0,
     spriteName = '',
     spriteFace = '',
@@ -281,7 +284,7 @@ class Sprite {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Gestion des dialogues avec Sprite
+// Gestion des dialogues
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   countDialogues() {
@@ -340,7 +343,7 @@ class Sprite {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Animation de combat
+// Animation de combat à revoir
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   async startSpriteFlash() {
@@ -453,6 +456,10 @@ class Sprite {
     }
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Classe d'un rayon (raycaster)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Holds information about a wall hit from a single ray
 class RayHit {
@@ -683,7 +690,6 @@ const sparksSpell = new Spell(
   "🗲"
 );
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quêtes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -714,7 +720,9 @@ class Quest {
     false
   );
 
-// moteur de jeu /////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// moteur de jeu
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Raycaster {
   static get TWO_PI() {
@@ -724,6 +732,10 @@ class Raycaster {
   static get MINIMAP_SCALE() {
     return 8;
   }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Carte
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   initMap() {
     // carte 
@@ -757,6 +769,10 @@ class Raycaster {
   ];
   }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Joueur
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   initPlayer() {
     const tileSizeHalf = Math.floor(this.tileSize / 2);
 
@@ -768,6 +784,8 @@ class Raycaster {
       z: 0,
       dir: 0,
       rot: 4.71238898038469,
+      // zzz
+      quadrant : "",
       speed: 0,
 
       moveSpeed: Math.round(this.tileSize / ((DESIRED_FPS / 60.0) * 16)),
@@ -821,6 +839,137 @@ class Raycaster {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// méthode calcul quadrant et stockage de la valeur dans Player
+// refactorisation de la méthode Move(), subdivisée en sous-méthodes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  playerQuadrant(player) {
+    const quadrants = [
+        { min: 337.5, max: 360, name: "ouest" },
+        { min: 0, max: 22.5, name: "ouest" },
+        { min: 22.5, max: 67.5, name: "nord-ouest" },
+        { min: 67.5, max: 112.5, name: "nord" },
+        { min: 112.5, max: 157.5, name: "nord-est" },
+        { min: 157.5, max: 202.5, name: "est" },
+        { min: 202.5, max: 247.5, name: "sud-est" },
+        { min: 247.5, max: 292.5, name: "sud" },
+        { min: 292.5, max: 337.5, name: "sud-ouest" }
+    ];
+
+    for (const quadrant of quadrants) {
+        if ((player.rot >= quadrant.min * (Math.PI / 180) && player.rot < quadrant.max * (Math.PI / 180))) {
+            player.quadrant = quadrant.name;
+            // console.log(player.quadrant);
+            return;
+        }
+    }
+    // console.log("rot is out of range - need angle in radians between 0 and 2PI");
+  }
+  
+  handleSlidingCollision(player) {
+    const { x, y, quadrant } = player;
+    const tileSize = this.tileSize;
+    const map = this.map;
+
+    const slidingMovements = {
+        "sud-ouest": [{ y: 30, x: 0 }, { y: 0, x: 30 }],
+        "sud-est": [{ y: 30, x: 0 }, { y: 0, x: -30 }],
+        "nord-ouest": [{ y: -30, x: 0 }, { y: 0, x: 30 }],
+        "nord-est": [{ y: -30, x: 0 }, { y: 0, x: -30 }]
+    };
+
+    const movements = slidingMovements[quadrant] || [];
+
+    for (const movement of movements) {
+        const newX = x + movement.x;
+        const newY = y + movement.y;
+        const tileX = Math.floor(newX / tileSize);
+        const tileY = Math.floor(newY / tileSize);
+
+        if (map[tileY][tileX] === 0) {
+            player.x = newX;
+            player.y = newY;
+            break;
+        }
+    }
+  }
+
+  calculateFrontPosition() {
+    const player = this.player;
+    if (!player) {
+        console.error('Player is undefined');
+        return { frontX: null, frontY: null };
+    }
+
+    const { x, y, quadrant } = player;
+
+    const frontOffsets = {
+        "nord-ouest": { x: 0.5, y: -0.5 },
+        "nord": { x: 0, y: -1 },
+        "nord-est": { x: -0.5, y: -0.5 },
+        "est": { x: -1, y: 0 },
+        "sud-est": { x: -0.5, y: 0.5 },
+        "sud": { x: 0, y: 1 },
+        "sud-ouest": { x: 0.5, y: 0.5 },
+        "ouest": { x: 1, y: 0 }
+    };
+
+    const offset = frontOffsets[quadrant];
+    const frontX = Math.floor((x / this.tileSize) + offset.x);
+    const frontY = Math.floor((y / this.tileSize) + offset.y);
+
+    return { frontX, frontY };
+  }
+
+  handleSpriteAction(action) {
+    if (!action || !this.player || !this.player.turn) return;
+
+    const { frontX, frontY } = this.calculateFrontPosition();
+
+    if (frontX === null || frontY === null) {
+        console.error('Failed to calculate front position');
+        return;
+    }
+
+    for (const sprite of this.sprites) {
+        if (Math.floor(sprite.x / this.tileSize) === frontX && Math.floor(sprite.y / this.tileSize) === frontY) {
+            switch (sprite.spriteType) {
+                case "A":
+                    this.player.combatSpell
+                        ? sprite.combatSpell(this.player, sprite)
+                        : sprite.combat(this.player.might, this.player.criti, this.player);
+                    break;
+                case 0:
+                    sprite.talk(sprite.spriteTalk, sprite.spriteFace);
+                    this.player.turn = false;
+                    break;
+                case 1:
+                    // décoration, ne rien faire
+                    break;
+                case 2:
+                    sprite.talk(sprite.spriteTalk, sprite.spriteFace);
+                    this.player.turn = false;
+                    break;
+                case 3:
+                    sprite.displayItemsForSale(this.player);
+                    this.player.turn = false;
+                    break;
+                case 4:
+                    // gestion des quêteurs
+                    break;
+                case 5:
+                    this.player.quests[0].complete();
+                    Sprite.resetToggle();
+                    break;
+                default:
+                    Sprite.resetToggle();
+                    break;
+            }
+          }
+        }
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // sélection et lancement de sort
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -849,7 +998,7 @@ class Raycaster {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// fonction update
+// fonction update des stats du joueurs (à chauqe seconde, à intégrer au gamecycle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   statsUpdate(player) {
@@ -1222,8 +1371,9 @@ class Raycaster {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Initialisation des sprites
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  // zzz
   initSprites() {
     // Mettre le sprite au centre de la cellule
     const tileSizeHalf = Math.floor(this.tileSize / 2);
@@ -1258,35 +1408,12 @@ class Raycaster {
         ], []], // Personnage 3
         [14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
             ["facePlayer", "Alakir", "Hey!"],
-            ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something? <br> The function is not implemented yet."],
+            ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something?"],
             ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
         ], [robe, magicSword]], // PNJ marchant
-        
-      // Décorations
-      [7, 16, 4, 4],   // Décoration 1
-      [20, 16, 4, 4],  // Décoration 2
-      [14, 9, 7, 7],   // Décoration 3
-      [1, 6, 11, 11],  // Décoration 4
-
-      // Bushes
-      [17, 3, 6, 6],   // Bush 1
-      [15, 7, 6, 6],   // Bush 2
-      [10, 10, 6, 6],  // Bush 3
-      [12, 3, 6, 6],   // Bush 4
-      [19, 9, 6, 6],   // Bush 5
-      [9, 7, 6, 6],    // Bush 6
 
       // "End of demo"
       [15, 18, 5, 9],  // Fin de la démo
-
-      // Torches
-      [2, 7, 12, 12],   // Torche 1
-      [2, 5, 12, 12],   // Torche 2
-      [6, 7, 12, 12],   // Torche 3
-      [6, 5, 12, 12],   // Torche 4
-      [2, 3, 12, 12],   // Torche 5
-      [6, 3, 12, 12],   // Torche 6
-      [1, 9, 12, 12],   // Torche 7
 
       // Ennemis
       [4, 17, "A", "A"],   // Ennemi 1
@@ -1296,36 +1423,61 @@ class Raycaster {
       // Dummy for testing
       // [14, 4, "A", "A"],
 
+      // Décorations
+      [7, 16, 1, 4],   // Décoration 1
+      [20, 16, 1, 4],  // Décoration 2
+      [14, 9, 2, 7, "facePlayer", "facePlayer", [
+        ["facePlayer", "Quill's shop", "Hard discount on adventure gear (No refund in case of death)"],
+      ], []], // Décoration 3 - Pancarte "Quill's Shop"
+      [1, 6, 1, 11],  // Décoration 4
+
+      // Bushes
+      [17, 3, 1, 6],   // Bush 1
+      [15, 7, 1, 6],   // Bush 2
+      [10, 10, 1, 6],  // Bush 3
+      [12, 3, 1, 6],   // Bush 4
+      [19, 9, 1, 6],   // Bush 5
+      [9, 7, 1, 6],    // Bush 6
+
+      // Torches
+      [2, 7, 1, 12],   // Torche 1
+      [2, 5, 1, 12],   // Torche 2
+      [6, 7, 1, 12],   // Torche 3
+      [6, 5, 1, 12],   // Torche 4
+      [2, 3, 1, 12],   // Torche 5
+      [6, 3, 1, 12],   // Torche 6
+      [1, 9, 1, 12],   // Torche 7
+
       // Sac
-      [7, 12, 17, 17],  // Sac 1
-      [20, 4, 17, 17],  // Sac 2
-      [13, 13, 17, 17], // Sac 3
+      [7, 12, 1, 17],  // Sac 1
+      [20, 4, 1, 17],  // Sac 2
+      [13, 13, 1, 17], // Sac 3
 
       // Barrel
-      [16, 9, 5, 5],   // Barrel 1
-      [15, 13, 5, 5],  // Barrel 2
-      [17, 7, 5, 5],   // Barrel 3
-      [5, 11, 5, 5],   // Barrel 4
-      [21, 6, 5, 5],   // Barrel 5
-      [15, 11, 5, 5],  // Barrel 6
+      [16, 9, 1, 5],   // Barrel 1
+      [15, 13, 1, 5],  // Barrel 2
+      [17, 7, 1, 5],   // Barrel 3
+      [5, 11, 1, 5],   // Barrel 4
+      [21, 6, 1, 5],   // Barrel 5
+      [15, 11, 1, 5],  // Barrel 6
 
       // Colonnes
-      [3, 7, 16, 16],   // Colonne 1
-      [3, 5, 16, 16],   // Colonne 2
-      [5, 5, 16, 16],   // Colonne 3
-      [5, 7, 16, 16],   // Colonne 4
-      [2, 1, 16, 16],   // Colonne 5
-      [6, 1, 16, 16],   // Colonne 6
-      [3, 11, 16, 16],  // Colonne 7
-      [1, 11, 16, 16],  // Colonne 8
+      [3, 7, 1, 16],   // Colonne 1
+      [3, 5, 1, 16],   // Colonne 2
+      [5, 5, 1, 16],   // Colonne 3
+      [5, 7, 1, 16],   // Colonne 4
+      [2, 1, 1, 16],   // Colonne 5
+      [6, 1, 1, 16],   // Colonne 6
+      [3, 11, 1, 16],  // Colonne 7
+      [1, 11, 1, 16],  // Colonne 8
 
       // Arbres
-      [16, 4, 15, 15],  // Arbre 1
-      [10, 9, 15, 15],  // Arbre 2
-      [11, 1, 15, 15],  // Arbre 3
+      [16, 4, 1, 15],  // Arbre 1
+      [10, 9, 1, 15],  // Arbre 2
+      [11, 1, 1, 15],  // Arbre 3
 
-      // Mauvaises herbes 1
-      [10, 1, 13, 13], [11, 1, 13, 13], [12, 1, 13, 13], [17, 1, 13, 13], [18, 1, 13, 13], [9, 2, 13, 13], [11, 2, 13, 13], [15, 2, 13, 13], [17, 2, 13, 13], [19, 2, 13, 13], [10, 3, 13, 13], [11, 3, 13, 13], [12, 3, 13, 13], [10, 4, 13, 13], [11, 5, 13, 13], [13, 5, 13, 13], [15, 5, 13, 13], [10, 7, 13, 13], [14, 7, 13, 13], [16, 7, 13, 13], [22, 7, 13, 13], [10, 8, 13, 13], [12, 8, 13, 13], [15, 8, 13, 13], [20, 8, 13, 13], [21, 8, 13, 13], [22, 8, 13, 13], [10, 9, 13, 13], [11, 9, 13, 13], [17, 9, 13, 13], [18, 9, 13, 13], [19, 9, 13, 13], [21, 9, 13, 13], [9, 10, 13, 13], [17, 10, 13, 13], [10, 11, 13, 13], [17, 11, 13, 13], [10, 12, 13, 13], [11, 12, 13, 13], [11, 13, 13, 13], [11, 14, 13, 13],
+      // Herbes
+      [10, 1, 10, 13], [11, 1, 10, 13], [12, 1, 10, 13], [17, 1, 10, 13], [18, 1, 10, 13], [9, 2, 10, 13], [11, 2, 10, 13], [15, 2, 10, 13], [17, 2, 10, 13], [19, 2, 10, 13], [10, 3, 10, 13], [11, 3, 10, 13], [12, 3, 10, 13], [10, 4, 10, 13], [11, 5, 10, 13], [13, 5, 10, 13], [15, 5, 10, 13], [10, 7, 10, 13], [14, 7, 10, 13], [16, 7, 10, 13], [22, 7, 10, 13], [10, 8, 10, 13], [12, 8, 10, 13], [15, 8, 10, 13], [20, 8, 10, 13], [21, 8, 10, 13], [22, 8, 10, 13], [10, 9, 10, 13], [11, 9, 10, 13], [17, 9, 10, 13], [18, 9, 10, 13], [19, 9, 10, 13], [21, 9, 10, 13], [9, 10, 10, 13], [17, 10, 10, 13], [10, 11, 10, 13], [17, 11, 10, 13], [10, 12, 10, 13], [11, 12, 10, 13], [11, 13, 10, 13], [11, 14, 10, 13],
     ];
 
     for (let pos of spritePositions) {
@@ -1344,20 +1496,10 @@ class Raycaster {
         let hp = 2;
         let dmg = 1;
 
-        // cette étape de vérification fait planter la génération de spriteDecoratifs.
-        // Logique, car il vérifie si le type est == 13, or, si pas de visage, nom, dialogue => sprite.type = 1
-        /*
-        // Si les valeurs de dialogue, face et name ne sont pas définies, le sprite est considéré comme un décor sans interaction (type 1)
-        if (!dialogue && !face && !name) {
-            type = 1;
-        }
-        */
-
-        // Si le type de sprite est 13 (herbe), générez des décorations supplémentaires
-        if (type === 13) {
+        // Si le type de sprite est 10 (sprites décoratifs), générez des décorations supplémentaires
+        if (type === 10) {
           // Générer des herbes supplémentaires et stockez-les dans additionalDecoration
           for (let j = 0; j < 3; j++) {
-              // positionnement aléatoire
               let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
               let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
               
@@ -1365,7 +1507,7 @@ class Raycaster {
 
               newDecoration.spriteTexture = 13;
 
-              newDecoration.spriteType = 1; // Type 1 pour les décorations sans interaction
+              newDecoration.spriteType = 1;
               newDecoration.isBlocking = false;
 
               additionalDecoration.push(newDecoration);
@@ -1378,6 +1520,10 @@ class Raycaster {
           let isBlocking = true;
           this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell));
         }
+
+        if (!dialogue && !face && !name) {
+            type = 1;
+        }      
     }
 
     // Ajoutez les décorations supplémentaires à la liste principale de sprites
@@ -1388,6 +1534,10 @@ class Raycaster {
     console.log(this.sprites.length + " sprites créés.");
     console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
   }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Méthode intersection rayon avec sprite
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   resetSpriteHits() {
     for (let sprite of this.sprites) {
@@ -1410,6 +1560,10 @@ class Raycaster {
     }
     return spritesFound;
   }
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Canvas 
+///////////////////////////////////////////////////////////////////////////////////////////////
 
   constructor(
     mainCanvas,
@@ -1600,9 +1754,9 @@ class Raycaster {
     });
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  /// CONTROLES
-  //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+/// CONTROLES - liaisons des boutons à un événement
+//////////////////////////////////////////////////////////////////////////////
 
   // Case selon type de bouton appuyée, les ID sont liées à un nombre dans "bindKeysAndButtons"
   handleButtonClick(buttonNumber) {
@@ -1724,9 +1878,9 @@ class Raycaster {
       this2.keysDown[e.keyCode] = false;
     };
   
-    /////////////////////////////////////////////////////////
-    //  JOYSTICK
-    /////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+//  CONTROLES - JOYSTICK
+/////////////////////////////////////////////////////////
   
     document.addEventListener("joystickchange", function (event) {
       const { up, down, left, right } = event.detail;
@@ -1746,11 +1900,10 @@ class Raycaster {
       }
     });
   
-    /////////////////////////////////////////////////////////
-    //  END - JOYSTICK
-    /////////////////////////////////////////////////////////
-  
-    // Liaison des boutons
+/////////////////////////////////////////////////////////
+// Liaison des boutons avec événement
+/////////////////////////////////////////////////////////  
+
     this.bindButton("button1", 1);
     this.bindButton("button2", 2);
     this.bindButton("button3", 3);
@@ -1768,9 +1921,9 @@ class Raycaster {
     this.bindButton("nextSpell", 15);
   }
   
-  //////////////////////////////////////////////////////////////////////////////
-  /// HORLOGE DU JEUX / GAMECYCLE
-  //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+/// HORLOGE DU JEUX / GAMECYCLE
+//////////////////////////////////////////////////////////////////////////////
 
   gameCycle() {
     const now = Date.now();
@@ -1789,7 +1942,7 @@ class Raycaster {
     });
 
 //////////////////////////////////////////////////////////////////////////////
-/// UNITE TEMPORELLE ("TOUR")
+/// UNITE TEMPORELLE ("TOUR") redondant
 //////////////////////////////////////////////////////////////////////////////
 
     // NOTE : 
@@ -1814,6 +1967,10 @@ class Raycaster {
   stripScreenHeight(screenDistance, correctDistance, heightInGame) {
     return Math.round((screenDistance / correctDistance) * heightInGame);
   }
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// drawwall - gestion prototype des differentes texture et hauteur
+///////////////////////////////////////////////////////////////////////////////////////////////
 
   drawTexturedRect(
     imgdata,
@@ -1861,6 +2018,8 @@ class Raycaster {
       screenStartX = 0;
     }
 
+    // zzz dessin de chaque sprite
+    // y compris les étapes d'animation
     for (
       let texY = texStartY, screenY = screenStartY;
       screenY < dstEndY && screenY < this.displayHeight;
@@ -1983,6 +2142,10 @@ class Raycaster {
     }
   }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+// fonction drawsprite, ou les textures des sprites sont gérées
+///////////////////////////////////////////////////////////////////////////////////////////////
+
   drawSpriteStrip(rayHit) {
     // ligne à supprimer si pas de bug dans la version > α0.6
     // let sprite = rayHit.sprite
@@ -2006,7 +2169,7 @@ class Raycaster {
     let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
     let srcW = 1;
 
-    // zzz
+// zzz
     if (srcX >= 0 && srcX < this.textureSize) {
       // Créez un objet (ou tableau) pour stocker les données associées à chaque spriteType
       const spriteData = {
@@ -2751,6 +2914,10 @@ class Raycaster {
     objectCtx.stroke();
   }
 
+//////////////////////////////////////////////////////////////////////////////
+/// Gestion interaction joueur avec monde (Move/Action)
+//////////////////////////////////////////////////////////////////////////////
+
   async move(timeElapsed) {
     // écoute des changement d'état des variables
     let up = this.keysDown[KEY_UP] || this.keysDown[KEY_W];
@@ -2815,107 +2982,21 @@ class Raycaster {
       this.player.dir = 0;
     }
 
-    // Calculate the direction based on the player's rotation
-    let quadrant;
-    
-    if (
-      (this.player.rot >= 337.5 * (Math.PI / 180) &&
-        this.player.rot < 360 * (Math.PI / 180)) ||
-      (this.player.rot >= 0 && this.player.rot < 22.5 * (Math.PI / 180))
-    ) {
-      quadrant = "ouest";
-    } else if (
-      this.player.rot >= 22.5 * (Math.PI / 180) &&
-      this.player.rot < 67.5 * (Math.PI / 180)
-    ) {
-      quadrant = "nord-ouest";
-    } else if (
-      this.player.rot >= 67.5 * (Math.PI / 180) &&
-      this.player.rot < 112.5 * (Math.PI / 180)
-    ) {
-      quadrant = "nord";
-    } else if (
-      this.player.rot >= 112.5 * (Math.PI / 180) &&
-      this.player.rot < 157.5 * (Math.PI / 180)
-    ) {
-      quadrant = "nord-est";
-    } else if (
-      this.player.rot >= 157.5 * (Math.PI / 180) &&
-      this.player.rot < 202.5 * (Math.PI / 180)
-    ) {
-      quadrant = "est";
-    } else if (
-      this.player.rot >= 202.5 * (Math.PI / 180) &&
-      this.player.rot < 247.5 * (Math.PI / 180)
-    ) {
-      quadrant = "sud-est";
-    } else if (
-      this.player.rot >= 247.5 * (Math.PI / 180) &&
-      this.player.rot < 292.5 * (Math.PI / 180)
-    ) {
-      quadrant = "sud";
-    } else if (
-      this.player.rot >= 292.5 * (Math.PI / 180) &&
-      this.player.rot < 337.5 * (Math.PI / 180)
-    ) {
-      quadrant = "sud-ouest";
-    } else {
-      console.log(
-        "rot is out of range - need angle in radians between 0 and 2PI"
-      );
-    }
-    //console.log(quadrant);
+///////////////////////////////////////////////////////////////////////////////////////////////
+//CALCUL DU QUADRANT CAMERA et collision glissante
+///////////////////////////////////////////////////////////////////////////////////////////////
 
-    // c'était l'origine du problème, vérifier fonction
+    this.playerQuadrant(this.player);
 
     if (this.isBlocking(cellX, cellY)) {
-
-    // collision glissante = conséquence de isBlocking(true)
-    // isBlocking est muni d'un système de collision glissante très rudimentaire
-    // la collision glissante prend en compte 360°, excluant les angles 0, 90, 180, 270 (360 = 0):
-    // pas de "glissade" si on est parfaitement perpendiculaire ou parallèle aux murs.
-
-          // sud ouest :
-             if ( this.player.rot > 270 * (Math.PI / 180) &&
-                  this.player.rot < 360 * (Math.PI / 180)) {
-          if (this.map[Math.floor((this.player.y + 30)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
-            this.player.y += 10;
-          } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x + 30) /this.tileSize)] === 0) {
-            this.player.x += 10;
-          }
-
-          // sud est :
-      } else if ( this.player.rot > 180 * (Math.PI / 180) &&
-                  this.player.rot < 270 * (Math.PI / 180)) {
-        if (this.map[Math.floor((this.player.y + 30)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
-            this.player.y += 10;
-          } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 30)/this.tileSize)] === 0) {
-            this.player.x -= 10;
-          }
-
-          // nord ouest :
-      } else if ( this.player.rot > 0 * (Math.PI / 180) &&
-                  this.player.rot < 90 * (Math.PI / 180)) {
-        if (this.map[Math.floor((this.player.y - 30)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
-          this.player.y -= 10;
-        } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 30)/this.tileSize)] === 0) {
-          this.player.x += 10;
-        }
-        // nord est
-      } else if ( this.player.rot > 90 * (Math.PI / 180) &&
-                  this.player.rot < 180 * (Math.PI / 180)) {
-        if (this.map[Math.floor((this.player.y - 30)/this.tileSize)][Math.floor(this.player.x/this.tileSize)] === 0) {
-          this.player.y -= 10;
-        } else if (this.map[Math.floor(this.player.y/this.tileSize)][Math.floor((this.player.x - 30)/this.tileSize)] === 0) {
-          this.player.x -= 10;
-        }
-      }
+      this.handleSlidingCollision(this.player);
       return;
     }
 
+//////////////////////////////////////////////////////////////////////////////
+// COLLISION SPRITE
+//////////////////////////////////////////////////////////////////////////////
 
-
-    // COLLISION SPRITE
     // prends en compte la valeur "blocking" dans Sprite
     // Si le sprite est bloquant (isBlocking==true), obstacle on path est true (bloquant)
 
@@ -2937,9 +3018,9 @@ class Raycaster {
       // ok, tout va
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // ACTION ET TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+// ACTION ET TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
+///////////////////////////////////////////////////////////////////////////////////////////////
 
     // action = true quand appuie sur sort d'attaque
     // bouléen pour préciser que c'est la fonction d'attaque
@@ -2952,118 +3033,25 @@ class Raycaster {
       }
     }
 
-    // YOUTURN
-    if (action && this.player.turn == true) {
+///////////////////////////////////////////////////////////////////////////////////////////////
+// ACTION Selon sprite type
+///////////////////////////////////////////////////////////////////////////////////////////////
 
-      this.actionButtonClicked = false;
-    
-      let frontX;
-      let frontY;
+    if (action && this.player && this.player.turn == true) {
+      this.handleSpriteAction(action);
+  }
 
-      if (quadrant === "nord-ouest") {
-        // nord-ouest
-        frontX = Math.floor(
-          (this.player.x + this.tileSize / 2) / this.tileSize
-        );
-        frontY = Math.floor(
-          (this.player.y - this.tileSize / 2) / this.tileSize
-        );
-      } else if (quadrant === "nord") {
-        // nord
-        frontX = Math.floor(this.player.x / this.tileSize);
-        frontY = Math.floor((this.player.y - this.tileSize) / this.tileSize);
-      } else if (quadrant === "nord-est") {
-        // nord-est
-        frontX = Math.floor(
-          (this.player.x - this.tileSize / 2) / this.tileSize
-        );
-        frontY = Math.floor(
-          (this.player.y - this.tileSize / 2) / this.tileSize
-        );
-      } else if (quadrant === "est") {
-        // est
-        frontX = Math.floor((this.player.x - this.tileSize) / this.tileSize);
-        frontY = Math.floor(this.player.y / this.tileSize);
-      } else if (quadrant === "sud-est") {
-        // sud-est
-        frontX = Math.floor(
-          (this.player.x - this.tileSize / 2) / this.tileSize
-        );
-        frontY = Math.floor((this.player.y + this.tileSize) / this.tileSize);
-      } else if (quadrant === "sud") {
-        // sud
-        frontX = Math.floor(this.player.x / this.tileSize);
-        frontY = Math.floor((this.player.y + this.tileSize) / this.tileSize);
-      } else if (quadrant === "sud-ouest") {
-        // sud-ouest
-        frontX = Math.floor(
-          (this.player.x + this.tileSize / 2) / this.tileSize
-        );
-        frontY = Math.floor((this.player.y + this.tileSize) / this.tileSize);
-      } else if (quadrant === "ouest") {
-        // ouest
-        frontX = Math.floor((this.player.x + this.tileSize) / this.tileSize);
-        frontY = Math.floor(this.player.y / this.tileSize);
-      }
-
-      // zzz
-      // Vérification si la case devant le joueur contient un sprite
-      for (let i = 0; i < this.sprites.length; i++) {
-        const spriteType = this.sprites[i].spriteType;
-        const spriteX = Math.floor(this.sprites[i].x / this.tileSize);
-        const spriteY = Math.floor(this.sprites[i].y / this.tileSize);
-
-        if (spriteX === frontX && spriteY === frontY) {
-          switch (spriteType) {
-            case "A":            
-              if (this.player.combatSpell === false) {
-                this.sprites[i].combat(this.player.might, this.player.criti, this.player); 
-              } else {
-                this.sprites[i].combatSpell(this.player, this.sprites[i]);
-              }
-              break;
-            case 0:
-              // cadavre
-              this.sprites[i].talk(this.sprites[i].spriteTalk, this.sprites[i].spriteFace);
-              this.player.turn = false;
-              break;
-            case 1:
-              // décoration
-              // les décorations traversables peuvent rester ainsi (car générée automatiquement avec isBlocking = false)
-              break;
-            case 2:
-              // PNJ dialogue
-              this.sprites[i].talk(this.sprites[i].spriteTalk, this.sprites[i].spriteFace);
-              this.player.turn = false;
-              break;
-            case 3:
-              // PNJ vendeur
-              this.player.turn = false;
-              this.sprites[i].displayItemsForSale(this.player); 
-              break
-            case 4:
-              // Quest Giver
-              break;
-            case 5:
-              // Quest Objective
-              this.player.quests[0].complete();
-              Sprite.resetToggle();
-              break;
-            case 9:
-              break
-            default:
-              Sprite.resetToggle();
-              break;
-          }
-        }
-      }
-    }
+///////////////////////////////////////////////////////////////////////////////////////////////
+// ACTION Téléporteur
+///////////////////////////////////////////////////////////////////////////////////////////////
 
     // vérification téléporteurs
+
     /* 
         Memo organisation des téléporteurs
         const mapEventX = [[Y, X, Rotation, RenduPlafond, TexturePlafond, HauteurPlafond, TextureSol, Contextualisation],]];
-        */
+    */
+
     // from outside
     const mapEventA = [
       [17, 5, ouest, false, 3, 2, 3, "Moving out..."],
@@ -3146,26 +3134,14 @@ class Raycaster {
     this.player.y = newY;
   }
 
-// collision glissante
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Logique de blocage
+///////////////////////////////////////////////////////////////////////////////////////////////
+
   isBlocking(x, y) {
     // first make sure that we cannot move outside the boundaries of the level
     if (y < 0 || y >= this.mapHeight || x < 0 || x >= this.mapWidth)
       return true;
-
-      /*  
-        // notes pour détection sprite
-        // ce sont ces variables qui sont utilisées par "isBlocking"
-        let cellX = newX / this.tileSize;
-        let cellY = newY / this.tileSize;
-  
-        // nord-ouest
-        frontX = Math.floor(
-          (this.player.x + this.tileSize / 2) / this.tileSize
-        );
-        frontY = Math.floor(
-          (this.player.y - this.tileSize / 2) / this.tileSize
-        );
-      */
 
     // return true if the map block is not 0, ie. if there is a blocking wall.
     if (this.map[Math.floor(y)][Math.floor(x)] != 0) 
@@ -3173,6 +3149,10 @@ class Raycaster {
       return true
     }
   }
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Minimap et dessin du canvas minimap
+///////////////////////////////////////////////////////////////////////////////////////////////
 
   updateMiniMap() {
     let miniMap = document.getElementById("minimap");
