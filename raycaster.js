@@ -442,6 +442,8 @@ class Sprite {
     }
   }
 
+  
+  //zzz
   async combatSpell(player, target) {
     if (player.turn == true) {
       // console.log(player.spells[player.selectedSpell].name)
@@ -609,86 +611,86 @@ const robe = new Item("robe", 2, true, 0, 0, 0, 0, 0, 0, 0, 1);
 // Sortilèges
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Spell {
-  constructor(name, manaCost, description, effect, selfCast, icon) {
-      this.name = name;
-      this.manaCost = manaCost;
-      this.description = description;
-      this.effect = effect; // Fonction représentant l'effet du sort
-      this.selfCast = selfCast;
-      this.icon = icon;
+  class Spell {
+    constructor(name, manaCost, description, effect, selfCast, icon) {
+        this.name = name;
+        this.manaCost = manaCost;
+        this.description = description;
+        this.effect = effect; // Fonction représentant l'effet du sort
+        this.selfCast = selfCast;
+        this.icon = icon;
+    }
+
+    // Méthode pour lancer le sort
+    cast(caster, target) {
+        if (caster.turn) {
+            caster.turn = false;
+
+            if (caster.mp >= this.manaCost) {
+                // Vérifie si le lanceur a suffisamment de mana pour lancer le sort
+                caster.mp -= this.manaCost; // Réduire le mana du lanceur
+
+                // Appliquer l'effet du sort sur la cible
+                this.effect(caster, target);
+
+                Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`);
+            } else {
+                Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
+            }
+        } else {
+            console.log("not your turn");
+        }
+    }
+
+    // Fonction représentant l'effet de soins
+    healEffect(caster, target) {
+        Raycaster.playerHealFlash();
+
+        caster.XPintellect += 1;
+
+        target.hp += 10;
+
+        if (target.hp > target.hpMax) {
+            target.hp = target.hpMax;
+            Sprite.terminalLog(`${target.name} is completely healed.`);
+        } else {
+            Sprite.terminalLog(`${target.name} is healed for 10hp.`);
+        }
+    }
+
+    // Fonction représentant l'effet de dégâts
+    damageEffect(caster, target) {
+        Raycaster.playerHealFlash();
+        target.startSpriteFlash();
+        target.hp -= 2;
+        caster.XPintellect += 1;
+        Sprite.terminalLog(`${target.name} suffured 2 points of damage from ${caster.name}`);
+    }
   }
 
-  // Méthode pour lancer le sort
-  cast(caster, target) {
-      if (caster.turn) {
-          caster.turn = false;
+  // Création d'un sort de soins
+  const healSpell = new Spell(
+    "Heal I",
+    8,
+      "Heal the player for 10hp.",
+      function(caster, target) {
+          healSpell.healEffect(caster, target);
+      },
+    true,
+    "✙"
+  );
 
-          if (caster.mp >= this.manaCost) {
-              // Vérifie si le lanceur a suffisamment de mana pour lancer le sort
-              caster.mp -= this.manaCost; // Réduire le mana du lanceur
-
-              // Appliquer l'effet du sort sur la cible
-              this.effect(caster, target);
-
-              Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`);
-          } else {
-              Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
-          }
-      } else {
-          console.log("not your turn");
-      }
-  }
-
-  // Fonction représentant l'effet de soins
-  healEffect(caster, target) {
-      Raycaster.playerHealFlash();
-
-      caster.XPintellect += 1;
-
-      target.hp += 10;
-
-      if (target.hp > target.hpMax) {
-          target.hp = target.hpMax;
-          Sprite.terminalLog(`${target.name} is completely healed.`);
-      } else {
-          Sprite.terminalLog(`${target.name} is healed for 10hp.`);
-      }
-  }
-
-  // Fonction représentant l'effet de dégâts
-  damageEffect(caster, target) {
-      Raycaster.playerHealFlash();
-      target.startSpriteFlash();
-      target.hp -= 2;
-      caster.XPintellect += 1;
-      Sprite.terminalLog(`${target.name} suffured 2 points of damage from ${caster.name}`);
-  }
-}
-
-// Création d'un sort de soins
-const healSpell = new Spell(
-  "Heal I",
-  8,
-  "Heal the player for 10hp.",
-  function(caster, target) {
-      healSpell.healEffect(caster, target);
-  },
-  true,
-  "✙"
-);
-
-// Création d'un sort de dégâts
-const sparksSpell = new Spell(
-  "Sparks",
-  2,
-  "Inflict 2pts of electric damage.",
-  function(caster, target) {
-      sparksSpell.damageEffect(caster, target);
-  },
-  false,
-  "🗲"
-);
+  // Création d'un sort de dégâts
+  const sparksSpell = new Spell(
+    "Sparks",
+    2,
+    "Inflict 2pts of electric damage.",
+      function(caster, target) {
+          sparksSpell.damageEffect(caster, target);
+      },
+    false,
+    "🗲"
+  );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quêtes
@@ -767,6 +769,36 @@ class Raycaster {
       [3,0,0,3,3,3,3,3,3,3,0,0,0,3,3,0,0,0,0,3,0,0,0,3],
       [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
   ];
+
+    // liste des téléporteurs 
+    // mapEvent lists
+    /* 
+        Memo organisation des téléporteurs
+        const mapEventX = [[Y, X, Rotation, RenduPlafond, TexturePlafond, HauteurPlafond, TextureSol, Contextualisation],]];
+    */
+
+    this.mapEventA = [
+      [17, 5, ouest, false, 3, 2, 3, "Moving out..."],
+      [13, 9, nord, false, 1, 2, 3, "Moving out..."],
+      [9, 6, est, false, 3, 2, 3, "Moving out..."],
+      [2, 12, nord, true, 2, 1, 2, "Moving out of the dungeon !"],
+    ];
+
+    this.mapEventB = [
+      [19, 5, est, true, 3, 1, 2, "Moving in !"],
+      [13, 11, sud, true, 3, 1, 4, "Moving in !"],
+      [7, 6, ouest, true, 2, 1, 2, "Moving in !"],
+      [2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."],
+    ];
+
+    /* Prototype de fusion des deux listes de téléporteurs
+    const mapTeleports = [
+      [[17, 5, ouest, false, 3, 2, 3, "Moving out..."][19, 5, est, true, 3, 1, 2, "Moving in !"]],
+      [[13, 9, nord, false, 1, 2, 3, "Moving out..."][13, 11, sud, true, 3, 1, 4, "Moving in !"]],
+      [[9, 6, est, false, 3, 2, 3, "Moving out..."][7, 6, ouest, true, 2, 1, 2, "Moving in !"]],
+      [[2, 12, nord, true, 2, 1, 2, "Moving out of the dungeon !"][2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."]],
+    ];
+    */
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -784,7 +816,6 @@ class Raycaster {
       z: 0,
       dir: 0,
       rot: 4.71238898038469,
-      // zzz
       quadrant : "",
       speed: 0,
 
@@ -935,9 +966,11 @@ class Raycaster {
         if (Math.floor(sprite.x / this.tileSize) === frontX && Math.floor(sprite.y / this.tileSize) === frontY) {
             switch (sprite.spriteType) {
                 case "A":
-                    this.player.combatSpell
-                        ? sprite.combatSpell(this.player, sprite)
-                        : sprite.combat(this.player.might, this.player.criti, this.player);
+                    if (this.player.combatSpell) {
+                        sprite.combatSpell(this.player, sprite);
+                    } else {
+                        sprite.combat(this.player.might, this.player.criti, this.player);
+                    }
                     break;
                 case 0:
                     sprite.talk(sprite.spriteTalk, sprite.spriteFace);
@@ -958,6 +991,7 @@ class Raycaster {
                     // gestion des quêteurs
                     break;
                 case 5:
+                    // valeur fixe de test, normalement valeur de sprite
                     this.player.quests[0].complete();
                     Sprite.resetToggle();
                     break;
@@ -965,6 +999,71 @@ class Raycaster {
                     Sprite.resetToggle();
                     break;
             }
+        }
+    }
+
+    // Réinitialisation de la touche d'action après utilisation
+    this.actionButtonClicked = false;
+  }
+
+  async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
+      for (var i = 0; i < mapEventA.length; i++) {
+          if (
+              Math.floor(newX / tileSize) === mapEventA[i][0] &&
+              Math.floor(newY / tileSize) === mapEventA[i][1]
+          ) {
+              // téléportation aux coordonnées données dans l'Event
+              newX = mapEventB[i][0] * tileSize + 640;
+              newY = mapEventB[i][1] * tileSize + 640;
+              player.rot = mapEventB[i][2];
+
+              // variable de modification d'environnement
+              ceilingRender = mapEventB[i][3];
+              ceilingTexture = mapEventB[i][4];
+              ceilingHeight = mapEventB[i][5];
+              // variable de modification des textures (vers le type '1' = terre)
+              floorTexture = mapEventB[i][6];
+              // On recharge toutes les textures, sinon le canvas ne sera pas modifié
+              this.loadFloorCeilingImages();
+              console.log(mapEventB[i][7]);
+
+              // évite les double-téléportation
+              await pause(250);
+              // set new position
+              player.x = newX;
+              player.y = newY;
+              
+              break; // Sortir de la boucle une fois la téléportation effectuée
+          }
+          // On compare également les coordonnées suivantes pour aller/retour
+          if (
+              Math.floor(newX / tileSize) === mapEventB[i][0] &&
+              Math.floor(newY / tileSize) === mapEventB[i][1]
+          ) {
+              // téléportation aux coordonnées données dans l'Event
+              newX = mapEventA[i][0] * tileSize + 640;
+              newY = mapEventA[i][1] * tileSize + 640;
+              player.rot = mapEventA[i][2];
+
+              // variable de modification d'environnement
+              ceilingRender = mapEventA[i][3];
+              ceilingTexture = mapEventA[i][4];
+              ceilingHeight = mapEventA[i][5];
+              // variable de modification des textures (vers le type '1' = terre)
+              floorTexture = mapEventA[i][6];
+              // On recharge toutes les textures, sinon le canvas ne sera pas modifié
+              this.loadFloorCeilingImages();
+              console.log(mapEventA[i][7]);
+
+              // évite les double-téléportation
+              await pause(250);
+              // set new position
+              player.x = newX;
+              player.y = newY;
+
+              break; // Sortir de la boucle une fois la téléportation effectuée
+          } else {
+              // console.log(false);
           }
         }
   }
@@ -1158,6 +1257,7 @@ class Raycaster {
     Sprite.terminalLog("YOOOU'RE DEEEAD !");
     Sprite.terminalLog("The page is going to refresh in 3seconds...");
     Sprite.terminalLog("HEAL AND EQUIP YOURSELF, GODDAMIT !")
+    Sprite.playerDamageFlash
     await new Promise((resolve) => setTimeout(resolve, 3000))
     location.reload();
   }
@@ -1499,7 +1599,7 @@ class Raycaster {
         // Si le type de sprite est 10 (sprites décoratifs), générez des décorations supplémentaires
         if (type === 10) {
           // Générer des herbes supplémentaires et stockez-les dans additionalDecoration
-          for (let j = 0; j < 3; j++) {
+          for (let j = 0; j < 2; j++) {
               let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
               let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
               
@@ -1843,6 +1943,7 @@ class Raycaster {
           console.log("magic combat = true")          
           if (this.player.turn == true) {
             console.log('Attack spell casted')
+            //zzz
             this.actionButtonClicked = true;
             this.player.combatSpell = true;
           }
@@ -2018,7 +2119,7 @@ class Raycaster {
       screenStartX = 0;
     }
 
-    // zzz dessin de chaque sprite
+    // dessin de chaque sprite
     // y compris les étapes d'animation
     for (
       let texY = texStartY, screenY = screenStartY;
@@ -2169,7 +2270,6 @@ class Raycaster {
     let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
     let srcW = 1;
 
-// zzz
     if (srcX >= 0 && srcX < this.textureSize) {
       // Créez un objet (ou tableau) pour stocker les données associées à chaque spriteType
       const spriteData = {
@@ -3022,10 +3122,6 @@ class Raycaster {
 // ACTION ET TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    // action = true quand appuie sur sort d'attaque
-    // bouléen pour préciser que c'est la fonction d'attaque
-
-    // au moindre movement ou click, la fenêtre de dialogue se réinitialise
     if ( action || left || right || down || up || joystickLeftClicked || joystickRightClicked || joystickBackwardClicked || joystickForwardClicked ) {
       if (this.player.turn === true) {
         Sprite.resetToggle();
@@ -3039,96 +3135,18 @@ class Raycaster {
 
     if (action && this.player && this.player.turn == true) {
       this.handleSpriteAction(action);
-  }
+    }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // ACTION Téléporteur
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    // vérification téléporteurs
-
-    /* 
-        Memo organisation des téléporteurs
-        const mapEventX = [[Y, X, Rotation, RenduPlafond, TexturePlafond, HauteurPlafond, TextureSol, Contextualisation],]];
-    */
-
-    // from outside
-    const mapEventA = [
-      [17, 5, ouest, false, 3, 2, 3, "Moving out..."],
-      [13, 9, nord, false, 1, 2, 3, "Moving out..."],
-      [9, 6, est, false, 3, 2, 3, "Moving out..."],
-      [2, 12, nord, true, 2, 1, 2, "Moving out of the dungeon !"],
-    ];
-    // from inside
-    const mapEventB = [
-      [19, 5, est, true, 3, 1, 2, "Moving in !"],
-      [13, 11, sud, true, 3, 1, 4, "Moving in !"],
-      [7, 6, ouest, true, 2, 1, 2, "Moving in !"],
-      [2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."],
-    ];
+    // les listes des téléporteurs sont à présent stockés dans initMap
 
     if (action) {
-      for (var i = 0; i < mapEventA.length; i++) {
-        if (
-          Math.floor(newX / this.tileSize) === mapEventA[i][0] &&
-          Math.floor(newY / this.tileSize) === mapEventA[i][1]
-        ) {
-          // téléportation aux coordonnées données dans l'Event
-          newX = mapEventB[i][0] * this.tileSize + 640;
-          newY = mapEventB[i][1] * this.tileSize + 640;
-          this.player.rot = mapEventB[i][2];
-
-          // variable de modification d'environnement
-          ceilingRender = mapEventB[i][3];
-          ceilingTexture = mapEventB[i][4];
-          ceilingHeight = mapEventB[i][5];
-          // variable de modification des textures (vers le type '1' = terre)
-          floorTexture = mapEventB[i][6];
-          // On recharge toutes les textures, sinon le canvas ne sera pas modifié
-          this.loadFloorCeilingImages();
-          console.log(mapEventB[i][7]);
-
-            // évite les double-téléportation
-            await pause(250);
-            // set new position
-            this.player.x = newX;
-            this.player.y = newY;
-                
-          break; // Sortir de la boucle une fois la téléportion effectuéef
-        }
-        // On compare également les coordonnées suivantes pour aller/retour
-        if (
-          Math.floor(newX / this.tileSize) === mapEventB[i][0] &&
-          Math.floor(newY / this.tileSize) === mapEventB[i][1]
-        ) {
-          // téléportation aux coordonnées données dans l'Event
-          newX = mapEventA[i][0] * this.tileSize + 640;
-          newY = mapEventA[i][1] * this.tileSize + 640;
-
-          this.player.rot = mapEventA[i][2];
-
-          // variable de modification d'environnement
-          ceilingRender = mapEventA[i][3];
-          ceilingTexture = mapEventA[i][4];
-          ceilingHeight = mapEventA[i][5];
-          // variable de modification des textures (vers le type '1' = terre)
-          floorTexture = mapEventA[i][6];
-          // On recharge toutes les textures, sinon le canvas ne sera pas modifié
-          this.loadFloorCeilingImages();
-          console.log(mapEventA[i][7]);
-
-            // évite les double-téléportation
-            await pause(250);
-            // set new position
-            this.player.x = newX;
-            this.player.y = newY;
-
-          break; // Sortir de la boucle une fois la téléportion effectuée
-        } else {
-          // console.log(false);
-        }
-      }
+      this.handleTeleportation(this.player, this.mapEventA, this.mapEventB, newX, newY, this.tileSize);
     }
+
     // set new position
     this.player.x = newX;
     this.player.y = newY;
