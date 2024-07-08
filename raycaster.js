@@ -96,6 +96,7 @@ function updateProgressBar(id, value, max) {
 // Sprite Class
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// zzz
 class Sprite {
   constructor(
     x = 0,
@@ -352,6 +353,132 @@ class Sprite {
     this.spriteFlash = 0;
   }
 
+  // Propriété statique pour le sprite de combat
+  static combatAnimationSprite = null;
+
+  // zzz
+  // Méthode statique pour mettre à jour les valeurs du sprite de combat
+  static updateCombatAnimationSprite(params) {
+      if (Sprite.combatAnimationSprite) {
+        for (let key in params) {
+          if (Sprite.combatAnimationSprite.hasOwnProperty(key)) {
+            Sprite.combatAnimationSprite[key] = params[key];
+            console.log(params[key]);
+          }
+        }
+      } else {
+        console.error("Combat animation sprite not initialized.");
+      }
+  }
+
+  hitAnimation(player) {
+    // Stocker la position initiale du sprite de combat
+    const initialCombatSpritePosition = {
+      x: Sprite.combatAnimationSprite.x,
+      y: Sprite.combatAnimationSprite.y
+    };
+  
+    // Constants
+    const recoilDistance = 400; // Distance de recul en pixels
+    const recoilDuration = 500; // Durée totale de l'animation en millisecondes
+  
+    // Calcul de l'angle en degrés
+    const angleDeg = (player.rot * 180 / Math.PI + 360) % 360;
+  
+    // Détermination du quadrant en fonction de l'angle
+    const quadrants = [
+      { min: 337.5, max: 360, name: "est" },
+      { min: 0, max: 22.5, name: "est" },
+      { min: 22.5, max: 67.5, name: "nord-est" },
+      { min: 67.5, max: 112.5, name: "nord" },
+      { min: 112.5, max: 157.5, name: "nord-ouest" },
+      { min: 157.5, max: 202.5, name: "ouest" },
+      { min: 202.5, max: 247.5, name: "sud-ouest" },
+      { min: 247.5, max: 292.5, name: "sud" },
+      { min: 292.5, max: 337.5, name: "sud-est" }
+    ];
+  
+    let quadrantName = "";
+    for (const quadrant of quadrants) {
+      if (angleDeg >= quadrant.min && angleDeg < quadrant.max) {
+        quadrantName = quadrant.name;
+        break;
+      }
+    }
+  
+    // Directions prédéfinies pour chaque quadrant
+    const recoilDirections = {
+      "est": { dx: 1, dy: 0 },
+      "nord-est": { dx: 1, dy: -1 },
+      "nord": { dx: 0, dy: -1 },
+      "nord-ouest": { dx: -1, dy: -1 },
+      "ouest": { dx: -1, dy: 0 },
+      "sud-ouest": { dx: -1, dy: 1 },
+      "sud": { dx: 0, dy: 1 },
+      "sud-est": { dx: 1, dy: 1 }
+    };
+  
+    const { dx, dy } = recoilDirections[quadrantName];
+  
+    // Position initiale de l'ennemi
+    const initialX = this.x;
+    const initialY = this.y;
+  
+    // Position de recul
+    const recoilX = initialX + dx * recoilDistance;
+    const recoilY = initialY + dy * recoilDistance;
+  
+    // Fonction de facilité pour l'effet de rebond
+    const easeOutBounce = (t) => {
+      const n1 = 7.5625;
+      const d1 = 2.75;
+      if (t < 1 / d1) return n1 * t * t;
+      if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
+      if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
+      return n1 * (t -= 2.625 / d1) * t + 0.984375;
+    };
+  
+    // Fonction pour animer le recul et le retour avec effet de rebond
+    const animateRecoil = (progress) => {
+      const easedProgress = easeOutBounce(progress);
+      if (progress < 0.5) {
+        // Première moitié de l'animation: recul
+        this.x = initialX + (recoilX - initialX) * easedProgress;
+        this.y = initialY + (recoilY - initialY) * easedProgress;
+      } else {
+        // Deuxième moitié de l'animation: retour à la position initiale
+        this.x = recoilX + (initialX - recoilX) * easedProgress;
+        this.y = recoilY + (initialY - recoilY) * easedProgress;
+      }
+    };
+  
+    // Démarrer l'animation
+    let startTime = null;
+    const step = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = elapsed / recoilDuration;
+      if (progress < 1) {
+        animateRecoil(progress);
+        requestAnimationFrame(step);
+      } else {
+        // Assurer la position finale correcte
+        this.x = initialX;
+        this.y = initialY;
+  
+        // Retourner le sprite de combat à sa position initiale après 1,5 seconde
+        setTimeout(() => {
+          Sprite.updateCombatAnimationSprite({
+            x: initialCombatSpritePosition.x,
+            y: initialCombatSpritePosition.y,
+            texture: 3 // ou la texture initiale si différente
+          });
+        }, 500);
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
   async startAttackAnimation() {
     this.spriteFlash = 200;
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -390,7 +517,10 @@ class Sprite {
 
     this.hp -= damage * factor;
 
+    // zzz
+    this.hitAnimation(player)
     this.startSpriteFlash();
+    Sprite.combatAnimationSprite
     
     player.XPstrength += 1;
 
@@ -442,8 +572,6 @@ class Sprite {
     }
   }
 
-  
-  //zzz
   async combatSpell(player, target) {
     if (player.turn == true) {
       // console.log(player.spells[player.selectedSpell].name)
@@ -769,13 +897,6 @@ class Raycaster {
       [3,0,0,3,3,3,3,3,3,3,0,0,0,3,3,0,0,0,0,3,0,0,0,3],
       [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
   ];
-
-    // liste des téléporteurs 
-    // mapEvent lists
-    /* 
-        Memo organisation des téléporteurs
-        const mapEventX = [[Y, X, Rotation, RenduPlafond, TexturePlafond, HauteurPlafond, TextureSol, Contextualisation],]];
-    */
 
     this.mapEventA = [
       [17, 5, ouest, false, 3, 2, 3, "Moving out..."],
@@ -1114,15 +1235,21 @@ class Raycaster {
     var mpBar = document.getElementById("mpBar");
     var xpBar = document.getElementById("xpBar");
 
+    const playerStr = document.getElementById("PlayerStrOutput");
+    const playerDex = document.getElementById("PlayerDexOutput");
+    const playerInt = document.getElementById("PlayerIntOutput");
+
+    const playerMight = document.getElementById("PlayerMightOutput");
+    const playerDodge = document.getElementById("PlayerDodgeOutput");
+    const playerMagic = document.getElementById("PlayerMagicOutput");
+    const playerArmor = document.getElementById("PlayerArmorOutput");
+    const playerCriti = document.getElementById("PlayerCritiOutput");
+
     hpBar.value = player.hp;
     mpBar.value = player.mp;
 
     updateProgressBar("hpBar", player.hp, 10);
     updateProgressBar("mpBar", player.mp, 10);
-
-    const playerStr = document.getElementById("PlayerStrOutput");
-    const playerDex = document.getElementById("PlayerDexOutput");
-    const playerInt = document.getElementById("PlayerIntOutput");
 
     playerStr.textContent = player.strength;
     playerDex.textContent = player.dexterity;
@@ -1188,12 +1315,6 @@ class Raycaster {
     player.dodge = player.dexterity * 2;
     player.armor = player.armor;
     player.criti = player.dexterity * 2;
-
-    const playerMight = document.getElementById("PlayerMightOutput");
-    const playerDodge = document.getElementById("PlayerDodgeOutput");
-    const playerMagic = document.getElementById("PlayerMagicOutput");
-    const playerArmor = document.getElementById("PlayerArmorOutput");
-    const playerCriti = document.getElementById("PlayerCritiOutput");
 
     playerMight.textContent = player.might;
     playerDodge.textContent = player.dodge;
@@ -1474,166 +1595,167 @@ class Raycaster {
 // Initialisation des sprites
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  initSprites() {
-    // Mettre le sprite au centre de la cellule
-    const tileSizeHalf = Math.floor(this.tileSize / 2);
+initSprites() {
+  const tileSizeHalf = Math.floor(this.tileSize / 2);
 
-    this.sprites = [];
+  this.sprites = [];
 
-    // Liste pour stocker les sprites décoratifs supplémentaires
-    let additionalDecoration = [];
-    let additionalDecorationCount = 0;
-    let additionalDecorationSpriteCount = 0;
+  let additionalDecoration = [];
+  let additionalDecorationCount = 0;
+  let additionalDecorationSpriteCount = 0;
 
-    // Positions des sprites avec les commentaires
-    // [x, y, type, texture, face, name, dialogue, spriteSell]
+  let spritePositions = [
+    [17, 6, 2, 1, "faceThief", "Tarik the Thief", [
+      ["facePlayer", "Alakir", "Hello there! What's the news?"],
+      ["faceThief", "Tarik the Thief", "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
+      ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
+    ], []], 
+    [9, 5, 2, 2, "faceGuard", "Guard", [
+      ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+      ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+      ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+    ], []], 
+    [4, 1, 2, 2, "faceGuard", "Guard", [
+      ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+      ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+      ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+    ], []], 
+    [14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
+      ["facePlayer", "Alakir", "Hey!"],
+      ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something?"],
+      ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
+    ], [robe, magicSword]], 
 
-      // Liste des positions des sprites avec les valeurs supplémentaires
-      let spritePositions = [
-        // [x, y, type, texture, face, name, dialogue, spriteSell]
-        [17, 6, 2, 1, "faceThief", "Tarik the Thief", [
-            ["facePlayer", "Alakir", "Hello there! What's the news?"],
-            ["faceThief", "Tarik the Thief", "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
-            ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
-        ], []], // Personnage 1
-        [9, 5, 2, 2, "faceGuard", "Guard", [
-            ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-            ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
-            ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
-        ], []], // Personnage 2
-        [4, 1, 2, 2, "faceGuard", "Guard", [
-            ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-            ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
-            ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
-        ], []], // Personnage 3
-        [14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
-            ["facePlayer", "Alakir", "Hey!"],
-            ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something?"],
-            ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
-        ], [robe, magicSword]], // PNJ marchant
+    [15, 18, 5, 9],  
 
-      // "End of demo"
-      [15, 18, 5, 9],  // Fin de la démo
+    [4, 17, "A", "A"],   
+    [19, 15, "A", "A"],  
+    [21, 20, "A", "A"],  
 
-      // Ennemis
-      [4, 17, "A", "A"],   // Ennemi 1
-      [19, 15, "A", "A"],  // Ennemi 2
-      [21, 20, "A", "A"],  // Ennemi 3
+    // dummy for testing
+    [14, 4, "A", "A"],
 
-      // Dummy for testing
-      // [14, 4, "A", "A"],
+    [7, 16, 1, 4],   
+    [20, 16, 1, 4],  
+    [14, 9, 2, 7, "facePlayer", "facePlayer", [
+      ["facePlayer", "Quill's shop", "Hard discount on adventure gear (No refund in case of death)"],
+    ], []], 
+    [1, 6, 1, 11],  
 
-      // Décorations
-      [7, 16, 1, 4],   // Décoration 1
-      [20, 16, 1, 4],  // Décoration 2
-      [14, 9, 2, 7, "facePlayer", "facePlayer", [
-        ["facePlayer", "Quill's shop", "Hard discount on adventure gear (No refund in case of death)"],
-      ], []], // Décoration 3 - Pancarte "Quill's Shop"
-      [1, 6, 1, 11],  // Décoration 4
+    [17, 3, 1, 6],   
+    [15, 7, 1, 6],   
+    [10, 10, 1, 6],  
+    [12, 3, 1, 6],   
+    [19, 9, 1, 6],   
+    [9, 7, 1, 6],    
 
-      // Bushes
-      [17, 3, 1, 6],   // Bush 1
-      [15, 7, 1, 6],   // Bush 2
-      [10, 10, 1, 6],  // Bush 3
-      [12, 3, 1, 6],   // Bush 4
-      [19, 9, 1, 6],   // Bush 5
-      [9, 7, 1, 6],    // Bush 6
+    [2, 7, 1, 12],   
+    [2, 5, 1, 12],   
+    [6, 7, 1, 12],   
+    [6, 5, 1, 12],   
+    [2, 3, 1, 12],   
+    [6, 3, 1, 12],   
+    [1, 9, 1, 12],   
 
-      // Torches
-      [2, 7, 1, 12],   // Torche 1
-      [2, 5, 1, 12],   // Torche 2
-      [6, 7, 1, 12],   // Torche 3
-      [6, 5, 1, 12],   // Torche 4
-      [2, 3, 1, 12],   // Torche 5
-      [6, 3, 1, 12],   // Torche 6
-      [1, 9, 1, 12],   // Torche 7
+    [7, 12, 1, 17],  
+    [20, 4, 1, 17],  
+    [13, 13, 1, 17], 
 
-      // Sac
-      [7, 12, 1, 17],  // Sac 1
-      [20, 4, 1, 17],  // Sac 2
-      [13, 13, 1, 17], // Sac 3
+    [16, 9, 1, 5],   
+    [15, 13, 1, 5],  
+    [17, 7, 1, 5],   
+    [5, 11, 1, 5],   
+    [21, 6, 1, 5],   
+    [15, 11, 1, 5],  
 
-      // Barrel
-      [16, 9, 1, 5],   // Barrel 1
-      [15, 13, 1, 5],  // Barrel 2
-      [17, 7, 1, 5],   // Barrel 3
-      [5, 11, 1, 5],   // Barrel 4
-      [21, 6, 1, 5],   // Barrel 5
-      [15, 11, 1, 5],  // Barrel 6
+    [3, 7, 1, 16],   
+    [3, 5, 1, 16],   
+    [5, 5, 1, 16],   
+    [5, 7, 1, 16],   
+    [2, 1, 1, 16],   
+    [6, 1, 1, 16],   
+    [3, 11, 1, 16],  
+    [1, 11, 1, 16],  
 
-      // Colonnes
-      [3, 7, 1, 16],   // Colonne 1
-      [3, 5, 1, 16],   // Colonne 2
-      [5, 5, 1, 16],   // Colonne 3
-      [5, 7, 1, 16],   // Colonne 4
-      [2, 1, 1, 16],   // Colonne 5
-      [6, 1, 1, 16],   // Colonne 6
-      [3, 11, 1, 16],  // Colonne 7
-      [1, 11, 1, 16],  // Colonne 8
+    [16, 4, 1, 15],  
+    [10, 9, 1, 15],  
+    [11, 1, 1, 15],  
 
-      // Arbres
-      [16, 4, 1, 15],  // Arbre 1
-      [10, 9, 1, 15],  // Arbre 2
-      [11, 1, 1, 15],  // Arbre 3
+    [10, 1, 10, 13], [11, 1, 10, 13], [12, 1, 10, 13], [17, 1, 10, 13], [18, 1, 10, 13], [9, 2, 10, 13], [11, 2, 10, 13], [15, 2, 10, 13], [17, 2, 10, 13], [19, 2, 10, 13], [10, 3, 10, 13], [11, 3, 10, 13], [12, 3, 10, 13], [10, 4, 10, 13], [11, 5, 10, 13], [13, 5, 10, 13], [15, 5, 10, 13], [10, 7, 10, 13], [14, 7, 10, 13], [16, 7, 10, 13], [22, 7, 10, 13], [10, 8, 10, 13], [12, 8, 10, 13], [15, 8, 10, 13], [20, 8, 10, 13], [21, 8, 10, 13], [22, 8, 10, 13], [10, 9, 10, 13], [11, 9, 10, 13], [17, 9, 10, 13], [18, 9, 10, 13], [19, 9, 10, 13], [21, 9, 10, 13], [9, 10, 10, 13], [17, 10, 10, 13], [10, 11, 10, 13], [17, 11, 10, 13], [10, 12, 10, 13], [11, 12, 10, 13], [11, 13, 10, 13], [11, 14, 10, 13],
+  ];
 
-      // Herbes
-      [10, 1, 10, 13], [11, 1, 10, 13], [12, 1, 10, 13], [17, 1, 10, 13], [18, 1, 10, 13], [9, 2, 10, 13], [11, 2, 10, 13], [15, 2, 10, 13], [17, 2, 10, 13], [19, 2, 10, 13], [10, 3, 10, 13], [11, 3, 10, 13], [12, 3, 10, 13], [10, 4, 10, 13], [11, 5, 10, 13], [13, 5, 10, 13], [15, 5, 10, 13], [10, 7, 10, 13], [14, 7, 10, 13], [16, 7, 10, 13], [22, 7, 10, 13], [10, 8, 10, 13], [12, 8, 10, 13], [15, 8, 10, 13], [20, 8, 10, 13], [21, 8, 10, 13], [22, 8, 10, 13], [10, 9, 10, 13], [11, 9, 10, 13], [17, 9, 10, 13], [18, 9, 10, 13], [19, 9, 10, 13], [21, 9, 10, 13], [9, 10, 10, 13], [17, 10, 10, 13], [10, 11, 10, 13], [17, 11, 10, 13], [10, 12, 10, 13], [11, 12, 10, 13], [11, 13, 10, 13], [11, 14, 10, 13],
-    ];
+  for (let pos of spritePositions) {
+    let x = pos[0] * this.tileSize + tileSizeHalf;
+    let y = pos[1] * this.tileSize + tileSizeHalf;
 
-    for (let pos of spritePositions) {
-        let x = pos[0] * this.tileSize + tileSizeHalf;
-        let y = pos[1] * this.tileSize + tileSizeHalf;
+    let type = pos[2];
+    let texture = pos[3];
+    let face = pos[4];
+    let name = pos[5];
+    let dialogue = pos[6];
+    let spriteSell = pos[7] || [];
 
-        let type = pos[2];
-        let texture = pos[3];
-        let face = pos[4];
-        let name = pos[5];
-        let dialogue = pos[6];
-        let spriteSell = pos[7] || [];
+    let hp = 2;
+    let dmg = 1;
 
-        // valeur par défaut, 
-        // à changer selon la liste ou le type (pour l'instant osef)
-        let hp = 2;
-        let dmg = 1;
+    if (type === 10) {
+      for (let j = 0; j < 2; j++) {
+        let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
+        let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
 
-        // Si le type de sprite est 10 (sprites décoratifs), générez des décorations supplémentaires
-        if (type === 10) {
-          // Générer des herbes supplémentaires et stockez-les dans additionalDecoration
-          for (let j = 0; j < 2; j++) {
-              let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
-              let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
-              
-              let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
+        let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
+        newDecoration.spriteTexture = 13;
+        newDecoration.spriteType = 1;
+        newDecoration.isBlocking = false;
 
-              newDecoration.spriteTexture = 13;
-
-              newDecoration.spriteType = 1;
-              newDecoration.isBlocking = false;
-
-              additionalDecoration.push(newDecoration);
-
-              additionalDecorationCount++;
-          }
-          additionalDecorationSpriteCount++;
-        } else {
-          // Créer le sprite avec isBlocking en fonction du type
-          let isBlocking = true;
-          this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell));
-        }
-
-        if (!dialogue && !face && !name) {
-            type = 1;
-        }      
+        additionalDecoration.push(newDecoration);
+        additionalDecorationCount++;
+      }
+      additionalDecorationSpriteCount++;
+    } else {
+      let isBlocking = true;
+      this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell));
     }
 
-    // Ajoutez les décorations supplémentaires à la liste principale de sprites
-    for (let newDecoration of additionalDecoration) {
-        this.sprites.push(newDecoration);
+    if (!dialogue && !face && !name) {
+      type = 1;
     }
-
-    console.log(this.sprites.length + " sprites créés.");
-    console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
   }
+
+  for (let newDecoration of additionalDecoration) {
+    this.sprites.push(newDecoration);
+  }
+
+  // zzz
+  // Définition du sprite de combat
+  // on PUSH le Sprite.combatAnimationSprite dans spriteList sinon il n'est pas pris en compte
+  this.sprites.push(Sprite.combatAnimationSprite = new Sprite(
+    tileSizeHalf,           // x
+    tileSizeHalf,           // y
+    0,                      // z
+    640,                    // w
+    640,                    // h
+    0,                      // ang
+    2,                      // spriteType
+    2,                      // spriteTexture
+    false,                  // isBlocking
+    false,                  // attackable
+    true,                   // turn
+    0,                      // hp
+    0,                      // dmg
+    0,                      // animationProgress
+    "combatAnimationSprite",// spriteName
+    1,                      // spriteFace
+    "",                     // spriteTalk
+    []                      // spriteSell
+  ));
+
+  Sprite.combatAnimationSprite.spriteTexture = 3;
+  
+  console.log(this.sprites.length + " sprites créés.");
+  console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Méthode intersection rayon avec sprite
@@ -1943,7 +2065,7 @@ class Raycaster {
           console.log("magic combat = true")          
           if (this.player.turn == true) {
             console.log('Attack spell casted')
-            //zzz
+
             this.actionButtonClicked = true;
             this.player.combatSpell = true;
           }
@@ -2072,7 +2194,7 @@ class Raycaster {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // drawwall - gestion prototype des differentes texture et hauteur
 ///////////////////////////////////////////////////////////////////////////////////////////////
-
+//zz
   drawTexturedRect(
     imgdata,
     srcX,
@@ -2244,7 +2366,7 @@ class Raycaster {
   }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// fonction drawsprite, ou les textures des sprites sont gérées
+// fonction drawsprite , ou les textures des sprites sont gérées
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
   drawSpriteStrip(rayHit) {
@@ -2315,31 +2437,6 @@ class Raycaster {
     let imgy = (this.displayHeight - wallScreenHeight) / 2;
     let imgw = this.stripWidth;
     let imgh = wallScreenHeight;
-    // de base : appelle directement la fonction drawTexturedRect
-    // Donc, on va devoir ajouter une condition
-    // this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy, imgw, imgh);
-
-            // algo de tri pour répartition des étages
-            // IDEE => on remplace tous les murs de roche par cet algo pour le test
-            // if ceilingHeight = 1                         ; bottom
-            // if level =! 1 && level =! this.ceilingHeight ; middle
-            // if level = this.ceilingHeight                ; top
-            // /!\ level =! de 0 étages ! D'ou problème d'affichage.
-
-            // if rocheN (new);
-            // 10 = top (576px); 11 = middle (640px); 12 = bottom (704px)
-
-            // IDEE : créer bloc conditionnel DANS le bloc conditionnel pour éviter les redondances
-            // Pas besoin de faire le bottom dans la boucle, déjà appliquée précédemment
-
-    // Créer 3 hauteurs pour chaque type de textures
-
-    // TEST : si texture à un seul étage sélectionnée, 
-    // aiguille automatiquement vers la palette sur 3 étages (bottom, middle, top) selon rendu du plafond ou pas
-
-    // une texture = 64²px,
-    // Texture Unit = 64
-    // On utilise cette valeur de référence qu'on multiplie par le N° de la texture choisie
     const TextureUnit = 64;
 
     if (textureY === TextureUnit*2) {
@@ -2519,6 +2616,81 @@ class Raycaster {
         }
     }
   } 
+
+/*
+  // zzz NOUVELLE VERSION A REVOIR
+  drawWallStrip(rayHit, textureX, textureY, wallScreenHeight) {
+    const TextureUnit = 64;
+    const swidth = 4;
+    const sheight = 64;
+    const imgx = rayHit.strip * this.stripWidth;
+    const imgy = (this.displayHeight - wallScreenHeight) / 2;
+    const imgw = this.stripWidth;
+    const imgh = wallScreenHeight;
+  
+  
+    // arbres : 1408 1472
+    // ornate door, pourquoi tu marche pas ptain !?
+    const textures = {
+      "basic": { main: 2 * TextureUnit, bottom: 11 * TextureUnit, middle: 10 * TextureUnit, top: 9 * TextureUnit, extra: null, maxLevels: 2 },
+      "stone": { main: 0, bottom: 18 * TextureUnit, middle: 17 * TextureUnit, top: 16 * TextureUnit, extra: null, maxLevels: 3 },
+      "ornate": { main: 1 * TextureUnit, bottom: 21 * TextureUnit, middle: 20 * TextureUnit, top: 19 * TextureUnit, extra: null, maxLevels: 2 },
+      "ornate_door": { main: 6 * TextureUnit, bottom: 6 * TextureUnit, middle: 1 * TextureUnit, top: 1 * TextureUnit, extra: 1 * TextureUnit, maxLevels: 2 },
+      "forest": { main: 23 * TextureUnit, bottom: 23 * TextureUnit, middle: 22 * TextureUnit, top: 22 * TextureUnit, extra: 22 * TextureUnit, maxLevels: 2 },
+      "house": { main: 14 * TextureUnit, bottom: 14 * TextureUnit, middle: 14 * TextureUnit, top: 12 * TextureUnit, extra: 12 * TextureUnit, maxLevels: 3 },
+      "house_window": { main: 13 * TextureUnit, bottom: 13 * TextureUnit, middle: 13 * TextureUnit, top: 12 * TextureUnit, extra: 12 * TextureUnit, maxLevels: 3 },
+      "house_door": { main: 15 * TextureUnit, bottom: 15 * TextureUnit, middle: 14 * TextureUnit, top: 12 * TextureUnit, extra: 12 * TextureUnit, maxLevels: 3 },
+      "default": { main: textureY, bottom: textureY, middle: textureY, top: textureY, extra: null, maxLevels: 2 }
+  };
+  
+  let selectedTexture;
+  if (textureY === 2 * TextureUnit) {
+      selectedTexture = textures.basic;
+  } else if (textureY === 0) {
+      selectedTexture = textures.stone;
+  } else if (textureY === 1 * TextureUnit) {
+      selectedTexture = textures.ornate;
+  } else if (textureY === 6 * TextureUnit) {
+      selectedTexture = textures.ornate_door;
+  } else if (textureY === 23 * TextureUnit) {
+      selectedTexture = textures.forest;
+  } else if (textureY === 14 * TextureUnit) {
+      selectedTexture = textures.house;
+  } else if (textureY === 13 * TextureUnit) {
+      selectedTexture = textures.house_window;
+  } else if (textureY === 15 * TextureUnit) {
+      selectedTexture = textures.house_door;
+  } else {
+      selectedTexture = textures.default;
+  }
+  
+  // Debugging logs
+  console.log("textureY:", textureY);
+  console.log("selectedTexture:", selectedTexture);
+  
+  const { main, bottom, middle, top, extra, maxLevels } = selectedTexture;
+  
+  if (this.ceilingHeight === 1) {
+      this.drawTexturedRect(this.wallsImageData, textureX, main, swidth, sheight, imgx, imgy, imgw, imgh);
+  } else {
+      this.drawTexturedRect(this.wallsImageData, textureX, bottom, swidth, sheight, imgx, imgy, imgw, imgh);
+      for (let level = 1; level < Math.min(this.ceilingHeight, maxLevels); ++level) {
+          let y;
+          if (level === this.ceilingHeight - 1 && extra !== null) {
+              y = extra;
+          } else if (level < maxLevels - 1) {
+              y = middle;
+          } else {
+              y = top;
+          }
+          this.drawTexturedRect(this.wallsImageData, textureX, y, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
+      }
+  }
+  
+  }
+*/
+  
+
 
   //////////////////////////////////////////////////////////////////////
   // Coloration sol si pas de texture
