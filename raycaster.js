@@ -378,6 +378,14 @@ class Sprite {
       y: Sprite.combatAnimationSprite.y
     };
   
+    // zzz
+    // Exemple de modification du sprite de combat
+    Sprite.updateCombatAnimationSprite({
+      x: (player.x + this.x) / 2,  // Nouvelle position x
+      y: (player.y + this.y) / 2,  // Nouvelle position y
+      texture: 19,                  // Nouvelle texture
+    });
+
     // Constants
     const recoilDistance = 400; // Distance de recul en pixels
     const recoilDuration = 500; // Durée totale de l'animation en millisecondes
@@ -471,13 +479,14 @@ class Sprite {
           Sprite.updateCombatAnimationSprite({
             x: initialCombatSpritePosition.x,
             y: initialCombatSpritePosition.y,
-            texture: 3 // ou la texture initiale si différente
+            texture: 19 // ou la texture initiale si différente
           });
-        }, 500);
+        }, 200);
       }
     };
     requestAnimationFrame(step);
   }
+  
 
   async startAttackAnimation() {
     this.spriteFlash = 200;
@@ -1737,7 +1746,7 @@ initSprites() {
     640,                    // h
     0,                      // ang
     2,                      // spriteType
-    2,                      // spriteTexture
+    19,                      // spriteTexture
     false,                  // isBlocking
     false,                  // attackable
     true,                   // turn
@@ -1750,7 +1759,9 @@ initSprites() {
     []                      // spriteSell
   ));
 
-  Sprite.combatAnimationSprite.spriteTexture = 3;
+
+  // zzz texture sprite d'animation xyz
+  Sprite.combatAnimationSprite.spriteTexture = 19;
   
   console.log(this.sprites.length + " sprites créés.");
   console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
@@ -1958,6 +1969,7 @@ initSprites() {
       "sprite16",
       "sprite17",
       "sprite18",
+      "sprite19"
     ];
 
     // On parcours le tableau et effectue les opérations pour chaque élément,
@@ -2256,29 +2268,30 @@ initSprites() {
         let textureX = Math.trunc(texX);
         let textureY = Math.trunc(texY);
 
-        // problème de gestion du temps, demande beaucoup trop de ressources
-        // Récupérez les secondes actuelles, cependant, à faire EN DEHORS DE LA BOUCLE !
-        // const currentTime = new Date().getSeconds();
 
-        // Récupérez les secondes actuelles, EN DEHORS DE LA BOUCLE, pour éviter la surcharge
+      // zzz
+      // test animations toutes les 333milisecondes
 
+      // Récupère le temps actuel en millisecondes
+      let currentTime = performance.now();
+
+      // Vérifiez si 250 ms se sont écoulées depuis la dernière vérification
+      if (currentTime - lastTime >= 333) {
+        // Incrémentez animationProgress pour chaque sprite
+        spriteAnimationProgress += 1;
+        if (spriteAnimationProgress === 3) {
+          spriteAnimationProgress = 0;
+        }
+        // Mettez à jour le dernier temps de vérification
+
+        // LAST TIME DOIT ETRE STOCKE DANS LE SPRITE
+        lastTime = currentTime;
+      }
+
+      /*
         // METTRE VARIABLE DANS CHAQUE INSTANCE DE SPRITE POUR GERER LES ANIMATIONS
         const currentTime = new Date().getSeconds();
-
-        // créer boucle qui prends en compte une valeur de chaque sprite (this.sprite.animationProgress)
-
-        // Vérifiez si une seconde s'est écoulée depuis la dernière vérification
-        if (currentTime !== lastTime) {
-          // Incrémentez animationProgress pour chaque sprite
-          spriteAnimationProgress += 1;
-          if (spriteAnimationProgress === 3) {
-            // problème : ça marche que pour un sprite ça, ou tous
-            spriteAnimationProgress = 0;
-          }
-          //console.log(spriteAnimationProgress);
-        }
-        // applique une nouvelle valeur de comparaison pour boucle
-        lastTime = currentTime;
+      */
 
         // Vérifiez si le sprite est assez large pour être animé
         // si c'est supérieur à 128, ça ne peut pas être un mur.
@@ -2392,6 +2405,7 @@ initSprites() {
     let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
     let srcW = 1;
 
+    // zzz
     if (srcX >= 0 && srcX < this.textureSize) {
       // Créez un objet (ou tableau) pour stocker les données associées à chaque spriteType
       const spriteData = {
@@ -2415,6 +2429,7 @@ initSprites() {
         16: this.spriteImageData16, // colonne
         17: this.spriteImageData17, // sac
         18: this.spriteImageData18, // sac
+        19: this.spriteImageData19, // slashAnimation sprite19
       };
 
       // Utilisez la structure de données pour accéder aux données appropriées en fonction de spriteType
