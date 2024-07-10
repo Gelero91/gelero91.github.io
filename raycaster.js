@@ -71,13 +71,12 @@ document.addEventListener("DOMContentLoaded", function () {
     outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
   }
 
-  addToConsole("Welcome in Oasis !");
-  addToConsole("Version pre-Alpha (conception)");
+  addToConsole("Welcome in Oasis.JS ! (version pre-Alpha)");
   addToConsole("");
   addToConsole("HOW TO PLAY :");
   addToConsole("'← ↑ → ↓' or use the joystick to move.");
   addToConsole("'A' button or 'space' to interact/fight.");
-  addToConsole("'B' button to access your inventory/stats.");
+  addToConsole("'B' button to access your gear/stats.");
   addToConsole("");
   addToConsole("N.B. : the joystick is crappy, sorry ♥");
   addToConsole("");
@@ -344,17 +343,20 @@ class Sprite {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Animation de combat à revoir
+// Animation de combat
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  async startAttackAnimation() {
+    this.spriteFlash = 200;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    this.spriteFlash = 0;
+  }
 
   async startSpriteFlash() {
     this.spriteFlash = 200;
     await new Promise((resolve) => setTimeout(resolve, 200));
     this.spriteFlash = 0;
   }
-
-  // Propriété statique pour le sprite de combat
-  static combatAnimationSprite = null;
 
   // zzz
   // Méthode statique pour mettre à jour les valeurs du sprite de combat
@@ -371,24 +373,35 @@ class Sprite {
       }
   }
 
-  hitAnimation(player) {
+  // Méthode pour invoquer le sprite d'animation
+  invokeAnimationSprite(player) {
     // Stocker la position initiale du sprite de combat
     const initialCombatSpritePosition = {
       x: Sprite.combatAnimationSprite.x,
       y: Sprite.combatAnimationSprite.y
     };
-  
-    // zzz
-    // Exemple de modification du sprite de combat
+
+    // Mise à jour du sprite de combat pour l'effet cosmétique
     Sprite.updateCombatAnimationSprite({
       x: (player.x + this.x) / 2,  // Nouvelle position x
       y: (player.y + this.y) / 2,  // Nouvelle position y
-      texture: 19,                  // Nouvelle texture
+      texture: 19,                 // Nouvelle texture
     });
 
-    // Constants
-    const recoilDistance = 400; // Distance de recul en pixels
-    const recoilDuration = 500; // Durée totale de l'animation en millisecondes
+    // Retourner le sprite de combat à sa position initiale après 0,1 seconde
+    setTimeout(() => {
+      Sprite.updateCombatAnimationSprite({
+        x: initialCombatSpritePosition.x,
+        y: initialCombatSpritePosition.y,
+        texture: 19 // ou la texture initiale si différente
+      });
+    }, 150);
+  }
+
+  hitAnimation(player) {
+    // Constants pour le recul
+    const recoilDistance = 600;    // Distance de recul en pixels
+    const recoilDuration = 750;    // Durée totale de l'animation en millisecondes
   
     // Calcul de l'angle en degrés
     const angleDeg = (player.rot * 180 / Math.PI + 360) % 360;
@@ -473,25 +486,9 @@ class Sprite {
         // Assurer la position finale correcte
         this.x = initialX;
         this.y = initialY;
-  
-        // Retourner le sprite de combat à sa position initiale après 1,5 seconde
-        setTimeout(() => {
-          Sprite.updateCombatAnimationSprite({
-            x: initialCombatSpritePosition.x,
-            y: initialCombatSpritePosition.y,
-            texture: 19 // ou la texture initiale si différente
-          });
-        }, 200);
       }
     };
     requestAnimationFrame(step);
-  }
-  
-
-  async startAttackAnimation() {
-    this.spriteFlash = 200;
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    this.spriteFlash = 0;
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -527,10 +524,11 @@ class Sprite {
     this.hp -= damage * factor;
 
     // zzz
+    // Appeler la méthode pour invoquer le sprite d'animation
+    this.invokeAnimationSprite(player);
     this.hitAnimation(player)
     this.startSpriteFlash();
-    Sprite.combatAnimationSprite
-    
+
     player.XPstrength += 1;
 
     var entry =
@@ -586,6 +584,10 @@ class Sprite {
       // console.log(player.spells[player.selectedSpell].name)
       player.spells[player.selectedSpell].cast(player, target);
       
+      //zzz    
+      // Appeler la méthode pour invoquer le sprite d'animation
+      this.invokeAnimationSprite(player);
+      this.hitAnimation(player)
       this.enemyAttackUpdate(player);
 
       player.turn = false;
