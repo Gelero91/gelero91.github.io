@@ -374,29 +374,31 @@ class Sprite {
   }
 
   // Méthode pour invoquer le sprite d'animation
-  invokeAnimationSprite(player) {
-    // Stocker la position initiale du sprite de combat
-    const initialCombatSpritePosition = {
+  // Delay est fixé à 150ms par défaut
+invokeAnimationSprite(player, usedTexture, delay = 150) {
+
+  // Stocker la position initiale du sprite de combat
+  const initialCombatSpritePosition = {
       x: Sprite.combatAnimationSprite.x,
       y: Sprite.combatAnimationSprite.y
-    };
+  };
 
-    // Mise à jour du sprite de combat pour l'effet cosmétique
-    Sprite.updateCombatAnimationSprite({
+  // Mise à jour du sprite de combat pour l'effet cosmétique
+  Sprite.updateCombatAnimationSprite({
       x: (player.x + this.x) / 2,  // Nouvelle position x
       y: (player.y + this.y) / 2,  // Nouvelle position y
-      texture: 19,                 // Nouvelle texture
-    });
+      spriteTexture: usedTexture,  // Nouvelle texture
+  });
 
-    // Retourner le sprite de combat à sa position initiale après 0,1 seconde
-    setTimeout(() => {
+  // Retourner le sprite de combat à sa position initiale après le délai spécifié
+  setTimeout(() => {
       Sprite.updateCombatAnimationSprite({
-        x: initialCombatSpritePosition.x,
-        y: initialCombatSpritePosition.y,
-        texture: 19 // ou la texture initiale si différente
+          x: initialCombatSpritePosition.x,
+          y: initialCombatSpritePosition.y,
+          texture: 0,
       });
-    }, 150);
-  }
+  }, delay);
+}
 
   hitAnimation(player) {
     // Constants pour le recul
@@ -525,7 +527,7 @@ class Sprite {
 
     // zzz
     // Appeler la méthode pour invoquer le sprite d'animation
-    this.invokeAnimationSprite(player);
+    this.invokeAnimationSprite(player, 19);
     this.hitAnimation(player)
     this.startSpriteFlash();
 
@@ -586,7 +588,7 @@ class Sprite {
       
       //zzz    
       // Appeler la méthode pour invoquer le sprite d'animation
-      this.invokeAnimationSprite(player);
+      this.invokeAnimationSprite(player, 20, 300);
       this.hitAnimation(player)
       this.enemyAttackUpdate(player);
 
@@ -1971,7 +1973,8 @@ initSprites() {
       "sprite16",
       "sprite17",
       "sprite18",
-      "sprite19"
+      "sprite19",
+      "sprite20"
     ];
 
     // On parcours le tableau et effectue les opérations pour chaque élément,
@@ -2431,7 +2434,8 @@ initSprites() {
         16: this.spriteImageData16, // colonne
         17: this.spriteImageData17, // sac
         18: this.spriteImageData18, // sac
-        19: this.spriteImageData19, // slashAnimation sprite19
+        19: this.spriteImageData19, // slashAnimation
+        20: this.spriteImageData20, // sparkAnimation
       };
 
       // Utilisez la structure de données pour accéder aux données appropriées en fonction de spriteType
