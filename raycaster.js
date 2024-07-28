@@ -1,3 +1,17 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OASIS.JS
+// The RPG game engine using raycasting
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Created by Gwendal LE ROUX,
+// Engine made from scratch with no dependencies !
+// Inspiration taken from Jacob Seidelin tutorial(ref : https://dev.opera.com/articles/3d-games-with-canvas-and-raycasting-part-1/)
+// and Andrew Lim's architecture (ref : https://github.com/andrew-lim/html5-raycast)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// VARIABLES GLOBALES
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const DESIRED_FPS = 60;
 const UPDATE_INTERVAL = Math.trunc(1000 / DESIRED_FPS);
 
@@ -57,6 +71,10 @@ var timeSinceLastSecond = 0;
 let spriteAnimationProgress = 0;
 let lastTime = new Date().getSeconds();
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FONCTIONS GLOBALES
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Ingame 1sec Pause Timer
 async function pause(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -92,9 +110,342 @@ function updateProgressBar(id, value, max) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Objets
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+class Item {
+  constructor(
+    id,
+    name,
+    slot,
+    equipped,
+    power,
+    strength,
+    dexterity,
+    intellect,
+    might,
+    magic,
+    dodge,
+    armor,
+    criti
+  ) {
+    this.id = id;
+    this.name = name;
+    this.slot = slot;
+    this.equipped = equipped || false;
+
+    this.power = power;
+
+    this.strength = strength;
+    this.dexterity = dexterity;
+    this.intellect = intellect;
+
+    this.might = might;
+    this.magic = magic;
+    this.dodge = dodge;
+
+    this.armor = armor;
+    this.criti = criti;
+  }
+
+  equip(player) {
+    if (this.isEquipable(player)) {
+      this.unequip(player);
+
+      this.equipped = true;
+
+      player.strength += this.strength || 0;
+      player.dexterity += this.dexterity || 0;
+      player.intellect += this.intellect || 0;
+
+      player.might += this.might || 0;
+      player.magic += this.magic || 0;
+      player.dodge += this.dodge || 0;
+
+      player.armor += this.armor || 0;
+
+      player.criti += this.criti || 0;
+
+      player[this.getSlotName()] = [this];
+    }
+  }
+
+  unequip(player) {
+    if (this.equipped) {
+      player.strength -= this.strength;
+      player.dexterity -= this.dexterity;
+      player.intellect -= this.intellect;
+
+      player.might -= this.might;
+      player.magic -= this.magic;
+      player.dodge -= this.dodge;
+
+      player.armor -= this.armor;
+
+      // Retirer l'objet de l'emplacement correspondant
+      player[this.getSlotName()] = [];
+
+      this.equipped = false;
+    }
+  }
+
+  isEquipable(player) {
+    return (
+      (this.slot === 1 && (!player.hands[0] || !player.hands[0].equipped)) ||
+      (this.slot === 2 && (!player.torso[0] || !player.torso[0].equipped))
+    );
+  }
+
+  getSlotName() {
+    return this.slot === 1 ? "hands" : this.slot === 2 ? "torso" : "";
+  }
+
+  give(player) {
+    if (!player.inventory) {
+      player.inventory = [];
+    }
+    player.inventory.push(this);
+    console.log(`${player.name} received item: ${this.name}`);
+  }
+
+  // à suprimer  ?
+  static giveItem(player, itemId) {
+    const itemData = Item.itemList.find(item => item.id === itemId);
+    if (itemData) {
+      const item = new Item(
+        itemData.id,
+        itemData.name,
+        itemData.slot,
+        itemData.equipped,
+        itemData.power,
+        itemData.strength,
+        itemData.dexterity,
+        itemData.intellect,
+        itemData.might,
+        itemData.magic,
+        itemData.dodge,
+        itemData.armor,
+        itemData.criti
+      );
+      item.give(player);
+    } else {
+      console.log(`Item with ID ${itemId} not found.`);
+    }
+  }
+
+  static getItemById(itemId) {
+    const itemData = Item.itemList.find(item => item.id === itemId);
+    if (itemData) {
+      return new Item(
+        itemData.id,
+        itemData.name,
+        itemData.slot,
+        itemData.equipped,
+        itemData.power,
+        itemData.strength,
+        itemData.dexterity,
+        itemData.intellect,
+        itemData.might,
+        itemData.magic,
+        itemData.dodge,
+        itemData.armor,
+        itemData.criti
+      );
+    }
+    return null;
+  }
+
+    // Nouvelle méthode statique pour déséquiper tous les objets
+    static unequipAll(player) {
+      if (player.hands && player.hands.length > 0) {
+        player.hands.forEach(item => item.unequip(player));
+      }
+      if (player.torso && player.torso.length > 0) {
+        player.torso.forEach(item => item.unequip(player));
+      }
+    }
+}
+
+// constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
+// Set d'objets test
+Item.itemList = [
+  { id: 1, name: "Sword and Shield", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 2, magic: 0, dodge: 0, armor: 1, criti: 0 },
+  { id: 2, name: "Quilted jacket", slot: 2, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 0, magic: 0, dodge: 0, armor: 1, criti: 0 },
+  { id: 3, name: "Magic sword", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 3, magic: 2, dodge: 0, armor: 0, criti: 0 },
+  { id: 4, name: "Robe", slot: 2, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 0, magic: 0, dodge: 0, armor: 1, criti: 0 },
+  { id: 5, name: "Staff", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 1, magic: 0, dodge: 0, armor: 0, criti: 0 },
+];
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Sortilèges
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  class Spell {
+    constructor(id, name, manaCost, description, effect, selfCast, icon) {
+      this.id = id;
+      this.name = name;
+      this.manaCost = manaCost;
+      this.description = description;
+      this.effect = effect; // Fonction représentant l'effet du sort
+      this.selfCast = selfCast;
+      this.icon = icon;
+    }
+
+    // Méthode pour lancer le sort
+    cast(caster, target) {
+      if (caster.turn) {
+        caster.turn = false;
+
+        if (caster.mp >= this.manaCost) {
+          // Vérifie si le lanceur a suffisamment de mana pour lancer le sort
+          caster.mp -= this.manaCost; // Réduire le mana du lanceur
+
+          // Appliquer l'effet du sort sur la cible
+          this.effect(caster, target);
+
+          Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`);
+        } else {
+          Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
+        }
+      } else {
+        console.log("not your turn");
+      }
+    }
+
+    // Fonction représentant l'effet de soins
+    static healEffect(caster, target) {
+      Raycaster.playerHealFlash();
+
+      caster.XPintellect += 1;
+
+      target.hp += 10;
+
+      if (target.hp > target.hpMax) {
+        target.hp = target.hpMax;
+        Sprite.terminalLog(`${target.name} is completely healed.`);
+      } else {
+        Sprite.terminalLog(`${target.name} is healed for 10hp.`);
+      }
+    }
+
+    // Fonction représentant l'effet de dégâts
+    static damageEffect(caster, target) {
+      Raycaster.playerHealFlash();
+      target.startSpriteFlash();
+      target.hp -= 2;
+      caster.XPintellect += 1;
+      Sprite.terminalLog(`${target.name} suffered 2 points of damage from ${caster.name}`);
+    }
+
+    // à suprimer ?
+    give(player) {
+      if (!player.spells) {
+        player.spells = [];
+      }
+      player.spells.push(this);
+      console.log(`${player.name} learned spell: ${this.name}`);
+    }
+
+    static getSpellById(spellId) {
+      const spellData = Spell.spellList.find(spell => spell.id === spellId);
+      if (spellData) {
+        return new Spell(
+          spellData.id,
+          spellData.name,
+          spellData.manaCost,
+          spellData.description,
+          spellData.effect,
+          spellData.selfCast,
+          spellData.icon
+        );
+      }
+      return null;
+    }
+
+    static giveSpell(player, spellId) {
+      const spell = Spell.getSpellById(spellId);
+      if (spell) {
+        spell.give(player);
+      } else {
+        console.log(`Spell with ID ${spellId} not found.`);
+      }
+    }
+  }
+
+  // Liste des sorts prédéfinis dans la classe Spell
+  Spell.spellList = [
+    { id: 1, name: "Heal I", manaCost: 8, description: "Heal the player for 10hp.", effect: Spell.healEffect, selfCast: true, icon: "✙" },
+    { id: 2, name: "Sparks", manaCost: 2, description: "Inflict 2pts of electric damage.", effect: Spell.damageEffect, selfCast: false, icon: "🗲" }
+  ];
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Quêtes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  class Quest {
+    constructor(id, title, description, reward, completed) {
+      this.id = id;
+      this.title = title;
+      this.description = description;
+      this.reward = reward;
+      this.completed = false;
+    }
+
+    // Méthode pour marquer une quête comme complétée
+    complete() {
+      this.completed = true;
+      Sprite.terminalLog(`The quest "${this.title}" has been completed! Reward: ${this.reward}`);
+    }
+
+    // à suprimer ?
+    give(player) {
+      if (!player.quests) {
+        player.quests = [];
+      }
+      player.quests.push(this);
+      console.log(`${player.name} received quest: ${this.title}`);
+    }
+
+    static getQuestById(questId) {
+      const questData = Quest.questList.find(quest => quest.id === questId);
+      if (questData) {
+        return new Quest(
+          questData.id,
+          questData.title,
+          questData.description,
+          questData.reward,
+          questData.completed
+        );
+      }
+      return null;
+    }
+
+    static giveQuest(player, questId) {
+      const quest = Quest.getQuestById(questId);
+      if (quest) {
+        quest.give(player);
+      } else {
+        console.log(`Quest with ID ${questId} not found.`);
+      }
+    }
+  }
+
+  // Liste des quêtes prédéfinies dans la classe Quest
+  Quest.questList = [
+    {
+      id: 1,
+      title: "Welcome to Oasis!",
+      description: "It's not fresh, but it's new... So please, enjoy my little baby!",
+      reward: "<3",
+      completed: false
+    }
+  ];
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Sprite Class
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// ZZZ
 class Sprite {
   constructor(
     x = 0,
@@ -115,6 +466,7 @@ class Sprite {
     spriteFace = '',
     spriteTalk = [],
     spriteSell = [],
+    id = 0
   ) {
     this.x = x;
     this.y = y;
@@ -148,6 +500,7 @@ class Sprite {
     this.spriteFace = spriteFace;
     this.spriteTalk = spriteTalk;
     this.spriteSell = spriteSell;
+    this.id = id;
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -526,8 +879,6 @@ class Sprite {
 
     this.hp -= damage * factor;
 
-    // zzz
-    // Appeler la méthode pour invoquer le sprite d'animation
     this.invokeAnimationSprite(player, 19);
     this.hitAnimation(player)
     this.startSpriteFlash();
@@ -587,7 +938,7 @@ class Sprite {
       // console.log(player.spells[player.selectedSpell].name)
       player.spells[player.selectedSpell].cast(player, target);
       
-      //zzz    
+
       // Appeler la méthode pour invoquer le sprite d'animation
       this.invokeAnimationSprite(player, 20, 300);
       this.hitAnimation(player)
@@ -651,335 +1002,7 @@ class RayState {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Objets
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-class Item {
-  constructor(
-    id,
-    name,
-    slot,
-    equipped,
-    power,
-    strength,
-    dexterity,
-    intellect,
-    might,
-    magic,
-    dodge,
-    armor,
-    criti
-  ) {
-    this.id = id;
-    this.name = name;
-    this.slot = slot;
-    this.equipped = equipped || false;
-
-    this.power = power;
-
-    this.strength = strength;
-    this.dexterity = dexterity;
-    this.intellect = intellect;
-
-    this.might = might;
-    this.magic = magic;
-    this.dodge = dodge;
-
-    this.armor = armor;
-    this.criti = criti;
-  }
-
-  equip(player) {
-    if (this.isEquipable(player)) {
-      this.unequip(player);
-
-      this.equipped = true;
-
-      player.strength += this.strength || 0;
-      player.dexterity += this.dexterity || 0;
-      player.intellect += this.intellect || 0;
-
-      player.might += this.might || 0;
-      player.magic += this.magic || 0;
-      player.dodge += this.dodge || 0;
-
-      player.armor += this.armor || 0;
-
-      player.criti += this.criti || 0;
-
-      player[this.getSlotName()] = [this];
-    }
-  }
-
-  unequip(player) {
-    if (this.equipped) {
-      player.strength -= this.strength;
-      player.dexterity -= this.dexterity;
-      player.intellect -= this.intellect;
-
-      player.might -= this.might;
-      player.magic -= this.magic;
-      player.dodge -= this.dodge;
-
-      player.armor -= this.armor;
-
-      // Retirer l'objet de l'emplacement correspondant
-      player[this.getSlotName()] = [];
-
-      this.equipped = false;
-    }
-  }
-
-  isEquipable(player) {
-    return (
-      (this.slot === 1 && (!player.hands[0] || !player.hands[0].equipped)) ||
-      (this.slot === 2 && (!player.torso[0] || !player.torso[0].equipped))
-    );
-  }
-
-  getSlotName() {
-    return this.slot === 1 ? "hands" : this.slot === 2 ? "torso" : "";
-  }
-
-  give(player) {
-    if (!player.inventory) {
-      player.inventory = [];
-    }
-    player.inventory.push(this);
-    console.log(`${player.name} received item: ${this.name}`);
-  }
-
-  static giveItem(player, itemId) {
-    const itemData = Item.itemList.find(item => item.id === itemId);
-    if (itemData) {
-      const item = new Item(
-        itemData.id,
-        itemData.name,
-        itemData.slot,
-        itemData.equipped,
-        itemData.power,
-        itemData.strength,
-        itemData.dexterity,
-        itemData.intellect,
-        itemData.might,
-        itemData.magic,
-        itemData.dodge,
-        itemData.armor,
-        itemData.criti
-      );
-      item.give(player);
-    } else {
-      console.log(`Item with ID ${itemId} not found.`);
-    }
-  }
-
-  static getItemById(itemId) {
-    const itemData = Item.itemList.find(item => item.id === itemId);
-    if (itemData) {
-      return new Item(
-        itemData.id,
-        itemData.name,
-        itemData.slot,
-        itemData.equipped,
-        itemData.power,
-        itemData.strength,
-        itemData.dexterity,
-        itemData.intellect,
-        itemData.might,
-        itemData.magic,
-        itemData.dodge,
-        itemData.armor,
-        itemData.criti
-      );
-    }
-    return null;
-  }
-
-    // Nouvelle méthode statique pour déséquiper tous les objets
-    static unequipAll(player) {
-      if (player.hands && player.hands.length > 0) {
-        player.hands.forEach(item => item.unequip(player));
-      }
-      if (player.torso && player.torso.length > 0) {
-        player.torso.forEach(item => item.unequip(player));
-      }
-    }
-}
-
-// constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
-// Set d'objets test
-Item.itemList = [
-  { id: 1, name: "Short Sword and Shield", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 2, magic: 0, dodge: 0, armor: 1, criti: 0 },
-  { id: 2, name: "Quilted jacket", slot: 2, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 0, magic: 0, dodge: 0, armor: 1, criti: 0 },
-  { id: 3, name: "Magic sword", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 3, magic: 2, dodge: 0, armor: 0, criti: 0 },
-  { id: 4, name: "Robe", slot: 2, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 0, magic: 0, dodge: 0, armor: 1, criti: 0 },
-];
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Sortilèges
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  class Spell {
-    constructor(id, name, manaCost, description, effect, selfCast, icon) {
-      this.id = id;
-      this.name = name;
-      this.manaCost = manaCost;
-      this.description = description;
-      this.effect = effect; // Fonction représentant l'effet du sort
-      this.selfCast = selfCast;
-      this.icon = icon;
-    }
-
-    // Méthode pour lancer le sort
-    cast(caster, target) {
-      if (caster.turn) {
-        caster.turn = false;
-
-        if (caster.mp >= this.manaCost) {
-          // Vérifie si le lanceur a suffisamment de mana pour lancer le sort
-          caster.mp -= this.manaCost; // Réduire le mana du lanceur
-
-          // Appliquer l'effet du sort sur la cible
-          this.effect(caster, target);
-
-          Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`);
-        } else {
-          Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
-        }
-      } else {
-        console.log("not your turn");
-      }
-    }
-
-    // Fonction représentant l'effet de soins
-    static healEffect(caster, target) {
-      Raycaster.playerHealFlash();
-
-      caster.XPintellect += 1;
-
-      target.hp += 10;
-
-      if (target.hp > target.hpMax) {
-        target.hp = target.hpMax;
-        Sprite.terminalLog(`${target.name} is completely healed.`);
-      } else {
-        Sprite.terminalLog(`${target.name} is healed for 10hp.`);
-      }
-    }
-
-    // Fonction représentant l'effet de dégâts
-    static damageEffect(caster, target) {
-      Raycaster.playerHealFlash();
-      target.startSpriteFlash();
-      target.hp -= 2;
-      caster.XPintellect += 1;
-      Sprite.terminalLog(`${target.name} suffered 2 points of damage from ${caster.name}`);
-    }
-
-    give(player) {
-      if (!player.spells) {
-        player.spells = [];
-      }
-      player.spells.push(this);
-      console.log(`${player.name} learned spell: ${this.name}`);
-    }
-
-    static getSpellById(spellId) {
-      const spellData = Spell.spellList.find(spell => spell.id === spellId);
-      if (spellData) {
-        return new Spell(
-          spellData.id,
-          spellData.name,
-          spellData.manaCost,
-          spellData.description,
-          spellData.effect,
-          spellData.selfCast,
-          spellData.icon
-        );
-      }
-      return null;
-    }
-
-    static giveSpell(player, spellId) {
-      const spell = Spell.getSpellById(spellId);
-      if (spell) {
-        spell.give(player);
-      } else {
-        console.log(`Spell with ID ${spellId} not found.`);
-      }
-    }
-  }
-
-  // Liste des sorts prédéfinis dans la classe Spell
-  Spell.spellList = [
-    { id: 1, name: "Heal I", manaCost: 8, description: "Heal the player for 10hp.", effect: Spell.healEffect, selfCast: true, icon: "✙" },
-    { id: 2, name: "Sparks", manaCost: 2, description: "Inflict 2pts of electric damage.", effect: Spell.damageEffect, selfCast: false, icon: "🗲" }
-  ];
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Quêtes
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  class Quest {
-    constructor(id, title, description, reward, completed) {
-      this.id = id;
-      this.title = title;
-      this.description = description;
-      this.reward = reward;
-      this.completed = false;
-    }
-
-    // Méthode pour marquer une quête comme complétée
-    complete() {
-      this.completed = true;
-      Sprite.terminalLog(`The quest "${this.title}" has been completed! Reward: ${this.reward}`);
-    }
-
-    give(player) {
-      if (!player.quests) {
-        player.quests = [];
-      }
-      player.quests.push(this);
-      console.log(`${player.name} received quest: ${this.title}`);
-    }
-
-    static getQuestById(questId) {
-      const questData = Quest.questList.find(quest => quest.id === questId);
-      if (questData) {
-        return new Quest(
-          questData.id,
-          questData.title,
-          questData.description,
-          questData.reward,
-          questData.completed
-        );
-      }
-      return null;
-    }
-
-    static giveQuest(player, questId) {
-      const quest = Quest.getQuestById(questId);
-      if (quest) {
-        quest.give(player);
-      } else {
-        console.log(`Quest with ID ${questId} not found.`);
-      }
-    }
-  }
-
-  // Liste des quêtes prédéfinies dans la classe Quest
-  Quest.questList = [
-    {
-      id: 1,
-      title: "Welcome to Oasis!",
-      description: "It's not fresh, but it's new... So please, enjoy my little baby!",
-      reward: "<3",
-      completed: false
-    }
-  ];
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// moteur de jeu
+// moteur de jeu + joueur
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Raycaster {
@@ -1133,7 +1156,10 @@ class Raycaster {
     this.statsUpdate(this.player)
   }
 
-  // SAUVEGARGE ET CHARGEMENT
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SAUVEGARGE ET CHARGEMENT
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   saveToLocalStorage() {
     if (this.player) {
       // Analyser l'équipement avant de déséquiper
@@ -1141,7 +1167,7 @@ class Raycaster {
         hands: this.player.hands.map(item => item.id),
         torso: this.player.torso.map(item => item.id)
       };
-  
+
       // Sauvegarde les IDs des items, sorts et quêtes
       var playerState = {
         ...this.player,
@@ -1156,13 +1182,40 @@ class Raycaster {
         floorTexture: floorTexture,
         ceilingTexture: ceilingTexture,
       };
-  
+
       // Déséquipement du joueur pour éviter les problèmes (solution temporaire)
       Sprite.resetToggle();
       Item.unequipAll(this.player);
-  
+
       localStorage.setItem('playerState', JSON.stringify(playerState));
-  
+
+      // Sauvegarde l'état des sprites en excluant les sprites avec l'ID 0
+      const spritesState = this.sprites
+        .filter(sprite => sprite.id !== 0)
+        .map(sprite => ({
+          id: sprite.id,
+          x: sprite.x,
+          y: sprite.y,
+          z: sprite.z,
+          w: sprite.w,
+          h: sprite.h,
+          ang: sprite.ang,
+          spriteType: sprite.spriteType,
+          spriteTexture: sprite.spriteTexture,
+          isBlocking: sprite.isBlocking,
+          attackable: sprite.attackable,
+          hp: sprite.hp,
+          dmg: sprite.dmg,
+          turn: sprite.turn,
+          animationProgress: sprite.animationProgress,
+          spriteName: sprite.spriteName,
+          spriteFace: sprite.spriteFace,
+          spriteTalk: sprite.spriteTalk,
+          spriteSell: sprite.spriteSell,
+        }));
+
+      localStorage.setItem('spritesState', JSON.stringify(spritesState));
+
       // Rééquiper les objets après la sauvegarde
       equippedItems.hands.forEach(id => {
         const item = this.player.inventory.find(item => item.id === id);
@@ -1170,7 +1223,7 @@ class Raycaster {
           item.equip(this.player);
         }
       });
-  
+
       equippedItems.torso.forEach(id => {
         const item = this.player.inventory.find(item => item.id === id);
         if (item) {
@@ -1179,15 +1232,21 @@ class Raycaster {
       });
     }
   }
-  
+
   updateFromLocalStorage() {
     const playerState = localStorage.getItem('playerState');
     if (playerState) {
       const loadedState = JSON.parse(playerState);
       this.updatePlayerState(loadedState);
     }
+
+    const spritesState = localStorage.getItem('spritesState');
+    if (spritesState) {
+      const loadedSpritesState = JSON.parse(spritesState);
+      this.updateSpritesState(loadedSpritesState);
+    }
   }
-  
+
   updatePlayerState(loadedState) {
     ceilingHeight = loadedState.ceilingHeight;
     ceilingRender = loadedState.ceilingRender;
@@ -1231,6 +1290,39 @@ class Raycaster {
     this.statsUpdate(this.player);
     Sprite.resetToggle();
   }
+
+  updateSpritesState(loadedSpritesState) {
+    // Réinitialise les sprites actuels
+    this.sprites = this.sprites.filter(sprite => sprite.id === 0);
+  
+    // Charge l'état des sprites depuis les données sauvegardées
+    loadedSpritesState.forEach(state => {
+      const sprite = new Sprite(
+        state.x,
+        state.y,
+        state.z,
+        state.w,
+        state.h,
+        state.ang,
+        state.spriteType,
+        state.spriteTexture,
+        state.isBlocking,
+        state.attackable,
+        state.turn,
+        state.hp,
+        state.dmg,
+        state.animationProgress,
+        state.spriteName,
+        state.spriteFace,
+        state.spriteTalk,
+        state.spriteSell,
+        state.id
+      );
+      this.sprites.push(sprite);
+    });
+  
+    console.log(this.sprites.length + " sprites chargés.");
+  }  
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // méthode calcul quadrant et stockage de la valeur dans Player
@@ -1837,169 +1929,216 @@ class Raycaster {
 // Initialisation des sprites
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  initSprites() {
-    const tileSizeHalf = Math.floor(this.tileSize / 2);
+// ZZZ
+initSprites() {
+  const tileSizeHalf = Math.floor(this.tileSize / 2);
 
-    this.sprites = [];
+  this.sprites = [];
 
-    let additionalDecoration = [];
-    let additionalDecorationCount = 0;
-    let additionalDecorationSpriteCount = 0;
+  let additionalDecoration = [];
+  let additionalDecorationCount = 0;
+  let additionalDecorationSpriteCount = 0;
 
-    let spritePositions = [
-      [17, 6, 2, 1, "faceThief", "Tarik the Thief", [
-        ["facePlayer", "Alakir", "Hello there! What's the news?"],
-        ["faceThief", "Tarik the Thief", "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
-        ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
-      ], []], 
-      [9, 5, 2, 2, "faceGuard", "Guard", [
-        ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-        ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
-        ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
-      ], []], 
-      [4, 1, 2, 2, "faceGuard", "Guard", [
-        ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-        ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
-        ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
-      ], []], 
-      [14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
-        ["facePlayer", "Alakir", "Hey!"],
-        ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something?"],
-        ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
-      ], [1,2,3,4]], 
+  let spritePositions = [
+    [1, 17, 6, 2, 1, "faceThief", "Tarik the Thief", [
+      ["facePlayer", "Alakir", "Hello there! What's the news?"],
+      ["faceThief", "Tarik the Thief", "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
+      ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
+    ], [], 5, 3],
+    [2, 9, 5, 2, 2, "faceGuard", "Guard", [
+      ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+      ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+      ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+    ], [], 4, 2],
+    [3, 4, 1, 2, 2, "faceGuard", "Guard", [
+      ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+      ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+      ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+    ], [], 4, 2],
+    [4, 14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
+      ["facePlayer", "Alakir", "Hey!"],
+      ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something?"],
+      ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
+    ], [1,2,3,4], 6, 4],
 
-      [15, 18, 5, 9],  
+    [5, 15, 18, 5, 9],  
 
-      [4, 17, "A", "A"],   
-      [19, 15, "A", "A"],  
-      [21, 20, "A", "A"],  
+    [6, 4, 17, "A", "A"],   
+    [7, 19, 15, "A", "A"],  
+    [8, 21, 20, "A", "A"],  
 
-      // dummy for testing
-      [14, 4, "A", "A"],
+    // dummy for testing
+    [9, 14, 4, "A", "A"],
 
-      [7, 16, 1, 4],   
-      [20, 16, 1, 4],  
-      [14, 9, 2, 7, "facePlayer", "facePlayer", [
-        ["facePlayer", "Quill's shop", "Hard discount on adventure gear (No refund in case of death)"],
-      ], []], 
-      [1, 6, 1, 11],  
+    [10, 7, 16, 1, 4],   
+    [11, 20, 16, 1, 4],  
+    [12, 14, 9, 2, 7, "facePlayer", "facePlayer", [
+      ["facePlayer", "Quill's shop", "Hard discount on adventure gear (No refund in case of death)"],
+    ], [], 3, 1], 
+    [13, 1, 6, 1, 11],  
 
-      [17, 3, 1, 6],   
-      [15, 7, 1, 6],   
-      [10, 10, 1, 6],  
-      [12, 3, 1, 6],   
-      [19, 9, 1, 6],   
-      [9, 7, 1, 6],    
+    [14, 17, 3, 1, 6],   
+    [15, 15, 7, 1, 6],   
+    [16, 10, 10, 1, 6],  
+    [17, 12, 3, 1, 6],   
+    [18, 19, 9, 1, 6],   
+    [19, 9, 7, 1, 6],    
 
-      [2, 7, 1, 12],   
-      [2, 5, 1, 12],   
-      [6, 7, 1, 12],   
-      [6, 5, 1, 12],   
-      [2, 3, 1, 12],   
-      [6, 3, 1, 12],   
-      [1, 9, 1, 12],   
+    [20, 2, 7, 1, 12],   
+    [21, 2, 5, 1, 12],   
+    [22, 6, 7, 1, 12],   
+    [23, 6, 5, 1, 12],   
+    [24, 2, 3, 1, 12],   
+    [25, 6, 3, 1, 12],   
+    [26, 1, 9, 1, 12],   
 
-      [7, 12, 1, 17],  
-      [20, 4, 1, 17],  
-      [13, 13, 1, 17], 
+    [27, 7, 12, 1, 17],  
+    [28, 20, 4, 1, 17],  
+    [29, 13, 13, 1, 17], 
 
-      [16, 9, 1, 5],   
-      [15, 13, 1, 5],  
-      [17, 7, 1, 5],   
-      [5, 11, 1, 5],   
-      [21, 6, 1, 5],   
-      [15, 11, 1, 5],  
+    [30, 16, 9, 1, 5],   
+    [31, 15, 13, 1, 5],  
+    [32, 17, 7, 1, 5],   
+    [33, 5, 11, 1, 5],   
+    [34, 21, 6, 1, 5],   
+    [35, 15, 11, 1, 5],  
 
-      [3, 7, 1, 16],   
-      [3, 5, 1, 16],   
-      [5, 5, 1, 16],   
-      [5, 7, 1, 16],   
-      [2, 1, 1, 16],   
-      [6, 1, 1, 16],   
-      [3, 11, 1, 16],  
-      [1, 11, 1, 16],  
+    [36, 3, 7, 1, 16],   
+    [37, 3, 5, 1, 16],   
+    [38, 5, 5, 1, 16],   
+    [39, 5, 7, 1, 16],   
+    [40, 2, 1, 1, 16],   
+    [41, 6, 1, 1, 16],   
+    [42, 3, 11, 1, 16],  
+    [43, 1, 11, 1, 16],  
 
-      [16, 4, 1, 15],  
-      [10, 9, 1, 15],  
-      [11, 1, 1, 15],  
+    [44, 16, 4, 1, 15],  
+    [45, 10, 9, 1, 15],  
+    [46, 11, 1, 1, 15],  
 
-      [10, 1, 10, 13], [11, 1, 10, 13], [12, 1, 10, 13], [17, 1, 10, 13], [18, 1, 10, 13], [9, 2, 10, 13], [11, 2, 10, 13], [15, 2, 10, 13], [17, 2, 10, 13], [19, 2, 10, 13], [10, 3, 10, 13], [11, 3, 10, 13], [12, 3, 10, 13], [10, 4, 10, 13], [11, 5, 10, 13], [13, 5, 10, 13], [15, 5, 10, 13], [10, 7, 10, 13], [14, 7, 10, 13], [16, 7, 10, 13], [22, 7, 10, 13], [10, 8, 10, 13], [12, 8, 10, 13], [15, 8, 10, 13], [20, 8, 10, 13], [21, 8, 10, 13], [22, 8, 10, 13], [10, 9, 10, 13], [11, 9, 10, 13], [17, 9, 10, 13], [18, 9, 10, 13], [19, 9, 10, 13], [21, 9, 10, 13], [9, 10, 10, 13], [17, 10, 10, 13], [10, 11, 10, 13], [17, 11, 10, 13], [10, 12, 10, 13], [11, 12, 10, 13], [11, 13, 10, 13], [11, 14, 10, 13],
-    ];
+    [0, 10, 1, 10, 13], 
+    [0, 11, 1, 10, 13], 
+    [0, 12, 1, 10, 13], 
+    [0, 17, 1, 10, 13], 
 
-    for (let pos of spritePositions) {
-      let x = pos[0] * this.tileSize + tileSizeHalf;
-      let y = pos[1] * this.tileSize + tileSizeHalf;
+    [0, 18, 1, 10, 13], 
+    [0, 9, 2, 10, 13], 
+    [0, 11, 2, 10, 13], 
+    [0, 15, 2, 10, 13], 
+    [0, 17, 2, 10, 13], 
+    [0, 19, 2, 10, 13], 
+    [0, 10, 3, 10, 13], 
+    [0, 11, 3, 10, 13], 
+    [0, 12, 3, 10, 13], 
+    [0, 10, 4, 10, 13], 
+    [0, 11, 5, 10, 13], 
+    [0, 13, 5, 10, 13], 
+    [0, 15, 5, 10, 13], 
+    [0, 10, 7, 10, 13], 
+    [0, 14, 7, 10, 13], 
+    [0, 16, 7, 10, 13], 
+    [0, 22, 7, 10, 13], 
+    [0, 10, 8, 10, 13], 
+    [0, 12, 8, 10, 13], 
+    [0, 15, 8, 10, 13], 
+    [0, 20, 8, 10, 13], 
+    [0, 21, 8, 10, 13], 
+    [0, 22, 8, 10, 13], 
+    [0, 10, 9, 10, 13], 
+    [0, 11, 9, 10, 13], 
+    [0, 17, 9, 10, 13], 
+    [0, 18, 9, 10, 13], 
+    [0, 19, 9, 10, 13], 
+    [0, 21, 9, 10, 13], 
+    [0, 9, 10, 10, 13], 
+    [0, 17, 10, 10, 13], 
+    [0, 10, 11, 10, 13], 
+    [0, 17, 11, 10, 13], 
+    [0, 10, 12, 10, 13], 
+    [0, 11, 12, 10, 13], 
+    [0, 11, 13, 10, 13], 
+    [0, 11, 14, 10, 13],
+  ];
 
-      let type = pos[2];
-      let texture = pos[3];
-      let face = pos[4];
-      let name = pos[5];
-      let dialogue = pos[6];
-      let spriteSell = pos[7] || [];
+  for (let pos of spritePositions) {
+    let id = pos[0];
+    let x = pos[1] * this.tileSize + tileSizeHalf;
+    let y = pos[2] * this.tileSize + tileSizeHalf;
 
-      let hp = 2;
-      let dmg = 1;
+    let type = pos[3];
+    let texture = pos[4];
+    let face = pos[5];
+    let name = pos[6];
+    let dialogue = pos[7];
+    let spriteSell = pos[8] || [];
 
-      if (type === 10) {
-        for (let j = 0; j < 2; j++) {
-          let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
-          let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
+    let hp = pos[9] || 2;
+    let dmg = pos[10] || 1;
 
-          let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
-          newDecoration.spriteTexture = 13;
-          newDecoration.spriteType = 1;
-          newDecoration.isBlocking = false;
+    if (type === 10) {
+      for (let j = 0; j < 2; j++) {
+        let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
+        let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
 
-          additionalDecoration.push(newDecoration);
-          additionalDecorationCount++;
-        }
-        additionalDecorationSpriteCount++;
-      } else {
-        let isBlocking = true;
-        this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell));
+        let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
+        newDecoration.spriteTexture = 13;
+        newDecoration.spriteType = 1;
+        newDecoration.isBlocking = false;
+        newDecoration.id = 0;
+
+        additionalDecoration.push(newDecoration);
+        additionalDecorationCount++;
+      }
+      additionalDecorationSpriteCount++;
+    } else {
+      if (typeof id !== 'number' || id <= 0) {
+        console.error("Invalid ID for sprite. Each sprite must have a unique positive ID.");
+        continue;
       }
 
-      if (!dialogue && !face && !name) {
-        type = 1;
-      }
+      let isBlocking = true;
+      console.log("sprite #" + id + " loaded.");
+      this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell, id));
     }
 
-    for (let newDecoration of additionalDecoration) {
-      this.sprites.push(newDecoration);
+    if (!dialogue && !face && !name) {
+      type = 1;
     }
-
-    // zzz
-    // Définition du sprite de combat
-    // on PUSH le Sprite.combatAnimationSprite dans spriteList sinon il n'est pas pris en compte
-    this.sprites.push(Sprite.combatAnimationSprite = new Sprite(
-      tileSizeHalf,           // x
-      tileSizeHalf,           // y
-      0,                      // z
-      640,                    // w
-      640,                    // h
-      0,                      // ang
-      2,                      // spriteType
-      19,                      // spriteTexture
-      false,                  // isBlocking
-      false,                  // attackable
-      true,                   // turn
-      0,                      // hp
-      0,                      // dmg
-      0,                      // animationProgress
-      "combatAnimationSprite",// spriteName
-      1,                      // spriteFace
-      "",                     // spriteTalk
-      []                      // spriteSell
-    ));
-
-
-    // zzz texture sprite d'animation xyz
-    Sprite.combatAnimationSprite.spriteTexture = 19;
-    
-    console.log(this.sprites.length + " sprites créés.");
-    console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
   }
 
+  for (let newDecoration of additionalDecoration) {
+    newDecoration.id = 0; // ID pour les décorations
+    this.sprites.push(newDecoration);
+  }
+
+  // Définition du sprite de combat avec l'ID 0
+  this.sprites.push(Sprite.combatAnimationSprite = new Sprite(
+    tileSizeHalf,           // x
+    tileSizeHalf,           // y
+    0,                      // z
+    640,                    // w
+    640,                    // h
+    0,                      // ang
+    2,                      // spriteType
+    19,                     // spriteTexture
+    false,                  // isBlocking
+    false,                  // attackable
+    true,                   // turn
+    0,                      // hp
+    0,                      // dmg
+    0,                      // animationProgress
+    "combatAnimationSprite",// spriteName
+    1,                      // spriteFace
+    "",                     // spriteTalk
+    [],                     // spriteSell
+    0                       // id
+  ));
+
+  Sprite.combatAnimationSprite.spriteTexture = 19;
+
+  console.log(this.sprites.length + " sprites créés.");
+  console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Méthode intersection rayon avec sprite
@@ -2320,9 +2459,6 @@ class Raycaster {
       case 15:
         this.nextSpell();
         break;
-
-// ZZZ
-// SAUVEGARDE ET CHARGEMENT
       case 16:
         this.saveToLocalStorage();
         alert('Player state saved!');
@@ -2381,7 +2517,6 @@ class Raycaster {
         joystickRightClicked = false;
       }
     });
-
   
 /////////////////////////////////////////////////////////
 // Liaison des boutons avec événement
@@ -2456,7 +2591,7 @@ class Raycaster {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // drawwall - gestion prototype des differentes texture et hauteur
 ///////////////////////////////////////////////////////////////////////////////////////////////
-//zz
+
   drawTexturedRect(
     imgdata,
     srcX,
@@ -2517,10 +2652,6 @@ class Raycaster {
       ) {
         let textureX = Math.trunc(texX);
         let textureY = Math.trunc(texY);
-
-
-      // zzz
-      // test animations toutes les 333milisecondes
 
       // Récupère le temps actuel en millisecondes
       let currentTime = performance.now();
@@ -2655,7 +2786,6 @@ class Raycaster {
     let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
     let srcW = 1;
 
-    // zzz
     if (srcX >= 0 && srcX < this.textureSize) {
       // Créez un objet (ou tableau) pour stocker les données associées à chaque spriteType
       const spriteData = {
@@ -2883,8 +3013,8 @@ class Raycaster {
     }
   } 
 
+
 /*
-  // zzz NOUVELLE VERSION A REVOIR
   drawWallStrip(rayHit, textureX, textureY, wallScreenHeight) {
     const TextureUnit = 64;
     const swidth = 4;
@@ -3524,11 +3654,13 @@ class Raycaster {
 
     this.playerQuadrant(this.player);
 
-    if (this.isBlocking(cellX, cellY)) {
+    // rajouter detection des sprite blocants aux conditions
+    if (this.isBlocking(cellX, cellY) ) {
       this.handleSlidingCollision(this.player);
       return;
     }
 
+    
 //////////////////////////////////////////////////////////////////////////////
 // COLLISION SPRITE
 //////////////////////////////////////////////////////////////////////////////
