@@ -72,6 +72,201 @@ let spriteAnimationProgress = 0;
 let lastTime = new Date().getSeconds();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MAP JSON :
+// VARIABLES D'INITIALISATION DE CARTE
+// & CHANGEMENT DE CARTE
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var currentMap = 1;
+
+var maps = [
+  {
+    mapID: 1,
+    map: [
+      [1,1,1,1,1,1,1,1,3,3,3,3,3,1,9,9,1,3,3,3,3,3,3,3],
+      [2,2,0,0,0,0,0,2,3,3,0,0,0,1,0,0,1,0,0,3,3,3,3,3],
+      [2,2,0,0,0,0,0,2,3,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3],
+      [2,2,0,0,0,0,0,2,3,1,0,0,0,0,0,0,0,0,0,15,15,15,3],
+      [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,14,0,0,0,15,3],
+      [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,16,0,0,0,15,3],
+      [2,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,14,0,0,0,15,3],
+      [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,15,15,15,15,3],
+      [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,24,24],
+      [1,0,0,0,0,0,0,1,24,1,0,0,0,0,0,0,0,0,0,0,24,0,24,24],
+      [1,0,0,0,1,1,0,1,24,0,0,0,14,16,15,14,0,0,24,24,24,24,24,24],
+      [1,0,0,0,1,0,0,0,1,24,0,0,15,0,0,0,15,0,24,3,3,3,3,3],
+      [1,0,0,0,1,0,0,0,1,24,0,15,0,0,0,0,15,24,24,3,0,0,3,3],
+      [1,2,6,2,1,1,1,1,1,3,24,15,0,0,0,0,15,3,3,3,0,0,0,3],
+      [3,3,0,3,3,3,3,3,3,3,24,0,15,15,15,15,15,3,0,0,3,0,0,3],
+      [3,0,0,3,3,3,0,0,3,3,3,24,3,3,3,3,3,0,0,0,3,3,0,3],
+      [3,0,3,3,0,0,0,0,0,3,3,3,0,0,0,0,0,0,3,0,0,3,3,3],
+      [3,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,0,0,0,3,3],
+      [3,3,3,3,0,0,0,0,0,3,3,3,3,3,0,0,0,3,0,0,3,0,3,3],
+      [3,0,0,3,3,3,0,3,3,3,0,0,0,3,0,0,0,3,0,3,3,0,3,3],
+      [3,0,0,3,3,3,0,3,0,0,0,0,0,3,0,0,0,3,0,3,0,0,0,3],
+      [3,0,0,0,0,0,0,0,0,3,0,0,0,3,3,0,3,3,0,3,0,0,0,3],
+      [3,0,0,3,3,3,3,3,3,3,0,0,0,3,3,0,0,0,0,3,0,0,0,3],
+      [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
+    ],
+    sprites: [
+      [1, 17, 6, 2, 1, "faceThief", "Tarik the Thief", [
+        ["facePlayer", "Alakir", "Hello there! What's the news?"],
+        ["faceThief", "Tarik the Thief", "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
+        ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
+      ], [], 5, 3],
+      [2, 9, 5, 2, 2, "faceGuard", "Guard", [
+        ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+        ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+        ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+      ], [], 4, 2],
+      [3, 4, 1, 2, 2, "faceGuard", "Guard", [
+        ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
+        ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+        ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
+      ], [], 4, 2],
+      [4, 14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
+        ["facePlayer", "Alakir", "Hey!"],
+        ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something?"],
+        ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
+      ], [1,2,3,4], 6, 4],
+    
+      [5, 15, 18, 5, 9],  
+     
+      // basic ennemies : bats
+      // le dialogue n'est pas nécessaire, il devrait être ajouté après la fonction de décès
+      [6, 4, 17, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      [7, 19, 15, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      [8, 21, 20, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      // tester
+      [9, 14, 4, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+    
+      [10, 7, 16, 1, 4],   
+      [11, 20, 16, 1, 4],  
+      [12, 14, 9, 2, 7, "facePlayer", "facePlayer", [
+        ["facePlayer", "Quill's shop", "Hard discount on adventure gear (No refund in case of death)"],
+      ], [], 3, 1], 
+      [13, 1, 6, 1, 11],  
+    
+      [14, 17, 3, 1, 6],   
+      [15, 15, 7, 1, 6],   
+      [16, 10, 10, 1, 6],  
+      [17, 12, 3, 1, 6],   
+      [18, 19, 9, 1, 6],   
+      [19, 9, 7, 1, 6],    
+    
+      [20, 2, 7, 1, 12],   
+      [21, 2, 5, 1, 12],   
+      [22, 6, 7, 1, 12],   
+      [23, 6, 5, 1, 12],   
+      [24, 2, 3, 1, 12],   
+      [25, 6, 3, 1, 12],   
+      [26, 1, 9, 1, 12],   
+    
+      [27, 7, 12, 1, 17],  
+      [28, 20, 4, 1, 17],  
+      [29, 13, 13, 1, 17], 
+    
+      [30, 16, 9, 1, 5],   
+      [31, 15, 13, 1, 5],  
+      [32, 17, 7, 1, 5],   
+      [33, 5, 11, 1, 5],   
+      [34, 21, 6, 1, 5],   
+      [35, 15, 11, 1, 5],  
+    
+      [36, 3, 7, 1, 16],   
+      [37, 3, 5, 1, 16],   
+      [38, 5, 5, 1, 16],   
+      [39, 5, 7, 1, 16],   
+      [40, 2, 1, 1, 16],   
+      [41, 6, 1, 1, 16],   
+      [42, 3, 11, 1, 16],  
+      [43, 1, 11, 1, 16],  
+    
+      [44, 16, 4, 1, 15],  
+      [45, 10, 9, 1, 15],  
+      [46, 11, 1, 1, 15],  
+    
+      [0, 10, 1, 10, 13], 
+      [0, 11, 1, 10, 13], 
+      [0, 12, 1, 10, 13], 
+      [0, 17, 1, 10, 13], 
+    
+      [0, 18, 1, 10, 13], 
+      [0, 9, 2, 10, 13], 
+      [0, 11, 2, 10, 13], 
+      [0, 15, 2, 10, 13], 
+      [0, 17, 2, 10, 13], 
+      [0, 19, 2, 10, 13], 
+      [0, 10, 3, 10, 13], 
+      [0, 11, 3, 10, 13], 
+      [0, 12, 3, 10, 13], 
+      [0, 10, 4, 10, 13], 
+      [0, 11, 5, 10, 13], 
+      [0, 13, 5, 10, 13], 
+      [0, 15, 5, 10, 13], 
+      [0, 10, 7, 10, 13], 
+      [0, 14, 7, 10, 13], 
+      [0, 16, 7, 10, 13], 
+      [0, 22, 7, 10, 13], 
+      [0, 10, 8, 10, 13], 
+      [0, 12, 8, 10, 13], 
+      [0, 15, 8, 10, 13], 
+      [0, 20, 8, 10, 13], 
+      [0, 21, 8, 10, 13], 
+      [0, 22, 8, 10, 13], 
+      [0, 10, 9, 10, 13], 
+      [0, 11, 9, 10, 13], 
+      [0, 17, 9, 10, 13], 
+      [0, 18, 9, 10, 13], 
+      [0, 19, 9, 10, 13], 
+      [0, 21, 9, 10, 13], 
+      [0, 9, 10, 10, 13], 
+      [0, 17, 10, 10, 13], 
+      [0, 10, 11, 10, 13], 
+      [0, 17, 11, 10, 13], 
+      [0, 10, 12, 10, 13], 
+      [0, 11, 12, 10, 13], 
+      [0, 11, 13, 10, 13], 
+      [0, 11, 14, 10, 13],
+    ],
+    eventA: [
+      [17, 5, ouest, false, 3, 2, 3, "Moving out..."],
+      [13, 9, nord, false, 1, 2, 3, "Moving out..."],
+      [9, 6, est, false, 3, 2, 3, "Moving out..."],
+      [2, 12, nord, true, 2, 1, 2, "Moving out of the dungeon !"],
+    ],
+    eventB: [
+      [19, 5, est, true, 3, 1, 2, "Moving in !"],
+      [13, 11, sud, true, 3, 1, 4, "Moving in !"],
+      [7, 6, ouest, true, 2, 1, 2, "Moving in !"],
+      [2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."],
+    ],
+    playerStart: { X: 14, Y: 1, Orientation: 4.71238898038469, } // Position de départ du joueur pour l'ID 1
+  },
+  {
+    mapID: 2,
+    map: [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,24,24,24,24,24,24,24,24,24,24,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+    sprites: [  
+      // liste de test
+      [6, 4, 17, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      [7, 19, 15, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      [8, 21, 20, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      [9, 14, 4, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+    ],   
+    eventA: [],
+    eventB: [],
+    playerStart: { X: 5, Y: 6, Orientation: 2 } // Position de départ du joueur pour l'ID 2
+  }
+];
+
+function getMapDataByID(mapID) {
+  return maps.find(map => map.mapID === mapID);
+}
+
+// Exemple d'utilisation
+var mapData = getMapDataByID(currentMap);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FONCTIONS GLOBALES
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -303,7 +498,7 @@ Item.itemList = [
           // Appliquer l'effet du sort sur la cible
           this.effect(caster, target);
 
-          Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`);
+          Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.spriteName}`);
         } else {
           Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
         }
@@ -445,7 +640,6 @@ Item.itemList = [
 // Sprite Class
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// ZZZ
 class Sprite {
   constructor(
     x = 0,
@@ -642,6 +836,7 @@ class Sprite {
 // Gestion des dialogues
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// peut etre réduit
   countDialogues() {
     return this.spriteTalk.length;
   }
@@ -1018,76 +1213,34 @@ class Raycaster {
 // Carte
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  initMap() {
-    // carte 
-    // worldmap
-    this.map = 
-    [
-      [1,1,1,1,1,1,1,1,3,3,3,3,3,1,9,9,1,3,3,3,3,3,3,3],
-      [2,2,0,0,0,0,0,2,3,3,0,0,0,1,0,0,1,0,0,3,3,3,3,3],
-      [2,2,0,0,0,0,0,2,3,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3],
-      [2,2,0,0,0,0,0,2,3,1,0,0,0,0,0,0,0,0,0,15,15,15,3],
-      [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,14,0,0,0,15,3],
-      [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,16,0,0,0,15,3],
-      [2,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,14,0,0,0,15,3],
-      [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,15,15,15,15,3],
-      [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,24,24],
-      [1,0,0,0,0,0,0,1,24,1,0,0,0,0,0,0,0,0,0,0,24,0,24,24],
-      [1,0,0,0,1,1,0,1,24,0,0,0,14,16,15,14,0,0,24,24,24,24,24,24],
-      [1,0,0,0,1,0,0,0,1,24,0,0,15,0,0,0,15,0,24,3,3,3,3,3],
-      [1,0,0,0,1,0,0,0,1,24,0,15,0,0,0,0,15,24,24,3,0,0,3,3],
-      [1,2,6,2,1,1,1,1,1,3,24,15,0,0,0,0,15,3,3,3,0,0,0,3],
-      [3,3,0,3,3,3,3,3,3,3,24,0,15,15,15,15,15,3,0,0,3,0,0,3],
-      [3,0,0,3,3,3,0,0,3,3,3,24,3,3,3,3,3,0,0,0,3,3,0,3],
-      [3,0,3,3,0,0,0,0,0,3,3,3,0,0,0,0,0,0,3,0,0,3,3,3],
-      [3,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,0,0,0,3,3],
-      [3,3,3,3,0,0,0,0,0,3,3,3,3,3,0,0,0,3,0,0,3,0,3,3],
-      [3,0,0,3,3,3,0,3,3,3,0,0,0,3,0,0,0,3,0,3,3,0,3,3],
-      [3,0,0,3,3,3,0,3,0,0,0,0,0,3,0,0,0,3,0,3,0,0,0,3],
-      [3,0,0,0,0,0,0,0,0,3,0,0,0,3,3,0,3,3,0,3,0,0,0,3],
-      [3,0,0,3,3,3,3,3,3,3,0,0,0,3,3,0,0,0,0,3,0,0,0,3],
-      [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
-  ];
+  initMap(mapID, map, mapEventA, mapEventB) {
+    
+    // Variable permettant de sauvegarder sprite et changer de carte
+    this.mapID = mapID;
 
-    this.mapEventA = [
-      [17, 5, ouest, false, 3, 2, 3, "Moving out..."],
-      [13, 9, nord, false, 1, 2, 3, "Moving out..."],
-      [9, 6, est, false, 3, 2, 3, "Moving out..."],
-      [2, 12, nord, true, 2, 1, 2, "Moving out of the dungeon !"],
-    ];
-
-    this.mapEventB = [
-      [19, 5, est, true, 3, 1, 2, "Moving in !"],
-      [13, 11, sud, true, 3, 1, 4, "Moving in !"],
-      [7, 6, ouest, true, 2, 1, 2, "Moving in !"],
-      [2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."],
-    ];
-
-    /* Prototype de fusion des deux listes de téléporteurs
-    const mapTeleports = [
-      [[17, 5, ouest, false, 3, 2, 3, "Moving out..."][19, 5, est, true, 3, 1, 2, "Moving in !"]],
-      [[13, 9, nord, false, 1, 2, 3, "Moving out..."][13, 11, sud, true, 3, 1, 4, "Moving in !"]],
-      [[9, 6, est, false, 3, 2, 3, "Moving out..."][7, 6, ouest, true, 2, 1, 2, "Moving in !"]],
-      [[2, 12, nord, true, 2, 1, 2, "Moving out of the dungeon !"][2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."]],
-    ];
-    */
+    console.log("load map ID : " + mapID);
+    
+    this.map = map;
+    this.mapEventA = mapEventA;
+    this.mapEventB = mapEventB;
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Joueur
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// xyz
   initPlayer() {
     const tileSizeHalf = Math.floor(this.tileSize / 2);
 
     this.player = {
       name: "Alakir",
 
-      x: 14 * this.tileSize + tileSizeHalf,
-      y: 1 * this.tileSize + tileSizeHalf,
+      x: mapData.playerStart.X * this.tileSize + tileSizeHalf,
+      y: mapData.playerStart.Y * this.tileSize + tileSizeHalf,
       z: 0,
       dir: 0,
-      rot: 4.71238898038469,
+      rot: mapData.playerStart.Orientation,
       quadrant : "",
       speed: 0,
 
@@ -1160,169 +1313,193 @@ class Raycaster {
 // SAUVEGARGE ET CHARGEMENT
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  saveToLocalStorage() {
-    if (this.player) {
-      // Analyser l'équipement avant de déséquiper
-      const equippedItems = {
-        hands: this.player.hands.map(item => item.id),
-        torso: this.player.torso.map(item => item.id)
-      };
+saveToLocalStorage() {
+  if (this.player) {
+    // Analyser l'équipement avant de déséquiper
+    const equippedItems = {
+      hands: this.player.hands.map(item => item.id),
+      torso: this.player.torso.map(item => item.id)
+    };
 
-      // Sauvegarde les IDs des items, sorts et quêtes
-      var playerState = {
-        ...this.player,
-        inventory: this.player.inventory.map(item => ({
-          id: item.id,
-          equipped: item.equipped,
-        })),
-        spells: this.player.spells.map(spell => spell.id),
-        quests: this.player.quests.map(quest => ({ id: quest.id, completed: quest.completed })),
-        ceilingHeight: ceilingHeight,
-        ceilingRender: ceilingRender,
-        floorTexture: floorTexture,
-        ceilingTexture: ceilingTexture,
-      };
+    // Sauvegarde les IDs des items, sorts et quêtes
+    var playerState = {
+      ...this.player,
+      inventory: this.player.inventory.map(item => ({
+        id: item.id,
+        equipped: item.equipped,
+      })),
+      spells: this.player.spells.map(spell => spell.id),
+      quests: this.player.quests.map(quest => ({ id: quest.id, completed: quest.completed })),
+      ceilingHeight: ceilingHeight,
+      ceilingRender: ceilingRender,
+      floorTexture: floorTexture,
+      ceilingTexture: ceilingTexture,
+      mapID: this.mapID // Ajouter l'ID de la carte à l'état du joueur
+    };
 
-      // Déséquipement du joueur pour éviter les problèmes (solution temporaire)
-      Sprite.resetToggle();
-      Item.unequipAll(this.player);
+    // Déséquipement du joueur pour éviter les problèmes (solution temporaire)
+    Sprite.resetToggle();
+    Item.unequipAll(this.player);
 
-      localStorage.setItem('playerState', JSON.stringify(playerState));
+    localStorage.setItem('playerState', JSON.stringify(playerState));
 
-      // Sauvegarde l'état des sprites en excluant les sprites avec l'ID 0
-      const spritesState = this.sprites
-        .filter(sprite => sprite.id !== 0)
-        .map(sprite => ({
-          id: sprite.id,
-          x: sprite.x,
-          y: sprite.y,
-          z: sprite.z,
-          w: sprite.w,
-          h: sprite.h,
-          ang: sprite.ang,
-          spriteType: sprite.spriteType,
-          spriteTexture: sprite.spriteTexture,
-          isBlocking: sprite.isBlocking,
-          attackable: sprite.attackable,
-          hp: sprite.hp,
-          dmg: sprite.dmg,
-          turn: sprite.turn,
-          animationProgress: sprite.animationProgress,
-          spriteName: sprite.spriteName,
-          spriteFace: sprite.spriteFace,
-          spriteTalk: sprite.spriteTalk,
-          spriteSell: sprite.spriteSell,
-        }));
+    // Lecture de l'état actuel des sprites pour l'ID de la carte
+    let spritesState = JSON.parse(localStorage.getItem(`spritesState_${this.mapID}`)) || [];
 
-      localStorage.setItem('spritesState', JSON.stringify(spritesState));
+    // Sauvegarde l'état des sprites en excluant les sprites avec l'ID 0
+    const currentSpritesState = this.sprites
+      .filter(sprite => sprite.id !== 0)
+      .map(sprite => ({
+        id: sprite.id,
+        x: sprite.x,
+        y: sprite.y,
+        z: sprite.z,
+        w: sprite.w,
+        h: sprite.h,
+        ang: sprite.ang,
+        spriteType: sprite.spriteType,
+        spriteTexture: sprite.spriteTexture,
+        isBlocking: sprite.isBlocking,
+        attackable: sprite.attackable,
+        hp: sprite.hp,
+        dmg: sprite.dmg,
+        turn: sprite.turn,
+        animationProgress: sprite.animationProgress,
+        spriteName: sprite.spriteName,
+        spriteFace: sprite.spriteFace,
+        spriteTalk: sprite.spriteTalk,
+        spriteSell: sprite.spriteSell,
+      }));
 
-      // Rééquiper les objets après la sauvegarde
-      equippedItems.hands.forEach(id => {
-        const item = this.player.inventory.find(item => item.id === id);
-        if (item) {
-          item.equip(this.player);
-        }
-      });
-
-      equippedItems.torso.forEach(id => {
-        const item = this.player.inventory.find(item => item.id === id);
-        if (item) {
-          item.equip(this.player);
-        }
-      });
-    }
-  }
-
-  updateFromLocalStorage() {
-    const playerState = localStorage.getItem('playerState');
-    if (playerState) {
-      const loadedState = JSON.parse(playerState);
-      this.updatePlayerState(loadedState);
-    }
-
-    const spritesState = localStorage.getItem('spritesState');
-    if (spritesState) {
-      const loadedSpritesState = JSON.parse(spritesState);
-      this.updateSpritesState(loadedSpritesState);
-    }
-  }
-
-  updatePlayerState(loadedState) {
-    ceilingHeight = loadedState.ceilingHeight;
-    ceilingRender = loadedState.ceilingRender;
-    floorTexture = loadedState.floorTexture;
-    ceilingTexture = loadedState.ceilingTexture;
-    this.loadFloorCeilingImages();
-  
-    // Mise à jour des propriétés de base
-    for (const key in loadedState) {
-      if (loadedState.hasOwnProperty(key) && this.player.hasOwnProperty(key)) {
-        this.player[key] = loadedState[key];
+    // Mettre à jour ou ajouter les sprites sans duplications
+    currentSpritesState.forEach(newSprite => {
+      const index = spritesState.findIndex(sprite => sprite.id === newSprite.id);
+      if (index !== -1) {
+        spritesState[index] = newSprite;  // Mise à jour du sprite existant
+      } else {
+        spritesState.push(newSprite);  // Ajout du nouveau sprite
       }
-    }
-  
-    // Restaure les items, sorts et quêtes à partir de leurs IDs
-    this.player.inventory = loadedState.inventory.map(itemData => {
-      const item = Item.getItemById(itemData.id);
-      if (itemData.equipped) {
-        item.equipped = true;
-      }
-      return item;
     });
-  
-    this.player.spells = loadedState.spells.map(id => Spell.getSpellById(id));
-    this.player.quests = loadedState.quests.map(q => {
-      const quest = Quest.getQuestById(q.id);
-      if (quest) {
-        quest.completed = q.completed;
-      }
-      return quest;
-    });
-  
-    // Rééquiper les objets après le chargement
-    this.player.inventory.forEach(item => {
-      if (item.equipped) {
+
+    localStorage.setItem(`spritesState_${this.mapID}`, JSON.stringify(spritesState));
+
+    // Rééquiper les objets après la sauvegarde
+    equippedItems.hands.forEach(id => {
+      const item = this.player.inventory.find(item => item.id === id);
+      if (item) {
         item.equip(this.player);
       }
     });
-  
-    // Mise à jour des statistiques du joueur
-    this.statsUpdate(this.player);
-    Sprite.resetToggle();
+
+    equippedItems.torso.forEach(id => {
+      const item = this.player.inventory.find(item => item.id === id);
+      if (item) {
+        item.equip(this.player);
+      }
+    });
+  }
+}
+
+loadSpritesFromMap() {
+  const spritesState = localStorage.getItem(`spritesState_${this.mapID}`);
+  if (spritesState) {
+    const loadedSpritesState = JSON.parse(spritesState);
+    this.updateSpritesState(loadedSpritesState);
+  }
+}
+
+updateFromLocalStorage() {
+  const playerState = localStorage.getItem('playerState');
+  if (playerState) {
+    const loadedState = JSON.parse(playerState);
+
+    // Vérification de l'ID de la carte avant de charger la sauvegarde
+    if (loadedState.mapID === this.mapID) {
+      alert('Player state loaded!');
+      this.updatePlayerState(loadedState);
+      this.loadSpritesFromMap();
+    } else {
+      alert("Save cannot be loaded : you're not on the same map.");
+    }
+  }
+}
+
+updatePlayerState(loadedState) {
+  ceilingHeight = loadedState.ceilingHeight;
+  ceilingRender = loadedState.ceilingRender;
+  floorTexture = loadedState.floorTexture;
+  ceilingTexture = loadedState.ceilingTexture;
+  this.loadFloorCeilingImages();
+
+  // Mise à jour des propriétés de base
+  for (const key in loadedState) {
+    if (loadedState.hasOwnProperty(key) && this.player.hasOwnProperty(key)) {
+      this.player[key] = loadedState[key];
+    }
   }
 
-  updateSpritesState(loadedSpritesState) {
-    // Réinitialise les sprites actuels
-    this.sprites = this.sprites.filter(sprite => sprite.id === 0);
-  
-    // Charge l'état des sprites depuis les données sauvegardées
-    loadedSpritesState.forEach(state => {
-      const sprite = new Sprite(
-        state.x,
-        state.y,
-        state.z,
-        state.w,
-        state.h,
-        state.ang,
-        state.spriteType,
-        state.spriteTexture,
-        state.isBlocking,
-        state.attackable,
-        state.turn,
-        state.hp,
-        state.dmg,
-        state.animationProgress,
-        state.spriteName,
-        state.spriteFace,
-        state.spriteTalk,
-        state.spriteSell,
-        state.id
-      );
-      this.sprites.push(sprite);
-    });
-  
-    console.log(this.sprites.length + " sprites chargés.");
-  }  
+  // Restaure les items, sorts et quêtes à partir de leurs IDs
+  this.player.inventory = loadedState.inventory.map(itemData => {
+    const item = Item.getItemById(itemData.id);
+    if (itemData.equipped) {
+      item.equipped = true;
+    }
+    return item;
+  });
+
+  this.player.spells = loadedState.spells.map(id => Spell.getSpellById(id));
+  this.player.quests = loadedState.quests.map(q => {
+    const quest = Quest.getQuestById(q.id);
+    if (quest) {
+      quest.completed = q.completed;
+    }
+    return quest;
+  });
+
+  // Rééquiper les objets après le chargement
+  this.player.inventory.forEach(item => {
+    if (item.equipped) {
+      item.equip(this.player);
+    }
+  });
+
+  // Mise à jour des statistiques du joueur
+  this.statsUpdate(this.player);
+  Sprite.resetToggle();
+}
+
+updateSpritesState(loadedSpritesState) {
+  // Réinitialise les sprites actuels
+  this.sprites = this.sprites.filter(sprite => sprite.id === 0);
+
+  // Charge l'état des sprites depuis les données sauvegardées
+  loadedSpritesState.forEach(state => {
+    const sprite = new Sprite(
+      state.x,
+      state.y,
+      state.z,
+      state.w,
+      state.h,
+      state.ang,
+      state.spriteType,
+      state.spriteTexture,
+      state.isBlocking,
+      state.attackable,
+      state.turn,
+      state.hp,
+      state.dmg,
+      state.animationProgress,
+      state.spriteName,
+      state.spriteFace,
+      state.spriteTalk,
+      state.spriteSell,
+      state.id
+    );
+    this.sprites.push(sprite);
+  });
+
+  console.log(this.sprites.length + " sprites chargés.");
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // méthode calcul quadrant et stockage de la valeur dans Player
@@ -1448,6 +1625,11 @@ class Raycaster {
                 case 5:
                     // valeur fixe de test, normalement valeur de sprite
                     this.player.quests[0].complete();
+
+                    // changement de texture temporaire
+                    console.log("test changement de texture");
+                    sprite.spriteTexture = 21;
+
                     Sprite.resetToggle();
                     break;
                 default:
@@ -1929,216 +2111,124 @@ class Raycaster {
 // Initialisation des sprites
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// ZZZ
-initSprites() {
-  const tileSizeHalf = Math.floor(this.tileSize / 2);
-
-  this.sprites = [];
-
-  let additionalDecoration = [];
-  let additionalDecorationCount = 0;
-  let additionalDecorationSpriteCount = 0;
-
-  let spritePositions = [
-    [1, 17, 6, 2, 1, "faceThief", "Tarik the Thief", [
-      ["facePlayer", "Alakir", "Hello there! What's the news?"],
-      ["faceThief", "Tarik the Thief", "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
-      ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
-    ], [], 5, 3],
-    [2, 9, 5, 2, 2, "faceGuard", "Guard", [
-      ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-      ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
-      ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
-    ], [], 4, 2],
-    [3, 4, 1, 2, 2, "faceGuard", "Guard", [
-      ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-      ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
-      ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
-    ], [], 4, 2],
-    [4, 14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
-      ["facePlayer", "Alakir", "Hey!"],
-      ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something?"],
-      ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
-    ], [1,2,3,4], 6, 4],
-
-    [5, 15, 18, 5, 9],  
-
-    [6, 4, 17, "A", "A"],   
-    [7, 19, 15, "A", "A"],  
-    [8, 21, 20, "A", "A"],  
-
-    // dummy for testing
-    [9, 14, 4, "A", "A"],
-
-    [10, 7, 16, 1, 4],   
-    [11, 20, 16, 1, 4],  
-    [12, 14, 9, 2, 7, "facePlayer", "facePlayer", [
-      ["facePlayer", "Quill's shop", "Hard discount on adventure gear (No refund in case of death)"],
-    ], [], 3, 1], 
-    [13, 1, 6, 1, 11],  
-
-    [14, 17, 3, 1, 6],   
-    [15, 15, 7, 1, 6],   
-    [16, 10, 10, 1, 6],  
-    [17, 12, 3, 1, 6],   
-    [18, 19, 9, 1, 6],   
-    [19, 9, 7, 1, 6],    
-
-    [20, 2, 7, 1, 12],   
-    [21, 2, 5, 1, 12],   
-    [22, 6, 7, 1, 12],   
-    [23, 6, 5, 1, 12],   
-    [24, 2, 3, 1, 12],   
-    [25, 6, 3, 1, 12],   
-    [26, 1, 9, 1, 12],   
-
-    [27, 7, 12, 1, 17],  
-    [28, 20, 4, 1, 17],  
-    [29, 13, 13, 1, 17], 
-
-    [30, 16, 9, 1, 5],   
-    [31, 15, 13, 1, 5],  
-    [32, 17, 7, 1, 5],   
-    [33, 5, 11, 1, 5],   
-    [34, 21, 6, 1, 5],   
-    [35, 15, 11, 1, 5],  
-
-    [36, 3, 7, 1, 16],   
-    [37, 3, 5, 1, 16],   
-    [38, 5, 5, 1, 16],   
-    [39, 5, 7, 1, 16],   
-    [40, 2, 1, 1, 16],   
-    [41, 6, 1, 1, 16],   
-    [42, 3, 11, 1, 16],  
-    [43, 1, 11, 1, 16],  
-
-    [44, 16, 4, 1, 15],  
-    [45, 10, 9, 1, 15],  
-    [46, 11, 1, 1, 15],  
-
-    [0, 10, 1, 10, 13], 
-    [0, 11, 1, 10, 13], 
-    [0, 12, 1, 10, 13], 
-    [0, 17, 1, 10, 13], 
-
-    [0, 18, 1, 10, 13], 
-    [0, 9, 2, 10, 13], 
-    [0, 11, 2, 10, 13], 
-    [0, 15, 2, 10, 13], 
-    [0, 17, 2, 10, 13], 
-    [0, 19, 2, 10, 13], 
-    [0, 10, 3, 10, 13], 
-    [0, 11, 3, 10, 13], 
-    [0, 12, 3, 10, 13], 
-    [0, 10, 4, 10, 13], 
-    [0, 11, 5, 10, 13], 
-    [0, 13, 5, 10, 13], 
-    [0, 15, 5, 10, 13], 
-    [0, 10, 7, 10, 13], 
-    [0, 14, 7, 10, 13], 
-    [0, 16, 7, 10, 13], 
-    [0, 22, 7, 10, 13], 
-    [0, 10, 8, 10, 13], 
-    [0, 12, 8, 10, 13], 
-    [0, 15, 8, 10, 13], 
-    [0, 20, 8, 10, 13], 
-    [0, 21, 8, 10, 13], 
-    [0, 22, 8, 10, 13], 
-    [0, 10, 9, 10, 13], 
-    [0, 11, 9, 10, 13], 
-    [0, 17, 9, 10, 13], 
-    [0, 18, 9, 10, 13], 
-    [0, 19, 9, 10, 13], 
-    [0, 21, 9, 10, 13], 
-    [0, 9, 10, 10, 13], 
-    [0, 17, 10, 10, 13], 
-    [0, 10, 11, 10, 13], 
-    [0, 17, 11, 10, 13], 
-    [0, 10, 12, 10, 13], 
-    [0, 11, 12, 10, 13], 
-    [0, 11, 13, 10, 13], 
-    [0, 11, 14, 10, 13],
-  ];
-
-  for (let pos of spritePositions) {
-    let id = pos[0];
-    let x = pos[1] * this.tileSize + tileSizeHalf;
-    let y = pos[2] * this.tileSize + tileSizeHalf;
-
-    let type = pos[3];
-    let texture = pos[4];
-    let face = pos[5];
-    let name = pos[6];
-    let dialogue = pos[7];
-    let spriteSell = pos[8] || [];
-
-    let hp = pos[9] || 2;
-    let dmg = pos[10] || 1;
-
-    if (type === 10) {
-      for (let j = 0; j < 2; j++) {
-        let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
-        let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
-
-        let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
-        newDecoration.spriteTexture = 13;
-        newDecoration.spriteType = 1;
-        newDecoration.isBlocking = false;
-        newDecoration.id = 0;
-
-        additionalDecoration.push(newDecoration);
-        additionalDecorationCount++;
-      }
-      additionalDecorationSpriteCount++;
-    } else {
-      if (typeof id !== 'number' || id <= 0) {
-        console.error("Invalid ID for sprite. Each sprite must have a unique positive ID.");
-        continue;
-      }
-
-      let isBlocking = true;
-      console.log("sprite #" + id + " loaded.");
-      this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell, id));
-    }
-
-    if (!dialogue && !face && !name) {
-      type = 1;
-    }
+  // vide la liste des sprites pour permettre de changer de carte
+  clearSprites() {
+    this.sprites = []
   }
 
-  for (let newDecoration of additionalDecoration) {
-    newDecoration.id = 0; // ID pour les décorations
-    this.sprites.push(newDecoration);
+  initSprites(spriteList) {
+    
+    this.clearSprites();
+
+    const tileSizeHalf = Math.floor(this.tileSize / 2);
+
+    // zzz
+    let spritePositions = spriteList;
+
+    this.sprites = [];
+
+    let additionalDecoration = [];
+    let additionalDecorationCount = 0;
+    let additionalDecorationSpriteCount = 0;
+
+
+    for (let pos of spritePositions) {
+      let id = pos[0];
+      let x = pos[1] * this.tileSize + tileSizeHalf;
+      let y = pos[2] * this.tileSize + tileSizeHalf;
+
+      let type = pos[3];
+      let texture = pos[4];
+      let face = pos[5];
+      let name = pos[6];
+      let dialogue = pos[7];
+      let spriteSell = pos[8] || [];
+
+      let hp = pos[9] || 2;
+      let dmg = pos[10] || 1;
+
+      if (type === 10) {
+        for (let j = 0; j < 2; j++) {
+          let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
+          let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
+
+          let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
+          newDecoration.spriteTexture = 13;
+          newDecoration.spriteType = 1;
+          newDecoration.isBlocking = false;
+          newDecoration.id = 0;
+
+          additionalDecoration.push(newDecoration);
+          additionalDecorationCount++;
+        }
+        additionalDecorationSpriteCount++;
+      } else {
+        if (typeof id !== 'number' || id <= 0) {
+          console.error("Invalid ID for sprite. Each sprite must have a unique positive ID.");
+          continue;
+        }
+
+        let isBlocking = true;
+        // console.log("sprite #" + id + " loaded.");
+        this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell, id));
+      }
+
+      if (!dialogue && !face && !name) {
+        type = 1;
+      }
+    }
+
+    for (let newDecoration of additionalDecoration) {
+      newDecoration.id = 0; // ID pour les décorations
+      this.sprites.push(newDecoration);
+    }
+
+    // Définition du sprite de combat avec l'ID 0
+    this.sprites.push(Sprite.combatAnimationSprite = new Sprite(
+      tileSizeHalf,           // x
+      tileSizeHalf,           // y
+      0,                      // z
+      640,                    // w
+      640,                    // h
+      0,                      // ang
+      2,                      // spriteType
+      19,                     // spriteTexture
+      false,                  // isBlocking
+      false,                  // attackable
+      true,                   // turn
+      0,                      // hp
+      0,                      // dmg
+      0,                      // animationProgress
+      "combatAnimationSprite",// spriteName
+      1,                      // spriteFace
+      "",                     // spriteTalk
+      [],                     // spriteSell
+      0                       // id
+    ));
+
+    Sprite.combatAnimationSprite.spriteTexture = 19;
+
+    console.log(this.sprites.length + " sprites créés.");
+    console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
   }
 
-  // Définition du sprite de combat avec l'ID 0
-  this.sprites.push(Sprite.combatAnimationSprite = new Sprite(
-    tileSizeHalf,           // x
-    tileSizeHalf,           // y
-    0,                      // z
-    640,                    // w
-    640,                    // h
-    0,                      // ang
-    2,                      // spriteType
-    19,                     // spriteTexture
-    false,                  // isBlocking
-    false,                  // attackable
-    true,                   // turn
-    0,                      // hp
-    0,                      // dmg
-    0,                      // animationProgress
-    "combatAnimationSprite",// spriteName
-    1,                      // spriteFace
-    "",                     // spriteTalk
-    [],                     // spriteSell
-    0                       // id
-  ));
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// NEXTMAP TEST
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  // fonction changement de carte
+  // zzz
+  nextMap() {
+    // pour tester on fait une simple incrémentation
+    currentMap += 1;
+    mapData = getMapDataByID(currentMap);
 
-  Sprite.combatAnimationSprite.spriteTexture = 19;
-
-  console.log(this.sprites.length + " sprites créés.");
-  console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
-}
+    this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
+    this.initSprites(mapData.sprites);
+    this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize/2;
+    this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize/2;
+    this.player.rot = mapData.playerStart.Orientation;
+  }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Méthode intersection rayon avec sprite
@@ -2179,7 +2269,9 @@ initSprites() {
     fovDegrees = 90
   ) 
   {
-    this.initMap();
+    // zzz
+    // mettre la map par défaut comme argument
+    this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
     this.stripWidth = 1; // leave this at 1 for now
     this.ceilingHeight = 1; // ceiling height in blocks
     this.mainCanvas = mainCanvas;
@@ -2206,7 +2298,7 @@ initSprites() {
     this.texturesLoaded = false;
 
     this.initPlayer();
-    this.initSprites();
+    this.initSprites(mapData.sprites);;
     this.bindKeysAndButtons();
     this.initScreen();
     this.drawMiniMap();
@@ -2312,7 +2404,7 @@ initSprites() {
     let wallsImage = document.getElementById("wallsImage");
     context.drawImage(wallsImage, 0, 0, wallsImage.width, wallsImage.height);
     this.wallsImageData = context.getImageData(0,0,wallsImage.width,wallsImage.height);
-    console.log("wallsImage.width=" + wallsImage.width);
+    // console.log("wallsImage.width=" + wallsImage.width);
 
     // Save sprite image pixels
     canvas = document.createElement("canvas");
@@ -2342,7 +2434,8 @@ initSprites() {
       "sprite17",
       "sprite18",
       "sprite19",
-      "sprite20"
+      "sprite20",
+      "sprite21"
     ];
 
     // On parcours le tableau et effectue les opérations pour chaque élément,
@@ -2357,7 +2450,7 @@ initSprites() {
       // animation sprite marqueur xxx
       context.drawImage(spriteImage,0,0,spriteImage.width,spriteImage.height);
       this["spriteImageData" + (index + 1)] = context.getImageData(0,0,spriteImage.width,spriteImage.height);
-      console.log(`spriteImage${index + 1}.width = ${spriteImage.width}`);
+      // console.log(`spriteImage${index + 1}.width = ${spriteImage.width}`);
     });
   }
 
@@ -2466,8 +2559,11 @@ initSprites() {
         break;
       case 17:
         this.updateFromLocalStorage();
-        alert('Player state loaded!');
         console.log('loadButton')
+        break;
+      case 18:
+        this.nextMap();
+        console.log("nextMapButton");
         break;
       default:
         console.log("Bouton non reconnu");
@@ -2538,7 +2634,8 @@ initSprites() {
     this.bindButton("castSpell", 14);
     this.bindButton("nextSpell", 15);
     this.bindButton("saveButton", 16);
-    this.bindButton("loadButton", 17)
+    this.bindButton("loadButton", 17);
+    this.bindButton("nextMapButton", 18);
   }
   
 //////////////////////////////////////////////////////////////////////////////
@@ -2565,8 +2662,8 @@ initSprites() {
 /// UNITE TEMPORELLE ("TOUR") redondant
 //////////////////////////////////////////////////////////////////////////////
 
-    // NOTE : 
-    // GESTION DES ANIMATIONS PAR VARIABLE POUR CHAQUE INSTANCE DE SPRITE
+    // calculé à chaque gameCycle() (temmps réel)
+    this.statsUpdate(this.player);
 
     // Utilisation de totalTimeElapsed pour calculer un délai d'une seconde
     // La valeur est initialisée au début du code
@@ -2578,7 +2675,6 @@ initSprites() {
 
     if (timeSinceLastSecond >= oneSecond) {
       // console.log("Délai d'un tour atteint, pas de minuterie CPU")
-      this.statsUpdate(this.player);
       this.player.turn = true;
       timeSinceLastSecond -= oneSecond;
     }
@@ -2760,7 +2856,7 @@ initSprites() {
   }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// fonction drawsprite , ou les textures des sprites sont gérées
+// fonction drawsprite : ou les textures des sprites sont gérées
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
   drawSpriteStrip(rayHit) {
@@ -2811,6 +2907,7 @@ initSprites() {
         18: this.spriteImageData18, // sac
         19: this.spriteImageData19, // slashAnimation
         20: this.spriteImageData20, // sparkAnimation
+        21: this.spriteImageData21, // openChest
       };
 
       // Utilisez la structure de données pour accéder aux données appropriées en fonction de spriteType
@@ -3013,7 +3110,6 @@ initSprites() {
     }
   } 
 
-
 /*
   drawWallStrip(rayHit, textureX, textureY, wallScreenHeight) {
     const TextureUnit = 64;
@@ -3087,54 +3183,13 @@ initSprites() {
 */
   
   //////////////////////////////////////////////////////////////////////
-  // Coloration sol si pas de texture
+  // sol
   //////////////////////////////////////////////////////////////////////
 
   drawSolidFloor() {
     for (let y = this.displayHeight / 2; y < this.displayHeight; ++y) {
       for (let x = 0; x < this.displayWidth; ++x) {
         Raycaster.setPixel(this.backBuffer, x, y, 111, 71, 59, 255);
-      }
-    }
-  }
-
-  //////////////////////////////////////////////////////////////////////
-  // SkyBox
-  //////////////////////////////////////////////////////////////////////
-
-  drawSkybox() {
-    // Calculer les facteurs d'échelle pour les coordonnées de texture
-    let scaleX = this.skyboxImageData.width / this.displayWidth;
-    let scaleY = this.skyboxImageData.height / this.displayHeight;
-
-    // Calculer le décalage horizontal en fonction de l'angle de la caméra
-    let offsetX = Math.floor((-this.player.rot / Math.PI) * this.skyboxImageData.width*3);
-
-    for (let y = 0; y < this.displayHeight / 2; ++y) {
-      // Calculer les coordonnées de texture pour cette ligne de pixels
-      let textureY = Math.floor(y * scaleY);
-
-      for (let x = 0; x < this.displayWidth; ++x) {
-        // Calculer les coordonnées de texture pour ce pixel
-        let textureX = Math.floor((x + offsetX) * scaleX) % this.skyboxImageData.width;
-
-        // Trouver l'index du pixel dans le tableau de données de l'image
-        let index = (textureX + textureY * this.skyboxImageData.width) * 4;
-
-        // Extraire les valeurs de couleur du pixel
-        let r = this.skyboxImageData.data[index];
-        let g = this.skyboxImageData.data[index + 1];
-        let b = this.skyboxImageData.data[index + 2];
-        let a = this.skyboxImageData.data[index + 3];
-
-        // Trouver l'index du pixel dans le tableau de données du backBuffer
-        let backBufferIndex = (x + y * this.displayWidth) * 4;
-
-        // Modifier les données du backBuffer pour mettre à jour le pixel
-        this.backBuffer.data[backBufferIndex] = r;
-        this.backBuffer.data[backBufferIndex + 1] = g;
-        this.backBuffer.data[backBufferIndex + 2] = b;
-        this.backBuffer.data[backBufferIndex + 3] = a;
       }
     }
   }
@@ -3194,6 +3249,10 @@ initSprites() {
     }
   }
 
+  //////////////////////////////////////////////////////////////////////
+  // Plafonf/SkyBox
+  //////////////////////////////////////////////////////////////////////
+
   drawTexturedCeiling(rayHits) {
     for (let rayHit of rayHits) {
       const wallScreenHeight = this.stripScreenHeight(
@@ -3249,6 +3308,47 @@ initSprites() {
       }
     }
   }
+
+  drawSkybox() {
+    // Calculer les facteurs d'échelle pour les coordonnées de texture
+    let scaleX = this.skyboxImageData.width / this.displayWidth;
+    let scaleY = this.skyboxImageData.height / this.displayHeight;
+
+    // Calculer le décalage horizontal en fonction de l'angle de la caméra
+    let offsetX = Math.floor((-this.player.rot / Math.PI) * this.skyboxImageData.width*3);
+
+    for (let y = 0; y < this.displayHeight / 2; ++y) {
+      // Calculer les coordonnées de texture pour cette ligne de pixels
+      let textureY = Math.floor(y * scaleY);
+
+      for (let x = 0; x < this.displayWidth; ++x) {
+        // Calculer les coordonnées de texture pour ce pixel
+        let textureX = Math.floor((x + offsetX) * scaleX) % this.skyboxImageData.width;
+
+        // Trouver l'index du pixel dans le tableau de données de l'image
+        let index = (textureX + textureY * this.skyboxImageData.width) * 4;
+
+        // Extraire les valeurs de couleur du pixel
+        let r = this.skyboxImageData.data[index];
+        let g = this.skyboxImageData.data[index + 1];
+        let b = this.skyboxImageData.data[index + 2];
+        let a = this.skyboxImageData.data[index + 3];
+
+        // Trouver l'index du pixel dans le tableau de données du backBuffer
+        let backBufferIndex = (x + y * this.displayWidth) * 4;
+
+        // Modifier les données du backBuffer pour mettre à jour le pixel
+        this.backBuffer.data[backBufferIndex] = r;
+        this.backBuffer.data[backBufferIndex + 1] = g;
+        this.backBuffer.data[backBufferIndex + 2] = b;
+        this.backBuffer.data[backBufferIndex + 3] = a;
+      }
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // Rendu des murs
+  //////////////////////////////////////////////////////////////////////
 
   drawWorld(rayHits) {
     this.ceilingHeight = ceilingHeight;
@@ -3679,6 +3779,8 @@ initSprites() {
     }
 
     // Suite détection sprite
+    // implémenter collision glissante
+    // zzz
     if (obstacleOnPath) {
       // console.log("obstacle !")
       return;
