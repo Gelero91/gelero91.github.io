@@ -71,10 +71,11 @@ var timeSinceLastSecond = 0;
 let spriteAnimationProgress = 0;
 let lastTime = new Date().getSeconds();
 
+let gameOver = false;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MAP JSON :
-// VARIABLES D'INITIALISATION DE CARTE
-// & CHANGEMENT DE CARTE
+// VARIABLES D'INITIALISATION DE CARTE & CHANGEMENT DE CARTE
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var currentMap = 1;
@@ -134,11 +135,11 @@ var maps = [
      
       // basic ennemies : bats
       // le dialogue n'est pas nécessaire, il devrait être ajouté après la fonction de décès
-      [6, 4, 17, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
-      [7, 19, 15, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
-      [8, 21, 20, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      [6, 4, 17, "A", "A", null, "Bat", [], null, null, null],
+      [7, 19, 15, "A", "A", null, "Bat", [], null, null, null],
+      [8, 21, 20, "A", "A", null, "Bat", [], null, null, null],
       // tester
-      [9, 14, 4, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      [9, 14, 4, "A", "A", null, "Bat", [], null, 10, 10],
     
       [10, 7, 16, 1, 4],   
       [11, 20, 16, 1, 4],  
@@ -248,10 +249,10 @@ var maps = [
     map: [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,24,24,24,24,24,24,24,24,24,24,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
     sprites: [  
       // liste de test
-      [6, 4, 17, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
-      [7, 19, 15, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
-      [8, 21, 20, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
-      [9, 14, 4, "A", "A", null, "Bat", [["facePlayer", "Alakir", "It's dead."]], null, null, null],
+      [6, 4, 17, "A", "A", null, "Bat", [], null, null, null],
+      [7, 19, 15, "A", "A", null, "Bat", [], null, null, null],
+      [8, 21, 20, "A", "A", null, "Bat", [], null, null, null],
+      [9, 14, 4, "A", "A", null, "Bat", [], null, null, null],
     ],   
     eventA: [],
     eventB: [],
@@ -1096,7 +1097,7 @@ class Sprite {
 
       this.spriteType = 0;
       this.spriteTexture = 10;
-      this.dialogue = [["facePlayer", "Alakir", "It's dead..."]];
+      this.spriteTalk = [["facePlayer", "Alakir", "It's dead..."]];
       this.isBlocking = false;
     } else {
 
@@ -1409,6 +1410,9 @@ loadSpritesFromMap() {
 }
 
 updateFromLocalStorage() {
+  gameOver = false;
+  Raycaster.showRenderWindow();
+
   const playerState = localStorage.getItem('playerState');
   if (playerState) {
     const loadedState = JSON.parse(playerState);
@@ -1419,7 +1423,10 @@ updateFromLocalStorage() {
       this.updatePlayerState(loadedState);
       this.loadSpritesFromMap();
     } else {
-      alert("Save cannot be loaded : you're not on the same map.");
+      this.loadMap(loadedState.mapID);
+      this.updatePlayerState(loadedState);
+      this.loadSpritesFromMap();
+      alert("Loading the map : you're not on the same map.");
     }
   }
 }
@@ -1499,6 +1506,99 @@ updateSpritesState(loadedSpritesState) {
   });
 
   console.log(this.sprites.length + " sprites chargés.");
+}
+
+// Sauvegarde des sprites et chargement pour le changement de carte
+// a refactoriser ultérieurement.
+
+saveCurrentMapSprites() {
+  // Lecture de l'état actuel des sprites pour la carte actuelle (currentMap)
+  let spritesState = JSON.parse(localStorage.getItem(`spritesState_${currentMap}`)) || [];
+
+  // Sauvegarde l'état des sprites en excluant les sprites avec l'ID 0
+  const currentSpritesState = this.sprites
+    .filter(sprite => sprite.id !== 0)
+    .map(sprite => ({
+      id: sprite.id,
+      x: sprite.x,
+      y: sprite.y,
+      z: sprite.z,
+      w: sprite.w,
+      h: sprite.h,
+      ang: sprite.ang,
+      spriteType: sprite.spriteType,
+      spriteTexture: sprite.spriteTexture,
+      isBlocking: sprite.isBlocking,
+      attackable: sprite.attackable,
+      hp: sprite.hp,
+      dmg: sprite.dmg,
+      turn: sprite.turn,
+      animationProgress: sprite.animationProgress,
+      spriteName: sprite.spriteName,
+      spriteFace: sprite.spriteFace,
+      spriteTalk: sprite.spriteTalk,
+      spriteSell: sprite.spriteSell,
+    }));
+
+  // Mettre à jour ou ajouter les sprites sans duplications
+  currentSpritesState.forEach(newSprite => {
+    const index = spritesState.findIndex(sprite => sprite.id === newSprite.id);
+    if (index !== -1) {
+      spritesState[index] = newSprite;  // Mise à jour du sprite existant
+    } else {
+      spritesState.push(newSprite);  // Ajout du nouveau sprite
+    }
+  });
+
+  localStorage.setItem(`spritesState_${currentMap}`, JSON.stringify(spritesState));
+}
+
+loadMapSprites(mapID) {
+  const spritesState = localStorage.getItem(`spritesState_${mapID}`);
+  if (spritesState) {
+    const loadedSpritesState = JSON.parse(spritesState);
+    this.updateLoadedSpritesState(loadedSpritesState, mapID);
+  } else {
+    console.warn(`Aucune sauvegarde trouvée pour la carte avec l'ID ${mapID}.`);
+  }
+}
+
+updateLoadedSpritesState(loadedSpritesState, mapID) {
+  // Réinitialise les sprites actuels
+  this.sprites = this.sprites.filter(sprite => sprite.id === 0);
+
+  // Charge l'état des sprites depuis les données sauvegardées
+  loadedSpritesState.forEach(state => {
+    const sprite = new Sprite(
+      state.x,
+      state.y,
+      state.z,
+      state.w,
+      state.h,
+      state.ang,
+      state.spriteType,
+      state.spriteTexture,
+      state.isBlocking,
+      state.attackable,
+      state.turn,
+      state.hp,
+      state.dmg,
+      state.animationProgress,
+      state.spriteName,
+      state.spriteFace,
+      state.spriteTalk,
+      state.spriteSell,
+      state.id
+    );
+    this.sprites.push(sprite);
+  });
+
+  console.log(`${this.sprites.length} sprites chargés pour la carte ${mapID}.`);
+}
+
+saveAndLoadMapSprites() {
+  saveCurrentMapSprites();
+  loadMapSprites(currentMap);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1734,6 +1834,52 @@ updateSpritesState(loadedSpritesState) {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// NEW GAME / MENU
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+static showGameOver() {
+  const renderWindow = document.getElementById("renderWindow");
+  const gameOverWindow = document.getElementById("gameOverWindow");
+  const mainMenuWindow = document.getElementById("mainMenuWindow");
+
+  renderWindow.style = "display:none";
+  gameOverWindow.style = "display:block";
+  mainMenuWindow.style = "display:none";
+}
+
+static showMainMenu() {
+  const renderWindow = document.getElementById("renderWindow");
+  const gameOverWindow = document.getElementById("gameOverWindow");
+  const mainMenuWindow = document.getElementById("mainMenuWindow");
+
+  renderWindow.style = "display:none";
+  gameOverWindow.style = "display:none";
+  mainMenuWindow.style = "display:block";
+}
+
+static showRenderWindow() {
+  const renderWindow = document.getElementById("renderWindow");
+  const gameOverWindow = document.getElementById("gameOverWindow");
+  const mainMenuWindow = document.getElementById("mainMenuWindow");
+
+  renderWindow.style = "display:block";
+  gameOverWindow.style = "display:none";
+  mainMenuWindow.style = "display:none";
+} 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// fonction DEATH
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+  static death() {
+    gameOver = true;
+    Raycaster.showGameOver();
+    // Sprite.playerDamageFlash();
+  }
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // fonction update des stats du joueurs (intégré au gamecycle)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1809,7 +1955,12 @@ updateSpritesState(loadedSpritesState) {
     // FONCTION DEATH
     if (player.hp > 0) {
     } else {
-      Raycaster.death();
+      if (gameOver === false) {
+        Raycaster.showGameOver();
+        gameOver = true;
+      } else {
+        console.log("hey you're dead");
+      }
     }
 
     // On base les HP sur la force & MP sur l'intellect
@@ -1884,19 +2035,6 @@ updateSpritesState(loadedSpritesState) {
       element.style.backgroundColor = "";
       element.style.filter = "";
     }, 100);
-  }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// fonction DEATHHHH
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  static async death() {
-    Sprite.terminalLog("YOOOU'RE DEEEAD !");
-    Sprite.terminalLog("The page is going to refresh in 3seconds...");
-    Sprite.terminalLog("HEAL AND EQUIP YOURSELF, GODDAMIT !")
-    Sprite.playerDamageFlash
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-    location.reload();
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2122,7 +2260,6 @@ updateSpritesState(loadedSpritesState) {
 
     const tileSizeHalf = Math.floor(this.tileSize / 2);
 
-    // zzz
     let spritePositions = spriteList;
 
     this.sprites = [];
@@ -2217,7 +2354,6 @@ updateSpritesState(loadedSpritesState) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   // fonction changement de carte
-  // zzz
   nextMap() {
     // pour tester on fait une simple incrémentation
     currentMap += 1;
@@ -2228,6 +2364,38 @@ updateSpritesState(loadedSpritesState) {
     this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize/2;
     this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize/2;
     this.player.rot = mapData.playerStart.Orientation;
+  }
+
+  // zzz
+  loadMap(mapID) {
+      // sauvegarder les sprites
+      this.saveCurrentMapSprites();
+
+      currentMap = mapID;
+
+      mapData = getMapDataByID(currentMap);
+
+      this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
+      this.initSprites(mapData.sprites);
+      this.loadMapSprites(currentMap);
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// NEW GAME
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  newGame() {
+    currentMap = 1;
+    mapData = getMapDataByID(currentMap);
+
+    this.initPlayer();
+
+    gameOver = false;
+
+    this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
+    this.initSprites(mapData.sprites);
+
+    Raycaster.showRenderWindow();
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2269,7 +2437,6 @@ updateSpritesState(loadedSpritesState) {
     fovDegrees = 90
   ) 
   {
-    // zzz
     // mettre la map par défaut comme argument
     this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
     this.stripWidth = 1; // leave this at 1 for now
@@ -2553,8 +2720,12 @@ updateSpritesState(loadedSpritesState) {
         this.nextSpell();
         break;
       case 16:
-        this.saveToLocalStorage();
-        alert('Player state saved!');
+        if (gameOver == false) {
+          this.saveToLocalStorage();
+          alert('Player state saved!');
+        } else {
+          alert('dead, so nope');
+        }
         console.log('saveButton')
         break;
       case 17:
@@ -2562,8 +2733,27 @@ updateSpritesState(loadedSpritesState) {
         console.log('loadButton')
         break;
       case 18:
-        this.nextMap();
+        if (gameOver == false) {
+          this.nextMap();
+          console.log("nextMapButton");
+        } else {
+          alert('dead, so nope');
+        }
         console.log("nextMapButton");
+        break;
+      case 19:
+        // "new game" button
+        this.newGame();
+        break;
+      case 20:
+        Raycaster.showMainMenu();
+        break;
+      case 21:
+        if (gameOver == false) {
+          Raycaster.showRenderWindow();
+        } else {
+          alert('dead, so nope');
+        }
         break;
       default:
         console.log("Bouton non reconnu");
@@ -2636,6 +2826,9 @@ updateSpritesState(loadedSpritesState) {
     this.bindButton("saveButton", 16);
     this.bindButton("loadButton", 17);
     this.bindButton("nextMapButton", 18);
+    this.bindButton("newGameButton",19);
+    this.bindButton("mainMenuButton",20);
+    this.bindButton("backMenuButton",21);    
   }
   
 //////////////////////////////////////////////////////////////////////////////
@@ -3780,7 +3973,6 @@ updateSpritesState(loadedSpritesState) {
 
     // Suite détection sprite
     // implémenter collision glissante
-    // zzz
     if (obstacleOnPath) {
       // console.log("obstacle !")
       return;
