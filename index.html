@@ -234,6 +234,18 @@ Gwendal L.R.
       transform: translateY(-50%);
       font-size: 14px;
     }
+
+    .menuCenter {
+      text-align: center;
+    }
+
+    .menuButton {
+      height: 75px;
+      width: 300px;
+      margin: 5px;
+      border-radius: 6px;
+      color: black;
+    }
   </style>
 </head>
 
@@ -410,13 +422,13 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
 <!-- UX/UI - Start -->
 <div>
   <div>
-    <button id="mainMenuButton">Menu</button>
     <!--
     <button id="newGameButton">New Game</button>
     <button id="loadButton">Load</button>
     -->
 
      <div class="paper">
+      <button id="mainMenuButton" style="width:100px;">Menu</button>
         <!-- Header Présentation -->
         <!-- <p>HEADER DE LA PAGE</p> -->
         <div class="center">
@@ -764,17 +776,19 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
 
           <div id="mainMenuWindow" style="display: none;">
             <div id="gameWindow" class="container" style="display:block;">
-              <H1>OASIS.JS</H1>
-              <br>
-              <button id="newGameButton">New Game</button>
-              <br>
-              <button id="loadButton">Load save</button>
-              <br>
-              <button id="saveButton">Save game</button>
-              <br>
-              <button id="nextMapButton">*DEV TEST : Next Map*</button>
-              <br>
-              <button id="backMenuButton">Back to Game</button>
+              <div class="menuCenter">
+                <H1 style="font-size: large;">OASIS.JS</H1>
+                <br>
+                <button id="newGameButton" class="menuButton">New Game</button>
+                <br>
+                <button id="loadButton" class="menuButton">Load save</button>
+                <br>
+                <button id="saveButton" class="menuButton">Save game</button>
+                <br>
+                <button id="nextMapButton" class="menuButton">DEV TEST<br>*Next Map*</button>
+                <br>
+                <button id="backMenuButton" class="menuButton">Back to Game</button>
+              </div>
             </div>
           </div>
         </div>

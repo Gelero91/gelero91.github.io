@@ -139,7 +139,7 @@ var maps = [
       [7, 19, 15, "A", "A", null, "Bat", [], null, null, null],
       [8, 21, 20, "A", "A", null, "Bat", [], null, null, null],
       // tester
-      [9, 14, 4, "A", "A", null, "Bat", [], null, 10, 10],
+      // [9, 14, 4, "A", "A", null, "Bat", [], null, null, null],
     
       [10, 7, 16, 1, 4],   
       [11, 20, 16, 1, 4],  
@@ -1720,10 +1720,11 @@ saveAndLoadMapSprites() {
                     this.player.turn = false;
                     break;
                 case 4:
-                    // gestion des quêteurs
+                    // gestion des Quest Giver
                     break;
                 case 5:
-                    // valeur fixe de test, normalement valeur de sprite
+                    // valeur fixe de test
+                    // ultérieurement : quests[currentMap].complete();
                     this.player.quests[0].complete();
 
                     // changement de texture temporaire
@@ -1732,13 +1733,15 @@ saveAndLoadMapSprites() {
 
                     Sprite.resetToggle();
                     break;
+                case "END":
+                    this.nextMap();
+                    break;
                 default:
                     Sprite.resetToggle();
                     break;
             }
         }
     }
-
     // Réinitialisation de la touche d'action après utilisation
     this.actionButtonClicked = false;
   }
@@ -2719,7 +2722,7 @@ static showRenderWindow() {
       case 15:
         this.nextSpell();
         break;
-      case 16:
+      case 16:""
         if (gameOver == false) {
           this.saveToLocalStorage();
           alert('Player state saved!');
