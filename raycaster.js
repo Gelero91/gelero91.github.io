@@ -242,7 +242,7 @@ var maps = [
       [7, 6, ouest, true, 2, 1, 2, "Moving in !"],
       [2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."],
     ],
-    playerStart: { X: 14, Y: 1, Orientation: 4.71238898038469, } // Position de départ du joueur pour l'ID 1
+    playerStart: { X: 14, Y: 1, Orientation: 4.71238898038469, ceilingRender:false,ceilingHeight:2, ceilingTexture:1, floorTexture:3}, // Position de départ du joueur pour l'ID 1
   },
   {
     mapID: 2,
@@ -256,7 +256,7 @@ var maps = [
     ],   
     eventA: [],
     eventB: [],
-    playerStart: { X: 5, Y: 6, Orientation: 2 } // Position de départ du joueur pour l'ID 2
+    playerStart: { X: 5, Y: 6, Orientation: 2 , ceilingRender:false,ceilingHeight:2, ceilingTexture:1, floorTexture:3} // Position de départ du joueur pour l'ID 2
   }
 ];
 
@@ -465,8 +465,8 @@ class Item {
 // constructor(name, slot, equipped, power, strength, dexterity, intellect, might, magic, dodge, armor)
 // Set d'objets test
 Item.itemList = [
-  { id: 1, name: "Sword and Shield", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 2, magic: 0, dodge: 0, armor: 1, criti: 0 },
-  { id: 2, name: "Quilted jacket", slot: 2, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 0, magic: 0, dodge: 0, armor: 1, criti: 0 },
+  { id: 1, name: "Shortsword", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 1, magic: 0, dodge: 0, armor: 0, criti: 0 },
+  { id: 2, name: "Cape", slot: 2, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 0, magic: 0, dodge: 0, armor: 1, criti: 0 },
   { id: 3, name: "Magic sword", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 3, magic: 2, dodge: 0, armor: 0, criti: 0 },
   { id: 4, name: "Robe", slot: 2, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 0, magic: 0, dodge: 0, armor: 1, criti: 0 },
   { id: 5, name: "Staff", slot: 1, equipped: false, power: 0, strength: 0, dexterity: 0, intellect: 0, might: 1, magic: 0, dodge: 0, armor: 0, criti: 0 },
@@ -863,6 +863,7 @@ class Sprite {
     dialWindow.style.display = "block";
 
     let currentDialogue = 0;
+    let allDialoguesLog = ''; // Stocker tous les dialogues pour le log
 
     const showNextDialogue = () => {
       if (currentDialogue < this.spriteTalk.length) {
@@ -875,12 +876,16 @@ class Sprite {
           var imgElement = document.getElementById(face);
           faceOutput.src = imgElement ? imgElement.src : '';
 
-          Sprite.terminalLog(`<font style="font-weight: bold;">${name} </font> : <br> <font style="font-style: italic;"> ${entry} </font>`);
+          // Accumuler le dialogue dans allDialoguesLog
+          allDialoguesLog += `<font style="font-weight: bold;">${name} </font> : <br> <font style="font-style: italic;"> ${entry} </font><br>`;
         }
 
         currentDialogue++;
       } else {
-        // Fin du dialogue
+        // Fin du dialogue : on log tous les dialogues d'un coup
+        Sprite.terminalLog(allDialoguesLog);
+
+        // Afficher la fin du dialogue
         outputElement.style.display = "block";
         dialWindow.style.display = "none";
         newNextButton.removeEventListener("click", showNextDialogue);
@@ -892,6 +897,7 @@ class Sprite {
     // Affiche le premier dialogue immédiatement
     showNextDialogue();
   }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Animation de combat
@@ -926,29 +932,28 @@ class Sprite {
   // Méthode pour invoquer le sprite d'animation
   // Delay est fixé à 150ms par défaut
   invokeAnimationSprite(player, usedTexture, delay = 150) {
+    // Stocker la position initiale du sprite de combat
+    const initialCombatSpritePosition = {
+        x: Sprite.combatAnimationSprite.x,
+        y: Sprite.combatAnimationSprite.y
+    };
 
-  // Stocker la position initiale du sprite de combat
-  const initialCombatSpritePosition = {
-      x: Sprite.combatAnimationSprite.x,
-      y: Sprite.combatAnimationSprite.y
-  };
+    // Mise à jour du sprite de combat pour l'effet cosmétique
+    Sprite.updateCombatAnimationSprite({
+        x: (player.x + this.x) / 2,  // Nouvelle position x
+        y: (player.y + this.y) / 2,  // Nouvelle position y
+        spriteTexture: usedTexture,  // Nouvelle texture
+    });
 
-  // Mise à jour du sprite de combat pour l'effet cosmétique
-  Sprite.updateCombatAnimationSprite({
-      x: (player.x + this.x) / 2,  // Nouvelle position x
-      y: (player.y + this.y) / 2,  // Nouvelle position y
-      spriteTexture: usedTexture,  // Nouvelle texture
-  });
-
-  // Retourner le sprite de combat à sa position initiale après le délai spécifié
-  setTimeout(() => {
-      Sprite.updateCombatAnimationSprite({
-          x: initialCombatSpritePosition.x,
-          y: initialCombatSpritePosition.y,
-          texture: 0,
-      });
-  }, delay);
-}
+    // Retourner le sprite de combat à sa position initiale après le délai spécifié
+    setTimeout(() => {
+        Sprite.updateCombatAnimationSprite({
+            x: initialCombatSpritePosition.x,
+            y: initialCombatSpritePosition.y,
+            texture: 0,
+        });
+    }, delay);
+  }
 
   hitAnimation(player) {
     // Constants pour le recul
@@ -1230,7 +1235,7 @@ class Raycaster {
 // Joueur
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// xyz
+
   initPlayer() {
     const tileSizeHalf = Math.floor(this.tileSize / 2);
 
@@ -1508,8 +1513,10 @@ updateSpritesState(loadedSpritesState) {
   console.log(this.sprites.length + " sprites chargés.");
 }
 
+//////////////////
 // Sauvegarde des sprites et chargement pour le changement de carte
 // a refactoriser ultérieurement.
+/////////////////
 
 saveCurrentMapSprites() {
   // Lecture de l'état actuel des sprites pour la carte actuelle (currentMap)
@@ -1962,6 +1969,8 @@ static showRenderWindow() {
         Raycaster.showGameOver();
         gameOver = true;
       } else {
+        // rajouter player tun = false, vérifier l'ordre 
+        // pour éviter conflit avec le reste de la fonction
         console.log("hey you're dead");
       }
     }
@@ -1978,7 +1987,7 @@ static showRenderWindow() {
     }
     
     if (player.intellect !== player.oldIntellect) {
-      player.might += (player.intellect - 5);
+      player.intellect += (player.intellect - 5);
       player.oldIntellect = player.intellect;
     }
 
@@ -2357,6 +2366,8 @@ static showRenderWindow() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   // fonction changement de carte
+  // refactoriser avec fonction load map
+  //XYZ
   nextMap() {
     // pour tester on fait une simple incrémentation
     currentMap += 1;
@@ -2367,9 +2378,14 @@ static showRenderWindow() {
     this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize/2;
     this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize/2;
     this.player.rot = mapData.playerStart.Orientation;
+
+    ceilingHeight = mapData.playerStart.ceilingHeight;
+    ceilingRender = mapData.playerStart.ceilingRender;
+    ceilingTexture = mapData.playerStart.ceilingTexture;
+    floorTexture = mapData.playerStart.floorTexture;
+    this.loadFloorCeilingImages();
   }
 
-  // zzz
   loadMap(mapID) {
       // sauvegarder les sprites
       this.saveCurrentMapSprites();
@@ -2383,6 +2399,28 @@ static showRenderWindow() {
       this.loadMapSprites(currentMap);
   }
 
+  startMap(mapID) {
+      // sauvegarder les sprites
+      this.saveCurrentMapSprites();
+
+      currentMap = mapID;
+
+      mapData = getMapDataByID(currentMap);
+
+      ceilingHeight = mapData.playerStart.ceilingHeight;
+      ceilingRender = mapData.playerStart.ceilingRender;
+      ceilingTexture = mapData.playerStart.ceilingTexture;
+      floorTexture = mapData.playerStart.floorTexture;
+      this.loadFloorCeilingImages();
+
+      this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
+      this.initSprites(mapData.sprites);
+      this.loadMapSprites(currentMap);
+      this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize/2;
+      this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize/2;
+      this.player.rot = mapData.playerStart.Orientation;
+  }
+  
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // NEW GAME
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2392,8 +2430,17 @@ static showRenderWindow() {
     mapData = getMapDataByID(currentMap);
 
     this.initPlayer();
+    this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize/2;
+    this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize/2;
+    this.player.rot = mapData.playerStart.Orientation;
 
     gameOver = false;
+
+    ceilingHeight = mapData.playerStart.ceilingHeight;
+    ceilingRender = mapData.playerStart.ceilingRender;
+    ceilingTexture = mapData.playerStart.ceilingTexture;
+    floorTexture = mapData.playerStart.floorTexture;
+    this.loadFloorCeilingImages();
 
     this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
     this.initSprites(mapData.sprites);
@@ -3117,6 +3164,10 @@ static showRenderWindow() {
       }
     }
   }
+
+//////////////////////////////////////////////////////////////////////
+// MURS
+//////////////////////////////////////////////////////////////////////
 
   drawWallStrip(rayHit, textureX, textureY, wallScreenHeight) {
     let swidth = 4;
