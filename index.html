@@ -437,8 +437,11 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
           <div id="renderWindow" style="display: block;"> 
             <div id="gameWindow" class="container" style="display: flex;">
                 <div id="screen" style="padding: 10px;">
-                                <canvas id="mainCanvas" style="border-radius: 5px;"></canvas>
-                                <!--pour les animations (à tester)-->
+                  <canvas id="mainCanvas" style="border-radius: 5px;"></canvas>
+                                
+                  <div id="gameOverWindow" style="display: none;border-radius: 5px;">
+                    <img src="game over.png" alt="" style="border-radius: 5px;">
+                  </div>
                               </div>
                               <div id="infos" style="position: relative; width: 192px; padding-left :9px;">
                                 <!--div info partie-->
@@ -770,12 +773,6 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
                                 </div>
                               </div>
             </div> 
-          </div>
-
-          <div id="gameOverWindow" style="display: none;">
-            <div id="gameWindow" class="container" style="display:block;">
-              <H1>GAME OVER</H1>
-            </div>
           </div>
 
           <div id="mainMenuWindow" style="display: none;">

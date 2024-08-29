@@ -112,17 +112,17 @@ var maps = [
     sprites: [
       [1, 17, 6, 2, 1, "faceThief", "Tarik the Thief", [
         ["facePlayer", "Alakir", "Hello there! What's the news?"],
-        ["faceThief", "Tarik the Thief", "Welcome adventurer! <br> You should talk to the guards, near the temple. They have a situation."],
+        ["faceThief", "Tarik the Thief", "Welcome adventurer! <br>You should talk to the guards, near the temple. They have a situation."],
         ["facePlayer", "Alakir", "Thanks for the info, I'll head there right away."]
       ], [], 5, 3],
       [2, 9, 5, 2, 2, "faceGuard", "Guard", [
-        ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-        ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+        ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br>Do you need any help?"],
+        ["faceGuard", "Guard", "Hello adventurer. <br>We need help in the temple, the crypts are invaded by critters."],
         ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
       ], [], 4, 2],
       [3, 4, 1, 2, 2, "faceGuard", "Guard", [
-        ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br> Do you need any help?"],
-        ["faceGuard", "Guard", "Hello adventurer. <br> We need help in the temple, the crypts are invaded by critters."],
+        ["facePlayer", "Alakir", "Hello, I'm an adventurer. <br>Do you need any help?"],
+        ["faceGuard", "Guard", "Hello adventurer. <br>We need help in the temple, the crypts are invaded by critters."],
         ["facePlayer", "Alakir", "Thanks for the info, I'll take care of that."]
       ], [], 4, 2],
       [4, 14, 13, 3, 3, "faceMerchant", "Quill the Merchant", [
@@ -139,7 +139,7 @@ var maps = [
       [7, 19, 15, "A", "A", null, "Bat", [], null, null, null],
       [8, 21, 20, "A", "A", null, "Bat", [], null, null, null],
       // tester
-      // [9, 14, 4, "A", "A", null, "Bat", [], null, null, null],
+      [9, 14, 4, "A", "A", null, "Bat", [], null, null, null],
     
       [10, 7, 16, 1, 4],   
       [11, 20, 16, 1, 4],  
@@ -705,17 +705,25 @@ class Sprite {
   static terminalLog(entry) {
     const outputElement = document.getElementById("output");
     const consoleContent = outputElement.innerHTML;
-
+/* Fonction pour éviter les doublons, mais empêche de comprendre ce qui se passe.
     if (entry === lastEntry) {
       outputElement.scrollTop = outputElement.scrollHeight;
       
     } else {
       outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
       outputElement.scrollTop = outputElement.scrollHeight;
-
     }
+*/
+    outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
+    outputElement.scrollTop = outputElement.scrollHeight;
 
     lastEntry = entry;
+  }
+
+  static resetTerminal() {
+    const outputElement = document.getElementById("output");
+    const consoleContent = outputElement.innerHTML;
+    outputElement.innerHTML = "- New Terminal -</br>";
   }
 
   static resetToggle() {
@@ -871,19 +879,23 @@ class Sprite {
 
         // Vérifiez qu'ils ne sont pas undefined :
         if (face && name && entry) {
-          dialogue.innerHTML = `<font style="font-weight: bold;">${name} </font> : <br> <font style="font-style: italic;"> ${entry} </font>`;
+          dialogue.innerHTML = `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br>${entry}</font>`;
 
           var imgElement = document.getElementById(face);
           faceOutput.src = imgElement ? imgElement.src : '';
 
           // Accumuler le dialogue dans allDialoguesLog
-          allDialoguesLog += `<font style="font-weight: bold;">${name} </font> : <br> <font style="font-style: italic;"> ${entry} </font><br>`;
+          allDialoguesLog += `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br>${entry}</font><br>`;
         }
 
         currentDialogue++;
       } else {
+        for (let i=0; i<this.spriteTalk.length; i++) {
+          const [face, name, entry] = this.spriteTalk[i];
+          Sprite.terminalLog(`<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"></br>${entry}</font>`);
+        }
         // Fin du dialogue : on log tous les dialogues d'un coup
-        Sprite.terminalLog(allDialoguesLog);
+        // Sprite.terminalLog(allDialoguesLog);
 
         // Afficher la fin du dialogue
         outputElement.style.display = "block";
@@ -927,6 +939,70 @@ class Sprite {
       } else {
         console.error("Combat animation sprite not initialized.");
       }
+  }
+
+  // recul au contact de l'ennemi xyz
+  static recoilPlayer(player) {
+    // Constants pour le recul
+    const recoilDistance = 800;    // Distance de recul en pixels
+    const recoilDuration = 300;    // Durée totale de l'animation en millisecondes
+
+    // Calcul de l'angle en degrés
+    const angleDeg = (player.rot * 180 / Math.PI + 360) % 360;
+
+    // Détermination de la direction de recul basée sur l'angle
+    const recoilDirections = [
+        { min: 337.5, max: 360, dx: -1, dy: 0 },  // Est
+        { min: 0, max: 22.5, dx: -1, dy: 0 },     // Est
+        { min: 22.5, max: 67.5, dx: -1, dy: 1 },  // Nord-Est
+        { min: 67.5, max: 112.5, dx: 0, dy: 1 },  // Nord
+        { min: 112.5, max: 157.5, dx: 1, dy: 1 }, // Nord-Ouest
+        { min: 157.5, max: 202.5, dx: 1, dy: 0 }, // Ouest
+        { min: 202.5, max: 247.5, dx: 1, dy: -1 },// Sud-Ouest
+        { min: 247.5, max: 292.5, dx: 0, dy: -1 },// Sud
+        { min: 292.5, max: 337.5, dx: -1, dy: -1 }// Sud-Est
+    ];
+
+    let dx = 0, dy = 0;
+
+    for (const direction of recoilDirections) {
+        if (angleDeg >= direction.min && angleDeg < direction.max) {
+            dx = direction.dx;
+            dy = direction.dy;
+            break;
+        }
+    }
+
+    // Position initiale du joueur
+    const initialX = player.x;
+    const initialY = player.y;
+
+    // Position de recul
+    const recoilX = initialX + dx * recoilDistance;
+    const recoilY = initialY + dy * recoilDistance;
+
+    // Fonction pour animer le recul
+    const animateRecoil = (progress) => {
+        player.x = initialX + (recoilX - initialX) * progress;
+        player.y = initialY + (recoilY - initialY) * progress;
+    };
+
+    // Démarrer l'animation
+    let startTime = null;
+    const step = (timestamp) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const progress = elapsed / recoilDuration;
+        if (progress < 1) {
+            animateRecoil(progress);
+            requestAnimationFrame(step);
+        } else {
+            // Assurer la position finale correcte
+            player.x = recoilX;
+            player.y = recoilY;
+        }
+    };
+    requestAnimationFrame(step);
   }
 
   // Méthode pour invoquer le sprite d'animation
@@ -1424,16 +1500,16 @@ updateFromLocalStorage() {
 
     // Vérification de l'ID de la carte avant de charger la sauvegarde
     if (loadedState.mapID === this.mapID) {
-      alert('Player state loaded!');
       this.updatePlayerState(loadedState);
       this.loadSpritesFromMap();
     } else {
       this.loadMap(loadedState.mapID);
       this.updatePlayerState(loadedState);
       this.loadSpritesFromMap();
-      alert("Loading the map : you're not on the same map.");
     }
   }
+
+  Sprite.resetTerminal();
 }
 
 updatePlayerState(loadedState) {
@@ -1660,7 +1736,7 @@ saveAndLoadMapSprites() {
             player.x = newX;
             player.y = newY;
             break;
-        }
+        } 
     }
   }
 
@@ -1844,17 +1920,24 @@ saveAndLoadMapSprites() {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// NEW GAME / MENU
+// NEW GAME / MENU / GAMEOVER
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
 static showGameOver() {
-  const renderWindow = document.getElementById("renderWindow");
+  const mainCanvas = document.getElementById("mainCanvas");
+  const gameOverWindow = document.getElementById("gameOverWindow");
+
+  mainCanvas.style = "display:none";
+  gameOverWindow.style = "display:block";
+}
+
+static resetShowGameOver() {
+  const mainCanvas = document.getElementById("mainCanvas");
   const gameOverWindow = document.getElementById("gameOverWindow");
   const mainMenuWindow = document.getElementById("mainMenuWindow");
 
-  renderWindow.style = "display:none";
-  gameOverWindow.style = "display:block";
-  mainMenuWindow.style = "display:none";
+  mainCanvas.style = "display:block";
+  gameOverWindow.style = "display:none";
 }
 
 static showMainMenu() {
@@ -1901,11 +1984,11 @@ static showRenderWindow() {
 
     playerHP.textContent = player.hp;
     playerMP.textContent = player.mp;
-    playerXP.textContent = player.xp;
+    // playerXP.textContent = player.xp;
 
     var hpBar = document.getElementById("hpBar");
     var mpBar = document.getElementById("mpBar");
-    var xpBar = document.getElementById("xpBar");
+    // var xpBar = document.getElementById("xpBar");
 
     const playerStr = document.getElementById("PlayerStrOutput");
     const playerDex = document.getElementById("PlayerDexOutput");
@@ -1987,7 +2070,7 @@ static showRenderWindow() {
     }
     
     if (player.intellect !== player.oldIntellect) {
-      player.intellect += (player.intellect - 5);
+      player.magic += (player.intellect - 5);
       player.oldIntellect = player.intellect;
     }
 
@@ -2772,30 +2855,36 @@ static showRenderWindow() {
       case 16:""
         if (gameOver == false) {
           this.saveToLocalStorage();
-          alert('Player state saved!');
+          Sprite.terminalLog("Player state saved!");
+          Raycaster.showRenderWindow()
         } else {
-          alert('dead, so nope');
+          alert("You can't save if you're dead.");
         }
-        console.log('saveButton')
         break;
       case 17:
         this.updateFromLocalStorage();
-        console.log('loadButton')
+        Sprite.resetTerminal();
+        Sprite.terminalLog("Save loaded !");
         break;
       case 18:
         if (gameOver == false) {
           this.nextMap();
           console.log("nextMapButton");
+          Raycaster.showRenderWindow();
+          Sprite.resetTerminal();
+          Sprite.terminalLog("Next map loaded !");
         } else {
-          alert('dead, so nope');
+          alert("You're dead...");
         }
         console.log("nextMapButton");
         break;
       case 19:
-        // "new game" button
         this.newGame();
+        Sprite.resetTerminal();
+        Sprite.terminalLog("New game !");
         break;
       case 20:
+        Raycaster.resetShowGameOver() 
         Raycaster.showMainMenu();
         break;
       case 21:
@@ -3977,10 +4066,10 @@ static showRenderWindow() {
     // + BONUS : anti-bug angle 0 (parallaxe et sprite), on ajoute ou enlève 1° (pi/180) selon l'angle.
     if (this.player.rot <= 0) {
       this.player.rot += 2 * Math.PI  - (Math.PI/180);
-      console.log("changing angle");
+      //console.log("changing angle");
     } else if (this.player.rot >= 2 * Math.PI) {
       this.player.rot -= 2 * Math.PI + (Math.PI/180);
-      console.log("changing angle");
+      //console.log("changing angle");
     } else {
       // nothing
     }
@@ -4022,13 +4111,23 @@ static showRenderWindow() {
       ) {
         // Si le sprite est bloquant (isBlocking==true), obstacle on path est true (bloquant)
         obstacleOnPath = this.sprites[i].isBlocking;
+        
+        // sprite attack en cas de collision xyz
+        if (this.player.turn == true && this.sprites[i].spriteType == "A") {
+          console.log("attack player on collision");
+          this.sprites[i].enemyAttackUpdate(this.player);
+          this.player.turn=false;
+          // ajouter fonction de "rebond" si collision avec ennemis
+          Sprite.recoilPlayer(this.player);
+        }
       }
     }
 
     // Suite détection sprite
     // implémenter collision glissante
     if (obstacleOnPath) {
-      // console.log("obstacle !")
+      console.log("sprite bloquant !")
+      this.handleSlidingCollision(this.player)
       return;
     } else {
       // ok, tout va
