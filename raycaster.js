@@ -139,7 +139,7 @@ var maps = [
       [7, 19, 15, "A", "A", null, "Bat", [], null, null, null],
       [8, 21, 20, "A", "A", null, "Bat", [], null, null, null],
       // tester
-      [9, 14, 4, "A", "A", null, "Bat", [], null, null, null],
+      // [9, 14, 4, "A", "A", null, "Bat", [], null, null, null],
     
       [10, 7, 16, 1, 4],   
       [11, 20, 16, 1, 4],  
@@ -1830,66 +1830,74 @@ saveAndLoadMapSprites() {
   }
 
   async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
-      for (var i = 0; i < mapEventA.length; i++) {
-          if (
-              Math.floor(newX / tileSize) === mapEventA[i][0] &&
-              Math.floor(newY / tileSize) === mapEventA[i][1]
-          ) {
-              // téléportation aux coordonnées données dans l'Event
-              newX = mapEventB[i][0] * tileSize + 640;
-              newY = mapEventB[i][1] * tileSize + 640;
-              player.rot = mapEventB[i][2];
+    const tolerance = Math.PI / 6; // 30° en radians
 
-              // variable de modification d'environnement
-              ceilingRender = mapEventB[i][3];
-              ceilingTexture = mapEventB[i][4];
-              ceilingHeight = mapEventB[i][5];
-              // variable de modification des textures (vers le type '1' = terre)
-              floorTexture = mapEventB[i][6];
-              // On recharge toutes les textures, sinon le canvas ne sera pas modifié
-              this.loadFloorCeilingImages();
-              console.log(mapEventB[i][7]);
+    for (var i = 0; i < mapEventA.length; i++) {
+        // Calculer l'orientation opposée (ajout de π radians)
+        const oppositeOrientationA = (mapEventA[i][2] + Math.PI) % (2 * Math.PI);
+        const oppositeOrientationB = (mapEventB[i][2] + Math.PI) % (2 * Math.PI);
 
-              // évite les double-téléportation
-              await pause(250);
-              // set new position
-              player.x = newX;
-              player.y = newY;
-              
-              break; // Sortir de la boucle une fois la téléportation effectuée
-          }
-          // On compare également les coordonnées suivantes pour aller/retour
-          if (
-              Math.floor(newX / tileSize) === mapEventB[i][0] &&
-              Math.floor(newY / tileSize) === mapEventB[i][1]
-          ) {
-              // téléportation aux coordonnées données dans l'Event
-              newX = mapEventA[i][0] * tileSize + 640;
-              newY = mapEventA[i][1] * tileSize + 640;
-              player.rot = mapEventA[i][2];
+        // Vérification pour la téléportation depuis A vers B
+        if (
+            Math.floor(newX / tileSize) === mapEventA[i][0] &&
+            Math.floor(newY / tileSize) === mapEventA[i][1] &&
+            (player.rot >= oppositeOrientationA - tolerance && player.rot <= oppositeOrientationA + tolerance)
+        ) {
+            // Téléportation aux coordonnées données dans l'Event
+            newX = mapEventB[i][0] * tileSize + 640;
+            newY = mapEventB[i][1] * tileSize + 640;
+            player.rot = mapEventB[i][2];
 
-              // variable de modification d'environnement
-              ceilingRender = mapEventA[i][3];
-              ceilingTexture = mapEventA[i][4];
-              ceilingHeight = mapEventA[i][5];
-              // variable de modification des textures (vers le type '1' = terre)
-              floorTexture = mapEventA[i][6];
-              // On recharge toutes les textures, sinon le canvas ne sera pas modifié
-              this.loadFloorCeilingImages();
-              console.log(mapEventA[i][7]);
+            // Variable de modification d'environnement
+            ceilingRender = mapEventB[i][3];
+            ceilingTexture = mapEventB[i][4];
+            ceilingHeight = mapEventB[i][5];
+            // Variable de modification des textures (vers le type '1' = terre)
+            floorTexture = mapEventB[i][6];
+            // On recharge toutes les textures, sinon le canvas ne sera pas modifié
+            this.loadFloorCeilingImages();
+            console.log(mapEventB[i][7]);
 
-              // évite les double-téléportation
-              await pause(250);
-              // set new position
-              player.x = newX;
-              player.y = newY;
+            // Évite les doubles téléportations
+            await pause(250);
+            // Set new position
+            player.x = newX;
+            player.y = newY;
 
-              break; // Sortir de la boucle une fois la téléportation effectuée
-          } else {
-              // console.log(false);
-          }
+            break; // Sortir de la boucle une fois la téléportation effectuée
         }
-  }
+
+        // Vérification pour la téléportation depuis B vers A
+        if (
+            Math.floor(newX / tileSize) === mapEventB[i][0] &&
+            Math.floor(newY / tileSize) === mapEventB[i][1] &&
+            (player.rot >= oppositeOrientationB - tolerance && player.rot <= oppositeOrientationB + tolerance)
+        ) {
+            // Téléportation aux coordonnées données dans l'Event
+            newX = mapEventA[i][0] * tileSize + 640;
+            newY = mapEventA[i][1] * tileSize + 640;
+            player.rot = mapEventA[i][2];
+
+            // Variable de modification d'environnement
+            ceilingRender = mapEventA[i][3];
+            ceilingTexture = mapEventA[i][4];
+            ceilingHeight = mapEventA[i][5];
+            // Variable de modification des textures (vers le type '1' = terre)
+            floorTexture = mapEventA[i][6];
+            // On recharge toutes les textures, sinon le canvas ne sera pas modifié
+            this.loadFloorCeilingImages();
+            console.log(mapEventA[i][7]);
+
+            // Évite les doubles téléportations
+            await pause(250);
+            // Set new position
+            player.x = newX;
+            player.y = newY;
+
+            break; // Sortir de la boucle une fois la téléportation effectuée
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // sélection et lancement de sort
