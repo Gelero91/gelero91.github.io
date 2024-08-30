@@ -809,133 +809,128 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs
 /////////////////////////////////////////////////////
 //  JOYSTICK
 /////////////////////////////////////////////////////
-
 // Récupération des éléments HTML nécessaires
 const joystick = document.querySelector('.joystick');
 const container = document.querySelector('.joystick-container');
-
-let isJoystickClicked = false;
-
-const centerPosX = container.offsetWidth / 2 - joystick.offsetWidth / 2;
-const centerPosY = container.offsetHeight / 2 - joystick.offsetHeight / 2;
-
-joystick.style.left = centerPosX + 'px';
-joystick.style.top = centerPosY + 'px';
-
-// Réduire de moitié la zone de déplacement horizontal (gauche et droite)
-const zoneWidth = container.offsetWidth / 4; // Vous pouvez ajuster le dénominateur pour réduire ou élargir la zone
-// Conserver la zone de déplacement vertical (haut et bas) inchangée
-const zoneHeight = container.offsetHeight / 2; // Vous pouvez ajuster le dénominateur pour élargir ou resserrer la zone
 
 let up = false;
 let down = false;
 let left = false;
 let right = false;
 
-joystick.addEventListener('mousedown', startDrag);
-joystick.addEventListener('touchstart', startDrag);
+// Variable pour ajuster l'écart d'angle entre les cadrans
+const angleOffset = 0.3; // Ajuster cette valeur selon les besoins (0.0 - 0.5)
 
-function disableEventsAfterClick() {
-  up = false;
-  down = false;
-  left = false;
-  right = false;
-  triggerJoystickChangeEvent();
-}
+// Position centrale du joystick
+const centerPosX = container.offsetWidth / 2 - joystick.offsetWidth / 2;
+const centerPosY = container.offsetHeight / 2 - joystick.offsetHeight / 2;
 
-function startDrag(e) {
-  isJoystickClicked = true;
-  moveJoystick(e);
-  document.addEventListener('mousemove', moveJoystick);
-  document.addEventListener('touchmove', moveJoystick);
-  document.addEventListener('mouseup', stopDrag);
-  document.addEventListener('touchend', stopDrag);
-}
+joystick.style.left = centerPosX + 'px';
+joystick.style.top = centerPosY + 'px';
 
-function moveJoystick(e) {
-  if (isJoystickClicked) {
+// Calcul de la distance maximale pour que le joystick touche presque la bordure du cercle
+const maxDistance = (container.offsetWidth - joystick.offsetWidth) / 2 - 5; // Ajuster "5" pour laisser un petit espace
+
+// Ajouter un écouteur de clic au conteneur pour gérer les clics sur les zones
+container.addEventListener('mousedown', handleJoystickClick);
+container.addEventListener('touchstart', handleJoystickClick);
+
+// Ajouter un écouteur pour détecter la fin du clic ou du toucher
+document.addEventListener('mouseup', resetJoystickPosition);
+document.addEventListener('touchend', resetJoystickPosition);
+
+// Ajouter un écouteur pour gérer les sorties du conteneur
+container.addEventListener('mouseleave', resetJoystickPosition);
+
+function handleJoystickClick(e) {
+    // Empêcher le comportement par défaut du clic/toucher
     e.preventDefault();
+
     const boundingBox = container.getBoundingClientRect();
-    let posX, posY;
-
-    if (e.type === 'touchmove') {
-      posX = e.touches[0].clientX - boundingBox.left;
-      posY = e.touches[0].clientY - boundingBox.top;
-    } else {
-      posX = e.clientX - boundingBox.left;
-      posY = e.clientY - boundingBox.top;
-    }
-
     const centerX = boundingBox.width / 2;
     const centerY = boundingBox.height / 2;
 
-    let distance = Math.sqrt((posX - centerX) ** 2 + (posY - centerY) ** 2);
-    let angle = Math.atan2(posY - centerY, posX - centerX);
-    let maxDistance = boundingBox.height / 2 - joystick.offsetHeight / 2;
+    const clickX = (e.clientX || e.touches[0].clientX) - boundingBox.left;
+    const clickY = (e.clientY || e.touches[0].clientY) - boundingBox.top;
 
-    if (distance > maxDistance) {
-      distance = maxDistance;
-      posX = centerX + distance * Math.cos(angle);
-      posY = centerY + distance * Math.sin(angle);
+    const deltaX = clickX - centerX;
+    const deltaY = clickY - centerY;
+
+    // Calcul de l'angle du clic par rapport au centre
+    const angle = Math.atan2(deltaY, deltaX);
+
+    let offsetX = 0;
+    let offsetY = 0;
+
+    // Détermination de la direction en fonction de l'angle avec l'écart d'angle
+    if (Math.abs(angle) < Math.PI / 2 - angleOffset) {
+        // Clic dans la zone droite
+        setDirection(false, false, false, true);
+        offsetX = maxDistance;
+    } else if (Math.abs(angle) > Math.PI / 2 + angleOffset) {
+        // Clic dans la zone gauche
+        setDirection(false, false, true, false);
+        offsetX = -maxDistance;
+    } else {
+        // Clic dans la zone haut ou bas
+        if (angle < 0) {
+            setDirection(true, false, false, false); // Haut
+            offsetY = -maxDistance;
+        } else {
+            setDirection(false, true, false, false); // Bas
+            offsetY = maxDistance;
+        }
     }
 
-    joystick.style.left = posX - joystick.offsetWidth / 2 + 'px';
-    joystick.style.top = posY - joystick.offsetHeight / 2 + 'px';
+    // Déplacer le joystick vers la zone cliquée
+    moveJoystick(offsetX, offsetY);
+}
 
-    // Calculer les distances horizontale et verticale par rapport au centre
-    const deltaX = posX - centerX;
-    const deltaY = posY - centerY;
+function moveJoystick(offsetX, offsetY) {
+    // Enlever la transition pour le déplacement instantané
+    joystick.style.transition = 'none';
 
+    const newPosX = centerPosX + offsetX;
+    const newPosY = centerPosY + offsetY;
+
+    joystick.style.left = `${newPosX}px`;
+    joystick.style.top = `${newPosY}px`;
+}
+
+function resetJoystickPosition() {
+    // Réinitialiser toutes les directions
+    setDirection(false, false, false, false);
+
+    // Ajouter une transition pour adoucir le retour à la position centrale
+    joystick.style.transition = 'left 0.3s ease, top 0.3s ease';
+
+    // Ramener le joystick à sa position centrale
+    joystick.style.left = `${centerPosX}px`;
+    joystick.style.top = `${centerPosY}px`;
+}
+
+function setDirection(newUp, newDown, newLeft, newRight) {
     // Mettre à jour les variables de direction
-    const newUp = (deltaY < -zoneHeight / 2);
-    const newDown = (deltaY > zoneHeight / 2);
-    const newLeft = (deltaX < -zoneWidth / 2);
-    const newRight = (deltaX > zoneWidth / 2);
+    up = newUp;
+    down = newDown;
+    left = newLeft;
+    right = newRight;
 
-    if (newUp !== up || newDown !== down || newLeft !== left || newRight !== right) {
-      up = newUp;
-      down = newDown;
-      left = newLeft;
-      right = newRight;
-      triggerJoystickChangeEvent();
-    }
-  }
+    // Déclencher un événement si la direction a changé
+    triggerJoystickChangeEvent();
 }
 
-function stopDrag() {
-  isJoystickClicked = false;
-
-  // Ramener le joystick à sa position par défaut
-  joystick.style.left = centerPosX + 'px';
-  joystick.style.top = centerPosY + 'px';
-
-  // Réinitialiser les variables de direction
-  up = false;
-  down = false;
-  left = false;
-  right = false;
-
-  // Désactiver les événements après un clic
-  disableEventsAfterClick();
-
-  document.removeEventListener('mousemove', moveJoystick);
-  document.removeEventListener('touchmove', moveJoystick);
-  document.removeEventListener('mouseup', stopDrag);
-  document.removeEventListener('touchend', stopDrag);
-}
-
-// Déclencher un événement personnalisé lorsque l'état du joystick change
 function triggerJoystickChangeEvent() {
-  const joystickEvent = new CustomEvent('joystickchange', {
-    detail: {
-      up,
-      down,
-      left,
-      right
-    }
-  });
-  console.log(joystickEvent);
-  document.dispatchEvent(joystickEvent);
+    const joystickEvent = new CustomEvent('joystickchange', {
+        detail: {
+            up,
+            down,
+            left,
+            right
+        }
+    });
+    console.log(joystickEvent);
+    document.dispatchEvent(joystickEvent);
 }
 
     /////////////////////////////////////////////////////////
