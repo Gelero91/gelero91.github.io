@@ -273,7 +273,8 @@ Gwendal L.R.
         color: white;
         font-size: 50px;
         text-align: center;
-        padding-top: 50vh;
+        padding-top: 25vh;
+        padding-bottom: 25vh;
         z-index: 9999;
       }
     }
@@ -282,7 +283,6 @@ Gwendal L.R.
     @media screen and (orientation: landscape) {
       #renderWindow, #mainMenuWindow {
         display: flex;
-        max-height: 100%;
         box-sizing: border-box;
       }
 
@@ -292,7 +292,19 @@ Gwendal L.R.
 
       /* Adapter les éléments internes */
       #renderWindow > *, #mainMenuWindow > * {
-        max-height: 100%;
+        transform: scale(0.6);
+      }
+    }
+
+    /* Réinitialiser l'échelle pour les grands écrans d'ordinateurs */
+    @media screen and (min-width: 1024px) {
+      #renderWindow > *, #mainMenuWindow > * {
+        transform: scale(1); /* Revenir à l'échelle normale pour les grands écrans */
+      }
+
+      #renderWindow, #mainMenuWindow {
+        max-width: 100%; /* Utiliser toute la largeur disponible */
+        max-height: 100%; /* Utiliser toute la hauteur disponible */
       }
     }
       /*RESPONSIVE*/
@@ -301,9 +313,9 @@ Gwendal L.R.
 
 <body>
   
-  <p class="landscape-message">
+  <div class="landscape-message">
     Veuillez passer en mode paysage pour jouer.            
-  </p>
+  </div>
 
   <!-- Textures -->
   <!--
@@ -473,6 +485,7 @@ Gwendal L.R.
   data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs4c6QAAA4JJREFUeF7tnNtyo0AMBc3/f7S3EjtVuGzMEUKLLr3PM4zmtHogkM1y49+YBJYxO2WjN2APagJgA3tQAoO2itnA7pvA/X6//+1uWZZRzT5qsz+Qgd1X5LedAbs57DXgra1OONJHHOPAfrQ4sJ+qY3bh412xedqR3tZsYL+3MrA/6N31SG8F22PzhCMd2DvPJZ0sBzaw6zyGRxzdXY/08mYDWxcT2HpWt+r37/KwFVaK/dVBKjkAm9elSp/UGYPZfAh56VaO8Tryfq0UszEbs5vI/LINzMZszMbsjglgNmZ37Gvu2ZiN2ZjdMQHMxuyOfc09e5DZHRv4yJ5GfOI8EkzHOcDuSHVjT8AG9qAEBm0Vs4E9KIFBW8VsYA9KYNBWMRvYgxIYtFXMBrY9gcl/X8ye1v6MiDxPMzuiuP1I+o6IyBPYSfslHeyt78TZ/itNxe/ZEdm6zI4oKEI0YJ/wywvAjmjNxzUjsjWbXcUSpc4tVBluQ0r91jqB/YG4NcQIv4FtSFUJC7M/JOAJzsDnd6jHqog6s9XjaVDpGI8I0VP01tyIOoFt1dUwPlu42erxSLJpdoQlCvNs4Warx5MhsHfSA7bSXgfHZAs3Wz1KrFs184DWxGylKYEN7NcE/ufDmtKh/Oj1noCSm2T2+tIKeGVh5d7jGaPU6fkxxlObMlep35ozsHk3vt17ER2ndLp1jFInZhtSjfjmalheHqqAtx6J8uIHB0Zkaz7Glft3leDWe6lSs6dOYD+Je0I8KO/XaenM3rI8W3ARMKKvme63S4EdhxzYcdmmu3Jq2OnSoqC3BFwPaORZKwFg1+LlqhbYrvhqTQZ2LV6uaoHtiq/WZGDX4uWqFtiu+GpNBnYtXq5qge2Kr9ZkYNfi5aoW2K74ak0eAbvib6pEtBGwn6lO+AYPbGBHHCLXXZNj/JE9ZmP2dRZGrIzZmP3SVzygRWh2wTUxG7Mx+wLxwpfEbMzG7HDNLlgAszEbsy8QL3xJzMZszA7X7OQFFGvPWrL6i5fy78aBrbcysPWsXH8e27BM2NDysNfJRFhe/ehe5wPsHY+AHXbQ+C6M2d/za2X2WUd6J5vbHuPAxmzzvQGzzZHlmaDcy7sCHnGMW490YOeR01UJZg/6ELJl+QSbxx3jwMbs8u+6rfe2ti9VrEFMGA/sCZSfewQ2sAclMGirmA3sQQkM2uo/6KMcmhz7zdkAAAAASUVORK5CYII=
   " style="display:none;">
     </div>
+
 <!-- UX/UI - Start -->
 <div>
   <div>
