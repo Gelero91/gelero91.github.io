@@ -1395,7 +1395,8 @@ class Raycaster {
 // SAUVEGARGE ET CHARGEMENT
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-saveToLocalStorage() {
+// Fonction de sauvegarde complète (joueur + sprites)
+saveGameState() {
   if (this.player) {
     // Analyser l'équipement avant de déséquiper
     const equippedItems = {
@@ -1403,8 +1404,8 @@ saveToLocalStorage() {
       torso: this.player.torso.map(item => item.id)
     };
 
-    // Sauvegarde les IDs des items, sorts et quêtes
-    var playerState = {
+    // Création de l'objet de sauvegarde pour l'état du joueur
+    const playerState = {
       ...this.player,
       inventory: this.player.inventory.map(item => ({
         id: item.id,
@@ -1416,20 +1417,11 @@ saveToLocalStorage() {
       ceilingRender: ceilingRender,
       floorTexture: floorTexture,
       ceilingTexture: ceilingTexture,
-      mapID: this.mapID // Ajouter l'ID de la carte à l'état du joueur
+      mapID: this.mapID
     };
 
-    // Déséquipement du joueur pour éviter les problèmes (solution temporaire)
-    Sprite.resetToggle();
-    Item.unequipAll(this.player);
-
-    localStorage.setItem('playerState', JSON.stringify(playerState));
-
-    // Lecture de l'état actuel des sprites pour l'ID de la carte
-    let spritesState = JSON.parse(localStorage.getItem(`spritesState_${this.mapID}`)) || [];
-
-    // Sauvegarde l'état des sprites en excluant les sprites avec l'ID 0
-    const currentSpritesState = this.sprites
+    // Sauvegarde l'état des sprites
+    const spritesState = this.sprites
       .filter(sprite => sprite.id !== 0)
       .map(sprite => ({
         id: sprite.id,
@@ -1453,17 +1445,19 @@ saveToLocalStorage() {
         spriteSell: sprite.spriteSell,
       }));
 
-    // Mettre à jour ou ajouter les sprites sans duplications
-    currentSpritesState.forEach(newSprite => {
-      const index = spritesState.findIndex(sprite => sprite.id === newSprite.id);
-      if (index !== -1) {
-        spritesState[index] = newSprite;  // Mise à jour du sprite existant
-      } else {
-        spritesState.push(newSprite);  // Ajout du nouveau sprite
-      }
-    });
+    // Créer un objet global pour stocker l'état du jeu
+    const gameState = {
+      playerState: playerState,
+      spritesState: spritesState
+    };
 
-    localStorage.setItem(`spritesState_${this.mapID}`, JSON.stringify(spritesState));
+    // Déséquipement du joueur avant la sauvegarde
+    Sprite.resetToggle();
+    Item.unequipAll(this.player);
+
+    // Sauvegarde dans le localStorage
+    localStorage.setItem('gameState', JSON.stringify(gameState));
+    console.log('Données sauvegardées localement');
 
     // Rééquiper les objets après la sauvegarde
     equippedItems.hands.forEach(id => {
@@ -1482,36 +1476,33 @@ saveToLocalStorage() {
   }
 }
 
-loadSpritesFromMap() {
-  const spritesState = localStorage.getItem(`spritesState_${this.mapID}`);
-  if (spritesState) {
-    const loadedSpritesState = JSON.parse(spritesState);
-    this.updateSpritesState(loadedSpritesState);
-  }
-}
+// Fonction de chargement complète (joueur + sprites)
+async loadGameState(player) {
+  const savedState = localStorage.getItem('gameState');
+  if (savedState) {
+    try {
+      const gameState = JSON.parse(savedState);
+      console.log('Données chargées localement', gameState);
 
-updateFromLocalStorage() {
-  gameOver = false;
-  Raycaster.showRenderWindow();
+      // Charger l'état du joueur et vérifier l'ID de la carte
+      if (gameState.playerState.mapID === this.mapID) {
+        this.updatePlayerState(gameState.playerState);
+      } else {
+        this.loadMap(gameState.playerState.mapID);
+        this.updatePlayerState(gameState.playerState);
+      }
 
-  const playerState = localStorage.getItem('playerState');
-  if (playerState) {
-    const loadedState = JSON.parse(playerState);
-
-    // Vérification de l'ID de la carte avant de charger la sauvegarde
-    if (loadedState.mapID === this.mapID) {
-      this.updatePlayerState(loadedState);
-      this.loadSpritesFromMap();
-    } else {
-      this.loadMap(loadedState.mapID);
-      this.updatePlayerState(loadedState);
-      this.loadSpritesFromMap();
+      // Charger les sprites de la carte
+      this.updateSpritesState(gameState.spritesState);
+    } catch (error) {
+      console.error("Erreur lors du chargement de l'état du jeu :", error);
     }
+  } else {
+    console.error('Aucune donnée trouvée dans le localStorage');
   }
-
-  Sprite.resetTerminal();
 }
 
+// Mise à jour de l'état du joueur
 updatePlayerState(loadedState) {
   ceilingHeight = loadedState.ceilingHeight;
   ceilingRender = loadedState.ceilingRender;
@@ -1519,14 +1510,14 @@ updatePlayerState(loadedState) {
   ceilingTexture = loadedState.ceilingTexture;
   this.loadFloorCeilingImages();
 
-  // Mise à jour des propriétés de base
+  // Mise à jour des propriétés du joueur
   for (const key in loadedState) {
     if (loadedState.hasOwnProperty(key) && this.player.hasOwnProperty(key)) {
       this.player[key] = loadedState[key];
     }
   }
 
-  // Restaure les items, sorts et quêtes à partir de leurs IDs
+  // Restauration des objets, sorts et quêtes à partir des IDs
   this.player.inventory = loadedState.inventory.map(itemData => {
     const item = Item.getItemById(itemData.id);
     if (itemData.equipped) {
@@ -1556,6 +1547,7 @@ updatePlayerState(loadedState) {
   Sprite.resetToggle();
 }
 
+// Mise à jour de l'état des sprites
 updateSpritesState(loadedSpritesState) {
   // Réinitialise les sprites actuels
   this.sprites = this.sprites.filter(sprite => sprite.id === 0);
@@ -1589,100 +1581,23 @@ updateSpritesState(loadedSpritesState) {
   console.log(this.sprites.length + " sprites chargés.");
 }
 
-//////////////////
-// Sauvegarde des sprites et chargement pour le changement de carte
-// a refactoriser ultérieurement.
-/////////////////
-
-saveCurrentMapSprites() {
-  // Lecture de l'état actuel des sprites pour la carte actuelle (currentMap)
-  let spritesState = JSON.parse(localStorage.getItem(`spritesState_${currentMap}`)) || [];
-
-  // Sauvegarde l'état des sprites en excluant les sprites avec l'ID 0
-  const currentSpritesState = this.sprites
-    .filter(sprite => sprite.id !== 0)
-    .map(sprite => ({
-      id: sprite.id,
-      x: sprite.x,
-      y: sprite.y,
-      z: sprite.z,
-      w: sprite.w,
-      h: sprite.h,
-      ang: sprite.ang,
-      spriteType: sprite.spriteType,
-      spriteTexture: sprite.spriteTexture,
-      isBlocking: sprite.isBlocking,
-      attackable: sprite.attackable,
-      hp: sprite.hp,
-      dmg: sprite.dmg,
-      turn: sprite.turn,
-      animationProgress: sprite.animationProgress,
-      spriteName: sprite.spriteName,
-      spriteFace: sprite.spriteFace,
-      spriteTalk: sprite.spriteTalk,
-      spriteSell: sprite.spriteSell,
-    }));
-
-  // Mettre à jour ou ajouter les sprites sans duplications
-  currentSpritesState.forEach(newSprite => {
-    const index = spritesState.findIndex(sprite => sprite.id === newSprite.id);
-    if (index !== -1) {
-      spritesState[index] = newSprite;  // Mise à jour du sprite existant
-    } else {
-      spritesState.push(newSprite);  // Ajout du nouveau sprite
-    }
-  });
-
-  localStorage.setItem(`spritesState_${currentMap}`, JSON.stringify(spritesState));
-}
-
+// Chargement des sprites pour une carte spécifique
 loadMapSprites(mapID) {
-  const spritesState = localStorage.getItem(`spritesState_${mapID}`);
-  if (spritesState) {
-    const loadedSpritesState = JSON.parse(spritesState);
-    this.updateLoadedSpritesState(loadedSpritesState, mapID);
-  } else {
-    console.warn(`Aucune sauvegarde trouvée pour la carte avec l'ID ${mapID}.`);
+  const gameState = localStorage.getItem('gameState');
+  if (gameState) {
+    try {
+      const loadedState = JSON.parse(gameState);
+      if (loadedState.playerState.mapID === mapID) {
+        this.updateSpritesState(loadedState.spritesState);
+      } else {
+        console.warn(`Aucune sauvegarde trouvée pour la carte avec l'ID ${mapID}.`);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des sprites :", error);
+    }
   }
 }
 
-updateLoadedSpritesState(loadedSpritesState, mapID) {
-  // Réinitialise les sprites actuels
-  this.sprites = this.sprites.filter(sprite => sprite.id === 0);
-
-  // Charge l'état des sprites depuis les données sauvegardées
-  loadedSpritesState.forEach(state => {
-    const sprite = new Sprite(
-      state.x,
-      state.y,
-      state.z,
-      state.w,
-      state.h,
-      state.ang,
-      state.spriteType,
-      state.spriteTexture,
-      state.isBlocking,
-      state.attackable,
-      state.turn,
-      state.hp,
-      state.dmg,
-      state.animationProgress,
-      state.spriteName,
-      state.spriteFace,
-      state.spriteTalk,
-      state.spriteSell,
-      state.id
-    );
-    this.sprites.push(sprite);
-  });
-
-  console.log(`${this.sprites.length} sprites chargés pour la carte ${mapID}.`);
-}
-
-saveAndLoadMapSprites() {
-  saveCurrentMapSprites();
-  loadMapSprites(currentMap);
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // méthode calcul quadrant et stockage de la valeur dans Player
@@ -2479,7 +2394,7 @@ static showRenderWindow() {
 
   loadMap(mapID) {
       // sauvegarder les sprites
-      this.saveCurrentMapSprites();
+      this.saveGameState();
 
       currentMap = mapID;
 
@@ -2492,7 +2407,7 @@ static showRenderWindow() {
 
   startMap(mapID) {
       // sauvegarder les sprites
-      this.saveCurrentMapSprites();
+      this.saveGameState();;
 
       currentMap = mapID;
 
@@ -2862,7 +2777,7 @@ static showRenderWindow() {
         break;
       case 16:""
         if (gameOver == false) {
-          this.saveToLocalStorage();
+          this.saveGameState();
           Sprite.terminalLog("Player state saved!");
           Raycaster.showRenderWindow()
         } else {
@@ -2870,7 +2785,8 @@ static showRenderWindow() {
         }
         break;
       case 17:
-        this.updateFromLocalStorage();
+        this.loadGameState(this.player);
+        Raycaster.showRenderWindow()
         Sprite.resetTerminal();
         Sprite.terminalLog("Save loaded !");
         break;
@@ -3454,77 +3370,6 @@ static showRenderWindow() {
     }
   } 
 
-/*
-  drawWallStrip(rayHit, textureX, textureY, wallScreenHeight) {
-    const TextureUnit = 64;
-    const swidth = 4;
-    const sheight = 64;
-    const imgx = rayHit.strip * this.stripWidth;
-    const imgy = (this.displayHeight - wallScreenHeight) / 2;
-    const imgw = this.stripWidth;
-    const imgh = wallScreenHeight;
-  
-  
-    // arbres : 1408 1472
-    // ornate door, pourquoi tu marche pas ptain !?
-    const textures = {
-      "basic": { main: 2 * TextureUnit, bottom: 11 * TextureUnit, middle: 10 * TextureUnit, top: 9 * TextureUnit, extra: null, maxLevels: 2 },
-      "stone": { main: 0, bottom: 18 * TextureUnit, middle: 17 * TextureUnit, top: 16 * TextureUnit, extra: null, maxLevels: 3 },
-      "ornate": { main: 1 * TextureUnit, bottom: 21 * TextureUnit, middle: 20 * TextureUnit, top: 19 * TextureUnit, extra: null, maxLevels: 2 },
-      "ornate_door": { main: 6 * TextureUnit, bottom: 6 * TextureUnit, middle: 1 * TextureUnit, top: 1 * TextureUnit, extra: 1 * TextureUnit, maxLevels: 2 },
-      "forest": { main: 23 * TextureUnit, bottom: 23 * TextureUnit, middle: 22 * TextureUnit, top: 22 * TextureUnit, extra: 22 * TextureUnit, maxLevels: 2 },
-      "house": { main: 14 * TextureUnit, bottom: 14 * TextureUnit, middle: 14 * TextureUnit, top: 12 * TextureUnit, extra: 12 * TextureUnit, maxLevels: 3 },
-      "house_window": { main: 13 * TextureUnit, bottom: 13 * TextureUnit, middle: 13 * TextureUnit, top: 12 * TextureUnit, extra: 12 * TextureUnit, maxLevels: 3 },
-      "house_door": { main: 15 * TextureUnit, bottom: 15 * TextureUnit, middle: 14 * TextureUnit, top: 12 * TextureUnit, extra: 12 * TextureUnit, maxLevels: 3 },
-      "default": { main: textureY, bottom: textureY, middle: textureY, top: textureY, extra: null, maxLevels: 2 }
-  };
-  
-  let selectedTexture;
-  if (textureY === 2 * TextureUnit) {
-      selectedTexture = textures.basic;
-  } else if (textureY === 0) {
-      selectedTexture = textures.stone;
-  } else if (textureY === 1 * TextureUnit) {
-      selectedTexture = textures.ornate;
-  } else if (textureY === 6 * TextureUnit) {
-      selectedTexture = textures.ornate_door;
-  } else if (textureY === 23 * TextureUnit) {
-      selectedTexture = textures.forest;
-  } else if (textureY === 14 * TextureUnit) {
-      selectedTexture = textures.house;
-  } else if (textureY === 13 * TextureUnit) {
-      selectedTexture = textures.house_window;
-  } else if (textureY === 15 * TextureUnit) {
-      selectedTexture = textures.house_door;
-  } else {
-      selectedTexture = textures.default;
-  }
-  
-  // Debugging logs
-  console.log("textureY:", textureY);
-  console.log("selectedTexture:", selectedTexture);
-  
-  const { main, bottom, middle, top, extra, maxLevels } = selectedTexture;
-  
-  if (this.ceilingHeight === 1) {
-      this.drawTexturedRect(this.wallsImageData, textureX, main, swidth, sheight, imgx, imgy, imgw, imgh);
-  } else {
-      this.drawTexturedRect(this.wallsImageData, textureX, bottom, swidth, sheight, imgx, imgy, imgw, imgh);
-      for (let level = 1; level < Math.min(this.ceilingHeight, maxLevels); ++level) {
-          let y;
-          if (level === this.ceilingHeight - 1 && extra !== null) {
-              y = extra;
-          } else if (level < maxLevels - 1) {
-              y = middle;
-          } else {
-              y = top;
-          }
-          this.drawTexturedRect(this.wallsImageData, textureX, y, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-      }
-  }
-  
-  }
-*/
   
   //////////////////////////////////////////////////////////////////////
   // sol
@@ -4134,8 +3979,10 @@ static showRenderWindow() {
     // Suite détection sprite
     // implémenter collision glissante
     if (obstacleOnPath) {
+      /*
       console.log("sprite bloquant !")
       this.handleSlidingCollision(this.player)
+      */
       return;
     } else {
       // ok, tout va
