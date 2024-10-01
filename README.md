@@ -29,4 +29,6 @@ Screenshots des anciennes versions :
 ![2024-07-15T23_40_26](https://github.com/user-attachments/assets/fe96d99e-e0b0-4def-9fe7-309a8a8b6f06)
 
 
-Algorithmes de raycasting introduit par Scott Roth dans les années 1978-79. Basé que une version très modifiée de l'architecture JS/Html5 de J.Seidelin (https://dev.opera.com/authors/jacob-seidelin/) par Andrew Lim (https://github.com/andrew-lim/), elle même basée sur les tutoriels de Permadi de 1996 (https://permadi.com/1996/) et de Lode (https://lodev.org/cgtutor/raycasting.html).
+Le projet s'appuie sur une version fortement modifiée de l'architecture JS/HTML5 de Jacob Seidelin (https://dev.opera.com/authors/jacob-seidelin/), adaptée par Andrew Lim (https://github.com/andrew-lim/). Ces travaux sont eux-mêmes inspirés des tutoriels de Permadi (https://permadi.com/1996/) et de Lode (https://lodev.org/cgtutor/raycasting.html).
+
+À noter que les assets graphiques utilisés dans ce projet ne m'appartiennent pas et restent la propriété de leurs auteurs respectifs, à l'exception de certaines illustrations en pixel art, notamment la bannière "Oasis.JS".
