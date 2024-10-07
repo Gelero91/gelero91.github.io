@@ -1457,9 +1457,9 @@ class Player {
         // Suite détection sprite
         // implémenter collision glissante
         if (obstacleOnPath) {
-
+            
             // console.log("sprite bloquant !")
-            this.handleSlidingCollision(this, actualMap);
+            // this.handleSlidingCollision(this, actualMap);
 
             return;
         } else {
