@@ -1167,7 +1167,7 @@ class Player {
         };
     }
 
-    handleSpriteAction(action, sprites) {
+    async handleSpriteAction(action, sprites) {
         if (!action || !this || !this.turn) return;
 
         const {
@@ -1483,6 +1483,10 @@ class Player {
 
         if (action && this && this.turn == true) {
             this.handleSpriteAction(action, sprites);
+            // la position de Player change, mais la fonction move a des valeurs
+            // qu'elle applique par dessus. On modifie donc les valeurs de move().
+            newX = this.x;
+            newY = this.y;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -2630,6 +2634,51 @@ class Sprite {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Raycaster {
+    constructor(
+        mainCanvas,
+        displayWidth = 320,
+        displayHeight = 180,
+        tileSize = 1280,
+        textureSize = 64,
+        fovDegrees = 90
+    ) {
+        // mettre la map par défaut comme argument
+        this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
+        this.stripWidth = 1; // leave this at 1 for now
+        this.ceilingHeight = 1; // ceiling height in blocks
+        this.mainCanvas = mainCanvas;
+        this.mapWidth = this.map[0].length;
+        this.mapHeight = this.map.length;
+        this.displayWidth = displayWidth;
+        this.displayHeight = displayHeight;
+        this.rayCount = Math.ceil(displayWidth / this.stripWidth);
+        this.tileSize = tileSize;
+        this.worldWidth = this.mapWidth * this.tileSize;
+        this.worldHeight = this.mapHeight * this.tileSize;
+        this.textureSize = textureSize;
+        this.fovRadians = (fovDegrees * Math.PI) / 180;
+        this.viewDist = this.displayWidth / 2 / Math.tan(this.fovRadians / 2);
+        this.rayAngles = null;
+        this.viewDistances = null;
+        this.backBuffer = null;
+
+        this.mainCanvasContext;
+        this.screenImageData;
+        this.textureIndex = 0;
+        this.textureImageDatas = [];
+        this.texturesLoadedCount = 0;
+        this.texturesLoaded = false;
+
+        this.initPlayer();
+        this.initSprites(mapData.sprites);;
+        this.player.bindKeysAndButtons();
+        this.initScreen();
+        this.drawMiniMap();
+        this.createRayAngles();
+        this.createViewDistances();
+        this.past = Date.now();
+    }
+
     static get TWO_PI() {
         return Math.PI * 2;
     }
@@ -3263,50 +3312,6 @@ class Raycaster {
     // Canvas 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    constructor(
-        mainCanvas,
-        displayWidth = 320,
-        displayHeight = 180,
-        tileSize = 1280,
-        textureSize = 64,
-        fovDegrees = 90
-    ) {
-        // mettre la map par défaut comme argument
-        this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
-        this.stripWidth = 1; // leave this at 1 for now
-        this.ceilingHeight = 1; // ceiling height in blocks
-        this.mainCanvas = mainCanvas;
-        this.mapWidth = this.map[0].length;
-        this.mapHeight = this.map.length;
-        this.displayWidth = displayWidth;
-        this.displayHeight = displayHeight;
-        this.rayCount = Math.ceil(displayWidth / this.stripWidth);
-        this.tileSize = tileSize;
-        this.worldWidth = this.mapWidth * this.tileSize;
-        this.worldHeight = this.mapHeight * this.tileSize;
-        this.textureSize = textureSize;
-        this.fovRadians = (fovDegrees * Math.PI) / 180;
-        this.viewDist = this.displayWidth / 2 / Math.tan(this.fovRadians / 2);
-        this.rayAngles = null;
-        this.viewDistances = null;
-        this.backBuffer = null;
-
-        this.mainCanvasContext;
-        this.screenImageData;
-        this.textureIndex = 0;
-        this.textureImageDatas = [];
-        this.texturesLoadedCount = 0;
-        this.texturesLoaded = false;
-
-        this.initPlayer();
-        this.initSprites(mapData.sprites);;
-        this.player.bindKeysAndButtons();
-        this.initScreen();
-        this.drawMiniMap();
-        this.createRayAngles();
-        this.createViewDistances();
-        this.past = Date.now();
-    }
 
     /**
      * https://stackoverflow.com/a/35690009/1645045
