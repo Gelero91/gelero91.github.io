@@ -115,31 +115,32 @@ let ceilingTexture = 1;
 var maps = [{
         mapID: 1,
         map: [
-            [1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 1, 9, 9, 1, 3, 3, 3, 3, 3, 3, 3],
-            [2, 2, 0, 0, 0, 0, 0, 2, 3, 3, 0, 0, 0, 1, 0, 0, 1, 0, 0, 3, 3, 3, 3, 3],
-            [2, 2, 0, 0, 0, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3],
-            [2, 2, 0, 0, 0, 0, 0, 2, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 3],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 15, 3],
-            [2, 2, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 15, 3],
-            [2, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 15, 3],
-            [2, 2, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15, 3],
-            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24],
-            [1, 0, 0, 0, 0, 0, 0, 1, 24, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 24, 24],
-            [1, 0, 0, 0, 1, 1, 0, 1, 24, 0, 0, 0, 14, 16, 15, 14, 0, 0, 24, 24, 24, 24, 24, 24],
-            [1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 0, 15, 0, 0, 0, 15, 0, 24, 3, 3, 3, 3, 3],
-            [1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 15, 0, 0, 0, 0, 15, 24, 24, 3, 0, 0, 3, 3],
-            [1, 2, 6, 2, 1, 1, 1, 1, 1, 3, 24, 15, 0, 0, 0, 0, 15, 3, 3, 3, 0, 0, 0, 3],
-            [3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 24, 0, 15, 15, 15, 15, 15, 3, 0, 0, 3, 0, 0, 3],
-            [3, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 24, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 0, 3],
-            [3, 0, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 3, 3],
-            [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3],
-            [3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 3, 3],
-            [3, 0, 0, 3, 3, 3, 0, 3, 3, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 3, 3, 0, 3, 3],
-            [3, 0, 0, 3, 3, 3, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 3, 0, 0, 0, 3],
-            [3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 3, 0, 3, 3, 0, 3, 0, 0, 0, 3],
-            [3, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 0, 0, 0, 0, 3, 0, 0, 0, 3],
-            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-        ],
+            [1,1,1,1,1,1,1,1,5,5,5,5,5,1,9,9,1,5,5,5,5,5,5,5],
+            [2,2,0,0,0,0,0,2,5,5,0,0,0,1,0,0,1,0,0,5,5,5,5,5],
+            [2,2,0,0,0,0,0,2,5,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5],
+            [2,2,0,0,0,0,0,2,1,1,0,0,0,0,0,0,0,0,0,7,6,6,6,5],
+            [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,7,0,0,0,6,3],
+            [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,8,0,0,0,6,3],
+            [2,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,7,0,0,0,6,3],
+            [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,6,6,6,6,6,3],
+            [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,5,5],
+            [1,0,0,0,0,0,0,1,5,1,0,0,0,0,0,0,0,0,0,0,0,0,5,3],
+            [1,0,0,0,1,1,0,1,5,0,0,0,7,8,7,6,0,0,5,5,5,5,5,3],
+            [1,0,0,0,1,0,0,0,1,5,0,0,6,0,0,0,7,0,5,3,3,3,3,3],
+            [1,0,0,0,1,0,0,0,1,5,0,7,0,0,0,0,6,5,3,3,0,0,3,3],
+            [1,2,4,2,1,1,1,1,1,3,5,6,0,0,0,0,6,3,3,3,0,0,0,3],
+            [3,3,0,3,3,3,3,3,3,3,3,0,6,6,6,6,6,3,0,0,3,0,0,3],
+            [3,0,0,3,3,3,0,0,3,3,3,0,3,3,3,3,3,0,0,0,3,3,0,3],
+            [3,0,3,3,0,0,0,0,0,3,3,3,0,0,0,0,0,0,3,0,0,3,3,3],
+            [3,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,0,0,0,3,3],
+            [3,3,3,3,0,0,0,0,0,3,3,3,3,3,0,0,0,3,0,0,3,0,3,3],
+            [3,0,0,3,3,3,0,3,3,3,0,0,0,3,0,0,0,3,0,3,3,0,3,3],
+            [3,0,0,3,3,3,0,3,0,0,0,0,0,3,0,0,0,3,0,3,0,0,0,3],
+            [3,0,0,0,0,0,0,0,0,3,0,0,0,3,3,0,3,3,0,3,0,0,0,3],
+            [3,0,0,3,3,3,3,3,3,3,0,0,0,3,3,0,0,0,0,3,0,0,0,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,9,3,3]
+          ],
+
         sprites: [
             [1, 17, 6, 2, 1, "faceThief", "Tarik the Thief", [
                     ["facePlayer", "Alakir", "Hello there! What's the news?"],
@@ -178,7 +179,7 @@ var maps = [{
             [7, 19, 15, "A", "A", null, "Bat", [], null, null, null],
             [8, 21, 20, "A", "A", null, "Bat", [], null, null, null],
             // tester
-            [9, 14, 4, "A", "A", null, "Bat", [], null, null, null],
+            // [9, 14, 4, "A", "A", null, "Bat", [], null, null, null],
 
             [10, 7, 16, 1, 4],
             [11, 20, 16, 1, 4],
@@ -270,6 +271,9 @@ var maps = [{
             [0, 11, 12, 10, 13],
             [0, 11, 13, 10, 13],
             [0, 11, 14, 10, 13],
+
+            // EXIT TEST
+            [47, 21, 23, "EXIT", "EXIT"],
         ],
         eventA: [
             [17, 5, ouest, false, 3, 2, 3, "Moving out..."],
@@ -283,6 +287,7 @@ var maps = [{
             [7, 6, ouest, true, 2, 1, 2, "Moving in !"],
             [2, 14, sud, true, 1, 1, 1, "It's a pretty scary place..."],
         ],
+
         playerStart: {
             X: 14,
             Y: 1,
@@ -295,32 +300,8 @@ var maps = [{
     },
     {
         mapID: 2,
-        map: [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 1],
-            [1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 1],
-            [1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 1],
-            [1, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 1],
-            [1, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 1],
-            [1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 1],
-            [1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ],
+        map: [[5,5,5,5,6,5,5,6,5,5,5,9,9,5,5,5,5,5,5,5,5,5,5,5],[5,5,0,0,7,6,6,7,0,0,5,0,0,5,0,0,0,0,0,0,0,0,5,5],[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[6,6,6,6,0,0,0,0,0,0,0,0,0,0,7,6,7,6,6,0,0,0,0,5],[5,0,0,7,0,0,0,0,0,0,0,0,0,0,6,0,0,0,6,0,0,0,0,5],[5,0,0,8,0,0,0,0,0,0,0,0,0,0,8,0,0,0,6,6,6,0,0,5],[5,0,0,7,0,0,6,7,8,6,0,0,0,0,6,0,0,0,6,0,6,0,0,5],[6,6,6,6,0,0,6,0,0,7,0,0,0,0,6,0,0,0,6,0,6,0,0,5],[5,6,0,0,0,0,6,6,7,6,0,0,0,0,7,6,6,6,6,0,7,0,0,5],[5,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,6,0,0,5],[5,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,7,6,6,0,0,5],[6,7,0,6,8,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,6,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,7,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,5],[5,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,5],[5,0,0,0,1,0,0,0,0,1,1,9,9,1,1,0,0,0,0,1,0,0,0,5],[5,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,5],[5,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,5],[5,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,5],[5,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,5,5],[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]],
+        
         sprites: [
             // liste de test
             [6, 4, 17, "A", "A", null, "Bat", [], null, null, null],
@@ -330,15 +311,16 @@ var maps = [{
         ],
         eventA: [],
         eventB: [],
+        //xyz
         playerStart: {
-            X: 5,
-            Y: 6,
-            Orientation: 2,
+            X: 14,
+            Y: 1,
+            Orientation: 4.71238898038469,
             ceilingRender: false,
             ceilingHeight: 2,
             ceilingTexture: 1,
             floorTexture: 3
-        } // Position de départ du joueur pour l'ID 2
+        }, // Position de départ du joueur pour l'ID 1
     }
 ];
 
@@ -397,6 +379,10 @@ class Player {
         this.selectedSpell = 0;
         this.combatSpell = false;
 
+        // Référence à la classe principale pour permettre au joueur d'interagir avec le moteur du jeu.
+        // Bien que cette approche fonctionne, elle introduit un couplage fort entre Player et la classe principale.
+        // Cela peut rendre le code moins flexible à long terme et plus difficile à maintenir ou à tester.
+        // Il serait préférable d'envisager des alternatives comme l'utilisation d'événements ou de services pour réduire ce couplage.
         this.raycaster = raycaster;
     }
 
@@ -870,9 +856,9 @@ class Player {
                 Sprite.terminalLog("Save loaded !");
                 break;
             case 18:
-                pause(500);
                 if (gameOver == false) {
-                    this.raycaster.nextMap();
+                    pause(500);
+                    this.raycaster.nextMap(this);
                     console.log("nextMapButton");
                     Raycaster.showRenderWindow();
                     Sprite.resetTerminal();
@@ -957,7 +943,6 @@ class Player {
         // Boutons avec debounce (anti double clic)
         this.bindButton("saveButton", 16, () => {
             if (canClickSave) {
-                this.saveGameState();
                 canClickSave = false;
                 setTimeout(() => canClickSave = true, debounceDelay);
             }
@@ -965,7 +950,6 @@ class Player {
 
         this.bindButton("loadButton", 17, () => {
             if (canClickLoad) {
-                this.loadGameState();
                 canClickLoad = false;
                 setTimeout(() => canClickLoad = true, debounceDelay);
             }
@@ -973,7 +957,6 @@ class Player {
 
         this.bindButton("nextMapButton", 18, () => {
             if (canClickNextMap) {
-                this.nextMap();
                 canClickNextMap = false;
                 setTimeout(() => canClickNextMap = true, debounceDelay);
             }
@@ -997,7 +980,6 @@ class Player {
         this.bindButton("mainMenuButton", 20);
         this.bindButton("backMenuButton", 21);
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // méthode calcul quadrant et stockage de la valeur dans Player
@@ -1208,6 +1190,10 @@ class Player {
                             sprite.combat(this.might, this.criti, this);
                         }
                         break;
+                    case "EXIT":
+                        Sprite.terminalLog('Level finished !')
+                        this.raycaster.nextMap();
+                        break;
                     case 0:
                         sprite.talk(sprite.spriteTalk, sprite.spriteFace);
                         this.turn = false;
@@ -1236,9 +1222,6 @@ class Player {
                         sprite.spriteTexture = 21;
 
                         Sprite.resetToggle();
-                        break;
-                    case "END":
-                        this.nextMap();
                         break;
                     default:
                         Sprite.resetToggle();
@@ -2842,23 +2825,38 @@ class Raycaster {
         this.player.rot = mapData.playerStart.Orientation;
     }
 
+    // xyz
     nextMap() {
         // Incrémenter l'ID de la carte pour charger la suivante
         this.mapID += 1;
 
         const mapData = getMapDataByID(this.mapID); // Utilisation de this.mapID
+        
 
         if (!mapData) {
             console.error(`Aucune donnée trouvée pour la carte avec l'ID ${this.mapID}`);
+            // back to the current ID
+            this.mapID -=1;
             return;
         }
+
+        console.log("before nextMap():")
+        console.log(this.player.x);
+        console.log(this.player.y);
+        console.log(this.player.rot);
+
+        this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize / 2;
+        this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize / 2;
+        this.player.rot = mapData.playerStart.Orientation;
+
+        console.log("after nextMap():")
+        console.log(this.player.x);
+        console.log(this.player.y);
+        console.log(this.player.rot);
 
         // Charger la nouvelle carte
         this.initMap(this.mapID, mapData.map, mapData.eventA, mapData.eventB);
         this.initSprites(mapData.sprites);
-        this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize / 2;
-        this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize / 2;
-        this.player.rot = mapData.playerStart.Orientation;
 
         ceilingHeight = mapData.playerStart.ceilingHeight;
         ceilingRender = mapData.playerStart.ceilingRender;
@@ -3345,117 +3343,70 @@ class Raycaster {
     }
 
     loadFloorCeilingImages() {
-        // Draw images on this temporary canvas to grab the ImageData pixels
+        // Crée un canvas temporaire pour obtenir les pixels des images
         let canvas = document.createElement("canvas");
-
-        // Canvas needs to be big enough for the wall texture
-        //this.textureSize*x
-        //x correspond au nombre de textures (de haut en bas) sur imgWall
-        //exemple : texture n°4 = 4ème texture, soit entre 3*64px et 4*64px
         canvas.width = this.textureSize * 2;
         canvas.height = this.textureSize * 24;
         let context = canvas.getContext("2d");
-
-        // Skybox Test
-        // multiplier texture size selon taille de la texture,
-        // sinon réglé comme un sprite
+    
+        // Fonction générique pour charger les textures de sol et de plafond
+        const loadTexture = (imageId, textureType) => {
+            let img = document.getElementById(imageId);
+            context.drawImage(img, 0, 0, img.width, img.height);
+            return context.getImageData(0, 0, this.textureSize, this.textureSize);
+        };
+    
+        // Skybox
         let skyboximg = document.getElementById("skybox1");
         context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
         this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
-
-        // initialisation de la variable floorimg qui stoque la texture en base64 (pixels)
-        // let floorimg;
-        // NON -> si déclaration de variable, alors réinitialisation des textures. A faire après condition.
-
-        // MARQUEUR : Chargement des textures sol plafond mur sprites
-
-        // selon le type de sol, la texture est adaptée
-        if (floorTexture == 1) {
-            let floorimg = document.getElementById("floorimg1");
-            context.drawImage(floorimg, 0, 0, floorimg.width, floorimg.height);
-            this.floorImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
-        } else if (floorTexture == 2) {
-            let floorimg = document.getElementById("floorimg2");
-            context.drawImage(floorimg, 0, 0, floorimg.width, floorimg.height);
-            this.floorImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
-        } else if (floorTexture == 3) {
-            let floorimg = document.getElementById("floorimg3");
-            context.drawImage(floorimg, 0, 0, floorimg.width, floorimg.height);
-            this.floorImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
-        } else if (floorTexture == 4) {
-            let floorimg = document.getElementById("floorimg4");
-            context.drawImage(floorimg, 0, 0, floorimg.width, floorimg.height);
-            this.floorImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
+    
+        // Chargement des textures de sol
+        const floorTextures = {
+            1: "floorimg1",
+            2: "floorimg2",
+            3: "floorimg3",
+            4: "floorimg4"
+        };
+        if (floorTextures[floorTexture]) {
+            this.floorImageData = loadTexture(floorTextures[floorTexture], 'floor');
         }
-
-        // Save ceiling image pixels
-        if (ceilingTexture == 1) {
-            let ceilingimg = document.getElementById("ceilingimg1");
-            context.drawImage(ceilingimg, 0, 0, ceilingimg.width, ceilingimg.height);
-            this.ceilingImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
-        } else if (ceilingTexture == 2) {
-            let ceilingimg = document.getElementById("ceilingimg2");
-            context.drawImage(ceilingimg, 0, 0, ceilingimg.width, ceilingimg.height);
-            this.ceilingImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
-        } else if (ceilingTexture == 3) {
-            let ceilingimg = document.getElementById("ceilingimg3");
-            context.drawImage(ceilingimg, 0, 0, ceilingimg.width, ceilingimg.height);
-            this.ceilingImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
+    
+        // Chargement des textures de plafond
+        const ceilingTextures = {
+            1: "ceilingimg1",
+            2: "ceilingimg2",
+            3: "ceilingimg3"
+        };
+        if (ceilingTextures[ceilingTexture]) {
+            this.ceilingImageData = loadTexture(ceilingTextures[ceilingTexture], 'ceiling');
         }
-
-        // Save walls image pixels
+    
+        // Chargement des textures de mur
         let wallsImage = document.getElementById("wallsImage");
         context.drawImage(wallsImage, 0, 0, wallsImage.width, wallsImage.height);
         this.wallsImageData = context.getImageData(0, 0, wallsImage.width, wallsImage.height);
-        // console.log("wallsImage.width=" + wallsImage.width);
-
-        // Save sprite image pixels
-        canvas = document.createElement("canvas");
-        context = canvas.getContext("2d");
-
-        // Save sprite image pixels
-        // tableau avec les identifiants des éléments d'image (les noms dans le html)
-        // pour l'exercice sur les animations, j'ai inversé 8 et 14.
-        // sprite 15 = test
+    
+        // Chargement des sprites (partie déjà optimisée)
         const spriteIds = [
-            "sprite1",
-            "sprite2",
-            "sprite3",
-            "sprite4",
-            "sprite5",
-            "sprite6",
-            "sprite7",
-            "sprite14",
-            "sprite9",
-            "sprite10",
-            "sprite11",
-            "sprite12",
-            "sprite13",
-            "sprite8",
-            "sprite15",
-            "sprite16",
-            "sprite17",
-            "sprite18",
-            "sprite19",
-            "sprite20",
-            "sprite21"
+            "sprite1", "sprite2", "sprite3", "sprite4", "sprite5", "sprite6", 
+            "sprite7", "sprite14", "sprite9", "sprite10", "sprite11", "sprite12", 
+            "sprite13", "sprite8", "sprite15", "sprite16", "sprite17", "sprite18", 
+            "sprite19", "sprite20", "sprite21"
         ];
-
-        // On parcours le tableau et effectue les opérations pour chaque élément,
-        // plutôt que les répéter comme avant.
+        
         spriteIds.forEach((spriteId, index) => {
             let spriteImage = document.getElementById(spriteId);
-
             let canvas = document.createElement("canvas");
             let context = canvas.getContext("2d");
             canvas.width = spriteImage.width;
             canvas.height = spriteImage.height;
-            // animation sprite marqueur xxx
             context.drawImage(spriteImage, 0, 0, spriteImage.width, spriteImage.height);
             this["spriteImageData" + (index + 1)] = context.getImageData(0, 0, spriteImage.width, spriteImage.height);
-            // console.log(`spriteImage${index + 1}.width = ${spriteImage.width}`);
         });
     }
+    
+    
 
     stripScreenHeight(screenDistance, correctDistance, heightInGame) {
         return Math.round((screenDistance / correctDistance) * heightInGame);
@@ -3703,184 +3654,106 @@ class Raycaster {
         let swidth = 4;
         let sheight = 64;
         let imgx = rayHit.strip * this.stripWidth;
-
         let imgy = (this.displayHeight - wallScreenHeight) / 2;
         let imgw = this.stripWidth;
         let imgh = wallScreenHeight;
         const TextureUnit = 64;
-
-        if (textureY === TextureUnit * 2) {
-            if (this.ceilingHeight === 1) {
-                this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy, imgw, imgh);
-            } else {
-                this.drawTexturedRect(this.wallsImageData, textureX, 11 * TextureUnit, swidth, sheight, imgx, imgy, imgw, imgh);
-
-                for (let level = 1; level < this.ceilingHeight; ++level) {
-                    if (level === this.ceilingHeight - 1) {
-                        textureY = 9 * TextureUnit;
-                    } else {
-                        textureY = 10 * TextureUnit;
-                    }
-
-                    this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                }
+    
+        // Configuration des textures avec des nombres pour identifier les types de murs
+        const wallConfig = {
+            1: { // stoneWall
+                singleFloorTexture: 0 * TextureUnit,     // Texture spéciale si un seul étage (mur en pierre)
+                groundTexture: 18 * TextureUnit,          // Texture pour le rez-de-chaussée (mur en pierre)
+                firstFloorTexture: 17 * TextureUnit,      // Texture pour les étages intermédiaires (mur en pierre)
+                topFloorTexture: 17 * TextureUnit,        // Texture pour le dernier étage (mur en pierre)
+                roofTexture: 16 * TextureUnit             // Texture pour le toit (mur en pierre)
+            },
+            2: { // ornateWall
+                singleFloorTexture: 1 * TextureUnit,     // Texture spéciale si un seul étage (mur orné)
+                groundTexture: 21 * TextureUnit,          // Texture pour le rez-de-chaussée (mur orné)
+                firstFloorTexture: 20 * TextureUnit,      // Texture pour les étages intermédiaires (mur orné)
+                topFloorTexture: 19 * TextureUnit,        // Texture pour le dernier étage (mur orné)
+                roofTexture: 0 * TextureUnit    
+            },
+            3: { // Rocks
+                singleFloorTexture: 2 * TextureUnit,      // Texture spéciale si un seul étage
+                groundTexture: 11 * TextureUnit,          // Texture pour le rez-de-chaussée
+                firstFloorTexture: 10 * TextureUnit,       // Texture pour les étages intermédiaires
+                topFloorTexture: 10 * TextureUnit,        // Texture pour le dernier étage
+                roofTexture: 9 * TextureUnit             // Texture pour le toit
+            },
+            4: { // templeDoor
+                singleFloorTexture: 5 * TextureUnit,      // Porte du temple pour un seul étage
+                groundTexture: 5 * TextureUnit,           // Texture porte du temple (rez-de-chaussée)
+                firstFloorTexture: 1 * TextureUnit,       // Texture intermédiaire (premier étage du temple)
+                topFloorTexture: 1 * TextureUnit,         // Texture pour le dernier étage
+                roofTexture: 0 * TextureUnit              // Texture pour le toit (ou pas de toit pour le temple)
+            },
+            5: { // forest
+                singleFloorTexture: 23* TextureUnit,                 // Texture spéciale pour la forêt (un seul étage)
+                groundTexture: 23* TextureUnit,                      // Texture de forêt (rez-de-chaussée)
+                firstFloorTexture: 22* TextureUnit,                  // Texture intermédiaire pour les étages de la forêt
+                topFloorTexture: 22* TextureUnit,                    // Texture pour le dernier étage
+                roofTexture: 0                            // Texture transparente pour le toit
+            },
+            6: { // house
+                singleFloorTexture: 14 * TextureUnit,     // Texture maison spéciale pour un étage
+                groundTexture: 14 * TextureUnit,          // Texture maison (rez-de-chaussée)
+                firstFloorTexture: 14 * TextureUnit,      // Texture répétée pour les étages intermédiaires
+                topFloorTexture: 14 * TextureUnit,        // Texture pour le dernier étage de la maison
+                roofTexture: 12 * TextureUnit             // Texture du toit de la maison
+            },
+            7: { // houseWindow
+                singleFloorTexture: 13 * TextureUnit,     // Fenêtre de la maison (un seul étage)
+                groundTexture: 13 * TextureUnit,          // Fenêtre de la maison (rez-de-chaussée)
+                firstFloorTexture: 13 * TextureUnit,      // Fenêtre répétée pour les étages intermédiaires
+                topFloorTexture: 13 * TextureUnit,        // Texture pour le dernier étage avec fenêtre
+                roofTexture: 12 * TextureUnit             // Texture du toit de la maison avec fenêtre
+            },
+            8: { // houseDoor
+                singleFloorTexture: 15 * TextureUnit,     // Texture de la porte de la maison (un seul étage)
+                groundTexture: 15 * TextureUnit,          // Texture pour la porte de la maison (rez-de-chaussée)
+                firstFloorTexture: 14 * TextureUnit,      // Texture répétée pour les étages intermédiaires
+                topFloorTexture: 14 * TextureUnit,        // Texture pour le dernier étage avec porte
+                roofTexture: 12 * TextureUnit             // Texture du toit de la maison avec porte
+            },
+            9: { // Prison door
+                singleFloorTexture: 7 * TextureUnit,      // Variation du mur de pierre pour un seul étage
+                groundTexture: 8 * TextureUnit,           // Texture variation mur de pierre (rez-de-chaussée)
+                firstFloorTexture: 8 * TextureUnit,      // Texture répétée pour les étages intermédiaires
+                topFloorTexture: 7 * TextureUnit,        // Texture pour le dernier étage de la variation de mur en pierre
+                roofTexture: 0 * TextureUnit             // Texture pour le toit de la variation de mur en pierre
             }
-        }
+            // Tu peux ajouter d'autres configurations si besoin pour atteindre les 24.
+        };
+        
+    
+        // Récupérer la configuration du mur en fonction de `textureY`
+        // +1, car 0 vaut pour un vide
+        const wallType = Math.floor(textureY / TextureUnit) + 1;  // Ajustement pour correspondre à un index 0-based
 
-        // mur pierre (spécial)
-        else if (textureY === 0 * TextureUnit) {
-            if (this.ceilingHeight === 1) {
-                this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy, imgw, imgh);
-            } else {
-                // TEST : on remplace les pixels par une valeur étalon : un bloc = 64px, donc choix numéro de texture * bloc = hauteur de la texture en pixel
-                this.drawTexturedRect(this.wallsImageData, textureX, TextureUnit * 18, swidth, sheight, imgx, imgy, imgw, imgh);
-
-                // ne pas oublier qu'ils sont sensés être plus haut que tout le reste (un demi mur)
-                for (let level = 1; level <= this.ceilingHeight; ++level) {
-                    if (level === this.ceilingHeight) {
-                        textureY = TextureUnit * 16;
-                    } else {
-                        textureY = TextureUnit * 17;
-                    }
-                    this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                }
+        // On suppose que textureY est un multiple de TextureUnit
+        const config = wallConfig[wallType] || wallConfig[1];  // 3 correspond au "default"
+    
+        if (this.ceilingHeight === 1) {
+            // Utilisation de la texture spéciale pour un étage
+            this.drawTexturedRect(this.wallsImageData, textureX, config.singleFloorTexture, swidth, sheight, imgx, imgy, imgw, imgh);
+        } else {
+            // Dessiner le rez-de-chaussée (groundTexture)
+            this.drawTexturedRect(this.wallsImageData, textureX, config.groundTexture, swidth, sheight, imgx, imgy, imgw, imgh);
+    
+            // Si plusieurs étages, dessiner les étages intermédiaires et le dernier étage
+            for (let level = 1; level < this.ceilingHeight - 1; ++level) {
+                // Répéter la texture des étages intermédiaires
+                this.drawTexturedRect(this.wallsImageData, textureX, config.firstFloorTexture, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
             }
-        }
-
-        // murs ornés (mécanique de base)
-        else if (textureY === 1 * TextureUnit) {
-            if (this.ceilingHeight === 1) {
-                this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy, imgw, imgh);
-            } else {
-                this.drawTexturedRect(this.wallsImageData, textureX, TextureUnit * 21, swidth, sheight, imgx, imgy, imgw, imgh);
-
-                for (let level = 1; level < this.ceilingHeight; ++level) {
-                    if (level === this.ceilingHeight - 1) {
-                        textureY = 19 * TextureUnit;
-                    } else {
-                        textureY = 20 * TextureUnit;
-                    }
-                    this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                }
-            }
-        }
-
-        // forêt
-        else if (textureY == 1472) {
-            this.drawTexturedRect(this.wallsImageData, textureX, 1472, swidth, sheight, imgx, imgy, imgw, imgh);
-            textureY = 1408;
-            this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - wallScreenHeight, imgw, imgh);
-
-        }
-
-        // COMPORTEMENT PAR DEFAUT
-        // + étages spéciaux selon sélection (blocs "if")
-        else {
-            this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy, imgw, imgh);
-
-            // PORTE MUR EN PIERRE
-            if (textureY == 4 * TextureUnit) {
-                textureY = 0
-                for (let level = 1; level < this.ceilingHeight; ++level) {
-                    this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                }
-            }
-
-            // porte du temple, je rajoute un étage pour test, cohérence architecturale
-            else if (textureY == 5 * TextureUnit) {
-                textureY = 1 * TextureUnit;
-                for (let level = 1; level < this.ceilingHeight; ++level) {
-                    this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                }
-            } else if (textureY == 8 * TextureUnit) {
-                textureY = 7 * TextureUnit;
-                for (let level = 1; level < this.ceilingHeight; ++level) {
-                    this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                }
-            }
-
-            // maison MAISON MAISON MAISOOOOOOOOOOOOOOON
-            else if (textureY === 14 * TextureUnit) {
-                if (this.ceilingHeight === 1) {
-                    // none, pas d'étage.
-                } else {
-                    for (let level = 1; level <= this.ceilingHeight; ++level) {
-                        if (level === this.ceilingHeight) {
-                            this.drawTexturedRect(this.wallsImageData, textureX, 12 * TextureUnit, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                        } else {
-                            this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                        }
-                    }
-                }
-            }
-
-            // fenêtre maison
-            else if (textureY == 13 * TextureUnit) {
-                if (this.ceilingHeight === 1) {
-                    // none, pas d'étage.
-                } else {
-
-                    for (let level = 1; level <= this.ceilingHeight; ++level) {
-                        if (level === this.ceilingHeight) {
-                            this.drawTexturedRect(this.wallsImageData, textureX, 12 * TextureUnit, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                        } else {
-                            this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                        }
-                    }
-                }
-            }
-
-            // porte maison
-            else if (textureY == 15 * TextureUnit) {
-                textureY = 14 * TextureUnit;
-                if (this.ceilingHeight === 1) {
-                    // none, pas d'étage.
-                } else {
-                    for (let level = 1; level <= this.ceilingHeight; ++level) {
-                        if (level === this.ceilingHeight) {
-                            this.drawTexturedRect(this.wallsImageData, textureX, 12 * TextureUnit, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                        } else {
-                            this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                        }
-                    }
-                }
-            }
-
-            // COMPORTEMENT PAR DEFAUT
-            else {
-                // rajout d'un <= pour augmenter d'un étage les murs de pierre
-                if (textureY === 0) {
-                    // condition de rendu du plafond
-                    if (this.ceilingHeight === 1 && ceilingRender === true) {
-                        // si un étage, pas de boucle
-                        // on enlève également "imgy - level * wallScreenHeight" de la fonction, évidemment.
-                        this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy, imgw, imgh);
-
-                        // si plusieurs étages => boucle, et "inférieur ou égal" pour rajouter un étage.
-                        // Condition si plafond ou pas.
-                    } else if (this.ceilingHeight > 1 && ceilingRender === true) {
-                        for (let level = 1; level < this.ceilingHeight; ++level) {
-                            this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                        }
-                    } else if (this.ceilingHeight > 1 && ceilingRender === false) {
-                        for (let level = 1; level <= this.ceilingHeight; ++level) {
-                            // sommet des murs en pierre si pas de plafond
-                            if (this.ceilingHeight === level) {
-                                // sommet
-                                textureY = 16 * TextureUnit;
-                                this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                            } else {
-                                // mur normal
-                                this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                            }
-                        }
-                    }
-                } else {
-                    // sinon, pas de <= (inférieur ou égal) au nombre d'étage, sinon on aurait un étage en plus du max.
-                    for (let level = 1; level < this.ceilingHeight; ++level) {
-                        this.drawTexturedRect(this.wallsImageData, textureX, textureY, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
-                    }
-                }
+    
+            // Dernier étage (topFloorTexture)
+            this.drawTexturedRect(this.wallsImageData, textureX, config.topFloorTexture, swidth, sheight, imgx, imgy - (this.ceilingHeight - 1) * wallScreenHeight, imgw, imgh);
+    
+            // Si un toit est configuré, on le dessine au-dessus du dernier étage
+            if (config.roofTexture) {
+                this.drawTexturedRect(this.wallsImageData, textureX, config.roofTexture, swidth, sheight, imgx, imgy - this.ceilingHeight * wallScreenHeight, imgw, imgh);
             }
         }
     }
