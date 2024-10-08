@@ -115,31 +115,31 @@ let ceilingTexture = 1;
 var maps = [{
         mapID: 1,
         map: [
-            [1,1,1,1,1,1,1,1,5,5,5,5,5,1,9,9,1,5,5,5,5,5,5,5],
-            [2,2,0,0,0,0,0,2,5,5,0,0,0,1,0,0,1,0,0,5,5,5,5,5],
-            [2,2,0,0,0,0,0,2,5,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5],
-            [2,2,0,0,0,0,0,2,1,1,0,0,0,0,0,0,0,0,0,7,6,6,6,5],
-            [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,7,0,0,0,6,3],
-            [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,8,0,0,0,6,3],
-            [2,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,7,0,0,0,6,3],
-            [2,2,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,6,6,6,6,6,3],
-            [1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,5,5],
-            [1,0,0,0,0,0,0,1,5,1,0,0,0,0,0,0,0,0,0,0,0,0,5,3],
-            [1,0,0,0,1,1,0,1,5,0,0,0,7,8,7,6,0,0,5,5,5,5,5,3],
-            [1,0,0,0,1,0,0,0,1,5,0,0,6,0,0,0,7,0,5,3,3,3,3,3],
-            [1,0,0,0,1,0,0,0,1,5,0,7,0,0,0,0,6,5,3,3,0,0,3,3],
-            [1,2,4,2,1,1,1,1,1,3,5,6,0,0,0,0,6,3,3,3,0,0,0,3],
-            [3,3,0,3,3,3,3,3,3,3,3,0,6,6,6,6,6,3,0,0,3,0,0,3],
-            [3,0,0,3,3,3,0,0,3,3,3,0,3,3,3,3,3,0,0,0,3,3,0,3],
-            [3,0,3,3,0,0,0,0,0,3,3,3,0,0,0,0,0,0,3,0,0,3,3,3],
-            [3,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,0,0,0,3,3],
-            [3,3,3,3,0,0,0,0,0,3,3,3,3,3,0,0,0,3,0,0,3,0,3,3],
-            [3,0,0,3,3,3,0,3,3,3,0,0,0,3,0,0,0,3,0,3,3,0,3,3],
-            [3,0,0,3,3,3,0,3,0,0,0,0,0,3,0,0,0,3,0,3,0,0,0,3],
-            [3,0,0,0,0,0,0,0,0,3,0,0,0,3,3,0,3,3,0,3,0,0,0,3],
-            [3,0,0,3,3,3,3,3,3,3,0,0,0,3,3,0,0,0,0,3,0,0,0,3],
-            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,9,3,3]
-          ],
+            [1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 1, 9, 9, 1, 5, 5, 5, 5, 5, 5, 5],
+            [2, 2, 0, 0, 0, 0, 0, 2, 5, 5, 0, 0, 0, 1, 0, 0, 1, 0, 0, 5, 5, 5, 5, 5],
+            [2, 2, 0, 0, 0, 0, 0, 2, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5],
+            [2, 2, 0, 0, 0, 0, 0, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 6, 6, 6, 5],
+            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 6, 3],
+            [2, 2, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 6, 3],
+            [2, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 6, 3],
+            [2, 2, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 3],
+            [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5],
+            [1, 0, 0, 0, 0, 0, 0, 1, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 3],
+            [1, 0, 0, 0, 1, 1, 0, 1, 5, 0, 0, 0, 7, 8, 7, 6, 0, 0, 5, 5, 5, 5, 5, 3],
+            [1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0, 6, 0, 0, 0, 7, 0, 5, 3, 3, 3, 3, 3],
+            [1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 7, 0, 0, 0, 0, 6, 5, 3, 3, 0, 0, 3, 3],
+            [1, 2, 4, 2, 1, 1, 1, 1, 1, 3, 5, 6, 0, 0, 0, 0, 6, 3, 3, 3, 0, 0, 0, 3],
+            [3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 6, 6, 6, 6, 6, 3, 0, 0, 3, 0, 0, 3],
+            [3, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 0, 3],
+            [3, 0, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 3, 3],
+            [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3],
+            [3, 3, 3, 3, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 3, 3],
+            [3, 0, 0, 3, 3, 3, 0, 3, 3, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 3, 3, 0, 3, 3],
+            [3, 0, 0, 3, 3, 3, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 3, 0, 0, 0, 3],
+            [3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 3, 0, 3, 3, 0, 3, 0, 0, 0, 3],
+            [3, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 0, 0, 0, 0, 3, 0, 0, 0, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 9, 3, 3]
+        ],
 
         sprites: [
             [1, 17, 6, 2, 1, "faceThief", "Tarik the Thief", [
@@ -300,8 +300,33 @@ var maps = [{
     },
     {
         mapID: 2,
-        map: [[5,5,5,5,6,5,5,6,5,5,5,9,9,5,5,5,5,5,5,5,5,5,5,5],[5,5,0,0,7,6,6,7,0,0,5,0,0,5,0,0,0,0,0,0,0,0,5,5],[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[6,6,6,6,0,0,0,0,0,0,0,0,0,0,7,6,7,6,6,0,0,0,0,5],[5,0,0,7,0,0,0,0,0,0,0,0,0,0,6,0,0,0,6,0,0,0,0,5],[5,0,0,8,0,0,0,0,0,0,0,0,0,0,8,0,0,0,6,6,6,0,0,5],[5,0,0,7,0,0,6,7,8,6,0,0,0,0,6,0,0,0,6,0,6,0,0,5],[6,6,6,6,0,0,6,0,0,7,0,0,0,0,6,0,0,0,6,0,6,0,0,5],[5,6,0,0,0,0,6,6,7,6,0,0,0,0,7,6,6,6,6,0,7,0,0,5],[5,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,6,0,0,5],[5,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,7,6,6,0,0,5],[6,7,0,6,8,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,6,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,7,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[5,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,5],[5,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,5],[5,0,0,0,1,0,0,0,0,1,1,9,9,1,1,0,0,0,0,1,0,0,0,5],[5,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,5],[5,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,5],[5,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,5],[5,5,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,5,5],[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]],
-        
+        map: [
+            [5, 5, 5, 5, 6, 5, 5, 6, 5, 5, 5, 9, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+            [5, 5, 0, 0, 7, 6, 6, 7, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5],
+            [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+            [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+            [6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 6, 7, 6, 6, 0, 0, 0, 0, 5],
+            [5, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 5],
+            [5, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 6, 6, 6, 0, 0, 5],
+            [5, 0, 0, 7, 0, 0, 6, 7, 8, 6, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 6, 0, 0, 5],
+            [6, 6, 6, 6, 0, 0, 6, 0, 0, 7, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 6, 0, 0, 5],
+            [5, 6, 0, 0, 0, 0, 6, 6, 7, 6, 0, 0, 0, 0, 7, 6, 6, 6, 6, 0, 7, 0, 0, 5],
+            [5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 6, 0, 0, 5],
+            [5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 6, 6, 0, 0, 5],
+            [6, 7, 0, 6, 8, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+            [5, 0, 0, 6, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+            [5, 0, 0, 7, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+            [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+            [5, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 5],
+            [5, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 5],
+            [5, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 9, 9, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 5],
+            [5, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 5],
+            [5, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 5],
+            [5, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 5],
+            [5, 5, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 5, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+        ],
+
         sprites: [
             // liste de test
             [6, 4, 17, "A", "A", null, "Bat", [], null, null, null],
@@ -313,7 +338,7 @@ var maps = [{
         eventB: [],
         //xyz
         playerStart: {
-            X: 14,
+            X: 12,
             Y: 1,
             Orientation: 4.71238898038469,
             ceilingRender: false,
@@ -341,16 +366,16 @@ class Player {
         this.x = x;
         this.y = y;
         this.z = 0,
-        this.dir = 0,
-        this.rot = rot,
-        this.quadrant = "",
-        this.speed = 0,
+            this.dir = 0,
+            this.rot = rot,
+            this.quadrant = "",
+            this.speed = 0,
 
-        this.tileSize = 1280,
-        this.moveSpeed = Math.round(1280 / ((DESIRED_FPS / 60.0) * 16)),
-        this.rotSpeed = (1.5 * Math.PI) / 180,
+            this.tileSize = 1280,
+            this.moveSpeed = Math.round(1280 / ((DESIRED_FPS / 60.0) * 16)),
+            this.rotSpeed = (1.5 * Math.PI) / 180,
 
-        this.hp = 10;
+            this.hp = 10;
         this.mp = 10;
         this.hpMax = 10;
         this.mpMax = 10;
@@ -1457,7 +1482,7 @@ class Player {
         // Suite détection sprite
         // implémenter collision glissante
         if (obstacleOnPath) {
-            
+
             // console.log("sprite bloquant !")
             // this.handleSlidingCollision(this, actualMap);
 
@@ -2880,12 +2905,12 @@ class Raycaster {
         this.mapID += 1;
 
         const mapData = getMapDataByID(this.mapID); // Utilisation de this.mapID
-        
+
 
         if (!mapData) {
             console.error(`Aucune donnée trouvée pour la carte avec l'ID ${this.mapID}`);
             // back to the current ID
-            this.mapID -=1;
+            this.mapID -= 1;
             return;
         }
 
@@ -3353,19 +3378,19 @@ class Raycaster {
         canvas.width = this.textureSize * 2;
         canvas.height = this.textureSize * 24;
         let context = canvas.getContext("2d");
-    
+
         // Fonction générique pour charger les textures de sol et de plafond
         const loadTexture = (imageId, textureType) => {
             let img = document.getElementById(imageId);
             context.drawImage(img, 0, 0, img.width, img.height);
             return context.getImageData(0, 0, this.textureSize, this.textureSize);
         };
-    
+
         // Skybox
         let skyboximg = document.getElementById("skybox1");
         context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
         this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
-    
+
         // Chargement des textures de sol
         const floorTextures = {
             1: "floorimg1",
@@ -3376,7 +3401,7 @@ class Raycaster {
         if (floorTextures[floorTexture]) {
             this.floorImageData = loadTexture(floorTextures[floorTexture], 'floor');
         }
-    
+
         // Chargement des textures de plafond
         const ceilingTextures = {
             1: "ceilingimg1",
@@ -3386,20 +3411,20 @@ class Raycaster {
         if (ceilingTextures[ceilingTexture]) {
             this.ceilingImageData = loadTexture(ceilingTextures[ceilingTexture], 'ceiling');
         }
-    
+
         // Chargement des textures de mur
         let wallsImage = document.getElementById("wallsImage");
         context.drawImage(wallsImage, 0, 0, wallsImage.width, wallsImage.height);
         this.wallsImageData = context.getImageData(0, 0, wallsImage.width, wallsImage.height);
-    
+
         // Chargement des sprites (partie déjà optimisée)
         const spriteIds = [
-            "sprite1", "sprite2", "sprite3", "sprite4", "sprite5", "sprite6", 
-            "sprite7", "sprite14", "sprite9", "sprite10", "sprite11", "sprite12", 
-            "sprite13", "sprite8", "sprite15", "sprite16", "sprite17", "sprite18", 
+            "sprite1", "sprite2", "sprite3", "sprite4", "sprite5", "sprite6",
+            "sprite7", "sprite14", "sprite9", "sprite10", "sprite11", "sprite12",
+            "sprite13", "sprite8", "sprite15", "sprite16", "sprite17", "sprite18",
             "sprite19", "sprite20", "sprite21"
         ];
-        
+
         spriteIds.forEach((spriteId, index) => {
             let spriteImage = document.getElementById(spriteId);
             let canvas = document.createElement("canvas");
@@ -3410,8 +3435,8 @@ class Raycaster {
             this["spriteImageData" + (index + 1)] = context.getImageData(0, 0, spriteImage.width, spriteImage.height);
         });
     }
-    
-    
+
+
 
     stripScreenHeight(screenDistance, correctDistance, heightInGame) {
         return Math.round((screenDistance / correctDistance) * heightInGame);
@@ -3663,99 +3688,99 @@ class Raycaster {
         let imgw = this.stripWidth;
         let imgh = wallScreenHeight;
         const TextureUnit = 64;
-    
+
         // Configuration des textures avec des nombres pour identifier les types de murs
         const wallConfig = {
             1: { // stoneWall
-                singleFloorTexture: 0 * TextureUnit,     // Texture spéciale si un seul étage (mur en pierre)
-                groundTexture: 18 * TextureUnit,          // Texture pour le rez-de-chaussée (mur en pierre)
-                firstFloorTexture: 17 * TextureUnit,      // Texture pour les étages intermédiaires (mur en pierre)
-                topFloorTexture: 17 * TextureUnit,        // Texture pour le dernier étage (mur en pierre)
-                roofTexture: 16 * TextureUnit             // Texture pour le toit (mur en pierre)
+                singleFloorTexture: 0 * TextureUnit, // Texture spéciale si un seul étage (mur en pierre)
+                groundTexture: 18 * TextureUnit, // Texture pour le rez-de-chaussée (mur en pierre)
+                firstFloorTexture: 17 * TextureUnit, // Texture pour les étages intermédiaires (mur en pierre)
+                topFloorTexture: 17 * TextureUnit, // Texture pour le dernier étage (mur en pierre)
+                roofTexture: 16 * TextureUnit // Texture pour le toit (mur en pierre)
             },
             2: { // ornateWall
-                singleFloorTexture: 1 * TextureUnit,     // Texture spéciale si un seul étage (mur orné)
-                groundTexture: 21 * TextureUnit,          // Texture pour le rez-de-chaussée (mur orné)
-                firstFloorTexture: 20 * TextureUnit,      // Texture pour les étages intermédiaires (mur orné)
-                topFloorTexture: 19 * TextureUnit,        // Texture pour le dernier étage (mur orné)
-                roofTexture: 0 * TextureUnit    
+                singleFloorTexture: 1 * TextureUnit, // Texture spéciale si un seul étage (mur orné)
+                groundTexture: 21 * TextureUnit, // Texture pour le rez-de-chaussée (mur orné)
+                firstFloorTexture: 20 * TextureUnit, // Texture pour les étages intermédiaires (mur orné)
+                topFloorTexture: 19 * TextureUnit, // Texture pour le dernier étage (mur orné)
+                roofTexture: 0 * TextureUnit
             },
             3: { // Rocks
-                singleFloorTexture: 2 * TextureUnit,      // Texture spéciale si un seul étage
-                groundTexture: 11 * TextureUnit,          // Texture pour le rez-de-chaussée
-                firstFloorTexture: 10 * TextureUnit,       // Texture pour les étages intermédiaires
-                topFloorTexture: 10 * TextureUnit,        // Texture pour le dernier étage
-                roofTexture: 9 * TextureUnit             // Texture pour le toit
+                singleFloorTexture: 2 * TextureUnit, // Texture spéciale si un seul étage
+                groundTexture: 11 * TextureUnit, // Texture pour le rez-de-chaussée
+                firstFloorTexture: 10 * TextureUnit, // Texture pour les étages intermédiaires
+                topFloorTexture: 10 * TextureUnit, // Texture pour le dernier étage
+                roofTexture: 9 * TextureUnit // Texture pour le toit
             },
             4: { // templeDoor
-                singleFloorTexture: 5 * TextureUnit,      // Porte du temple pour un seul étage
-                groundTexture: 5 * TextureUnit,           // Texture porte du temple (rez-de-chaussée)
-                firstFloorTexture: 1 * TextureUnit,       // Texture intermédiaire (premier étage du temple)
-                topFloorTexture: 1 * TextureUnit,         // Texture pour le dernier étage
-                roofTexture: 0 * TextureUnit              // Texture pour le toit (ou pas de toit pour le temple)
+                singleFloorTexture: 5 * TextureUnit, // Porte du temple pour un seul étage
+                groundTexture: 5 * TextureUnit, // Texture porte du temple (rez-de-chaussée)
+                firstFloorTexture: 1 * TextureUnit, // Texture intermédiaire (premier étage du temple)
+                topFloorTexture: 1 * TextureUnit, // Texture pour le dernier étage
+                roofTexture: 0 * TextureUnit // Texture pour le toit (ou pas de toit pour le temple)
             },
             5: { // forest
-                singleFloorTexture: 23* TextureUnit,                 // Texture spéciale pour la forêt (un seul étage)
-                groundTexture: 23* TextureUnit,                      // Texture de forêt (rez-de-chaussée)
-                firstFloorTexture: 22* TextureUnit,                  // Texture intermédiaire pour les étages de la forêt
-                topFloorTexture: 22* TextureUnit,                    // Texture pour le dernier étage
-                roofTexture: 0                            // Texture transparente pour le toit
+                singleFloorTexture: 23 * TextureUnit, // Texture spéciale pour la forêt (un seul étage)
+                groundTexture: 23 * TextureUnit, // Texture de forêt (rez-de-chaussée)
+                firstFloorTexture: 22 * TextureUnit, // Texture intermédiaire pour les étages de la forêt
+                topFloorTexture: 22 * TextureUnit, // Texture pour le dernier étage
+                roofTexture: 0 // Texture transparente pour le toit
             },
             6: { // house
-                singleFloorTexture: 14 * TextureUnit,     // Texture maison spéciale pour un étage
-                groundTexture: 14 * TextureUnit,          // Texture maison (rez-de-chaussée)
-                firstFloorTexture: 14 * TextureUnit,      // Texture répétée pour les étages intermédiaires
-                topFloorTexture: 14 * TextureUnit,        // Texture pour le dernier étage de la maison
-                roofTexture: 12 * TextureUnit             // Texture du toit de la maison
+                singleFloorTexture: 14 * TextureUnit, // Texture maison spéciale pour un étage
+                groundTexture: 14 * TextureUnit, // Texture maison (rez-de-chaussée)
+                firstFloorTexture: 14 * TextureUnit, // Texture répétée pour les étages intermédiaires
+                topFloorTexture: 14 * TextureUnit, // Texture pour le dernier étage de la maison
+                roofTexture: 12 * TextureUnit // Texture du toit de la maison
             },
             7: { // houseWindow
-                singleFloorTexture: 13 * TextureUnit,     // Fenêtre de la maison (un seul étage)
-                groundTexture: 13 * TextureUnit,          // Fenêtre de la maison (rez-de-chaussée)
-                firstFloorTexture: 13 * TextureUnit,      // Fenêtre répétée pour les étages intermédiaires
-                topFloorTexture: 13 * TextureUnit,        // Texture pour le dernier étage avec fenêtre
-                roofTexture: 12 * TextureUnit             // Texture du toit de la maison avec fenêtre
+                singleFloorTexture: 13 * TextureUnit, // Fenêtre de la maison (un seul étage)
+                groundTexture: 13 * TextureUnit, // Fenêtre de la maison (rez-de-chaussée)
+                firstFloorTexture: 13 * TextureUnit, // Fenêtre répétée pour les étages intermédiaires
+                topFloorTexture: 13 * TextureUnit, // Texture pour le dernier étage avec fenêtre
+                roofTexture: 12 * TextureUnit // Texture du toit de la maison avec fenêtre
             },
             8: { // houseDoor
-                singleFloorTexture: 15 * TextureUnit,     // Texture de la porte de la maison (un seul étage)
-                groundTexture: 15 * TextureUnit,          // Texture pour la porte de la maison (rez-de-chaussée)
-                firstFloorTexture: 14 * TextureUnit,      // Texture répétée pour les étages intermédiaires
-                topFloorTexture: 14 * TextureUnit,        // Texture pour le dernier étage avec porte
-                roofTexture: 12 * TextureUnit             // Texture du toit de la maison avec porte
+                singleFloorTexture: 15 * TextureUnit, // Texture de la porte de la maison (un seul étage)
+                groundTexture: 15 * TextureUnit, // Texture pour la porte de la maison (rez-de-chaussée)
+                firstFloorTexture: 14 * TextureUnit, // Texture répétée pour les étages intermédiaires
+                topFloorTexture: 14 * TextureUnit, // Texture pour le dernier étage avec porte
+                roofTexture: 12 * TextureUnit // Texture du toit de la maison avec porte
             },
             9: { // Prison door
-                singleFloorTexture: 7 * TextureUnit,      // Variation du mur de pierre pour un seul étage
-                groundTexture: 8 * TextureUnit,           // Texture variation mur de pierre (rez-de-chaussée)
-                firstFloorTexture: 8 * TextureUnit,      // Texture répétée pour les étages intermédiaires
-                topFloorTexture: 7 * TextureUnit,        // Texture pour le dernier étage de la variation de mur en pierre
-                roofTexture: 0 * TextureUnit             // Texture pour le toit de la variation de mur en pierre
+                singleFloorTexture: 7 * TextureUnit, // Variation du mur de pierre pour un seul étage
+                groundTexture: 8 * TextureUnit, // Texture variation mur de pierre (rez-de-chaussée)
+                firstFloorTexture: 8 * TextureUnit, // Texture répétée pour les étages intermédiaires
+                topFloorTexture: 7 * TextureUnit, // Texture pour le dernier étage de la variation de mur en pierre
+                roofTexture: 0 * TextureUnit // Texture pour le toit de la variation de mur en pierre
             }
             // Tu peux ajouter d'autres configurations si besoin pour atteindre les 24.
         };
-        
-    
+
+
         // Récupérer la configuration du mur en fonction de `textureY`
         // +1, car 0 vaut pour un vide
-        const wallType = Math.floor(textureY / TextureUnit) + 1;  // Ajustement pour correspondre à un index 0-based
+        const wallType = Math.floor(textureY / TextureUnit) + 1; // Ajustement pour correspondre à un index 0-based
 
         // On suppose que textureY est un multiple de TextureUnit
-        const config = wallConfig[wallType] || wallConfig[1];  // 3 correspond au "default"
-    
+        const config = wallConfig[wallType] || wallConfig[1]; // 3 correspond au "default"
+
         if (this.ceilingHeight === 1) {
             // Utilisation de la texture spéciale pour un étage
             this.drawTexturedRect(this.wallsImageData, textureX, config.singleFloorTexture, swidth, sheight, imgx, imgy, imgw, imgh);
         } else {
             // Dessiner le rez-de-chaussée (groundTexture)
             this.drawTexturedRect(this.wallsImageData, textureX, config.groundTexture, swidth, sheight, imgx, imgy, imgw, imgh);
-    
+
             // Si plusieurs étages, dessiner les étages intermédiaires et le dernier étage
             for (let level = 1; level < this.ceilingHeight - 1; ++level) {
                 // Répéter la texture des étages intermédiaires
                 this.drawTexturedRect(this.wallsImageData, textureX, config.firstFloorTexture, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
             }
-    
+
             // Dernier étage (topFloorTexture)
             this.drawTexturedRect(this.wallsImageData, textureX, config.topFloorTexture, swidth, sheight, imgx, imgy - (this.ceilingHeight - 1) * wallScreenHeight, imgw, imgh);
-    
+
             // Si un toit est configuré, on le dessine au-dessus du dernier étage
             if (config.roofTexture) {
                 this.drawTexturedRect(this.wallsImageData, textureX, config.roofTexture, swidth, sheight, imgx, imgy - this.ceilingHeight * wallScreenHeight, imgw, imgh);
