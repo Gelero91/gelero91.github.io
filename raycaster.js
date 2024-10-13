@@ -115,6 +115,128 @@ let ceilingTexture = 1;
 var maps = [{
         mapID: 1,
         map: [
+            [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1],
+            [3, 3, 1, 2, 0, 2, 1, 0, 0, 0, 0, 0, 3, 3, 0, 7, 0, 0, 0, 7, 0, 3, 3, 1],
+            [3, 3, 1, 0, 0, 0, 1, 5, 0, 0, 0, 0, 5, 0, 0, 6, 0, 0, 0, 6, 0, 0, 5, 1],
+            [3, 3, 1, 0, 0, 0, 1, 5, 5, 0, 0, 0, 5, 0, 0, 7, 6, 8, 6, 7, 0, 5, 5, 1],
+            [3, 3, 1, 0, 0, 0, 1, 0, 5, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 1],
+            [3, 0, 1, 1, 4, 1, 1, 0, 0, 5, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 1],
+            [3, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 5, 0, 1],
+            [1, 3, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 5, 0, 0, 1],
+            [1, 3, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 0, 0, 0, 5, 5, 0, 0, 1],
+            [1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 5, 5, 0, 5, 5, 0, 0, 0, 1],
+            [1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 5, 5, 0, 0, 0, 1],
+            [1, 3, 3, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 0, 1],
+            [1, 3, 5, 5, 5, 5, 5, 0, 5, 5, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 1],
+            [1, 3, 0, 0, 0, 0, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 0, 5, 0, 1],
+            [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 5, 5, 5, 0, 5, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 0, 5, 5, 0, 0, 5, 5, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 5, 5, 0, 5, 0, 0, 0, 0, 5, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 5, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 5, 5, 0, 0, 5, 5, 0, 0, 0, 0, 5, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 5, 0, 0, 5, 5, 5, 5, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 9, 1, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1]
+        ],
+        sprites: [
+            // comment ça marche ?
+            // Il y a des types de sprites avec des comportements définis.
+            // 1 = objet/sans intéraction/bloquant, 10 = sprites décoratifs (ex : herbe)
+            // 2 = XXX , 3 = XXX, 4 = XXX, 5 = XXX
+            // "A" = ennemis, "DOOR" = porte intérieur/exterieur, "EXIT" = map suivante
+            // les variables sont organisées de la sorte:
+            // ID (ne peut être en double, sauf 0 qui ne marche que pour type 10)
+            // ID, x, y, type, texture (etc...)
+
+            [1, 20, 14, "A", "A", null, "Bat", [], null, null, null],
+            [2, 12, 12, "A", "A", null, "Bat", [], null, null, null],
+            [3, 4, 2, "A", "A", null, "Bat", [], null, null, null],
+            [4, 11, 19, "A", "A", null, "Bat", [], null, null, null],
+
+            [5, 4, 5, "DOOR", "DOOR"],
+            [6, 11, 23, "EXIT", "EXIT"],
+
+            [7, 3, 10, 1, 4],
+
+            [8, 16, 4, 1, 5],
+
+            [9, 6, 6, 1, 6],
+            [10, 19, 7, 1, 6],
+            [11, 13, 4, 1, 6],
+            [12, 12, 17, 1, 6],
+            [13, 19, 20, 1, 6],
+            [14, 13, 22, 1, 6],
+
+            [15, 10, 22, 1, 7],
+            [16, 16, 16, 1, 7],
+            [17, 18, 17, 1, 7],
+            [18, 18, 8, 1, 7],
+
+            [19, 4, 1, 1, 9],
+
+            [20, 3, 2, 1, 12],
+            [21, 5, 2, 1, 12],
+
+            [22, 16, 7, 15],
+            [23, 2, 8, 15],
+            [24, 6, 8, 15],
+            [25, 14, 19, 15],
+            [26, 21, 19, 15],
+
+            [27, 3, 4, 1, 16],
+            [28, 5, 4, 1, 16],
+
+            [29, 19, 4, 1, 17],
+
+            [30, 18, 13, 1, 15],
+            [31, 27, 17, 1, 15],
+            [32, 6, 8, 1, 15],
+            [33, 2, 8, 1, 15],
+
+            [0, 20, 5, 10, 13],
+            [0, 3, 6, 10, 13],
+            [0, 14, 3, 10, 13],
+            [0, 14, 6, 10, 13],
+            [0, 18, 6, 10, 13],
+            [0, 7, 7, 10, 13],
+            [0, 3, 8, 10, 13],
+            [0, 5, 9, 10, 13],
+            [0, 8, 9, 10, 13],
+            [0, 17, 9, 10, 13],
+            [0, 3, 11, 10, 13],
+            [0, 6, 11, 10, 13],
+            [0, 12, 12, 10, 13],
+            [0, 14, 14, 10, 13],
+            [0, 20, 16, 10, 13],
+            [0, 11, 18, 10, 13],
+            [0, 16, 18, 10, 13],
+            [0, 19, 18, 10, 13],
+            [0, 20, 20, 10, 13],
+            [0, 10, 21, 10, 13],
+            [0, 12, 21, 10, 13],
+            [0, 13, 17, 10, 13],
+            [0, 18, 11, 10, 13],
+            [0, 16, 12, 10, 13],
+        ],
+
+        eventA: [],
+        eventB: [],
+        //xyz
+        playerStart: {
+            X: 17,
+            Y: 4,
+            Orientation: 4.71238898038469,
+            ceilingRender: false,
+            ceilingHeight: 2,
+            ceilingTexture: 1,
+            floorTexture: 3
+        }, // Position de départ du joueur pour l'ID 1
+    },
+    {
+        mapID: 2,
+        map: [
             [1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 1, 9, 9, 1, 5, 5, 5, 5, 5, 5, 5],
             [2, 2, 0, 0, 0, 0, 0, 2, 5, 5, 0, 0, 0, 1, 0, 0, 1, 0, 0, 5, 5, 5, 5, 5],
             [2, 2, 0, 0, 0, 0, 0, 2, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5],
@@ -299,10 +421,10 @@ var maps = [{
         }, // Position de départ du joueur pour l'ID 1
     },
     {
-        mapID: 2,
+        mapID: 3,
         map: [
             [5, 5, 5, 5, 6, 5, 5, 6, 5, 5, 5, 9, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-            [5, 5, 0, 0, 7, 6, 6, 7, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5],
+            [5, 5, 0, 0, 7, 6, 6, 7, 0, 5, 5, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5],
             [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
             [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
             [6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 6, 7, 6, 6, 0, 0, 0, 0, 5],
@@ -1218,6 +1340,12 @@ class Player {
                     case "EXIT":
                         Sprite.terminalLog('Level finished !')
                         this.raycaster.nextMap();
+                        break;
+                    case "DOOR":
+                        // xyz
+                        sprite.door(this, null);
+                        this.raycaster.loadFloorCeilingImages();
+                        Sprite.terminalLog('You enter/exit the area.')
                         break;
                     case 0:
                         sprite.talk(sprite.spriteTalk, sprite.spriteFace);
@@ -2652,6 +2780,57 @@ class Sprite {
             console.log('not your turn');
         }
     }
+
+    // XYZ
+    door(player, textureSet) {
+        let floor;
+
+
+
+        if (textureSet == null) {
+            floor = 1;
+        } else if (textureSet) {
+            // alternance : si le sol est le même que celui définit par défaut,
+            // on revient aux valeurs de base de la carte.
+            floor = floorType;
+        }
+
+        // N.B. : est et ouest sont inversés
+        if (player.quadrant == "nord") {
+            player.y = player.y - 2 * 1280;
+        } else if (player.quadrant == "est") {
+            player.x = player.x - 2 * 1280;
+        } else if (player.quadrant == "sud") {
+            player.y = player.y + 2 * 1280;
+        } else if (player.quadrant == "ouest") {
+            player.x = player.x + 2 * 1280;
+        } else {
+            console.log("don't try to enter in diagonal please...");
+        }
+
+        if (ceilingRender == true) {
+            ceilingRender = mapData.playerStart.ceilingRender;
+
+            // mettre chemin d'accès aux données de la map
+            ceilingHeight = mapData.playerStart.ceilingHeight;
+            ceilingTexture = mapData.playerStart.ceilingTexture;
+            floorTexture = mapData.playerStart.floorTexture;
+
+            console.log("ceiling render : " + ceilingRender)
+
+        } else if (ceilingRender == false) {
+            ceilingRender = true;
+            ceilingHeight = 1;
+            ceilingTexture = 2;
+            floorTexture = 2;
+            console.log("ceiling render : " + ceilingRender)
+        }
+
+        // xyz
+        // player.x = Math.floor(1280 * player.x + 640);
+        // player.y = Math.floor(1280 * player.y + 640);
+        console.log(player.quadrant);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2746,6 +2925,8 @@ class Raycaster {
         const oneSecond = 1000; // 1 seconde en millisecondes
 
         timeSinceLastSecond += timeElapsed;
+
+
 
         if (timeSinceLastSecond >= oneSecond) {
             // console.log("Délai d'un tour atteint, pas de minuterie CPU")
