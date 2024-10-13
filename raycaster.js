@@ -73,6 +73,7 @@ var moveTargetY;
 
 // Ingame 1sec Pause Timer
 async function pause(ms) {
+    console.log("pause putain");
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -102,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function() {
 // MAP | ENVIRONMENT || Make a class out of it ? Whatever...
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var currentMap = 1;
+var currentMap = 2;
 
 // Valeur hauteur de plafond
 let ceilingHeight = 2;
@@ -986,7 +987,6 @@ class Player {
                 this.nextSpell();
                 break;
             case 16:
-                pause(500);
                 if (gameOver == false) {
                     this.raycaster.saveGameState();
                     Sprite.terminalLog("Player state saved!");
@@ -1003,16 +1003,20 @@ class Player {
                 Sprite.terminalLog("Save loaded !");
                 break;
             case 18:
+                Raycaster.showRenderWindow();
                 if (gameOver == false) {
-                    pause(500);
-                    this.raycaster.nextMap(this);
-                    console.log("nextMapButton");
-                    Raycaster.showRenderWindow();
-                    Sprite.resetTerminal();
-                    Sprite.terminalLog("Next map loaded !");
+                    if (confirm("Voulez-vous vraiment charger la prochaine carte ?")) {
+                        this.raycaster.nextMap(this);
+                        console.log("nextMapButton");
+                        Sprite.resetTerminal();
+                        Sprite.terminalLog("Next map loaded !");
+                    } else {
+                        console.log("Changement de carte annulé.");
+                    }
                 } else {
                     alert("You're dead...");
                 }
+                
                 break;
             case 19:
                 pause(500);
@@ -3085,13 +3089,16 @@ class Raycaster {
         // Incrémenter l'ID de la carte pour charger la suivante
         this.mapID += 1;
 
-        const mapData = getMapDataByID(this.mapID); // Utilisation de this.mapID
+        currentMap = this.mapID;
+
+        const mapData = getMapDataByID(currentMap); // Utilisation de this.mapID
 
 
         if (!mapData) {
-            console.error(`Aucune donnée trouvée pour la carte avec l'ID ${this.mapID}`);
+            console.error(`Aucune donnée trouvée pour la carte avec l'ID ${currentMap}`);
             // back to the current ID
             this.mapID -= 1;
+            currentMap = this.mapID;
             return;
         }
 
@@ -3110,7 +3117,7 @@ class Raycaster {
         console.log(this.player.rot);
 
         // Charger la nouvelle carte
-        this.initMap(this.mapID, mapData.map, mapData.eventA, mapData.eventB);
+        this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
         this.initSprites(mapData.sprites);
 
         ceilingHeight = mapData.playerStart.ceilingHeight;
