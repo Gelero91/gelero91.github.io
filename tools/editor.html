@@ -56,7 +56,7 @@
         background-color: #f9f9f9;
         cursor: pointer;
       }
-      
+
       .sprite-item {
         padding: 10px;
         margin: 5px 0;
@@ -64,14 +64,15 @@
         background-color: #f9f9f9;
         cursor: pointer;
       }
-      
+
       .tile-item.active,
       .sprite-item.active {
-        background-color: #ffe066; /* Fond jaune clair pour l'élément sélectionné */
-        border: 2px solid #ffcc00; /* Bordure plus épaisse pour indiquer la sélection */
+        background-color: #ffe066;
+        /* Fond jaune clair pour l'élément sélectionné */
+        border: 2px solid #ffcc00;
+        /* Bordure plus épaisse pour indiquer la sélection */
       }
-      
-      
+
       .container {
         display: flex;
         flex: 1;
@@ -151,11 +152,13 @@
         justify-content: center;
         cursor: pointer;
         position: relative;
-        border: 1px solid #ccc; /* Ajouter une bordure légère */
+        border: 1px solid #ccc;
+        /* Ajouter une bordure légère */
       }
-      
+
       .tile.selected {
-        outline: 2px solid #ff0; /* Mettre en évidence la tuile sélectionnée */
+        outline: 2px solid #ff0;
+        /* Mettre en évidence la tuile sélectionnée */
       }
 
       .sprite {
@@ -252,28 +255,33 @@
         font-size: 14px;
       }
 
-      .custom-sprite-form, .teleport-form {
+      .custom-sprite-form,
+      .teleport-form {
         padding: 20px;
         border: 1px solid #ddd;
         background-color: #f9f9f9;
         max-width: 600px;
         margin: 0 auto;
-        max-height: auto; /* Limite la hauteur visible de l'onglet */
-        overflow-y: auto;  /* Active le scrolling vertical */
+        max-height: auto;
+        /* Limite la hauteur visible de l'onglet */
+        overflow-y: auto;
+        /* Active le scrolling vertical */
       }
-      
-      .custom-sprite-form h2, .teleport-form h2 {
+
+      .custom-sprite-form h2,
+      .teleport-form h2 {
         margin-bottom: 20px;
       }
-      
-      .custom-sprite-form label, .teleport-form label {
+
+      .custom-sprite-form label,
+      .teleport-form label {
         font-weight: bold;
         margin-top: 10px;
       }
-      
-      .custom-sprite-form input[type="text"], 
-      .custom-sprite-form input[type="number"], 
-      .teleport-form input[type="text"], 
+
+      .custom-sprite-form input[type="text"],
+      .custom-sprite-form input[type="number"],
+      .teleport-form input[type="text"],
       .teleport-form input[type="number"] {
         width: 100%;
         padding: 8px;
@@ -281,8 +289,9 @@
         border: 1px solid #ccc;
         border-radius: 4px;
       }
-      
-      .custom-sprite-form button, .teleport-form button {
+
+      .custom-sprite-form button,
+      .teleport-form button {
         background-color: #28a745;
         color: white;
         border: none;
@@ -292,29 +301,30 @@
         cursor: pointer;
         display: inline-block;
       }
-      
-      .custom-sprite-form button:hover, .teleport-form button:hover {
+
+      .custom-sprite-form button:hover,
+      .teleport-form button:hover {
         background-color: #218838;
       }
-      
+
       #teleporter-list {
         margin-top: 20px;
         border-top: 1px solid #ccc;
         padding-top: 20px;
       }
-      
+
       #teleporter-list-items {
         list-style: none;
         padding-left: 0;
       }
-      
+
       #teleporter-list-items li {
         padding: 10px;
         background-color: #f0f0f0;
         margin-bottom: 10px;
         border-radius: 4px;
       }
-      
+
       #teleport-select {
         width: 100%;
         padding: 8px;
@@ -325,25 +335,27 @@
 
       .sprite-map-container {
         position: relative;
-        display: block; /* Toujours visible quand on est sur l'onglet des sprites */
+        display: block;
+        /* Toujours visible quand on est sur l'onglet des sprites */
       }
-      
+
       #map-grid {
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 1; /* Grille de la carte en arrière-plan */
-        opacity: 0.6; /* Transparence pour voir les murs en gris */
+        z-index: 1;
+        /* Grille de la carte en arrière-plan */
+        opacity: 0.6;
+        /* Transparence pour voir les murs en gris */
       }
-      
+
       #sprite-grid {
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 2; /* Grille des sprites au-dessus */
+        z-index: 2;
+        /* Grille des sprites au-dessus */
       }
-      
-      
     </style>
   </head>
   <body>
@@ -371,53 +383,49 @@
           <div class="grid" id="map-grid"></div>
           <div class="grid" id="sprite-grid"></div>
         </div>
-        
         <!--CUSTOM SPRITES TAB-->
         <div class="custom-sprite-form" id="custom-sprite-form" style="display:none;">
           <h2>Créer un Sprite Personnalisé</h2>
           <label for="sprite-name">Nom du Sprite:</label>
           <input type="text" id="sprite-name" placeholder="Nom du Sprite">
-          <!--
-          <label for="sprite-id">ID du Sprite:</label>
-          <input type="number" id="sprite-id" placeholder="ID du Sprite">
-          <label for="sprite-x">Position X:</label>
-          <input type="number" id="sprite-x" placeholder="Position X" value="0">
-          <label for="sprite-y">Position Y:</label>
-          <input type="number" id="sprite-y" placeholder="Position Y" value="0">
-          <label for="sprite-z">Position Z:</label>
-          <input type="number" id="sprite-z" placeholder="Position Z" value="0">
-          <label for="sprite-w">Largeur (w):</label>
-          <input type="number" id="sprite-w" placeholder="Largeur" value="128">
-          <label for="sprite-h">Hauteur (h):</label>
-          <input type="number" id="sprite-h" placeholder="Hauteur" value="128">
-          <label for="sprite-ang">Angle (ang):</label>
-          <input type="number" id="sprite-ang" placeholder="Angle" value="0">
-          -->
           <label for="sprite-type">Type de Sprite:</label>
           <input type="number" id="sprite-type" placeholder="Type de Sprite" value="0">
-        </br>
+          </br>
           <label for="sprite-texture">Texture du Sprite:</label>
           <input type="text" id="sprite-texture" placeholder="Texture du Sprite" value="">
-        </br>
+          </br>
           <label for="sprite-is-blocking">Bloquant?</label>
           <input type="checkbox" id="sprite-is-blocking" checked>
-        </br>
+          </br>
           <label for="sprite-attackable">Attaquable?</label>
           <input type="checkbox" id="sprite-attackable">
-        </br>
-          <label for="sprite-turn">Peut tourner?</label>
-          <input type="checkbox" id="sprite-turn" checked>
-        </br>
-        </br>
-
+          </br>
+          </br>
           <label for="sprite-hp">Points de Vie (hp):</label>
           <input type="number" id="sprite-hp" placeholder="HP" value="1">
           <label for="sprite-dmg">Dégâts (dmg):</label>
           <input type="number" id="sprite-dmg" placeholder="Dégâts" value="1">
-        <!--
-          <label for="sprite-animation-progress">Progression d'Animation:</label>
-          <input type="number" id="sprite-animation-progress" placeholder="Progression d'Animation" value="0">
-        --> 
+          <div style="display:none;">
+            </br>
+            <label for="sprite-turn">Peut tourner?</label>
+            <input type="checkbox" id="sprite-turn" checked>
+            <label for="sprite-id">ID du Sprite:</label>
+            <input type="number" id="sprite-id" placeholder="ID du Sprite">
+            <label for="sprite-x">Position X:</label>
+            <input type="number" id="sprite-x" placeholder="Position X" value="0">
+            <label for="sprite-y">Position Y:</label>
+            <input type="number" id="sprite-y" placeholder="Position Y" value="0">
+            <label for="sprite-z">Position Z:</label>
+            <input type="number" id="sprite-z" placeholder="Position Z" value="0">
+            <label for="sprite-w">Largeur (w):</label>
+            <input type="number" id="sprite-w" placeholder="Largeur" value="128">
+            <label for="sprite-h">Hauteur (h):</label>
+            <input type="number" id="sprite-h" placeholder="Hauteur" value="128">
+            <label for="sprite-ang">Angle (ang):</label>
+            <input type="number" id="sprite-ang" placeholder="Angle" value="0">
+            <label for="sprite-animation-progress">Progression d'Animation:</label>
+            <input type="number" id="sprite-animation-progress" placeholder="Progression d'Animation" value="0">
+          </div>
           <label for="sprite-face">Face du Sprite:</label>
           <input type="text" id="sprite-face" placeholder="Face du Sprite" value="">
           <label for="sprite-talk">Dialogue (Array):</label>
@@ -567,42 +575,73 @@
       let teleporters = [];
       let spriteIdCounter = 1;
 
+
       // Define the basic sprites     
       const basicSprites = [
-  { id: 1, spriteName: "Sprite 1", spriteTexture: 1, spriteFace: "face1", spriteTalk: [], spriteSell: [], hp: 5, dmg: 2 },
-  { id: 2, spriteName: "Sprite 2", spriteTexture: 2, spriteFace: "face2", spriteTalk: [], spriteSell: [], hp: 4, dmg: 1 },
-  { id: 3, spriteName: "Sprite 3", spriteTexture: 3, spriteFace: "face3", spriteTalk: [], spriteSell: [], hp: 6, dmg: 3 },
-  { id: 4, spriteName: "Sprite 4", spriteTexture: 4, spriteFace: "face4", spriteTalk: [], spriteSell: [], hp: 7, dmg: 4 },
-  { id: 5, spriteName: "Sprite 5", spriteTexture: 5, spriteFace: "face5", spriteTalk: [], spriteSell: [], hp: 3, dmg: 2 },
-  { id: 6, spriteName: "Sprite 6", spriteTexture: 6, spriteFace: "face6", spriteTalk: [], spriteSell: [], hp: 5, dmg: 3 },
-  { id: 7, spriteName: "Sprite 7", spriteTexture: 7, spriteFace: "face7", spriteTalk: [], spriteSell: [], hp: 4, dmg: 2 },
-  { id: 8, spriteName: "Sprite 8", spriteTexture: 8, spriteFace: "face8", spriteTalk: [], spriteSell: [], hp: 6, dmg: 3 },
-  { id: 9, spriteName: "Sprite 9", spriteTexture: 9, spriteFace: "face9", spriteTalk: [], spriteSell: [], hp: 5, dmg: 2 },
-  { id: 10, spriteName: "Sprite 10", spriteTexture: 10, spriteFace: "face10", spriteTalk: [], spriteSell: [], hp: 7, dmg: 4 },
-  { id: 11, spriteName: "Sprite 11", spriteTexture: 11, spriteFace: "face11", spriteTalk: [], spriteSell: [], hp: 3, dmg: 1 },
-  { id: 12, spriteName: "Sprite 12", spriteTexture: 12, spriteFace: "face12", spriteTalk: [], spriteSell: [], hp: 6, dmg: 2 },
-  { id: 13, spriteName: "Sprite 13", spriteTexture: 13, spriteFace: "face13", spriteTalk: [], spriteSell: [], hp: 4, dmg: 3 },
-  { id: 14, spriteName: "Sprite 14", spriteTexture: 14, spriteFace: "face14", spriteTalk: [], spriteSell: [], hp: 5, dmg: 2 },
-  { id: 15, spriteName: "Sprite 15", spriteTexture: 15, spriteFace: "face15", spriteTalk: [], spriteSell: [], hp: 7, dmg: 4 },
-  { id: 16, spriteName: "Sprite 16", spriteTexture: 16, spriteFace: "face16", spriteTalk: [], spriteSell: [], hp: 5, dmg: 3 },
-  { id: 17, spriteName: "Sprite 17", spriteTexture: 17, spriteFace: "face17", spriteTalk: [], spriteSell: [], hp: 4, dmg: 2 },
-  { id: 18, spriteName: "Sprite 18", spriteTexture: 18, spriteFace: "face18", spriteTalk: [], spriteSell: [], hp: 6, dmg: 3 },
-  { id: 19, spriteName: "Sprite 19", spriteTexture: 19, spriteFace: "face19", spriteTalk: [], spriteSell: [], hp: 4, dmg: 1 },
-  { id: 20, spriteName: "Sprite 20", spriteTexture: 20, spriteFace: "face20", spriteTalk: [], spriteSell: [], hp: 7, dmg: 4 }
+    { id: 0, spriteName: 0, spriteTexture: 0, spriteFace: 0, spriteTalk: 0, spriteSell: 0, hp: 0, dmg: 0 },
+    { id: 1, spriteName: "Sprite 1", spriteTexture: 1, spriteFace: "face1", spriteTalk: [], spriteSell: [], hp: 5, dmg: 2 },
+    { id: 2, spriteName: "Sprite 2", spriteTexture: 2, spriteFace: "face2", spriteTalk: [], spriteSell: [], hp: 4, dmg: 1 },
+    { id: 3, spriteName: "Sprite 3", spriteTexture: 3, spriteFace: "face3", spriteTalk: [], spriteSell: [], hp: 6, dmg: 3 },
+    { id: 4, spriteName: "Sprite 4", spriteTexture: 4, spriteFace: "face4", spriteTalk: [], spriteSell: [], hp: 7, dmg: 4 },
+    { id: 5, spriteName: "Sprite 5", spriteTexture: 5, spriteFace: "face5", spriteTalk: [], spriteSell: [], hp: 3, dmg: 2 },
+    { id: 6, spriteName: "Sprite 6", spriteTexture: 6, spriteFace: "face6", spriteTalk: [], spriteSell: [], hp: 5, dmg: 3 },
+    { id: 7, spriteName: "Sprite 7", spriteTexture: 7, spriteFace: "face7", spriteTalk: [], spriteSell: [], hp: 4, dmg: 2 },
+    { id: 8, spriteName: "Sprite 8", spriteTexture: 8, spriteFace: "face8", spriteTalk: [], spriteSell: [], hp: 6, dmg: 3 },
+    { id: 9, spriteName: "Sprite 9", spriteTexture: 9, spriteFace: "face9", spriteTalk: [], spriteSell: [], hp: 5, dmg: 2 },
+    { id: 10, spriteName: "Sprite 10", spriteTexture: 10, spriteFace: "face10", spriteTalk: [], spriteSell: [], hp: 7, dmg: 4 },
+    { id: 11, spriteName: "Sprite 11", spriteTexture: 11, spriteFace: "face11", spriteTalk: [], spriteSell: [], hp: 3, dmg: 1 },
+    { id: 12, spriteName: "Sprite 12", spriteTexture: 12, spriteFace: "face12", spriteTalk: [], spriteSell: [], hp: 6, dmg: 2 },
+    { id: 13, spriteName: "Sprite 13", spriteTexture: 13, spriteFace: "face13", spriteTalk: [], spriteSell: [], hp: 4, dmg: 3 },
+    { id: 14, spriteName: "Sprite 14", spriteTexture: 14, spriteFace: "face14", spriteTalk: [], spriteSell: [], hp: 5, dmg: 2 },
+    { id: 15, spriteName: "Sprite 15", spriteTexture: 15, spriteFace: "face15", spriteTalk: [], spriteSell: [], hp: 7, dmg: 4 },
+    { id: 16, spriteName: "Sprite 16", spriteTexture: 16, spriteFace: "face16", spriteTalk: [], spriteSell: [], hp: 5, dmg: 3 },
+    { id: 17, spriteName: "Sprite 17", spriteTexture: 17, spriteFace: "face17", spriteTalk: [], spriteSell: [], hp: 4, dmg: 2 },
+    { id: 18, spriteName: "Sprite 18", spriteTexture: 18, spriteFace: "face18", spriteTalk: [], spriteSell: [], hp: 6, dmg: 3 },
+    { id: 19, spriteName: "Sprite 19", spriteTexture: 19, spriteFace: "face19", spriteTalk: [], spriteSell: [], hp: 4, dmg: 1 },
+    { id: 20, spriteName: "Sprite 20", spriteTexture: 20, spriteFace: "face20", spriteTalk: [], spriteSell: [], hp: 7, dmg: 4 }
 ];
 
-const basicTiles = [
-  { id: 0, tileName: "Vide", description: "Aucune tuile (0)" },
-  { id: 1, tileName: "Herbe", description: "Tuile de base (1)" },
-  { id: 2, tileName: "Sable", description: "Tuile de base (2)" },
-  { id: 3, tileName: "Eau", description: "Tuile de base (3)" },
-  { id: 4, tileName: "Roche", description: "Tuile de base (4)" },
-  { id: 5, tileName: "Route", description: "Tuile de base (5)" },
-  { id: 6, tileName: "Mur", description: "Tuile de base (6)" },
-  { id: 7, tileName: "Escalier", description: "Tuile de base (7)" },
-  { id: 8, tileName: "Plancher", description: "Tuile de base (8)" },
-  { id: 9, tileName: "Toit", description: "Tuile de base (9)" }
-];
+      const basicTiles = [{
+        id: 0,
+        tileName: "Vide",
+        description: "effacer contenu de case"
+      }, {
+        id: 1,
+        tileName: "stoneWall",
+        description: "Mur de pierres taillées"
+      }, {
+        id: 2,
+        tileName: "ornateWall",
+        description: "Mur sculpté"
+      }, {
+        id: 3,
+        tileName: "Rocks",
+        description: "Roche brute"
+      }, {
+        id: 4,
+        tileName: "templeDoor",
+        description: "Porte ornée"
+      }, {
+        id: 5,
+        tileName: "forest",
+        description: "Arbres de 2 étages"
+      }, {
+        id: 6,
+        tileName: "house",
+        description: "Mur de maison"
+      }, {
+        id: 7,
+        tileName: "houseWindow",
+        description: "Mur de maison avec fenêtre"
+      }, {
+        id: 8,
+        tileName: "houseDoor",
+        description: "Mur de maison avec fenêtre"
+      }, {
+        id: 9,
+        tileName: "Prison door",
+        description: "Porte en barreaux"
+      }];
 
 
       let eventA = []; // Empty list for source teleporters
@@ -636,7 +675,6 @@ const basicTiles = [
       function createNewMap() {
         // Sauvegarder la carte actuelle avant de créer une nouvelle
         saveCurrentMap();
-      
         // Création de la nouvelle carte
         const newMapID = maps.length + 1;
         const mapSize = 24;
@@ -644,8 +682,12 @@ const basicTiles = [
         const defaultTile = 0;
         const newMap = {
           mapID: newMapID,
-          map: Array.from({ length: mapSize }, (_, rowIndex) => {
-            return Array.from({ length: mapSize }, (_, colIndex) => {
+          map: Array.from({
+            length: mapSize
+          }, (_, rowIndex) => {
+            return Array.from({
+              length: mapSize
+            }, (_, colIndex) => {
               if (rowIndex === 0 || rowIndex === mapSize - 1 || colIndex === 0 || colIndex === mapSize - 1) {
                 return borderValue;
               } else {
@@ -654,7 +696,9 @@ const basicTiles = [
             });
           }),
           sprites: [],
-          worldSpriteMap: Array.from({ length: mapSize }, () => Array(mapSize).fill(0)),
+          worldSpriteMap: Array.from({
+            length: mapSize
+          }, () => Array(mapSize).fill(0)),
           eventA: [],
           eventB: [],
           playerStart: {
@@ -671,7 +715,7 @@ const basicTiles = [
         currentMapIndex = maps.length - 1;
         loadMap(currentMapIndex);
       }
-      
+
       function saveCurrentMap() {
         if (maps[currentMapIndex]) {
           maps[currentMapIndex].map = worldMap;
@@ -681,7 +725,7 @@ const basicTiles = [
           maps[currentMapIndex].eventB = eventB;
         }
       }
-      
+
       function nextMap() {
         // Save the current map's sprites before switching maps
         maps[currentMapIndex].sprites = sprites;
@@ -852,21 +896,16 @@ const basicTiles = [
         // Initialisation des grilles et autres composants
         worldMap = generateWorldMap(24, 24, 1, 0);
         worldSpriteMap = generateWorldMap(24, 24, 'x', 0);
-        
         createGrid(mapGrid, worldMap, 'map');
         createGrid(spriteGrid, worldSpriteMap, 'sprites');
-        
         // Par défaut, seules les grilles de la carte principale sont visibles
         document.getElementById('map-container').style.display = 'block';
         document.getElementById('sprite-map-container').style.display = 'none';
-        
         updateMapGrid();
         setupPalette();
         setupTabs();
         setupTeleporterSelect();
       }
-      
-
       // Create Grid
       function createGrid(container, map, type) {
         container.innerHTML = '';
@@ -884,68 +923,73 @@ const basicTiles = [
         }
       }
 
+      function getTileColor(tileValue) {
+        const tileColors = {
+          0: '#ffffff', // Blanc pour l'espace vide
+          1: '#000000', // Noir pour les murs
+          2: '#FFD700', // Or pour une tuile spéciale
+          3: '#00BFFF', // Bleu pour l'eau
+          4: '#228B22', // Vert pour l'herbe
+          5: '#A52A2A', // Brun pour la terre
+          6: '#000000', // Noir pour les murs
+          7: '#FFD700', // Or pour une tuile spéciale
+          8: '#00BFFF', // Bleu pour l'eau
+          4: '#228B22', // Vert pour l'herbe
+          // Ajoutez plus de couleurs pour chaque valeur de tuile
+        };
+        return tileColors[tileValue] || '#ccc'; // Valeur par défaut si aucune couleur n'est spécifiée
+      }
+
       function updateMapGrid() {
         const tiles = mapGrid.querySelectorAll('.tile');
         tiles.forEach(tile => {
           const x = parseInt(tile.getAttribute('data-x'));
           const y = parseInt(tile.getAttribute('data-y'));
           const tileValue = worldMap[y][x];
-          // Clear previous content
+          // Efface le contenu précédent
           tile.innerHTML = '';
-          // Vérifier la valeur de la tuile et ajuster le style
-          if (tileValue === 1) {
-            tile.style.backgroundColor = '#000'; // Wall (black background for walls)
-            tile.textContent = '1'; // Show the wall number
-            tile.style.color = '#fff'; // White text for visibility
-          } else if (tileValue === 0) {
-            tile.style.backgroundColor = '#fff'; // Empty space (white background)
-          } else {
-            // Si la tuile est différente de 0, affiche son numéro
-            tile.style.backgroundColor = '#ccc'; // Grey for other terrain types
-            tile.textContent = tileValue; // Display the tile number
-            tile.style.color = '#000'; // Black text for visibility
+          // Appliquer la couleur en fonction de la valeur de la tuile
+          tile.style.backgroundColor = getTileColor(tileValue);
+          // Si vous souhaitez afficher le numéro de la tuile, par exemple pour les murs
+          if (tileValue !== 0) {
+            tile.textContent = tileValue; // Affiche le numéro de la tuile
+            tile.style.color = '#fff'; // Couleur du texte (si nécessaire)
           }
-        });
-        // Force immediate re-render to ensure the tiles are displayed correctly
+        }); // Force immediate re-render to ensure the tiles are displayed correctly
         requestAnimationFrame(() => {
           mapGrid.classList.remove('hidden');
         });
       }
 
-
-
-function updateSpriteGrid() {
-  const tiles = spriteGrid.querySelectorAll('.tile');
-  tiles.forEach(tile => {
-    const x = parseInt(tile.getAttribute('data-x'));
-    const y = parseInt(tile.getAttribute('data-y'));
-    const tileValue = worldMap[y][x];
-    const spriteValue = worldSpriteMap[y][x];
-
-    // Efface le contenu précédent de la tuile des sprites uniquement
-    tile.innerHTML = '';
-
-    // Les murs sont toujours visibles depuis la grille de la carte
-    if (tileValue === 1) {
-      // Grille des sprites ne doit pas effacer le mur de la carte
-      tile.style.backgroundColor = 'rgba(128, 128, 128, 0.6)'; // Gris semi-transparent pour les murs
-    } else if (tileValue === 0) {
-      // Les cases inutilisées apparaissent en blanc
-      tile.style.backgroundColor = '#fff';
-    }
-
-    if (spriteValue !== 0) {
-      // Si un sprite est présent, affiche le numéro du sprite par-dessus
-      tile.style.backgroundColor = '#ffcc00'; // Fond jaune pour les sprites
-      tile.textContent = spriteValue; // Affiche l'ID du sprite
-    }
-  });
-  // Force immediate re-render to ensure the tiles are displayed correctly
-  requestAnimationFrame(() => {
-    spriteGrid.classList.remove('hidden');
-  });
-}
-      
+      function updateSpriteGrid() {
+        const tiles = spriteGrid.querySelectorAll('.tile');
+        tiles.forEach(tile => {
+          const x = parseInt(tile.getAttribute('data-x'));
+          const y = parseInt(tile.getAttribute('data-y'));
+          const tileValue = worldMap[y][x];
+          const spriteValue = worldSpriteMap[y][x];
+          // Efface le contenu précédent de la tuile des sprites uniquement
+          tile.innerHTML = '';
+          // Les murs sont toujours visibles depuis la grille de la carte
+          if (tileValue !== 0) {
+            // Grille des sprites ne doit pas effacer les tuiles de la carte principale
+            tile.style.backgroundColor = 'rgba(128, 128, 128, 0.6)'; // Affiche un fond semi-transparent pour toutes les tuiles de terrain
+            tile.textContent = tileValue; // Affiche le numéro de la tuile
+          } else if (tileValue === 0) {
+            // Les cases inutilisées apparaissent en blanc
+            tile.style.backgroundColor = '#fff';
+          }
+          if (spriteValue !== 0) {
+            // Si un sprite est présent, affiche le numéro du sprite par-dessus
+            tile.style.backgroundColor = '#ffcc00'; // Fond jaune pour les sprites
+            tile.textContent = spriteValue; // Affiche l'ID du sprite
+          }
+        });
+        // Force immediate re-render to ensure the tiles are displayed correctly
+        requestAnimationFrame(() => {
+          spriteGrid.classList.remove('hidden');
+        });
+      }
       // Function to initialize the sprite map grid
       function createSpriteMap() {
         spriteGrid.innerHTML = ''; // Clear any existing tiles
@@ -1031,24 +1075,22 @@ function updateSpriteGrid() {
       function setupPalette() {
         const palette = document.getElementById('palette');
         palette.innerHTML = ''; // Vider la palette existante
-      
         if (currentTab === 'map') {
           // Titre de la palette de carte
-          palette.innerHTML = `<h2>Palette de Carte</h2>`;
-      
+          palette.innerHTML = `
+																																															<h2>Palette de Carte</h2>`;
           // Ajouter les tuiles de base à la palette de carte
           basicTiles.forEach(tile => {
             addTileToPalette(tile);
           });
         } else if (currentTab === 'sprites') {
           // Titre de la palette des sprites
-          palette.innerHTML = `<h2>Palette de Sprites</h2>`;
-      
+          palette.innerHTML = `
+																																															<h2>Palette de Sprites</h2>`;
           // Ajouter les sprites de base à la palette des sprites
           basicSprites.forEach(sprite => {
             addSpriteToPalette(sprite);
           });
-      
           // Ajouter les sprites personnalisés à la palette des sprites
           if (customSprites.length > 0) {
             const customTitle = document.createElement('h2');
@@ -1060,68 +1102,62 @@ function updateSpriteGrid() {
           }
         }
       }
-      
+
       function addTileToPalette(tile) {
         const palette = document.getElementById('palette');
         const tileButton = document.createElement('button'); // Utilisez un bouton au lieu d'un div
         tileButton.className = 'tile-item';
         tileButton.dataset.tileId = tile.id;
-      
         // Affichage de base des informations de la tuile
         tileButton.innerHTML = `
-          <strong>${tile.tileName}</strong><br>
+          
+																																															<strong>${tile.tileName}</strong>
+																																															<br>
           ${tile.description}
         `;
-      
         // Ajouter la tuile à la palette
         palette.appendChild(tileButton);
-      
         // Ajouter un événement pour sélectionner une tuile à partir de la palette
         tileButton.addEventListener('click', () => {
           selectedTile = tile.id; // Mémoriser l'ID de la tuile sélectionnée
           highlightSelectedTile(tileButton); // Appeler une fonction pour mettre en évidence la sélection
         });
       }
-      
       // Fonction pour mettre en évidence la tuile sélectionnée
       function highlightSelectedTile(selectedElement) {
         const buttons = document.querySelectorAll('.palette .tile-item');
         buttons.forEach(btn => btn.classList.remove('active')); // Retirer la classe active de toutes les tuiles
         selectedElement.classList.add('active'); // Ajouter la classe active à l'élément sélectionné
       }
-      
 
       function addSpriteToPalette(sprite) {
         const palette = document.getElementById('palette');
         const spriteButton = document.createElement('button'); // Utiliser un bouton pour les sprites
         spriteButton.className = 'sprite-item';
         spriteButton.dataset.spriteId = sprite.id;
-      
         // Affichage de base des informations du sprite
         spriteButton.innerHTML = `
-          <strong>${sprite.spriteName}</strong><br>
-          Texture: ${sprite.spriteTexture}<br>
+          
+																																																<strong>${sprite.spriteName}</strong>
+																																																<br>
+          Texture: ${sprite.spriteTexture}
+																																																	<br>
           HP: ${sprite.hp}, DMG: ${sprite.dmg}
         `;
-      
         // Ajouter le sprite à la palette
         palette.appendChild(spriteButton);
-      
         // Ajouter un événement pour sélectionner un sprite à partir de la palette
         spriteButton.addEventListener('click', () => {
           selectedSprite = sprite; // Mémoriser le sprite sélectionné
           highlightSelectedSprite(spriteButton); // Mettre en évidence la sélection
         });
       }
-      
+
       function highlightSelectedSprite(selectedElement) {
         const buttons = document.querySelectorAll('.palette .sprite-item');
         buttons.forEach(btn => btn.classList.remove('active')); // Retirer la classe active de tous les sprites
         selectedElement.classList.add('active'); // Ajouter la classe active à l'élément sélectionné
       }
-      
-
-
       // Select Tile
       function selectTile(tileId) {
         selectedTile = tileId;
@@ -1146,14 +1182,11 @@ function updateSpriteGrid() {
             // Remove the active class from all buttons and add it to the clicked one
             tabButtons.forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
-      
             // Hide all containers (map, sprites, teleporters, export, custom-sprite form)
             document.querySelectorAll('.map-container, .sprite-map-container, .export-area, #custom-sprite-form, #teleport-form').forEach(container => {
               container.style.display = 'none'; // Hide all containers by default
             });
-      
             const selectedTab = event.target.getAttribute('data-tab');
-      
             if (selectedTab === 'map') {
               document.getElementById('map-container').style.display = 'block';
               setTimeout(() => setupPalette(), 50); // Load the map palette with a slight delay
@@ -1162,8 +1195,7 @@ function updateSpriteGrid() {
               setTimeout(() => setupPalette(), 50); // Load the sprite palette with a slight delay
               updateMapGrid(); // Mettre à jour la grille de la carte pour l'afficher en arrière-plan
               updateSpriteGrid(); // Mettre à jour la grille des sprites au premier plan
-            }
-             else if (selectedTab === 'custom-sprites') {
+            } else if (selectedTab === 'custom-sprites') {
               document.getElementById('custom-sprite-form').style.display = 'block';
               setTimeout(() => setupCustomSpritePalette(), 50); // Show the custom sprites in the palette with a slight delay
             } else if (selectedTab === 'teleporters') {
@@ -1175,8 +1207,6 @@ function updateSpriteGrid() {
           });
         });
       }
-      
-      
       // Sprite Modal Functions
       function openSpriteModal(x = null, y = null, sprite = null) {
         spriteModal.style.display = 'flex';
@@ -1224,14 +1254,12 @@ function updateSpriteGrid() {
       function generateUniqueSpriteId() {
         const existingIds = [...basicSprites, ...customSprites].map(sprite => sprite.id);
         let newId = existingIds.length + 1;
-      
         // Vérifie que l'ID est unique, sinon incrémente jusqu'à trouver un ID libre
         while (existingIds.includes(newId)) {
           newId++;
         }
-      
         return newId;
-      }      
+      }
 
       function saveSprite() {
         const id = document.getElementById('sprite-id').value;
@@ -1325,7 +1353,6 @@ function updateSpriteGrid() {
         const spriteFace = document.getElementById('sprite-face').value;
         const spriteTalk = document.getElementById('sprite-talk').value.split(',');
         const spriteSell = document.getElementById('sprite-sell').value.split(',');
-      
         if (spriteName && !isNaN(spriteId)) {
           // Créer le nouveau sprite personnalisé
           const newSprite = {
@@ -1349,13 +1376,10 @@ function updateSpriteGrid() {
             spriteTalk: spriteTalk,
             spriteSell: spriteSell
           };
-      
           // Ajouter le sprite personnalisé à la liste des sprites personnalisés
           customSprites.push(newSprite);
-      
           // Ajouter le nouveau sprite à la palette
           addSpriteToPalette(newSprite);
-      
           // Réinitialiser le formulaire après la création
           document.getElementById('sprite-name').value = '';
           document.getElementById('sprite-x').value = '0';
@@ -1379,8 +1403,6 @@ function updateSpriteGrid() {
           alert('Veuillez saisir un nom pour le sprite.');
         }
       }
-
-      
       // Add a new custom sprite to the palette
       function addSpriteToPalette(sprite) {
         const palette = document.getElementById('palette');
@@ -1394,7 +1416,8 @@ function updateSpriteGrid() {
         const palette = document.getElementById('palette');
         palette.innerHTML = `
 																																																					
-																																																					<h2>Palette des Sprites Personnalisés</h2>`;
+																																																					
+																																																		<h2>Palette des Sprites Personnalisés</h2>`;
         // If there are custom sprites, display them in the palette
         if (customSprites.length > 0) {
           customSprites.forEach(sprite => {
@@ -1559,12 +1582,12 @@ function updateSpriteGrid() {
           })),
           customSprites: customSprites // Ajouter les sprites personnalisés à l'état sauvegardé
         };
-        
         // Convertir l'état en une chaîne JSON avec mise en page (indentation)
         const jsonString = JSON.stringify(saveData, null, 2);
-        
         // Créer un fichier téléchargeable
-        const blob = new Blob([jsonString], { type: "application/json" });
+        const blob = new Blob([jsonString], {
+          type: "application/json"
+        });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -1574,32 +1597,25 @@ function updateSpriteGrid() {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       }
-      
 
-function loadAllMaps(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const loadedState = JSON.parse(e.target.result);
-
-    // Restaurer l'état complet avec plusieurs cartes et les sprites personnalisés
-    maps = loadedState.maps || [];
-    customSprites = loadedState.customSprites || [];
-
-    // Charger la première carte par défaut lors du chargement
-    currentMapIndex = 0;
-    loadMap(currentMapIndex);
-
-    // Recréer la palette des sprites personnalisés après le chargement
-    setupCustomSpritePalette();
-    setupPalette(); // Mettre à jour la palette globale
-  };
-
-  reader.readAsText(file);
-}
-
+      function loadAllMaps(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const loadedState = JSON.parse(e.target.result);
+          // Restaurer l'état complet avec plusieurs cartes et les sprites personnalisés
+          maps = loadedState.maps || [];
+          customSprites = loadedState.customSprites || [];
+          // Charger la première carte par défaut lors du chargement
+          currentMapIndex = 0;
+          loadMap(currentMapIndex);
+          // Recréer la palette des sprites personnalisés après le chargement
+          setupCustomSpritePalette();
+          setupPalette(); // Mettre à jour la palette globale
+        };
+        reader.readAsText(file);
+      }
       // Handle Export Area Buttons
       function handleExportButtons() {
         // Already handled by exportAll and copyExport functions
