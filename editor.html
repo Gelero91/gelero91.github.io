@@ -538,16 +538,19 @@
               <button id="sprite-selection-mode" class="mode-button" style="width: 48%;">Sélection</button>
             </div>
             
+
+            <!-- penser à intégrer la possibilité d'effacer le sprite -->
             <h3>Types de sprites</h3>
             <button onclick="selectTileType('A')">A - Ennemis</button>
             <button onclick="selectTileType('EXIT')">EXIT - Fin du niveau</button>
             <button onclick="selectTileType('DOOR')">DOOR - Porte entrée/sortie</button>
-            <button onclick="selectTileType(0)">0 - PNJ dialogue</button>
             <button onclick="selectTileType(1)">1 - Décoration</button>
-            <button onclick="selectTileType(2)">2 - Type particulier</button>
+            <button onclick="selectTileType(2)">2 - PNJ dialogue</button>
             <button onclick="selectTileType(3)">3 - Boutique</button>
             <button onclick="selectTileType(4)">4 - Quest Giver</button>
             <button onclick="selectTileType(5)">5 - Quest ending</button>
+            <!-- Ajout du bouton pour effacer les sprites -->
+            <button onclick="selectTileType('erase')" style="background-color: #ff6b6b; color: white;">Effacer sprite</button>
             
             <h3>Texture du sprite</h3>
             <select id="sprite-texture-select" style="width: 100%; margin-bottom: 10px;">
@@ -1653,33 +1656,56 @@ function createNewMap() {
   }
 
   // Définit la valeur d'une tuile dans la carte appropriée
-  function setTile(x, y, value) {
-    if (isMapSelected) {
-      worldMap[y][x] = value;
-      updateMap();
-    } else {
-      // Cas spécial: placer une porte (DOOR) sur un mur existant
-      if (value === 'DOOR' && worldSpriteMap[y][x] === 'x') {
-        // Marquer comme étant une porte sur un mur, sans enlever le mur
-        worldSpriteMap[y][x] = 'DOOR-x';
-        
-        // Ajouter aux propriétés du sprite
+// Définit la valeur d'une tuile dans la carte appropriée
+function setTile(x, y, value) {
+  if (isMapSelected) {
+    worldMap[y][x] = value;
+    updateMap();
+  } else {
+    // Cas spécial: effacer un sprite
+    if (value === 'erase') {
+      // Si c'est une case avec un sprite (mais pas un mur)
+      if (worldSpriteMap[y][x] !== 0 && worldSpriteMap[y][x] !== 'x') {
+        // Supprimer les propriétés du sprite si elles existent
         const propKey = `${x},${y}`;
-        if (!spriteProperties[propKey]) {
-          spriteProperties[propKey] = {
-            type: 'DOOR',
-            texture: document.getElementById('sprite-texture-select').value,
-            name: `Porte ${x},${y}`
-          };
+        if (spriteProperties[propKey]) {
+          delete spriteProperties[propKey];
+        }
+        // Effacer le sprite (remplacer par 0)
+        worldSpriteMap[y][x] = 0;
+        
+        // Si un sprite était sélectionné à cette position, le désélectionner
+        if (selectedSpritePos && selectedSpritePos.x === x && selectedSpritePos.y === y) {
+          selectedSpritePos = null;
+          document.getElementById('selected-sprite-info').style.display = 'none';
         }
       }
-      // Si ce n'est pas une case occupée par un mur, ou si c'est déjà une porte-mur
-      else if (worldSpriteMap[y][x] !== 'x' || worldSpriteMap[y][x] === 'DOOR-x') {
-        worldSpriteMap[y][x] = value;
-      }
       updateSpriteMap();
+      return;
     }
+    
+    // Cas spécial: placer une porte (DOOR) sur un mur existant
+    if (value === 'DOOR' && worldSpriteMap[y][x] === 'x') {
+      // Marquer comme étant une porte sur un mur, sans enlever le mur
+      worldSpriteMap[y][x] = 'DOOR-x';
+      
+      // Ajouter aux propriétés du sprite
+      const propKey = `${x},${y}`;
+      if (!spriteProperties[propKey]) {
+        spriteProperties[propKey] = {
+          type: 'DOOR',
+          texture: document.getElementById('sprite-texture-select').value,
+          name: `Porte ${x},${y}`
+        };
+      }
+    }
+    // Si ce n'est pas une case occupée par un mur, ou si c'est déjà une porte-mur
+    else if (worldSpriteMap[y][x] !== 'x' || worldSpriteMap[y][x] === 'DOOR-x') {
+      worldSpriteMap[y][x] = value;
+    }
+    updateSpriteMap();
   }
+}
   
   // Sélectionne le type de tuile à placer
   function selectTileType(tileType) {
