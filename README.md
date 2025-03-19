@@ -16,6 +16,12 @@ Mode multijoueur à venir, prévu en Node.JS et SQL
 Les touches directionnelles vous permettront de vous déplacer. 
 Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, marchander, observer, ouvrir un coffre & combattre.
 
+
+L'editeur de carte est disponible à cette adresse : https://gelero91.github.io/editor.html
+
+![image](https://github.com/user-attachments/assets/bf691ff2-4cf9-413f-8a54-7bf3f83891e2)
+
+
 Screenshots des anciennes versions :
 
 ![2024-07-15T23_26_42](https://github.com/user-attachments/assets/f14b9945-5059-49c9-a5d7-4d724529dd29)
