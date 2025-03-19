@@ -263,6 +263,19 @@
       }
       
       /* Style pour les fenêtres modales */
+      #sprite-properties-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+      }
+      
       #sprite-properties-modal .modal-content {
         max-width: 550px;
         width: 90%;
@@ -308,6 +321,30 @@
         padding: 8px;
         font-family: monospace;
         font-size: 12px;
+      }
+      
+      /* Styles spécifiques pour les téléporteurs */
+      .teleport-a {
+        background-color: rgba(0, 255, 0, 0.3) !important;
+        border: 2px solid green !important;
+      }
+
+      .teleport-b {
+        background-color: rgba(0, 0, 255, 0.3) !important;
+        border: 2px solid blue !important;
+      }
+      
+      .placement-btn {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        padding: 5px 10px;
+        margin-right: 5px;
+        cursor: pointer;
+      }
+
+      .placement-btn.active {
+        background-color: #4CAF50;
+        color: white;
       }
     </style>
   </head>
@@ -358,14 +395,15 @@
               <div class="panel-section">
                 <h3>Types de sprites</h3>
                 <div class="element-grid">
-                  <button class="sprite-btn" onclick="selectTileType('A')">A - Ennemis</button>
-                  <button class="sprite-btn" onclick="selectTileType('EXIT')">EXIT - Fin du niveau</button>
-                  <button class="sprite-btn" onclick="selectTileType('DOOR')">DOOR - Porte entrée/sortie</button>
-                  <button class="sprite-btn" onclick="selectTileType(1)">1 - Décoration</button>
-                  <button class="sprite-btn" onclick="selectTileType(2)">2 - PNJ dialogue</button>
-                  <button class="sprite-btn" onclick="selectTileType(3)">3 - Boutique</button>
+                  <button class="sprite-btn" onclick="selectTileType(0)">0 - Décoration</button>
+                  <button class="sprite-btn" onclick="selectTileType(1)">1 - Décoration alternative</button>
+                  <button class="sprite-btn" onclick="selectTileType(2)">2 - PNJ avec dialogue</button>
+                  <button class="sprite-btn" onclick="selectTileType(3)">3 - Marchand</button>
+                  <button class="sprite-btn" onclick="selectTileType('A')">A - Ennemi</button>
                   <button class="sprite-btn" onclick="selectTileType(4)">4 - Quest Giver</button>
                   <button class="sprite-btn" onclick="selectTileType(5)">5 - Quest ending</button>
+                  <button class="sprite-btn" onclick="selectTileType('EXIT')">EXIT - Fin du niveau</button>
+                  <button class="sprite-btn" onclick="selectTileType('DOOR')">DOOR - Porte entrée/sortie</button>
                   <button class="sprite-btn" onclick="selectTileType('erase')" style="background-color: #ff6b6b; color: white;">Effacer sprite</button>
                 </div>
               </div>
@@ -396,7 +434,7 @@
             </div>
           </div>
 
-          <!-- Palette de Téléporteurs -->
+          <!-- Palette de Téléporteurs avec les directions individuelles -->
           <div class="teleportPalette" id="teleportPalette" style="display: none;">
             <div style="width: 100%;">
               <div class="panel-section">
@@ -419,15 +457,7 @@
                 </div>
               </div>
               
-              <div class="panel-section">
-                <h3>Direction commune</h3>
-                <select id="teleport-rotation" style="width: 100%;">
-                  <option value="nord">Nord</option>
-                  <option value="est">Est</option>
-                  <option value="sud">Sud</option>
-                  <option value="ouest">Ouest</option>
-                </select>
-              </div>
+              <!-- La section de direction commune a été supprimée -->
               
               <div class="panel-section">
                 <div style="display: flex; border-bottom: 1px solid #ccc; margin-bottom: 10px;">
@@ -437,6 +467,16 @@
                 
                 <!-- Propriétés du point A -->
                 <div id="point-a-properties" class="tab-content">
+                  <div class="form-group">
+                    <label>Direction:</label>
+                    <select id="teleport-a-direction" style="width: 100%;">
+                      <option value="nord">Nord</option>
+                      <option value="est">Est</option>
+                      <option value="sud">Sud</option>
+                      <option value="ouest">Ouest</option>
+                    </select>
+                  </div>
+                  
                   <div class="form-group">
                     <label>
                       <input type="checkbox" id="teleport-a-rendu-plafond"> 
@@ -476,6 +516,16 @@
                 
                 <!-- Propriétés du point B -->
                 <div id="point-b-properties" class="tab-content" style="display: none;">
+                  <div class="form-group">
+                    <label>Direction:</label>
+                    <select id="teleport-b-direction" style="width: 100%;">
+                      <option value="nord">Nord</option>
+                      <option value="est">Est</option>
+                      <option value="sud">Sud</option>
+                      <option value="ouest">Ouest</option>
+                    </select>
+                  </div>
+                  
                   <div class="form-group">
                     <label>
                       <input type="checkbox" id="teleport-b-rendu-plafond"> 
@@ -545,7 +595,7 @@
           </div>
           
           <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <button onclick="createNewMap(parseInt(document.getElementById('map-id').value))" style="width: 49%;">Nouvelle carte</button>
+            <button onclick="createNewMap()" style="width: 49%;">Nouvelle carte</button>
             <button onclick="deleteMap(parseInt(document.getElementById('map-selector').value))" style="width: 49%;">Supprimer</button>
           </div>
           
@@ -645,10 +695,37 @@
             <label for="sprite-name">Nom du sprite</label>
             <input type="text" id="sprite-name" placeholder="Nom du sprite">
           </div>
+          
+          <div class="form-group">
+            <label for="sprite-texture-modal">Texture</label>
+            <select id="sprite-texture-modal">
+              <option value="1">Texture 1 - PNJ1</option>
+              <option value="2">Texture 2 - PNJ2</option>
+              <option value="3">Texture 3 - Garde</option>
+              <option value="4">Texture 4 - Roche</option>
+              <option value="5">Texture 5 - Tonneau</option>
+              <option value="6">Texture 6 - Buisson</option>
+              <option value="7">Texture 7 - Pancarte</option>
+              <option value="8">Texture 8 - Imp</option>
+              <option value="9">Texture 9 - Trésor</option>
+              <option value="10">Texture 10 - Cadavre</option>
+              <option value="11">Texture 11 - Statue</option>
+              <option value="12">Texture 12 - Brasier</option>
+              <option value="13">Texture 13 - Herbes</option>
+              <option value="14">Texture 14 - Chauve-souris</option>
+              <option value="15">Texture 15 - Arbre</option>
+              <option value="16">Texture 16 - Colonne</option>
+              <option value="17">Texture 17 - Sac</option>
+            </select>
+          </div>
         </div>
         
         <div id="sprite-type-specific-props">
-          <!-- Contenu spécifique au type de sprite -->
+          <!-- Props pour décorations (types 0, 1, etc.) -->
+          <div id="decoration-props" class="property-section" style="display: none;">
+            <h3>Propriétés de décoration</h3>
+            <p>Ce type de sprite est une simple décoration et n'a pas de propriétés spécifiques supplémentaires.</p>
+          </div>
           
           <!-- Props pour ennemi (type A) -->
           <div id="enemy-props" class="property-section" style="display: none;">
@@ -663,7 +740,7 @@
             </div>
           </div>
           
-          <!-- Props pour PNJ dialogues (type 0, 2) -->
+          <!-- Props pour PNJ dialogues (type 2) -->
           <div id="npc-props" class="property-section" style="display: none;">
             <h3>Dialogues du PNJ</h3>
             <div id="dialog-container">
@@ -679,6 +756,13 @@
               <!-- Les entrées d'objets seront ajoutées ici -->
             </div>
             <button class="add-item-btn" id="add-shop-item-btn">Ajouter un objet</button>
+            
+            <!-- Section de dialogue pour les marchands aussi -->
+            <h3 style="margin-top: 15px;">Dialogues du marchand</h3>
+            <div id="merchant-dialog-container">
+              <!-- Les entrées de dialogue seront ajoutées ici -->
+            </div>
+            <button class="add-dialog-btn" id="add-merchant-dialog-btn">Ajouter un dialogue</button>
           </div>
         </div>
         
@@ -690,5 +774,36 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+      // Script supplémentaire pour gérer le bouton d'ajout de dialogue marchand
+      document.addEventListener('DOMContentLoaded', function() {
+        // S'assurer que l'élément existe avant d'ajouter l'écouteur
+        const addMerchantDialogBtn = document.getElementById('add-merchant-dialog-btn');
+        if (addMerchantDialogBtn) {
+          addMerchantDialogBtn.addEventListener('click', function() {
+            const container = document.getElementById('merchant-dialog-container');
+            if (container) {
+              addDialogEntry(container);
+            }
+          });
+        }
+        
+        // Synchroniser la texture sélectionnée entre les deux sélecteurs
+        const spriteTextureSelect = document.getElementById('sprite-texture-select');
+        const spriteTextureModal = document.getElementById('sprite-texture-modal');
+        
+        if (spriteTextureSelect && spriteTextureModal) {
+          // Mettre à jour le modal quand on ouvre les propriétés
+          document.getElementById('edit-sprite-props-btn').addEventListener('click', function() {
+            spriteTextureModal.value = spriteTextureSelect.value;
+          });
+          
+          // Mettre à jour la sélection principale quand on ferme le modal
+          document.getElementById('save-sprite-props-btn').addEventListener('click', function() {
+            spriteTextureSelect.value = spriteTextureModal.value;
+          });
+        }
+      });
+    </script>
   </body>
 </html>
