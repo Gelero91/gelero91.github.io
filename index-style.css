@@ -506,7 +506,6 @@
   
   /* Joystick back buttons */
   #joystickBackButtonContainer {
-    margin-top: 6px;
     margin-left: 20px;
     display: none;
   }
@@ -514,7 +513,7 @@
   #QuestButton {
     width: 192px;
     height: 94px;
-    margin-top: 2px;
+    margin-top: 9px;
     margin-bottom: 2px;
     border-radius: 10px;
     background-color: #140c1c;
@@ -523,7 +522,8 @@
   #InventoryButton {
     width: 192px;
     height: 94px;
-    margin-top: 3px;
+    margin-top: 2px;
+    margin-bottom: 2px;
     border-radius: 10px;
     background-color: #140c1c;
     display: none;
