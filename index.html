@@ -19,296 +19,8 @@ Gwendal L.R.
   <script src="raycaster.js"></script>
   <meta charset="UTF-8">
 
+  <link rel="stylesheet" href="index-style.css">
 
-  <style>
-    @font-face {
-      font-family: 'apple][';
-      src: url('Apple ][.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
-
-    * {
-      font-family: 'apple][', sans-serif;
-      color: white;
-      font-size: 14px;
-    }
-
-    body {
-      background-color: black;
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-    }
-
-    div#minimapcontainer {
-      width: 192px;
-    }
-
-    canvas#minimap {
-      position: absolute;
-    }
-
-    canvas#minimapobjects {
-      position: absolute;
-    }
-
-    #mainCanvas {
-      background-color: none;
-      height: 100%;
-      width: 100%;
-    }
-
-    #screen {
-      overflow: hidden;
-    }
-
-    #output {
-      height: 172px;
-      width: 620px;
-      white-space: pre-wrap;
-      overflow-y: auto;
-      background-color: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      margin-left: 10px;
-      border-radius: 5px;
-      image-rendering: pixelated;
-      box-shadow: 0 0 10px rgba(20, 20, 20, 1);
-      line-height: 125%;
-    }
-
-    #gameWindow {
-      width: 870px; 
-      height : 590px; 
-      padding : 10px; 
-      padding-bottom : 20px;
-      border-radius: 5px;
-      display: flex;
-    }
-
-    .underscreenDiv {
-      height: 192px;
-      width: 640px;
-      margin-left: 10px;
-      overflow-y: hidden;
-      background-color: rgba(0, 0, 0, 0.5);
-      border-radius: 5px;
-      image-rendering: pixelated;
-      box-shadow: 0 0 10px rgba(20, 20, 20, 1);
-    }
-
-    #infos {
-      width: 192px;
-    }
-
-    .center {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      background: rgb(178 180 178 / 50%);
-    }
-
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      width: 890px;
-      height: fit-content;
-      background-color: #595758;
-      box-shadow: 0px 0px 30px rgba(0, 0, 0, 1);
-    }
-
-    .paper {
-      width: 100%;
-      height: 100%;
-      background-color: white;
-      background-image: url('paper.jpg');
-      background-size: cover;
-      background-position: center;
-      z-index: -1;
-    }
-
-    .border {
-      border: 8px double rgba(25, 25, 25, 0.5);
-    }
-
-    .item {
-      width: 172px;
-      padding-right: 10px;
-      padding-left: 10px;
-    }
-
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      width: 192px;
-      height: 192px;
-    }
-
-    .grid-item {
-      width: 100%;
-      height: 100%;
-      color: #fff;
-      background-color: #140c1c;
-      font-size: 25px;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .itemInventory {
-      width: 100%;
-    }
-
-    .controlButton {
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 1);
-    }
-
-    .joystick-container {
-      position: relative;
-      width: 192px;
-      height: 192px;
-    }
-
-    .joystick-circle {
-      border: 1px solid rgb(100, 100, 100, 0);
-      background-color: rgba(0, 0, 0, 0.3);
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 1);
-    }
-
-    .joystick-circle-shadow {
-      box-shadow: inset 0 0 10px rgba(20, 20, 20, 1);
-    }
-
-    .joystick-container {
-      width: 192px;
-      height: 192px;
-    }
-
-    .joystick {
-      position: absolute;
-      width: 40%;
-      height: 40%;
-      background-color: rgb(50, 50, 50);
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 1);
-    }
-
-    .equipped {
-      background-color: #86b460;
-      /* Changer la couleur de fond pour les éléments équipés */
-      color: white;
-      /* Changer la couleur du texte pour une meilleure lisibilité */
-    }
-
-    /*PROGRESS BAR*/
-    .progress-bar {
-      position: relative;
-      width: 100%;
-      height: 24px;
-      background-color: #140c1c;
-      border: 1px solid #000000;
-      border-radius: 3px;
-      margin: 10px 0;
-      overflow: hidden;
-      border-radius: 4px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 1);
-    }
-
-    .progress-bar .icon {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      z-index: 1;
-      font-style: normal;
-    }
-
-    .progress-bar .progress {
-      position: absolute;
-      top: 0;
-      height: 100%;
-      background-color: #000000;
-      transition: width 0.3s ease-in-out;
-    }
-
-    .progress-bar label {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 14px;
-    }
-
-    .menuCenter {
-      text-align: center;
-    }
-
-    .menuButton {
-      height: 75px;
-      width: 300px;
-      margin: 5px;
-      border-radius: 6px;
-      color: black;
-    }
-
-      /*RESPONSIVE*/
-
-    /* Masquer le contenu en mode portrait et afficher le message */
-    @media screen and (orientation: portrait) {
-      #renderWindow, #mainMenuWindow {
-        display: none;
-      }
-
-      .landscape-message {
-        display: block;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: black;
-        color: white;
-        font-size: 50px;
-        text-align: center;
-        padding-top: 25vh;
-        padding-bottom: 25vh;
-        z-index: 9999;
-      }
-    }
-
-    /* Adapter le contenu principal en mode paysage */
-    @media screen and (orientation: landscape) {
-      #renderWindow, #mainMenuWindow {
-        display: flex;
-        box-sizing: border-box;
-      }
-
-      .landscape-message {
-        display: none;
-      }
-
-      /* Adapter les éléments internes */
-      #renderWindow > *, #mainMenuWindow > * {
-        transform: scale(0.6);
-      }
-    }
-
-    /* Réinitialiser l'échelle pour les grands écrans d'ordinateurs */
-    @media screen and (min-width: 1024px) {
-      #renderWindow > *, #mainMenuWindow > * {
-        transform: scale(1); /* Revenir à l'échelle normale pour les grands écrans */
-      }
-
-      #renderWindow, #mainMenuWindow {
-        max-width: 100%; /* Utiliser toute la largeur disponible */
-        max-height: 100%; /* Utiliser toute la hauteur disponible */
-      }
-    }
-      /*RESPONSIVE*/
-  </style>
 </head>
 
 <body>
@@ -332,356 +44,283 @@ Gwendal L.R.
     <button id="loadButton">Load</button>
     -->
      <div class="paper">
-      <!--<button id="mainMenuButton" style="width:100px;">Menu</button>-->
+      <!--<button id="mainMenuButton">Menu</button>-->
         <!-- Header Présentation -->
         <!-- <p>HEADER DE LA PAGE</p> -->
         <div class="center">
            <!-- écran de jeux -->
-          <div id="renderWindow" style="display: block;"> 
-            <div id="gameWindow" class="container" style="display: flex;">
-                <div id="screen" style="padding: 10px;">
-                  <canvas id="mainCanvas" style="border-radius: 5px;"></canvas>
+          <div id="renderWindow"> 
+            <div id="gameWindow" class="container">
+                <div id="screen">
+                  <canvas id="mainCanvas"></canvas>
                                 
-                  <div id="gameOverWindow" style="display: none;border-radius: 5px;">
-                    <img src="game over.png" alt="" style="border-radius: 5px;">
+                  <div id="gameOverWindow" style="display: none;"></div>
+                </div>
+                  <!-- Division d'information du joueur -->
+                  <div id="infos">
+                    <!--div info partie-->
+                    <div id="info">
+                      <h1>Alakir</h1>
+                      <hr>
+                      <br>
+                      <!-- PLAYER INFO OUTPUT, old -->
+                      <div id="playerInfoOutput" style="display: none;">
+                        <p id="PlayerHPoutput">XXX</p>
+                        <p class="text-center">/</p>
+                        <p id="PlayerMaxHP">XXX</p>
+                        <p class="text-bold"> HP </p>
+                        <p id="PlayerMPoutput">YYY</p>
+                        <p class="text-center">/</p>
+                        <p id="PlayerMaxMP">YYY</p>
+                        <p class="text-bold"> MP </p>
+                        <p id="PlayerXPoutput">ZZZ</p>
+                        <p class="text-center">/</p>
+                        <p id="NextLevelXP">ZZZ</p>
+                        <p class="text-bold"> XP </p>
+                      </div>
+                      <!-- PLAYER INFO PROGRESS BAR OUTPUT -->
+                      <div>
+                        <div class="progress-bar" id="hpBar">
+                          <i class="icon">♥</i>
+                          <div class="progress"></div>
+                          <label style="top:50%;">Health</label>
+                        </div>
+                        <div class="progress-bar" id="mpBar">
+                          <i class="icon">✦</i>
+                          <div class="progress"></div>
+                          <label style="top:50%;">Mana</label>
+                        </div>
+                        <div class="menu-button-container">
+                          <button id="mainMenuButton">MENU</button>
+                        </div>
+                        <!--SPELLS-->
+                        <div id="SpellButtons">
+                          <button id="previousSpell" class="controlButton">◄</button>
+                          <button id="castSpell" class="controlButton">❂</button>
+                          <button id="nextSpell" class="controlButton">►</button>
+                        </div>
+                        <div>
+                          <p id="selectedSpell">-</p>
+                        </div>
+                        <!--SPELLS-->
+                        <div class="progress-bar" id="xpBar" style="display:none;">
+                          <i class="icon">★</i>
+                          <div class="progress"></div>
+                          <label>Experience</label>
+                        </div>
+                      </div>
+                      <!--old progress bar-->
+                      <div id="old-progress-bar" style="display: none;">
+                        <br>
+                        <label>♥ Health</label>
+                        <progress id="hpBarOld" value="x" max="x"></progress>
+                        <br>
+                        <br>
+                        <label>❖ Mana</label>
+                        <progress id="mpBarOld" value="y" max="y"></progress>
+                        <br>
+                        <br>
+                        <!--rajoute 2 br pour compenser l'expérience cachée-->
+                        <br>
+                        <br>
+                        <label style="display:none;">★ Experience</label>
+                        <progress id="xpBarOld" value="z" max="z" style="display:none;"></progress>
+                      </div>
+                      <div>
+                        <!--compensation des boutons AB-->
+                        <div style="display: none;">
+                          <div id="joystickButtonABOld">
+                            <button id="button7" class="grid-item controlButton">◄</button>
+                            <button id="button8" class="grid-item controlButton">╬</button>
+                            <button id="button9" class="grid-item controlButton">►</button>
+                          </div>
+                        </div>
+                        <!-- a modifier pour rendre utilisable-->
+                        <div id="joystickButtonAB">
+                          <button id="button1" class="controlButton">A</button>
+                          <div id="button2"></div>
+                          <button id="button3" class="controlButton">B</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="stats">
+                      <h1>Stats</h1>
+                      <hr class="">
+                      <div class="stats-grid">
+                        <p>Expe.</p>
+                        <p>:</p>
+                        <p>0</p>
+                        <p>Level</p>
+                        <p>:</p>
+                        <p>1</p>
+                        <p></p>
+                        <p></p>
+                        <p></p>
+                      </div>
+                    </div>
+                    <div id="equipment">
+                      <div style="display: none;">
+                        <h1>EQUIPMENT</h1>
+                        <hr>
+                        <div class="equipment-grid">
+                          <p>Hands :</p>
+                          <span id="handsContent">EMPTY</span>
+                          <p>Torso :</p>
+                          <span id="torsoContent">EMPTY</span>
+                          <br>
+                        </div>
+                      </div>
+                      <h1>PLAYER STATS</h1>
+
+                      <div>
+                        <div id="grid-container">
+                          <div class="progress-bar" id="strengthBar">
+                            <p class="progress-label" style="top:0%;">Strength</p>
+                            <p id="PlayerStrOutput"style="top:0%;">x</p>
+                            <div class="progress"></div>
+                          </div>
+                          
+                          <div class="progress-bar" id="dexterityBar">
+                            <p class="progress-label" style="top:0%;">Dexterity</p>
+                            <p id="PlayerDexOutput" style="top:0%;">y</p>
+                            <div class="progress"></div>
+                          </div>
+                          
+                          <div class="progress-bar" id="intellectBar">
+                            <p class="progress-label" style="top:0%;">Intellect</p>
+                            <p id="PlayerIntOutput"  style="top:0%;">z</p>
+                            <div class="progress"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <h1>COMBAT STATS</h1>
+                      <hr>
+                      <div class="combat-stats-grid-3">
+                        <div>Might</div>
+                        <div>:</div>
+                        <div id="PlayerMightOutput">x</div>
+                        <div>Magic</div>
+                        <div>:</div>
+                        <div id="PlayerMagicOutput">z</div>
+                      </div>
+                      <br>
+                      <hr>
+                      <div class="combat-stats-grid-4">
+                        <div>Armor</div>
+                        <div>:</div>
+                        <div>-</div>
+                        <div id="PlayerArmorOutput">a</div>
+                        <div>Dodge</div>
+                        <div>:</div>
+                        <div>%</div>
+                        <div id="PlayerDodgeOutput">b</div>
+                        <div>Crit. </div>
+                        <div>:</div>
+                        <div>%</div>
+                        <div id="PlayerCritiOutput">c</div>
+                      </div>
+                    </div>
                   </div>
-                              </div>
-                              <div id="infos" style="position: relative; width: 192px; padding-left :9px;">
-                                <!--div info partie-->
-                                <div id="info" style="display:block;image-rendering: pixelated;">
-                                    <h1 style="text-align: center; padding: 10px; margin : 0px;">Alakir</h1>
-                                    <hr>
-                                    <br>
-                                    <!-- PLAYER INFO OUTPUT, old -->
-                                    <div
-                                      style="display: grid; grid-template-columns: repeat(4, 1fr); text-align: right; padding: 10px; margin : 0px; display:none;">
-                                      <p id="PlayerHPoutput">XXX</p>
-                                      <p style="text-align: center;">/</p>
-                                      <p id="PlayerMaxHP">XXX</p>
-                                      <p style="font-weight: bold;"> HP </p>
-                                      <p id="PlayerMPoutput">YYY</p>
-                                      <p style="text-align: center;">/</p>
-                                      <p id="PlayerMaxMP">YYY</p>
-                                      <p style="font-weight: bold;"> MP </p>
-                                      <p id="PlayerXPoutput">ZZZ</p>
-                                      <p style="text-align: center;">/</p>
-                                      <p id="NextLevelXP">ZZZ</p>
-                                      <p style="font-weight: bold;"> XP </p>
-                                    </div>
-                                    <!-- PLAYER INFO PROGRESS BAR OUTPUT -->
-                                    <div>
-                                      <div class="progress-bar" id="hpBar">
-                                          <i class="icon">♥</i>
-                                          <div class="progress" style="width: 0%; background-color:rgb(110, 0, 0);"></div>
-                                          <label>Health</label>
-                                      </div>
-                                      <div class="progress-bar" id="mpBar">
-                                          <i class="icon" style="left: 7px;">✦</i>
-                                          <div class="progress" style="width: 0%; background-color:rgb(0, 0, 110);"></div>
-                                          <label>Mana</label>
-                                      </div>
-                                      <div style="text-align: center;height:50px">
-                                        <button id="mainMenuButton" style="width:120px;height: 30px;margin: 6px;border-radius: 10px; color:rgb(0, 0, 0); background-color: rgb(225, 225, 225);">MENU</button>
-                                      </div>
-                                    <!--SPELLS-->
-                                      <!--<div style="height:50px;">
-                                      compensation des boutons SPELL
-                                      </div>-->
-                                      <div id="SpellButtons" style="display: flex;">
-                                        <button id="previousSpell" class="controlButton"
-                                            style="width:64px;height:64px;padding:0px; border-radius:64px 0 0 64px; background-color: rgb(52, 52, 52);">◄</button>
-                                            <button id="castSpell" class="controlButton" style="width:64px;padding:0px;background-color: rgb(52, 52, 52); border-radius: 0px;font-size: 26px;">❂</button>
-                                            <button id="nextSpell" class="controlButton"
-                                            style="width:64px;height:64px;padding:0px;border-radius:0 64px 64px 0;  background-color: rgb(52, 52, 52);">►</button>
-                                    </div>
-                                    <div>
-                                      <p id="selectedSpell" style="text-align: center;">-</p>
-                                    </div>
-                                  
-                                      <!--SPELLS-->
-                                      <div class="progress-bar" id="xpBar" style="display:none;">
-                                          <i class="icon">★</i>
-                                          <div class="progress" style="width: 0%; "></div>
-                                          <label>Experience</label>
-                                      </div>
-                                    </div>
-                                    <!--old progress bar-->
-                                    <div id="old progress bar" style="display: none;">
-                                      <br>
-                                      <label>♥ Health</label>
-                                      <progress id="hpBar" value="x" max="x" style="width:100%;"></progress>
-                                      <br>
-                                      <br>
-                                      <label>❖ Mana</label>
-                                      <progress id="mpBar" value="y" max="y" style="width:100%;"></progress>
-                                      <br>
-                                      <br>
-                                      <!--rajoute 2 br pour compenser l'expérience cachée-->
-                                      <br>
-                                      <br>
-                                      <label style="display:none;">★ Experience</label>
-                                      <progress id="xpBar" value="z" max="z" style="width:100%; display:none;"></progress>
-                                    </div>
-                                    <div>
-                                      <!--compensation des boutons AB-->
-                                      <div style="display: none;">
-                                          <div id="joystickButtonAB" style="display: flex;height: 60px;">
-                                            <button id="button7" class="grid-item controlButton"
-                                                style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif; border-radius: 30px 0 0 30px;">◄</button>
-                                            <button id="button8" class="grid-item controlButton"
-                                                style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">╬</button>
-                                            <button id="button9" class="grid-item controlButton"
-                                                style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif; border-radius: 0 30px 30px 0;">►</button>
-                                          </div>
-                                      </div>
-                                      <!-- a modifier pour rendre utilisable-->
-                                      <div id="joystickButtonAB" style="display: flex;">
-                                          <button id="button1" class="controlButton"
-                                            style="width:64px;height:64px;padding:0px; border-radius:50px; background-color:  rgb(130, 0, 0);">A</button>
-                                          <div id="button2" class="" style="width:64px;padding:0px; background-color:  rgba(0, 0, 0, 0);">
-                                          </div>
-                                          <button id="button3" class="controlButton"
-                                            style="width:64px;height:64px;padding:0px;border-radius:50px;  background-color:  rgb(0, 60, 0);">B</button>
-                                      </div>
-                                    </div>
-                                </div>
-                                <div id="stats" style="height : 392px;display:none;">
-                                    <h1 style="text-align: center; padding: 10px; margin : 0px;image-rendering: pixelated;">Stats</h1>
-                                    <hr class="">
-                                    <div
-                                      style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: right; padding: 10px; margin : 0px;">
-                                      <p style="text-align: center;">Expe.</p>
-                                      <p style="text-align: center;">:</p>
-                                      <p style="text-align: center;">0</p>
-                                      <p style="text-align: center;">Level</p>
-                                      <p style="text-align: center;">:</p>
-                                      <p style="text-align: center;">1</p>
-                                      <p></p>
-                                      <p></p>
-                                      <p></p>
-                                    </div>
-                                </div>
-                                <div id="equipment" style="height : 380px;display:none;">
-                                    <div style="display: none;">
-                                      <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">EQUIPMENT</h1>
-                                      <hr>
-                                      <div
-                                          style="display: grid; grid-template-columns: repeat(1, 1fr); text-align: right; margin: 0px; height : 192px;">
-                                          <p style="text-align: left;">Hands :</p>
-                                          <span id="handsContent" style="text-align: left; height : 36px;text-align: center;">EMPTY</span>
-                                          <p style="text-align: left;">Torso :</p>
-                                          <span id="torsoContent" style="text-align: left; height : 36px;text-align: center;">EMPTY</span>
-                                          <br>
-                                      </div>
-                                    </div>
-                                    <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">PLAYER STATS</h1>
-
-                                    <div>
-                                      <div id="grid-container" style="margin-top: 10px;">
-                                        <div id="grid-container" style="margin-top: 10px;">
-                                          <div class="progress-bar" id="strengthBar">
-                                            <p class="progress-label" style="
-                                            position: absolute;
-                                            left: 10px;
-                                            transform: translateY(-50%);
-                                            z-index: 1;">Strength</p>
-
-                                            <p id="PlayerStrOutput" style="position: absolute;
-                                            right: 10px;
-                                            transform: translateY(-50%);
-                                            ">x</p>
-                                            <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
-                                        </div>
-                                        
-                                        <div class="progress-bar" id="dexterityBar">
-                                            <p class="progress-label" style="
-                                            position: absolute;
-                                            left: 10px;
-                                            transform: translateY(-50%);
-                                            z-index: 1;">Dexterity</p>
-                                            <p id="PlayerDexOutput" style="position: absolute;
-                                            right: 10px;
-                                            transform: translateY(-50%);">y</p>
-                                            <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
-                                        </div>
-                                        
-                                        <div class="progress-bar" id="intellectBar">
-                                            <p class="progress-label" style="
-                                            position: absolute;
-                                            left: 10px;
-                                            transform: translateY(-50%);
-                                            z-index: 1;">Intellect</p>
-                                            <p id="PlayerIntOutput" style="position: absolute;
-                                            right: 10px;
-                                            transform: translateY(-50%);">z</p>
-                                            <div class="progress" style="flex: 1; background-color: rgb(110, 0, 0);"></div>
-                                        </div>
-                                        
-                                      </div>
-                                    
-                                    </div>
-                                      <h1 style="text-align: center; padding: 10px; margin: 0px; image-rendering: pixelated;">COMBAT STATS
-                                      </h1>
-                                      <hr>
-                                      <div
-                                          style="  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, auto); gap: 10px; margin-top : 18px;">
-                                          <div>Might</div>
-                                          <div style="text-align: right;">:</div>
-                                          <div style="text-align: right;" id="PlayerMightOutput">x</div>
-                                          <div>Magic</div>
-                                          <div style="text-align: right;">:</div>
-                                          <div style="text-align: right;" id="PlayerMagicOutput">z</div>
-                                      </div>
-                                      <br>
-                                      <hr>
-                                      <div
-                                          style="  display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, auto); gap: 10px; margin-top : 18px;">
-                                          <div>Armor</div>
-                                          <div style="text-align: right;">:</div>
-                                          <div style="text-align: right;">-</div>
-                                          <div style="text-align: right;" id="PlayerArmorOutput">a</div>
-                                          <div>Dodge</div>
-                                          <div style="text-align: right;">:</div>
-                                          <div style="text-align: right;">%</div>
-                                          <div style="text-align: right;" id="PlayerDodgeOutput">b</div>
-                                          <div>Crit. </div>
-                                          <div style="text-align: right;">:</div>
-                                          <div style="text-align: right;">%</div>
-                                          <div style="text-align: right;" id="PlayerCritiOutput">c</div>
-                                      </div>
-                                    </div>
-                                </div>
-                              </div>
-                              <!-- outputs -->
-                              <div style="position: relative;width: 668px;padding: 0px;image-rendering: pixelated;">
-                                <!--CONSOLE-->
-                                <output id="output" style="display: block;"></output>
-                                <!--FENETRE DIALOGUE-->
-                            <div id="dialogueWindow" class="underscreenDiv" style="display: none; position: relative;">
-                            <div style="display: flex;">
-                                <!-- visage -->
-                                <img id="faceOutput" style="
-                                    height: 184px;
-                                    width: 184px;
-                                    padding:4px;
-                                    border-radius: 10px;" src="" alt="No face error !">
-                                <!-- dialogue et bouton -->
-                                <div style="position: relative; flex: 1;">
-                                    <div id="dialogue" style="
-                                        padding: 20px;
-                                        height: auto;
-                                        width: auto;
-                                        line-height: 125%;">
-                                    </div>
-                                    <button id="nextButton" style="
-                                        position: absolute;
-                                        bottom: 10px;
-                                        right: 10px;
-                                        border-radius:5px;
-                                        background-color: rgb(52, 52, 52);">Next</button>
-                                </div>
-                            </div>
-                          </div>              
-                                <!--ITEMS-->
-                                <div id="items"
-                                    style="display: none; width: 640px; height: 192px; padding-left: 10px;padding: bottom 10px;margin-top:4px; color: rgb(52, 52, 52); overflow: hidden;">
-                                    <div style="font-size: 16px; padding: top 2px;display:flex; justify-content: space-between;">
-                                      <div>ITEMS</div>
-                                      <div>GOLD : 10GP</div>
-                                    </div>
-                                    <br>
-                                    <div id="inventoryContent"
-                                      style="width:100%; max-height: 150px; overflow-y:scroll; border : 1px; border-color:#140c1c; border-radius:10px;padding-top: 10px;">
-                                      > The inventory is empty
-                                    </div>
-                                </div>
-                                <!--QUEST-->
-                                <div id="quests"
-                                    style="display: none; width: 640px; height: 192px; padding-left: 10px; color: black; overflow: hidden;">
-                                    <div style="font-size: 16px; padding: top 2px;display:flex; justify-content: space-between;">
-                                      <div>QUEST JOURNAL</div>
-                                      <div>-</div>
-                                    </div>
-                                    <br>
-                                    <div id="questContent"
-                                      style="width:100%; height: 150px; overflow-y:scroll; border : 1px; border-color:#140c1c; border-radius:10px;padding-top: 10px;">
-                                      > No quest in progress
-                                    </div>
-                                </div>
-                                <!--boutique-->
-                                <div id="shop" style="
-                                display: none;
-                                  width: 640px; height: 192px; padding-left: 10px; color: black; overflow: hidden;">
-                                  <div style="font-size: 16px; padding-top: 2px; display: flex; justify-content: space-between;">
-                                    <div>SHOP</div>
-                                    <div id="shopName">-</div>
-                                  </div>
-                                  <br>
-                                  <div id="shopContent" style="width: 100%; height: 150px; overflow-y: scroll; border: 0px solid #140c1c; border-radius: 10px; padding-top: 10px;">
-                                    > No items for sale
-                                  </div>
-                                </div>
-                                <!--boutique-->
-                              </div>
-                              <!-- MAP -->
-                              <div id="minimapcontainer" class="border" style="display: none;">
-                                <canvas id="minimap"></canvas>
-                                <canvas id="minimapobjects"></canvas>
-                              </div>
-                              <!--COMMANDES-->
-                              <div id="commandcontainer" style="height: 192px; width: 192px; position: relative; display: block;">
-                                <!--JOYSTICK ABC-->
-                                <div style="width: 192px;height:192px;">
-                                    <!--SI JOYSTICK => photo, décalage lors du déplacement-->
-                                    <div id="joystick-container" class="joystick-container joystick-circle joystick-circle-shadow"
-                                      style="display: block;">
-                                      <div class="joystick" id="joystick">
-                                          <img style="position: relative; height: 100%; width:100%;" src="
-                                            data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs4c6QAAA4JJREFUeF7tnNtyo0AMBc3/f7S3EjtVuGzMEUKLLr3PM4zmtHogkM1y49+YBJYxO2WjN2APagJgA3tQAoO2itnA7pvA/X6//+1uWZZRzT5qsz+Qgd1X5LedAbs57DXgra1OONJHHOPAfrQ4sJ+qY3bh412xedqR3tZsYL+3MrA/6N31SG8F22PzhCMd2DvPJZ0sBzaw6zyGRxzdXY/08mYDWxcT2HpWt+r37/KwFVaK/dVBKjkAm9elSp/UGYPZfAh56VaO8Tryfq0UszEbs5vI/LINzMZszMbsjglgNmZ37Gvu2ZiN2ZjdMQHMxuyOfc09e5DZHRv4yJ5GfOI8EkzHOcDuSHVjT8AG9qAEBm0Vs4E9KIFBW8VsYA9KYNBWMRvYgxIYtFXMBrY9gcl/X8ye1v6MiDxPMzuiuP1I+o6IyBPYSfslHeyt78TZ/itNxe/ZEdm6zI4oKEI0YJ/wywvAjmjNxzUjsjWbXcUSpc4tVBluQ0r91jqB/YG4NcQIv4FtSFUJC7M/JOAJzsDnd6jHqog6s9XjaVDpGI8I0VP01tyIOoFt1dUwPlu42erxSLJpdoQlCvNs4Warx5MhsHfSA7bSXgfHZAs3Wz1KrFs184DWxGylKYEN7NcE/ufDmtKh/Oj1noCSm2T2+tIKeGVh5d7jGaPU6fkxxlObMlep35ozsHk3vt17ER2ndLp1jFInZhtSjfjmalheHqqAtx6J8uIHB0Zkaz7Glft3leDWe6lSs6dOYD+Je0I8KO/XaenM3rI8W3ARMKKvme63S4EdhxzYcdmmu3Jq2OnSoqC3BFwPaORZKwFg1+LlqhbYrvhqTQZ2LV6uaoHtiq/WZGDX4uWqFtiu+GpNBnYtXq5qge2Kr9ZkYNfi5aoW2K74ak0eAbvib6pEtBGwn6lO+AYPbGBHHCLXXZNj/JE9ZmP2dRZGrIzZmP3SVzygRWh2wTUxG7Mx+wLxwpfEbMzG7HDNLlgAszEbsy8QL3xJzMZszA7X7OQFFGvPWrL6i5fy78aBrbcysPWsXH8e27BM2NDysNfJRFhe/ehe5wPsHY+AHXbQ+C6M2d/za2X2WUd6J5vbHuPAxmzzvQGzzZHlmaDcy7sCHnGMW490YOeR01UJZg/6ELJl+QSbxx3jwMbs8u+6rfe2ti9VrEFMGA/sCZSfewQ2sAclMGirmA3sQQkM2uo/6KMcmhz7zdkAAAAASUVORK5CYII=
-                                            "></img>
-                                      </div>
-                                    </div>
-                                    <div id="joystickBackButtonContainer" style="display:none;">
-                                      <button id="QuestButton" class="controlButton"
-                                          style="width: 192px; height: 94px;margin-top :2px;margin-bottom:2px;border-radius:10px;  background-color: #140c1c; ">Quest
-                                      journal</button>
-                                      <button id="InventoryButton" class="controlButton"
-                                          style="width: 192px; height: 94px;margin-top :3px;border-radius:10px;  background-color: #140c1c; display:none;">Inventory</button>
-                                      <button id="joystickBackButton" class="controlButton"
-                                          style="width: 192px; height: 94px;margin-top : 2px;margin-bottom:2px;border-radius:10px;  background-color:#140c1c;   ">Back</button>
-                                    </div>
-                                </div>
-                              </div>
-                              <!--JOYSTICK ABC-->
-                              <!--CLAVIER-->
-                              <!--div pour cacher clavier-->
-                              <div id="actionButtons" style="display:none;">
-                                <div class="grid-container" style="display: grid;">
-                                    <button id="button1" class="grid-item controlButton"
-                                      style="min-width:60px;padding:0px; background-color:  rgb(132, 0, 0); border-radius:50px;">A</button>
-                                    <div id="button2" class="grid-item"
-                                      style="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
-                                    <button id="button3" class="grid-item controlButton"
-                                      style="min-width:60px;padding:0px;border-radius:50px;  background-color:  rgb(17, 79, 0); ">B</button>
-                                    <div class="grid-item" style="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
-                                    <button id="button5" class="grid-item controlButton"
-                                      style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↑</button>
-                                    <div class="grid-item" style="min-width:60px;padding:0px; background-color:  rgba(0, 0, 0, 0);"></div>
-                                    <button id="button7" class="grid-item controlButton"
-                                      style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif; border-radius: 30px 0 0 30px;">↰</button>
-                                    <button id="button8" class="grid-item controlButton"
-                                      style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif;">↓</button>
-                                    <button id="button9" class="grid-item controlButton"
-                                      style="min-width:60px;padding:0px;font-family: 'Times New Roman', Times, serif; border-radius: 0 30px 30px 0;">↱</button>
-                                </div>
-                              </div>
+                <!-- outputs -->
+                <div>
+                  <!--CONSOLE-->
+                  <output id="output"></output>
+                  <!--FENETRE DIALOGUE-->
+                  <div id="dialogueWindow" class="underscreenDiv" style="display: none;">
+                    <div>
+                      <!-- visage -->
+                      <img id="faceOutput" src="" alt="No face error !">
+                      <!-- dialogue et bouton -->
+                      <div>
+                          <div id="dialogue">
+                          </div>
+                          <button id="nextButton">Next</button>
+                      </div>
+                    </div>
+                  </div>              
+                  <!--ITEMS-->
+                  <div id="items" style="display: none;">
+                      <div>
+                        <div>ITEMS</div>
+                        <div>GOLD : 10GP</div>
+                      </div>
+                      <br>
+                      <div id="inventoryContent">
+                        > The inventory is empty
+                      </div>
+                  </div>
+                  <!--QUEST-->
+                  <div id="quests" style="display: none;">
+                      <div>
+                        <div>QUEST JOURNAL</div>
+                        <div>-</div>
+                      </div>
+                      <br>
+                      <div id="questContent">
+                        > No quest in progress
+                      </div>
+                  </div>
+                  <!--boutique-->
+                  <div id="shop" style="display: none;">
+                    <div>
+                      <div>SHOP</div>
+                      <div id="shopName">-</div>
+                    </div>
+                    <br>
+                    <div id="shopContent">
+                      > No items for sale
+                    </div>
+                  </div>
+                  <!--boutique-->
+                </div>
+                <!-- MAP -->
+                <div id="minimapcontainer" class="border" style="display: none;">
+                  <canvas id="minimap"></canvas>
+                  <canvas id="minimapobjects"></canvas>
+                </div>
+                <!--COMMANDES-->
+                <div id="commandcontainer">
+                  <!--JOYSTICK ABC-->
+                  <div>
+                      <!--SI JOYSTICK => photo, décalage lors du déplacement-->
+                      <div id="joystick-container" class="joystick-container joystick-circle joystick-circle-shadow">
+                        <div class="joystick" id="joystick">
+                          <img style="position: relative; height: 100%; width:100%;" src="
+                          data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAAAXNSR0IArs4c6QAAA4JJREFUeF7tnNtyo0AMBc3/f7S3EjtVuGzMEUKLLr3PM4zmtHogkM1y49+YBJYxO2WjN2APagJgA3tQAoO2itnA7pvA/X6//+1uWZZRzT5qsz+Qgd1X5LedAbs57DXgra1OONJHHOPAfrQ4sJ+qY3bh412xedqR3tZsYL+3MrA/6N31SG8F22PzhCMd2DvPJZ0sBzaw6zyGRxzdXY/08mYDWxcT2HpWt+r37/KwFVaK/dVBKjkAm9elSp/UGYPZfAh56VaO8Tryfq0UszEbs5vI/LINzMZszMbsjglgNmZ37Gvu2ZiN2ZjdMQHMxuyOfc09e5DZHRv4yJ5GfOI8EkzHOcDuSHVjT8AG9qAEBm0Vs4E9KIFBW8VsYA9KYNBWMRvYgxIYtFXMBrY9gcl/X8ye1v6MiDxPMzuiuP1I+o6IyBPYSfslHeyt78TZ/itNxe/ZEdm6zI4oKEI0YJ/wywvAjmjNxzUjsjWbXcUSpc4tVBluQ0r91jqB/YG4NcQIv4FtSFUJC7M/JOAJzsDnd6jHqog6s9XjaVDpGI8I0VP01tyIOoFt1dUwPlu42erxSLJpdoQlCvNs4Warx5MhsHfSA7bSXgfHZAs3Wz1KrFs184DWxGylKYEN7NcE/ufDmtKh/Oj1noCSm2T2+tIKeGVh5d7jGaPU6fkxxlObMlep35ozsHk3vt17ER2ndLp1jFInZhtSjfjmalheHqqAtx6J8uIHB0Zkaz7Glft3leDWe6lSs6dOYD+Je0I8KO/XaenM3rI8W3ARMKKvme63S4EdhxzYcdmmu3Jq2OnSoqC3BFwPaORZKwFg1+LlqhbYrvhqTQZ2LV6uaoHtiq/WZGDX4uWqFtiu+GpNBnYtXq5qge2Kr9ZkYNfi5aoW2K74ak0eAbvib6pEtBGwn6lO+AYPbGBHHCLXXZNj/JE9ZmP2dRZGrIzZmP3SVzygRWh2wTUxG7Mx+wLxwpfEbMzG7HDNLlgAszEbsy8QL3xJzMZszA7X7OQFFGvPWrL6i5fy78aBrbcysPWsXH8e27BM2NDysNfJRFhe/ehe5wPsHY+AHXbQ+C6M2d/za2X2WUd6J5vbHuPAxmzzvQGzzZHlmaDcy7sCHnGMW490YOeR01UJZg/6ELJl+QSbxx3jwMbs8u+6rfe2ti9VrEFMGA/sCZSfewQ2sAclMGirmA3sQQkM2uo/6KMcmhz7zdkAAAAASUVORK5CYII=
+                          "></img>
+                        </div>
+                      </div>
+                      <div id="joystickBackButtonContainer" style="display:none;">
+                        <button id="QuestButton" class="controlButton">Quest journal</button>
+                        <button id="InventoryButton" class="controlButton" style="display:none;">Inventory</button>
+                        <button id="joystickBackButton" class="controlButton">Back</button>
+                      </div>
+                  </div>
+                </div>
+                <!--JOYSTICK ABC-->
+                <!--CLAVIER-->
+                <!--div pour cacher clavier-->
+                <div id="actionButtons" style="display:none;">
+                  <div class="grid-container">
+                      <button id="button1" class="grid-item controlButton">A</button>
+                      <div id="button2" class="grid-item"></div>
+                      <button id="button3" class="grid-item controlButton">B</button>
+                      <div class="grid-item"></div>
+                      <button id="button5" class="grid-item controlButton">↑</button>
+                      <div class="grid-item"></div>
+                      <button id="button7" class="grid-item controlButton">↰</button>
+                      <button id="button8" class="grid-item controlButton">↓</button>
+                      <button id="button9" class="grid-item controlButton">↱</button>
+                  </div>
+                </div>
             </div> 
           </div>
 
           <div id="mainMenuWindow" style="display: none;">
-            <div id="gameWindow" class="container" style="display:block;">
+            <div id="gameWindow" class="container">
               <div class="menuCenter">
-                <H1 style="font-size: large;">OASIS.JS</H1>
+                <H1>OASIS.JS</H1>
                 <br>
                 <button id="newGameButton" class="menuButton">New Game</button>
                 <br>
@@ -698,8 +337,6 @@ Gwendal L.R.
         </div>
      </div>
   </div>
-</div>
-</div>
 </div>
 <!-- UX/UI - End -->
 
