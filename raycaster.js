@@ -2700,8 +2700,8 @@ class Sprite {
 class Raycaster {
     constructor(
         mainCanvas,
-        displayWidth = 320,
-        displayHeight = 180,
+        displayWidth = 330,
+        displayHeight = 190,
         tileSize = 1280,
         textureSize = 64,
         fovDegrees = 90
