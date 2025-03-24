@@ -107,10 +107,12 @@ body {
   height: var(--game-height);
   background-color: var(--color-grey);
   box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+  padding-bottom: var(--padding-bottom);
+/*
   padding-top: var(--padding-top);
   padding-right: var(--padding-right);
-  padding-bottom: var(--padding-bottom);
   padding-left: var(--padding-left);
+*/
   gap: var(--gap-size);
 }
 
