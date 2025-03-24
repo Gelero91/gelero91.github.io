@@ -9,8 +9,8 @@
   /* Dimensions de base du jeu - ajustables automatiquement */
   --base-width: 852px;
   --base-height: 572px;
-  --padding-right: 20px;
-  --padding-bottom: 20px;
+  --padding-right: 10px;
+  --padding-bottom: 10px;
   --padding-left: 10px;
   --padding-top: 10px;
   
@@ -171,7 +171,7 @@ body {
 
 /* Panels d'informations */
 #info, #stats, #equipment {
-  width: 100%;
+  width: 192px;
 }
 
 #info {
@@ -418,7 +418,7 @@ body {
 
 /* Zone de sortie texte */
 #output {
-  width: 100%;
+  width: 660px;
   height: 100%;
   white-space: pre-wrap;
   overflow-y: auto;
@@ -475,7 +475,7 @@ body {
   padding-top: 4px;
   overflow: hidden;
   height: 100%;
-  width: var(--screen-width);
+  width: 660px;
   max-width: var(--screen-width);
 }
 
@@ -500,7 +500,7 @@ body {
 #inventoryContent,
 #questContent,
 #shopContent {
-  width: 100%;
+  width: 660px;
   height: calc(100% - 30px);
   overflow-y: scroll;
   border-radius: var(--border-radius-medium);
@@ -675,8 +675,8 @@ body {
 
 /* Fenêtre de jeu et menu */
 #gameWindow {
-  width: var(--game-width);
-  height: var(--game-height);
+  width: var(--game-width)+10px;
+  height: var(--game-height)+10px;
   border-radius: var(--border-radius-standard);
 }
 
@@ -686,8 +686,6 @@ body {
 
 .menuCenter {
   text-align: center;
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -770,6 +768,5 @@ body {
   #renderWindow,
   #mainMenuWindow {
     max-width: 100%;
-    max-height: 100%;
   }
 }

@@ -21,6 +21,24 @@ Gwendal L.R.
 
   <link rel="stylesheet" href="index-style.css">
 
+
+  <style>
+    /*PIXEL FRAME*/
+    /* Cadre pixelisé avec border-image */
+    .pixel-frame {
+      background-color: #333;
+      box-sizing: border-box;
+      
+      /* Configuration du cadre avec border-image */
+      border-width: 20px;
+      border-style: solid;
+      border-image-source: url('pixelFrameTransparent.png');
+      border-image-slice: 20; /* Valeur en pixels correspondant à l'épaisseur des coins */
+      border-image-repeat: repeat; /* Préserve l'aspect pixelisé */
+      image-rendering: pixelated;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -43,7 +61,7 @@ Gwendal L.R.
       <div class="center">
         <!-- Fenêtre de rendu du jeu -->
         <div id="renderWindow"> 
-          <div id="gameWindow" class="container">
+          <div id="gameWindow" class="container pixel-frame">
             <!-- Zone écran principal (haut gauche) -->
             <div id="screen" class="game-area">
               <canvas id="mainCanvas"></canvas>
@@ -312,7 +330,7 @@ Gwendal L.R.
         </div>
 
         <div id="mainMenuWindow" style="display: none;">
-          <div id="gameWindow" class="container">
+          <div id="gameWindow" class="container pixel-frame">
             <div class="menuCenter">
               <H1>OASIS.JS</H1>
               <br>
