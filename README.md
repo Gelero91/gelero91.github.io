@@ -17,6 +17,11 @@ Les touches directionnelles vous permettront de vous déplacer.
 Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, marchander, observer, ouvrir un coffre & combattre.
 
 
+Nouveau ! Cadre en pixelArt et CSS refactorisé :
+
+![Oasis pixelFrame](https://github.com/user-attachments/assets/b999445c-b3b2-4378-8cb6-1389d09f4408)
+
+
 L'editeur de carte est disponible à cette adresse : https://gelero91.github.io/editor.html
 
 ![image](https://github.com/user-attachments/assets/bf691ff2-4cf9-413f-8a54-7bf3f83891e2)
