@@ -19,7 +19,7 @@ Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, m
 
 Nouveau ! Cadre en pixelArt et CSS refactorisé :
 
-![Oasis pixelFrame](https://github.com/user-attachments/assets/b999445c-b3b2-4378-8cb6-1389d09f4408)
+![Cadres !](https://github.com/user-attachments/assets/7a422d5a-74d2-4a25-b35f-8f57c1ae4795)
 
 
 L'editeur de carte est disponible à cette adresse : https://gelero91.github.io/editor.html
