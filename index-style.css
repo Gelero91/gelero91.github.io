@@ -76,7 +76,7 @@ body {
 .border { border: 8px double rgba(25, 25, 25, 0.5); }
 .controlButton {
   border-radius: var(--border-radius-medium);
-  box-shadow: var(--shadow-standard);
+  /*box-shadow: var(--shadow-standard);*/
 }
 
 /* Structure de base */
@@ -226,7 +226,7 @@ body {
   margin: 10px 0;
   overflow: hidden;
   border-radius: 4px;
-  box-shadow: var(--shadow-standard);
+  /*box-shadow: var(--shadow-standard);*/
 }
 
 .progress-bar .icon {
@@ -321,14 +321,14 @@ body {
   height: 64px;
   padding: 0;
   border-radius: 64px 0 0 64px;
-  background-color: var(--color-dark-grey);
+  background-color: var(--color-dark-bg);
 }
 
 #castSpell {
   width: 64px;
   height: 64px;
   padding: 0;
-  background-color: var(--color-dark-grey);
+  background-color: var(--color-dark-bg);
   border-radius: 0;
   font-size: 26px;
 }
@@ -338,7 +338,7 @@ body {
   height: 64px;
   padding: 0;
   border-radius: 0 64px 64px 0;
-  background-color: var(--color-dark-grey);
+  background-color: var(--color-dark-bg);
 }
 
 #selectedSpell {
@@ -473,9 +473,11 @@ body {
 #quests,
 #shop,
 #dialogueWindow {
-  padding: 8px;
+  padding: 10px;
+
   height: 100%;
   max-width: 654px;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 #items {
