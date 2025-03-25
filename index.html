@@ -37,6 +37,33 @@ Gwendal L.R.
       border-image-repeat: repeat; /* Préserve l'aspect pixelisé */
       image-rendering: pixelated;
     }
+
+
+    /* Méthode avec cadre interne */
+    .pixel-frame-internal {
+      background-color: #333;
+      box-sizing: border-box;
+      position: relative;
+      image-rendering: pixelated;
+    }
+    
+    /* Création du cadre interne avec pseudo-élément */
+    .pixel-frame-internal::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none; /* Permet d'interagir avec le contenu en dessous */
+      border-width: 20px;
+      border-style: solid;
+      border-image-source: url('pixelFrameTransparent.png');
+      border-image-slice: 20;
+      border-image-repeat: repeat;
+      image-rendering: pixelated;
+      box-sizing: border-box;
+    }
   </style>
 
 </head>
@@ -63,7 +90,7 @@ Gwendal L.R.
         <div id="renderWindow"> 
           <div id="gameWindow" class="container pixel-frame">
             <!-- Zone écran principal (haut gauche) -->
-            <div id="screen" class="game-area">
+            <div id="screen" class="game-area pixel-frame-internal">
               <canvas id="mainCanvas"></canvas>
               <div id="gameOverWindow" style="display: none;"></div>
             </div>
@@ -237,7 +264,7 @@ Gwendal L.R.
             </div>
             
             <!-- Zone de sortie texte (bas gauche) -->
-            <div id="output-area" class="game-area">
+            <div id="output-area" class="game-area pixel-frame-internal">
               <!--CONSOLE-->
               <output id="output"></output>
               

@@ -302,9 +302,8 @@ body {
 }
 
 #mainMenuButton {
-  width: 120px;
+  width: 100%;
   height: 30px;
-  margin: 6px;
   border-radius: var(--border-radius-medium);
   color: var(--color-black);
   background-color: var(--color-light-grey);
@@ -420,11 +419,11 @@ body {
 
 /* Zone de sortie texte */
 #output {
-  width: 660px;
+  width: 654px;
   height: 100%;
   white-space: pre-wrap;
   overflow-y: auto;
-  padding: 10px;
+  padding: 14px;
   line-height: 125%;
   image-rendering: pixelated;
   background-color: rgba(0, 0, 0, 0.5);
@@ -474,11 +473,9 @@ body {
 #quests,
 #shop,
 #dialogueWindow {
-  padding-top: 4px;
-  overflow: hidden;
+  padding: 8px;
   height: 100%;
-  width: 660px;
-  max-width: var(--screen-width);
+  max-width: 654px;
 }
 
 #items {
@@ -502,7 +499,7 @@ body {
 #inventoryContent,
 #questContent,
 #shopContent {
-  width: 660px;
+  width: 645px;
   height: calc(100% - 30px);
   overflow-y: scroll;
   border-radius: var(--border-radius-medium);
@@ -586,14 +583,13 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 10px;
 }
 
 #QuestButton,
 #InventoryButton,
 #joystickBackButton {
   width: 100%;
-  height: 30%;
+  height: 48%;
   margin: 2px 0;
   border-radius: var(--border-radius-medium);
   background-color: var(--color-dark-bg);
