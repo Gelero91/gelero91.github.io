@@ -80,6 +80,13 @@ body {
   /*box-shadow: var(--shadow-standard);*/
 }
 
+
+.separator{
+  padding: 5;
+  margin-left: 14px;
+}
+
+
 /* Structure de base */
 .paper {
   width: 100%;
