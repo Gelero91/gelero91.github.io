@@ -604,8 +604,7 @@ body {
 #joystickBackButton {
   width: 100%;
   height: 48%;
-  margin: 2px 0;
-  border-radius: var(--border-radius-medium);
+  /*border-radius: var(--border-radius-medium);*/
   background-color: #592918;
 }
 

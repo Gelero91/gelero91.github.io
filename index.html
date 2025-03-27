@@ -132,21 +132,23 @@ Gwendal L.R.
                 </br>
 
                   <div class="menu-button-container">
-                    <button id="mainMenuButton" style="margin-top: 8px;">MENU</button>
+                    <button id="mainMenuButton" class="pixel-frame" style="margin-top: 9px;"><p style="margin-top: -7px;color: black;">MENU</p></button>
                   </div>
                   <!--SPELLS-->
                   <div id="SpellButtons">
                     <button id="previousSpell" class="controlButton">
-                      <img src="left.png" alt="" class="separator"></img>
+                      <img src="left.png" alt=""></img>
                     </button>
                     <button id="castSpell" class="controlButton">❂</button>
                     <button id="nextSpell" class="controlButton">
                       <img src="right.png" alt=""></img>
                     </button>
                   </div>
+
                   <div>
                     <p id="selectedSpell">-</p>
                   </div>
+                  
                   <div class="progress-bar" id="xpBar" style="display:none;">
                     <i class="icon">★</i>
                     <div class="progress"></div>
@@ -216,20 +218,20 @@ Gwendal L.R.
                 <div>
                   <div id="grid-container">
                     <div class="progress-bar" id="strengthBar">
-                      <p class="progress-label">Strength</p>
-                      <p id="PlayerStrOutput">x</p>
+                      <p class="progress-label" style="padding-bottom: 2px;">Strength</p>
+                      <p id="PlayerStrOutput" style="padding-bottom: 2px;">x</p>
                       <div class="progress"></div>
                     </div>
                     
                     <div class="progress-bar" id="dexterityBar">
-                      <p class="progress-label">Dexterity</p>
-                      <p id="PlayerDexOutput">y</p>
+                      <p class="progress-label" style="padding-bottom: 2px;">Dexterity</p>
+                      <p id="PlayerDexOutput" style="padding-bottom: 2px;">y</p>
                       <div class="progress"></div>
                     </div>
                     
                     <div class="progress-bar" id="intellectBar">
-                      <p class="progress-label">Intellect</p>
-                      <p id="PlayerIntOutput">z</p>
+                      <p class="progress-label" style="padding-bottom: 2px;">Intellect</p>
+                      <p id="PlayerIntOutput" style="padding-bottom: 2px;">z</p>
                       <div class="progress"></div>
                     </div>
                   </div>
@@ -338,9 +340,9 @@ Gwendal L.R.
                     </div>
                   </div>
                   <div id="joystickBackButtonContainer" style="display:none;">
-                    <button id="QuestButton" class="controlButton">Quest journal</button>
-                    <button id="InventoryButton" class="controlButton" style="display:none;">Inventory</button>
-                    <button id="joystickBackButton" class="controlButton">Back</button>
+                    <button id="QuestButton" class="controlButton pixel-frame">Quest journal</button>
+                    <button id="InventoryButton" class="controlButton pixel-frame" style="display:none;">Inventory</button>
+                    <button id="joystickBackButton" class="controlButton pixel-frame" style="margin-top: 8px;">Back</button>
                   </div>
                 </div>
                 
