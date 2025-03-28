@@ -134,13 +134,23 @@ Gwendal L.R.
                   <div class="menu-button-container">
                     <button id="mainMenuButton" class="pixel-frame" style="margin-top: 9px;"><p style="margin-top: -7px;color: black;">MENU</p></button>
                   </div>
+
+                  <div class="menu-button-container">
+                    <button id="characterButton" class="pixel-frame" style="margin-top: 9px;
+                    height: 30px;
+                    width: 100%;
+                    background-color: var(--color-light-grey);"><p style="margin-top: -7px;color: black;">CHARACTER</p></button>
+                  </div>
+
+                  <img src="separatorLarge.png" alt="" class="separator" style="padding-top:  15px;"></img>
+
                   <!--SPELLS-->
                   <div id="SpellButtons">
-                    <button id="previousSpell" class="controlButton">
+                    <button id="previousSpell" class="controlButton pixel-frame" style="border-radius: 0px;">
                       <img src="left.png" alt=""></img>
                     </button>
-                    <button id="castSpell" class="controlButton">❂</button>
-                    <button id="nextSpell" class="controlButton">
+                    <button id="castSpell" class="controlButton pixel-frame" style="border-radius: 0px;">❂</button>
+                    <button id="nextSpell" class="controlButton pixel-frame" style="border-radius: 0px;">
                       <img src="right.png" alt=""></img>
                     </button>
                   </div>
@@ -172,13 +182,15 @@ Gwendal L.R.
                   <!--compensation des boutons AB-->
                   <div style="display: none;">
                     <div id="joystickButtonABOld">
+                      <!--
                       <button id="button7" class="grid-item controlButton">◄</button>
                       <button id="button8" class="grid-item controlButton">╬</button>
                       <button id="button9" class="grid-item controlButton">►</button>
+                    -->
                     </div>
                   </div>
                   <!-- a modifier pour rendre utilisable-->
-                  <div id="joystickButtonAB">
+                  <div id="joystickButtonAB" style="display: none;">
                     <button id="button1" class="controlButton">A</button>
                     <div id="button2"></div>
                     <button id="button3" class="controlButton">B</button>
@@ -330,7 +342,7 @@ Gwendal L.R.
             <div id="commands-area" class="game-area">
               <div id="commandcontainer">
                 <!--JOYSTICK ABC-->
-                <div>
+                <div style="display: none;">
                   <div id="joystick-container" class="joystick-container joystick-circle joystick-circle-shadow">
                     <div class="joystick" id="joystick">
                       <img style="position: relative; height: 100%; width:100%;" src="
@@ -339,25 +351,43 @@ Gwendal L.R.
                       "></img>
                     </div>
                   </div>
-                  <div id="joystickBackButtonContainer" style="display:none;">
-                    <button id="QuestButton" class="controlButton pixel-frame">Quest journal</button>
-                    <button id="InventoryButton" class="controlButton pixel-frame" style="display:none;">Inventory</button>
-                    <button id="joystickBackButton" class="controlButton pixel-frame" style="margin-top: 8px;">Back</button>
-                  </div>
                 </div>
                 
+                <div id="joystickBackButtonContainer" style="display:none;">
+                  <button id="QuestButton" class="controlButton pixel-frame">Quest journal</button>
+                  <button id="InventoryButton" class="controlButton pixel-frame" style="display:none;">Inventory</button>
+                  <button id="joystickBackButton" class="controlButton pixel-frame" style="margin-top: 8px;">Back</button>
+                </div>
+
                 <!--CLAVIER-->
-                <div id="actionButtons" style="display:none;">
+                <div id="actionButtons" style="display:block;">
                   <div class="grid-container">
-                    <button id="button1" class="grid-item controlButton">A</button>
-                    <div id="button2" class="grid-item"></div>
-                    <button id="button3" class="grid-item controlButton">B</button>
-                    <div class="grid-item"></div>
-                    <button id="button5" class="grid-item controlButton">↑</button>
-                    <div class="grid-item"></div>
-                    <button id="button7" class="grid-item controlButton">↰</button>
-                    <button id="button8" class="grid-item controlButton">↓</button>
-                    <button id="button9" class="grid-item controlButton">↱</button>
+                    <button id="buttonA" class="grid-item controlButton pixel-frame"  style="background-color: #592918;height: 64px;
+    width: 64px;">A</button>
+
+                    <div id="button2" class="grid-item" display="height: 64px;
+                    width: 64px;"></div>
+
+                    <button id="buttonB" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
+    width: 64px;">B</button>
+
+                    <div class="grid-item" style="background-color: #200F09;height: 64px;
+    width: 64px;"></div>
+
+                    <button id="button5" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
+    width: 64px; border-radius: 0px;"><img src="up.png" alt></button>
+
+                    <div class="grid-item" style="background-color: #200F09; height: 64px;
+    width: 64px;"></div>
+
+                    <button id="button7" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
+    width: 64px; border-radius: 0px;"><img src="left.png" alt></button>
+
+                    <button id="button8" class="grid-item controlButton pixel-frame"style="background-color: #592918;height: 64px;
+    width: 64px; border-radius: 0px;"><img src="down.png" alt></button>
+
+                    <button id="button9" class="grid-item controlButton pixel-frame"style="background-color: #592918;height: 64px;
+    width: 64px; border-radius: 0px;"><img src="right.png" alt></button>
                   </div>
                 </div>
               </div>

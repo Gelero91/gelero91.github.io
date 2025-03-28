@@ -319,7 +319,7 @@ body {
 
 /* Boutons de sorts */
 #SpellButtons {
-  margin-top: 26px;
+  margin-top: 12px;
   display: flex;
   justify-content: space-between;
 }
@@ -338,7 +338,6 @@ body {
   padding: 0;
   background-color: #592918;
   border-radius: 0;
-  font-size: 26px;
 }
 
 #nextSpell {
