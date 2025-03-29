@@ -1363,180 +1363,361 @@ class Player {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     async move(timeElapsed, map, eventA, eventB, sprites) {
-        // console.log(timeElapsed);
-        // console.log('Tile Size:', this.tileSize);
-
-
-        // écoute des changement d'état des variables
-        const actualMap = map;
-
-        /*
-        console.log(actualMap)
-        console.log(eventA)
-        console.log(eventB)
-        */
-
+        // Récupération des entrées utilisateur
         let up = this.keysDown[KEY_UP] || this.keysDown[KEY_W];
         let down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S];
         let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A];
         let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D];
         const action = this.actionButtonClicked || this.keysDown[KEY_F] || this.keysDown[KEY_SPACE];
-
-        let timeBasedFactor = timeElapsed / UPDATE_INTERVAL;
-
-        let moveStep = this.speed * this.moveSpeed * timeBasedFactor;
-
-        this.rot +=
-            -this.dir * this.rotSpeed * timeBasedFactor;
-
-        let newX = Math.trunc(this.x + Math.cos(this.rot) * moveStep);
-        let newY = Math.trunc(
-            this.y + -Math.sin(this.rot) * moveStep
-        );
-
-        /*
-        console.log('newX:', newX, 'newY:', newY);
-        */
-
-        let cellX = newX / this.tileSize;
-        let cellY = newY / this.tileSize;
-
-
-        if (isNaN(cellX) || isNaN(cellY)) {
-            console.error("Invalid cell coordinates: cellX =", cellX, ", cellY =", cellY);
+        
+        // Éviter les mouvements multiples pendant une animation ou une action
+        if (this.isMoving || this.isRotating) return;
+        
+        // Définir les angles cardinaux précis (en radians)
+        const NORTH = Math.PI / 2;
+        const EAST = 0;
+        const SOUTH = 3 * Math.PI / 2;
+        const WEST = Math.PI;
+        
+        // Fonctions d'easing
+        const easeInOut = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+        const easeOutBack = (t) => {
+            const c1 = 1.70158;
+            const c3 = c1 + 1;
+            return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+        };
+        
+        // Traitement des rotations (par incréments de 90 degrés)
+        if (left || right) {
+            // Marquer le début de la rotation
+            this.isRotating = true;
+            
+            // Déterminer la rotation cible
+            let targetRot;
+            if (left) {
+                // Rotation de 90 degrés dans le sens horaire
+                if (Math.abs(this.rot - NORTH) < 0.1) targetRot = WEST;
+                else if (Math.abs(this.rot - EAST) < 0.1) targetRot = NORTH;
+                else if (Math.abs(this.rot - SOUTH) < 0.1) targetRot = EAST;
+                else if (Math.abs(this.rot - WEST) < 0.1) targetRot = SOUTH;
+            } else if (right) {
+                // Rotation de 90 degrés dans le sens anti-horaire
+                if (Math.abs(this.rot - NORTH) < 0.1) targetRot = EAST;
+                else if (Math.abs(this.rot - EAST) < 0.1) targetRot = SOUTH;
+                else if (Math.abs(this.rot - SOUTH) < 0.1) targetRot = WEST;
+                else if (Math.abs(this.rot - WEST) < 0.1) targetRot = NORTH;
+            }
+            
+            // Animation de rotation
+            const startRot = this.rot;
+            const rotationSteps = 10;
+            
+            // Calculer la différence d'angle en prenant le chemin le plus court
+            let angleDiff = targetRot - startRot;
+            if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+            if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+            
+            for (let i = 1; i <= rotationSteps; i++) {
+                const t = i / rotationSteps;
+                const easedT = easeInOutQuart(t); // Rotation plus dynamique
+                
+                this.rot = startRot + angleDiff * easedT;
+                await new Promise(resolve => setTimeout(resolve, 8)); // Plus rapide (8ms)
+            }
+            
+            // Normaliser à la fin pour éviter les erreurs d'arrondi
+            this.rot = targetRot;
+            
+            // Mise à jour du quadrant après rotation
+            this.playerQuadrant(this);
+            
+            // Réinitialiser l'état de rotation
+            this.isRotating = false;
             return;
         }
-
-        let obstacleOnPath;
-
-        // ACCELERATION
-        const accelerationRate = 0.05; // Taux d'accélération
-        const decelerationRate = 0.15; // Taux de décélération
-
-        if (up || joystickForwardClicked === true) {
-            this.speed = Math.min(this.speed + accelerationRate, 1);
-        } else if (down || joystickBackwardClicked === true) {
-            this.speed = Math.max(this.speed - accelerationRate, -1);
-        } else {
-            // Inertie/décélération si aucune touche n'est enfoncée
-            if (this.speed > 0) {
-                this.speed = Math.max(this.speed - decelerationRate, 0);
-            } else if (this.speed < 0) {
-                this.speed = Math.min(this.speed + decelerationRate, 0);
+        
+        // Calcul de la case de destination si mouvement
+        let destX = Math.floor(this.x / this.tileSize);
+        let destY = Math.floor(this.y / this.tileSize);
+        
+        // Variable pour suivre si un mouvement est demandé
+        let movementRequested = false;
+        let isMovingBackward = false;
+        
+        if (up) {
+            // Avancer d'une case dans la direction actuelle
+            if (Math.abs(this.rot - NORTH) < 0.1) {
+                destY -= 1; // Nord
+            } else if (Math.abs(this.rot - EAST) < 0.1) {
+                destX += 1; // Est
+            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                destY += 1; // Sud
+            } else if (Math.abs(this.rot - WEST) < 0.1) {
+                destX -= 1; // Ouest
+            }
+            movementRequested = true;
+        } else if (down) {
+            // Reculer d'une case (direction opposée)
+            if (Math.abs(this.rot - NORTH) < 0.1) {
+                destY += 1; // Sud (opposé du Nord)
+            } else if (Math.abs(this.rot - EAST) < 0.1) {
+                destX -= 1; // Ouest (opposé de l'Est)
+            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                destY -= 1; // Nord (opposé du Sud)
+            } else if (Math.abs(this.rot - WEST) < 0.1) {
+                destX += 1; // Est (opposé de l'Ouest)
+            }
+            movementRequested = true;
+            isMovingBackward = true;
+        } else if (action && this.turn) {
+            // Gestion des actions
+            this.handleSpriteAction(action, sprites);
+            
+            if (action) {
+                await this.handleTeleportation(this, eventA, eventB, this.x, this.y, this.tileSize);
+            }
+            return;
+        }
+        
+        // Si aucun mouvement n'est demandé, sortir
+        if (!movementRequested) return;
+        
+        // Vérification de collision avec mur ou limite de carte
+        let collidesWithWall = destX < 0 || destY < 0 || destX >= map[0].length || destY >= map.length || map[destY][destX] !== 0;
+        
+        // Vérification des sprites bloquants
+        let collidesWithSprite = false;
+        let collidedSprite = null;
+        
+        for (let sprite of sprites) {
+            let spriteX = Math.floor(sprite.x / this.tileSize);
+            let spriteY = Math.floor(sprite.y / this.tileSize);
+            
+            if (spriteX === destX && spriteY === destY && sprite.isBlocking) {
+                collidesWithSprite = true;
+                collidedSprite = sprite;
+                break;
             }
         }
-
-        // normalizing angle (contenu entre 0 et 2*pi)
-        // + BONUS : anti-bug angle 0 (parallaxe et sprite), on ajoute ou enlève 1° (pi/180) selon l'angle.
-        if (this.rot <= 0) {
-            this.rot += 2 * Math.PI - (Math.PI / 180);
-            //console.log("changing angle");
-        } else if (this.rot >= 2 * Math.PI) {
-            this.rot -= 2 * Math.PI + (Math.PI / 180);
-            //console.log("changing angle");
-        } else {
-            // nothing
-        }
-
-        // inertie rotation
-        if (left || joystickLeftClicked === true) {
-            this.dir = Math.max(this.dir - accelerationRate * 2, -1);
-        } else if (right || joystickRightClicked === true) {
-            this.dir = Math.min(this.dir + accelerationRate * 2, 1);
-        } else {
-            // Arrêt direct, sans décélération
-            this.dir = 0;
-        }
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        //CALCUL DU QUADRANT CAMERA et collision glissante
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-
-        this.playerQuadrant(this);
-
-        // console.log('Player object (this):', this);
-        // rajouter detection des sprite blocants aux conditions
-        if (this.isBlocking(cellX, cellY, actualMap)) {
-            // console.log('Player object (this):', this);
-            this.handleSlidingCollision(this, actualMap);
-            return;
-        }
-
-        //////////////////////////////////////////////////////////////////////////////
-        // COLLISION SPRITE
-        //////////////////////////////////////////////////////////////////////////////
-
-        // prends en compte la valeur "blocking" dans Sprite
-        // Si le sprite est bloquant (isBlocking==true), obstacle on path est true (bloquant)
-
-        for (let i = 0; i < sprites.length; i++) {
-            if (
-                Math.floor(cellX) === Math.floor(sprites[i].x / this.tileSize) &&
-                Math.floor(cellY) === Math.floor(sprites[i].y / this.tileSize)
-            ) {
-                // Si le sprite est bloquant (isBlocking==true), obstacle on path est true (bloquant)
-                obstacleOnPath = sprites[i].isBlocking;
-
-                // sprite attack en cas de collision xyz
-                if (this.turn == true && sprites[i].spriteType == "A") {
-                    console.log("attack player on collision");
-                    sprites[i].enemyAttackUpdate(this);
+        
+        // Gestion spécifique pour les ennemis (type "A")
+        if (collidesWithSprite && collidedSprite.spriteType === "A") {
+            // Marquer le début du mouvement
+            this.isMoving = true;
+            
+            // Animation d'impact contre l'ennemi
+            const startX = this.x;
+            const startY = this.y;
+            
+            // Distance de "poussée" vers l'ennemi (15% de la taille d'une case)
+            const pushDistance = this.tileSize * 0.15;
+            
+            // Calculer la direction de la poussée
+            let pushX = 0;
+            let pushY = 0;
+            
+            if (Math.abs(this.rot - NORTH) < 0.1) {
+                pushY = -pushDistance; // Nord
+            } else if (Math.abs(this.rot - EAST) < 0.1) {
+                pushX = pushDistance;  // Est
+            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                pushY = pushDistance;  // Sud
+            } else if (Math.abs(this.rot - WEST) < 0.1) {
+                pushX = -pushDistance; // Ouest
+            }
+            
+            // Position cible maximale de la poussée
+            const maxPushX = startX + pushX;
+            const maxPushY = startY + pushY;
+            
+            // Animation de "frappe" contre l'ennemi
+            const impactSteps = 4;
+            
+            // Phase 1: Poussée vers l'avant rapide
+            for (let i = 1; i <= impactSteps / 2; i++) {
+                const t = i / (impactSteps / 2);
+                const easedT = easeInOut(t);
+                
+                this.x = startX + pushX * easedT;
+                this.y = startY + pushY * easedT;
+                
+                // Léger effet de balancement
+                this.z = 3 * Math.sin(Math.PI * t);
+                
+                await new Promise(resolve => setTimeout(resolve, 5));
+            }
+            
+            // Phase 2: Rebond rapide
+            for (let i = 1; i <= impactSteps / 2; i++) {
+                const t = i / (impactSteps / 2);
+                const easedT = easeOutBack(t);
+                
+                this.x = maxPushX - pushX * easedT;
+                this.y = maxPushY - pushY * easedT;
+                
+                // Léger effet de balancement inverse
+                this.z = 3 * Math.sin(Math.PI * (1 - t));
+                
+                await new Promise(resolve => setTimeout(resolve, 5));
+            }
+            
+            // Normalisation finale de la position
+            this.x = startX;
+            this.y = startY;
+            this.z = 0;
+            
+            // Marquer la fin du mouvement d'impact
+            this.isMoving = false;
+            
+            // Déclencher directement le combat au lieu d'utiliser la méthode enemyAttackUpdate
+            // Cette approche permet un meilleur contrôle sur la séquence d'animation
+            if (this.turn) {
+                try {
+                    // Utiliser la méthode combat directement avec les paramètres appropriés
+                    await collidedSprite.combat(this.might, this.criti, this);
+                    
+                    // Note: la méthode combat devrait gérer elle-même le this.turn = false;
+                } catch (error) {
+                    console.error("Erreur lors du combat:", error);
+                    // Assurer que le tour est terminé même en cas d'erreur
                     this.turn = false;
-                    // ajouter fonction de "rebond" si collision avec ennemis
-                    Sprite.recoilPlayer(this);
                 }
             }
-        }
-
-        // Suite détection sprite
-        // implémenter collision glissante
-        if (obstacleOnPath) {
-
-            // console.log("sprite bloquant !")
-            // this.handleSlidingCollision(this, actualMap);
-
+            
             return;
-        } else {
-            // ok, tout va
         }
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // ACTION ET TELEPORT FUNCTION // MARQUEUR : event événement téléporteur
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-
-        if (action || left || right || down || up || joystickLeftClicked || joystickRightClicked || joystickBackwardClicked || joystickForwardClicked) {
-            if (this.turn === true) {
-                Sprite.resetToggle();
-                this.inventoryMenuShowed = false;
+        
+        // Animation d'impact en cas de collision avec un mur ou un sprite non-ennemi
+        if (collidesWithWall || collidesWithSprite) {
+            // Marquer le début du mouvement
+            this.isMoving = true;
+            
+            // Animation d'impact sur obstacle
+            const startX = this.x;
+            const startY = this.y;
+            
+            // Déterminer la distance maximale de "poussée" vers l'obstacle (20% de la taille d'une case)
+            const pushDistance = this.tileSize * 0.2;
+            
+            // Calculer la direction de la poussée
+            let pushX = 0;
+            let pushY = 0;
+            
+            if (Math.abs(this.rot - NORTH) < 0.1) {
+                pushY = -pushDistance; // Nord
+            } else if (Math.abs(this.rot - EAST) < 0.1) {
+                pushX = pushDistance;  // Est
+            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                pushY = pushDistance;  // Sud
+            } else if (Math.abs(this.rot - WEST) < 0.1) {
+                pushX = -pushDistance; // Ouest
             }
+            
+            // Position cible maximale de la poussée
+            const maxPushX = startX + pushX;
+            const maxPushY = startY + pushY;
+            
+            // Animation de poussée contre l'obstacle
+            const impactSteps = 8;
+            
+            // Phase 1: Poussée vers l'avant
+            for (let i = 1; i <= impactSteps / 2; i++) {
+                const t = i / (impactSteps / 2);
+                const easedT = easeInOut(t);
+                
+                this.x = startX + pushX * easedT;
+                this.y = startY + pushY * easedT;
+                
+                // Léger effet de balancement
+                this.z = 2 * Math.sin(Math.PI * t);
+                
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            
+            // Phase 2: Rebond
+            for (let i = 1; i <= impactSteps / 2; i++) {
+                const t = i / (impactSteps / 2);
+                const easedT = easeOutBack(t); // Effet de rebond
+                
+                this.x = maxPushX - pushX * easedT;
+                this.y = maxPushY - pushY * easedT;
+                
+                // Léger effet de balancement inverse
+                this.z = 2 * Math.sin(Math.PI * (1 - t));
+                
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            
+            // Normalisation finale de la position
+            this.x = startX;
+            this.y = startY;
+            this.z = 0;
+            
+            // Marquer la fin du mouvement
+            this.isMoving = false;
+            return;
         }
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // ACTION Selon sprite type
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-
-        if (action && this && this.turn == true) {
-            this.handleSpriteAction(action, sprites);
-            // la position de Player change, mais la fonction move a des valeurs
-            // qu'elle applique par dessus. On modifie donc les valeurs de move().
-            newX = this.x;
-            newY = this.y;
+        
+        // Si nous arrivons ici, le mouvement est possible
+        // Marquer le début du mouvement
+        this.isMoving = true;
+        
+        // Animation de déplacement améliorée
+        const startX = this.x;
+        const startY = this.y;
+        const targetX = destX * this.tileSize + this.tileSize / 2; // Centre de la case
+        const targetY = destY * this.tileSize + this.tileSize / 2; // Centre de la case
+        
+        // Vitesse variable en fonction des attributs du joueur et de la direction
+        let baseSteps = isMovingBackward ? 6 : 8; // Mouvement de base plus rapide, recul encore plus rapide
+        let movementSteps = baseSteps;
+        
+        // Ajuster selon les caractéristiques du joueur
+        if (this.hp < this.hpMax * 0.3) movementSteps += 2; // Légèrement plus lent si peu de vie
+        if (this.spells && this.spells.length > 0 && this.spells[this.selectedSpell].name === "Speed") movementSteps -= 2; // Plus rapide avec sort de vitesse
+        
+        // Vitesse minimale et maximale
+        movementSteps = Math.max(Math.min(movementSteps, 10), 4);
+        
+        // Hauteur du saut et amplitude du bobbing, adaptés selon la direction
+        const jumpHeight = isMovingBackward ? 8 : 15; // Saut moins haut en reculant
+        const bobbingAmount = isMovingBackward ? 2 : 3; // Bobbing moins prononcé en reculant
+        
+        // Animation principale avec bobbing et arc
+        for (let i = 1; i <= movementSteps; i++) {
+            const t = i / movementSteps;
+            const easedT = easeInOutQuart(t); // Easing plus prononcé pour un effet plus dynamique
+            
+            // Position horizontale avec easing
+            this.x = startX + (targetX - startX) * easedT;
+            this.y = startY + (targetY - startY) * easedT;
+            
+            // Mouvement vertical (arc/saut)
+            this.z = jumpHeight * Math.sin(Math.PI * t);
+            
+            // Bobbing (oscillation verticale supplémentaire)
+            // Fréquence plus rapide pour un mouvement plus dynamique
+            this.z += Math.sin(t * Math.PI * 6) * bobbingAmount;
+            
+            await new Promise(resolve => setTimeout(resolve, 12)); // Plus rapide (~83fps)
         }
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        // ACTION Téléporteur
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-
-        // les listes des téléporteurs sont à présent stockés dans initMap
-
-        if (action) {
-            this.handleTeleportation(this, eventA, eventB, newX, newY, this.tileSize);
+        
+        // Normalisation finale de la position
+        this.x = targetX;
+        this.y = targetY;
+        this.z = 0; // Réinitialiser la hauteur
+        
+        // Gestion des réinitialisations d'interface
+        if (this.turn) {
+            Sprite.resetToggle();
+            this.inventoryMenuShowed = false;
         }
-
-        // set new position
-        this.x = newX;
-        this.y = newY;
+        
+        // Marquer la fin du mouvement
+        this.isMoving = false;
     }
+    
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
