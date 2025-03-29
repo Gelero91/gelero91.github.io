@@ -682,6 +682,8 @@ class Player {
         var output = document.getElementById("output");
         var dialWindow = document.getElementById("dialogueWindow");
 
+        var actionButton = document.getElementById('actionButtons');
+
         // joystick adds
         if (joystick) {
             console.log("TOGGLE bouton inventaire en mode joystick");
@@ -690,6 +692,11 @@ class Player {
 
             this.inventoryMenuShowed = true;
         }
+
+        actionButton.style.display = "none";
+        document.getElementById("joystickBackButtonContainer").style.display = "block";
+        this.inventoryMenuShowed = true;
+
 
         info.style.display = "none";
         equipment.style.display = "block";
@@ -742,6 +749,9 @@ class Player {
         document.getElementById("QuestButton").style.display = "block";
         document.getElementById("InventoryButton").style.display = "none";
         document.getElementById("joystickBackButtonContainer").style.display = "none";
+
+        // Dungeon Crawler controls
+        document.getElementById("actionButtons").style.display = "block";
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -986,6 +996,17 @@ class Player {
         this.bindButton("newGameButton", 19);
         this.bindButton("mainMenuButton", 20);
         this.bindButton("backMenuButton", 21);
+
+        // Dungeon Crawler UI
+        this.bindButton("buttonA", 1);
+        this.bindButton("buttonB", 14);
+        this.bindButton("characterButton", 3);
+/*
+        this.bindButton("buttonUp", 5);
+        this.bindButton("buttonLeft", 7);
+        this.bindButton("buttonDown", 8);
+        this.bindButton("buttonRight", 9);
+*/
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2045,6 +2066,9 @@ class Sprite {
         dialWindow.style.display = "none";
         items.style.display = "none";
         output.style.display = "block";
+
+        // dungeon crawler controls :
+        document.getElementById("actionButtons").style.display = "block";
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
