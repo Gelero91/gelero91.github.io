@@ -585,7 +585,7 @@ class Player {
                 statsHTML = statsHTML.slice(0, -2);
 
                 if (item.slot === 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
               item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
             }; width:99%; margin-bottom: 5px; padding : 15px;" id="${
               item.name
@@ -595,7 +595,7 @@ class Player {
               item.name
             } ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
                 } else if (item.slot === 2) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
               item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
             }; width:99%; margin-bottom: 5px; padding : 15px;" id="${
               item.name
@@ -605,7 +605,7 @@ class Player {
               item.name
             } ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
                 } else {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton ${equippedClass}" style ="line-height: 0.8;background-color: ${
+                    inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
               item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
             }; width:99%; margin-bottom: 5px; padding : 15px;" id="${
               item.name
@@ -761,18 +761,20 @@ class Player {
     // Case selon type de bouton appuyée, les ID sont liées à un nombre dans "bindKeysAndButtons"
     handleButtonClick(buttonNumber) {
         switch (buttonNumber) {
-            case 1: // ACTION
+            case 1: // ACTION (Bouton A)
                 Sprite.resetToggle();
                 if (this.turn == true) {
-                    console.log('Action/Dialogue')
-                    // actionButtonClicked clic sur la touche action (bouton A)
+                    console.log('Action/Dialogue');
+                    this.buttonAClicked = true;
                     this.actionButtonClicked = true;
                 }
                 break;
-            case 2:
-            case 3: // EQUIPEMENT
+            
+            case 2: // Non utilisé
+                break;
+                
+            case 3: // EQUIPEMENT (Bouton B)
                 console.log("Bouton Equipement");
-                // zz
                 if (this.inventoryMenuShowed == false) {
                     Sprite.resetToggle();
                     this.inventoryMenuShowed = true;
@@ -784,28 +786,37 @@ class Player {
                     console.log("true");
                 }
                 break;
-            case 4:
-                // EMPTY
-                break;
-            case 5:
+                
+            case 5: // AVANCER (flèche haut)
                 console.log("forward");
-                this.joystickForwardClicked = true;
+                if (!this.isMoving && !this.isRotating && this.turn) {
+                    this.button5Clicked = true;
+                }
                 break;
-            case 6:
-                // EMPTY
-                break;
-            case 7:
+                
+            case 7: // TOURNER A GAUCHE (flèche gauche)
                 console.log("turnLeft");
-                this.turnLeftButtonClicked = true;
+                if (!this.isMoving && !this.isRotating && this.turn) {
+                    this.button7Clicked = true;
+                    this.turnLeftButtonClicked = true;
+                }
                 break;
-            case 8:
+                
+            case 8: // RECULER (flèche bas)
                 console.log("backward");
-                this.BackwardButtonClicked = true;
+                if (!this.isMoving && !this.isRotating && this.turn) {
+                    this.button8Clicked = true;
+                }
                 break;
-            case 9:
+                
+            case 9: // TOURNER A DROITE (flèche droite)
                 console.log("turnRight");
-                this.turnRightButtonClicked = true;
+                if (!this.isMoving && !this.isRotating && this.turn) {
+                    this.button9Clicked = true;
+                    this.turnRightButtonClicked = true;
+                }
                 break;
+                
             case 10:
                 // console.log('strifeRight');
                 this.joystickBackButton();
@@ -813,27 +824,31 @@ class Player {
                 this.inventoryMenuShowed = false;
                 console.log("joystickBackButton");
                 break;
+                
             case 11:
                 console.log("quest button");
                 document.getElementById("QuestButton").style.display = "none";
                 document.getElementById("InventoryButton").style.display = "block";
-
+    
                 this.displayQuests();
-
+    
                 document.getElementById("items").style.display = "none";
                 document.getElementById("quests").style.display = "block";
                 break;
+                
             case 12:
                 console.log("inventory button");
                 document.getElementById("QuestButton").style.display = "block";
                 document.getElementById("InventoryButton").style.display = "none";
-
+    
                 document.getElementById("items").style.display = "block";
                 document.getElementById("quests").style.display = "none";
                 break;
+                
             case 13:
                 this.previousSpell();
                 break;
+                
             case 14:
                 if (this.spells[this.selectedSpell].selfCast == true) {
                     console.log("self cast !")
@@ -843,15 +858,17 @@ class Player {
                     console.log("magic combat = true")
                     if (this.turn == true) {
                         console.log('Attack spell casted')
-
+    
                         this.actionButtonClicked = true;
                         this.combatSpell = true;
                     }
                 }
                 break;
+                
             case 15:
                 this.nextSpell();
                 break;
+                
             case 16:
                 if (gameOver == false) {
                     this.raycaster.saveGameState();
@@ -861,6 +878,7 @@ class Player {
                     alert("You can't save if you're dead.");
                 }
                 break;
+                
             case 17:
                 pause(500);
                 this.raycaster.loadGameState(this);
@@ -868,6 +886,7 @@ class Player {
                 Sprite.resetTerminal();
                 Sprite.terminalLog("Save loaded !");
                 break;
+                
             case 18:
                 Raycaster.showRenderWindow();
                 if (gameOver == false) {
@@ -884,17 +903,20 @@ class Player {
                 }
                 
                 break;
+                
             case 19:
                 pause(500);
                 this.raycaster.newGame();
                 Sprite.resetTerminal();
                 Sprite.terminalLog("New game !");
                 break;
+                
             case 20:
                 pause(500);
                 Raycaster.resetShowGameOver()
                 Raycaster.showMainMenu();
                 break;
+                
             case 21:
                 pause(500);
                 if (gameOver == false) {
@@ -903,8 +925,9 @@ class Player {
                     alert('dead, so nope');
                 }
                 break;
+                
             default:
-                console.log("Bouton non reconnu");
+                console.log("Bouton non reconnu: " + buttonNumber);
         }
     }
 
@@ -915,7 +938,6 @@ class Player {
         });
     }
 
-    // méthode d'interface, permet de centraliser les commandes et eventlistener
     // méthode d'interface, permet de centraliser les commandes et eventlistener
     bindKeysAndButtons() {
         this.keysDown = [];
@@ -991,7 +1013,7 @@ class Player {
         this.bindButton("QuestButton", 11);
         this.bindButton("InventoryButton", 12);
         this.bindButton("previousSpell", 13);
-        this.bindButton("castSpell", 14);
+        // this.bindButton("castSpell", 14);
         this.bindButton("nextSpell", 15);
         this.bindButton("newGameButton", 19);
         this.bindButton("mainMenuButton", 20);
@@ -1363,16 +1385,27 @@ class Player {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     async move(timeElapsed, map, eventA, eventB, sprites) {
-        // Récupération des entrées utilisateur
-        let up = this.keysDown[KEY_UP] || this.keysDown[KEY_W];
-        let down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S];
-        let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A];
-        let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D];
-        const action = this.actionButtonClicked || this.keysDown[KEY_F] || this.keysDown[KEY_SPACE];
+        // Récupération des entrées utilisateur - combinaison du clavier et des contrôles UI
+        let up = this.keysDown[KEY_UP] || this.keysDown[KEY_W] || this.joystickForwardClicked || this.button5Clicked;
+        let down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S] || this.joystickBackwardClicked || this.button8Clicked;
+        let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A] || this.joystickLeftClicked || this.button7Clicked || this.turnLeftButtonClicked;
+        let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D] || this.joystickRightClicked || this.button9Clicked || this.turnRightButtonClicked;
+        const action = this.actionButtonClicked || this.keysDown[KEY_F] || this.keysDown[KEY_SPACE] || this.buttonAClicked;
+        
+        // Réinitialiser les états des boutons après leur détection
+        this.button5Clicked = false;
+        this.button7Clicked = false;
+        this.button8Clicked = false;
+        this.button9Clicked = false;
+        this.buttonAClicked = false;
+        this.turnLeftButtonClicked = false;
+        this.turnRightButtonClicked = false;
+        this.actionButtonClicked = false;
         
         // Éviter les mouvements multiples pendant une animation ou une action
         if (this.isMoving || this.isRotating) return;
         
+        // Le reste de la fonction reste identique...
         // Définir les angles cardinaux précis (en radians)
         const NORTH = Math.PI / 2;
         const EAST = 0;
@@ -1604,14 +1637,28 @@ class Player {
             let pushX = 0;
             let pushY = 0;
             
-            if (Math.abs(this.rot - NORTH) < 0.1) {
-                pushY = -pushDistance; // Nord
-            } else if (Math.abs(this.rot - EAST) < 0.1) {
-                pushX = pushDistance;  // Est
-            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
-                pushY = pushDistance;  // Sud
-            } else if (Math.abs(this.rot - WEST) < 0.1) {
-                pushX = -pushDistance; // Ouest
+            if (isMovingBackward) {
+                // Inversion de la direction pour le mouvement arrière
+                if (Math.abs(this.rot - NORTH) < 0.1) {
+                    pushY = pushDistance; // Sud (inverse du Nord)
+                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                    pushX = -pushDistance; // Ouest (inverse de l'Est)
+                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                    pushY = -pushDistance; // Nord (inverse du Sud)
+                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                    pushX = pushDistance; // Est (inverse de l'Ouest)
+                }
+            } else {
+                // Direction normale pour le mouvement avant
+                if (Math.abs(this.rot - NORTH) < 0.1) {
+                    pushY = -pushDistance; // Nord
+                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                    pushX = pushDistance;  // Est
+                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                    pushY = pushDistance;  // Sud
+                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                    pushX = -pushDistance; // Ouest
+                }
             }
             
             // Position cible maximale de la poussée
@@ -1621,7 +1668,7 @@ class Player {
             // Animation de poussée contre l'obstacle
             const impactSteps = 8;
             
-            // Phase 1: Poussée vers l'avant
+            // Phase 1: Poussée vers l'avant/arrière
             for (let i = 1; i <= impactSteps / 2; i++) {
                 const t = i / (impactSteps / 2);
                 const easedT = easeInOut(t);
@@ -2304,7 +2351,7 @@ class Sprite {
                     }
 
                     shopContent.innerHTML += `
-              <button class="shop-item controlButton" style="line-height: 0.8;background-color: #281102; width:99%; margin-bottom: 5px; padding: 15px;" id="${item.name}" data-item="${item.id}">
+              <button class="shop-item controlButton pixel-frame-item" style="line-height: 0.8;background-color: #281102; width:99%; margin-bottom: 5px; padding: 15px;" id="${item.name}" data-item="${item.id}">
                 <div style="font-size: 15px; text-align: left; padding-top:5px;">
                   <img src="${itemIconSrc}"> ► ${item.name}
                 </div>

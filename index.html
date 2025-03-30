@@ -38,6 +38,18 @@ Gwendal L.R.
       image-rendering: pixelated;
     }
 
+    .pixel-frame-item {
+      background-color: #200F09;
+      box-sizing: border-box;
+      
+      /* Configuration du cadre avec border-image */
+      border-width: 20px;
+      border-style: solid;
+      border-image-source: url('pixelFrame-Item.png');
+      border-image-slice: 20; /* Valeur en pixels correspondant à l'épaisseur des coins */
+      border-image-repeat: repeat; /* Préserve l'aspect pixelisé */
+      image-rendering: pixelated;
+    }
 
     /* Méthode avec cadre interne */
     .pixel-frame-internal {
