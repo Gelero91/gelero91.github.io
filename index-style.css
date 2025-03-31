@@ -471,9 +471,9 @@ body {
 
 #nextButton {
   position: absolute;
-  padding: 5px;
-  bottom: 30px;
-  right: 35px;
+  /* padding: 5px;*/
+  bottom: 15px;
+  right: 15px;
   border-radius: var(--border-radius-standard);
   background-color: var(--color-dark-grey);
 }
