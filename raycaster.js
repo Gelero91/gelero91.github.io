@@ -720,7 +720,7 @@ class Player {
                 const questStatus = quest.completed ? "Completed" : "In progress";
                 const statusClass = quest.completed ? "completed" : ""; // Ajout de la classe 'completed' si la quête est complétée
 
-                questContent.innerHTML += `<div class="quest-item ${statusClass}">
+                questContent.innerHTML += `<div class="quest-item pixel-frame-item ${statusClass}">
                                               <h3>${quest.title}</h3>
                                               <p>${quest.description}</p>
                                               <p>Status: ${questStatus}</p>
@@ -1245,7 +1245,6 @@ class Player {
                         this.raycaster.nextMap();
                         break;
                     case "DOOR":
-                        // xyz
                         sprite.door(this, null);
                         this.raycaster.loadFloorCeilingImages();
                         Sprite.terminalLog('You enter/exit the area.')
@@ -2499,63 +2498,80 @@ class Sprite {
 
     talk() {
         Sprite.resetToggle();
-
+    
         const dialogue = document.getElementById("dialogue");
         const faceOutput = document.getElementById("faceOutput");
         const dialWindow = document.getElementById("dialogueWindow");
         const outputElement = document.getElementById("output");
         const nextButton = document.getElementById("nextButton");
-
+    
         // Réinitialiser le contenu de la fenêtre de dialogue
         dialogue.innerHTML = "";
         faceOutput.src = "";
-
+    
         // Retirer tout ancien gestionnaire d'événements du bouton "Next"
         const newNextButton = nextButton.cloneNode(true);
         nextButton.parentNode.replaceChild(newNextButton, nextButton);
-
+    
         outputElement.style.display = "none";
         dialWindow.style.display = "block";
-
+    
         let currentDialogue = 0;
         let allDialoguesLog = ''; // Stocker tous les dialogues pour le log
-
+    
         const showNextDialogue = () => {
             if (currentDialogue < this.spriteTalk.length) {
                 const [face, name, entry] = this.spriteTalk[currentDialogue];
-
-                // Vérifiez qu'ils ne sont pas undefined :
+    
                 if (face && name && entry) {
                     dialogue.innerHTML = `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br>${entry}</font>`;
-
-                    var imgElement = document.getElementById(face);
+                    const imgElement = document.getElementById(face);
                     faceOutput.src = imgElement ? imgElement.src : '';
-
-                    // Accumuler le dialogue dans allDialoguesLog
                     allDialoguesLog += `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br>${entry}</font><br>`;
                 }
-
+    
                 currentDialogue++;
             } else {
                 for (let i = 0; i < this.spriteTalk.length; i++) {
                     const [face, name, entry] = this.spriteTalk[i];
                     Sprite.terminalLog(`<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"></br>${entry}</font>`);
                 }
-                // Fin du dialogue : on log tous les dialogues d'un coup
-                // Sprite.terminalLog(allDialoguesLog);
-
-                // Afficher la fin du dialogue
+    
                 outputElement.style.display = "block";
                 dialWindow.style.display = "none";
-                newNextButton.removeEventListener("click", showNextDialogue);
             }
         };
-
+    
+        // Ajout des bons event listeners
         newNextButton.addEventListener("click", showNextDialogue);
+        
+        /*
+        // J'ai tenté d'ajouter des eventListener pour lire le dialogue suivant
+        // grâce à la touche action A, F et "espace"
+        // Cependant, face à un sprite, c'est aussi la touche qui permet d'intéragir avec ce dernier.
+        // Il faut trouver un moyen de bloquer cette interaction le temps du dialogue, puis remettre
+        // ce code.
+
+        const buttonA = document.getElementById("buttonA");
+        if (buttonA) {
+            buttonA.addEventListener("click", showNextDialogue);
+        }
+    
+        // Event listener pour les touches clavier
+        const keyListener = (event) => {
+            if (event.code === "Space" || event.key.toLowerCase() === "f") {
+                event.preventDefault();
+                showNextDialogue();
+            }
+        };
+    
+        document.addEventListener("keydown", keyListener);
+        */
 
         // Affiche le premier dialogue immédiatement
         showNextDialogue();
     }
+    
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Animation de combat
@@ -2587,7 +2603,7 @@ class Sprite {
         }
     }
 
-    // recul au contact de l'ennemi xyz
+    // recul au contact de l'ennemi
     static recoilPlayer(player) {
         // Constants pour le recul
         const recoilDistance = 800; // Distance de recul en pixels
@@ -2984,11 +3000,8 @@ class Sprite {
         }
     }
 
-    // XYZ
     door(player, textureSet) {
         let floor;
-
-
 
         if (textureSet == null) {
             floor = 1;
@@ -3029,7 +3042,6 @@ class Sprite {
             console.log("ceiling render : " + ceilingRender)
         }
 
-        // xyz
         // player.x = Math.floor(1280 * player.x + 640);
         // player.y = Math.floor(1280 * player.y + 640);
         console.log(player.quadrant);
@@ -3283,7 +3295,6 @@ class Raycaster {
         this.player.rot = mapData.playerStart.Orientation;
     }
 
-    // xyz
     nextMap() {
         // Incrémenter l'ID de la carte pour charger la suivante
         this.mapID += 1;
