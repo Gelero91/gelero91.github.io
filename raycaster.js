@@ -1405,7 +1405,6 @@ class Player {
         // Éviter les mouvements multiples pendant une animation ou une action
         if (this.isMoving || this.isRotating) return;
         
-        // Le reste de la fonction reste identique...
         // Définir les angles cardinaux précis (en radians)
         const NORTH = Math.PI / 2;
         const EAST = 0;
@@ -1442,21 +1441,39 @@ class Player {
                 else if (Math.abs(this.rot - WEST) < 0.1) targetRot = NORTH;
             }
             
-            // Animation de rotation
+            // Animation de rotation avec durée minimale garantie
             const startRot = this.rot;
-            const rotationSteps = 10;
+            const minRotationDuration = 500; // 200ms pour une rotation de 90 degrés
             
             // Calculer la différence d'angle en prenant le chemin le plus court
             let angleDiff = targetRot - startRot;
             if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
             if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
             
-            for (let i = 1; i <= rotationSteps; i++) {
-                const t = i / rotationSteps;
-                const easedT = easeInOutQuart(t); // Rotation plus dynamique
+            const startTime = performance.now();
+            let rotationComplete = false;
+            
+            while (!rotationComplete) {
+                const currentTime = performance.now();
+                const elapsedTime = currentTime - startTime;
                 
+                // Calculer la progression de la rotation (entre 0 et 1)
+                let t = Math.min(elapsedTime / minRotationDuration, 1);
+                
+                // Si la rotation est terminée
+                if (t >= 1) {
+                    rotationComplete = true;
+                    t = 1;
+                }
+                
+                // Appliquer l'easing
+                const easedT = easeInOutQuart(t);
+                
+                // Mettre à jour la rotation
                 this.rot = startRot + angleDiff * easedT;
-                await new Promise(resolve => setTimeout(resolve, 8)); // Plus rapide (8ms)
+                
+                // Rendre la frame
+                await new Promise(resolve => requestAnimationFrame(resolve));
             }
             
             // Normaliser à la fin pour éviter les erreurs d'arrondi
@@ -1550,26 +1567,53 @@ class Player {
             let pushX = 0;
             let pushY = 0;
             
-            if (Math.abs(this.rot - NORTH) < 0.1) {
-                pushY = -pushDistance; // Nord
-            } else if (Math.abs(this.rot - EAST) < 0.1) {
-                pushX = pushDistance;  // Est
-            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
-                pushY = pushDistance;  // Sud
-            } else if (Math.abs(this.rot - WEST) < 0.1) {
-                pushX = -pushDistance; // Ouest
+            if (isMovingBackward) {
+                // Inversion pour le mouvement arrière
+                if (Math.abs(this.rot - NORTH) < 0.1) {
+                    pushY = pushDistance; // Sud (inverse du Nord)
+                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                    pushX = -pushDistance; // Ouest (inverse de l'Est)
+                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                    pushY = -pushDistance; // Nord (inverse du Sud)
+                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                    pushX = pushDistance; // Est (inverse de l'Ouest)
+                }
+            } else {
+                // Direction normale pour le mouvement avant
+                if (Math.abs(this.rot - NORTH) < 0.1) {
+                    pushY = -pushDistance; // Nord
+                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                    pushX = pushDistance;  // Est
+                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                    pushY = pushDistance;  // Sud
+                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                    pushX = -pushDistance; // Ouest
+                }
             }
             
             // Position cible maximale de la poussée
             const maxPushX = startX + pushX;
             const maxPushY = startY + pushY;
             
-            // Animation de "frappe" contre l'ennemi
-            const impactSteps = 4;
+            // Durée minimale pour l'animation d'impact contre un ennemi
+            const minImpactDuration = 500; // 150ms au total (75ms pour chaque phase)
             
-            // Phase 1: Poussée vers l'avant rapide
-            for (let i = 1; i <= impactSteps / 2; i++) {
-                const t = i / (impactSteps / 2);
+            // Phase 1: Poussée vers l'avant/arrière rapide
+            const startImpactTime = performance.now();
+            let impactPhase1Complete = false;
+            
+            while (!impactPhase1Complete) {
+                const currentTime = performance.now();
+                const elapsedTime = currentTime - startImpactTime;
+                
+                // Progression de la phase 1 (0 à 1)
+                let t = Math.min(elapsedTime / (minImpactDuration / 2), 1);
+                
+                if (t >= 1) {
+                    impactPhase1Complete = true;
+                    t = 1;
+                }
+                
                 const easedT = easeInOut(t);
                 
                 this.x = startX + pushX * easedT;
@@ -1578,12 +1622,25 @@ class Player {
                 // Léger effet de balancement
                 this.z = 3 * Math.sin(Math.PI * t);
                 
-                await new Promise(resolve => setTimeout(resolve, 5));
+                await new Promise(resolve => requestAnimationFrame(resolve));
             }
             
             // Phase 2: Rebond rapide
-            for (let i = 1; i <= impactSteps / 2; i++) {
-                const t = i / (impactSteps / 2);
+            const startReboundTime = performance.now();
+            let impactPhase2Complete = false;
+            
+            while (!impactPhase2Complete) {
+                const currentTime = performance.now();
+                const elapsedTime = currentTime - startReboundTime;
+                
+                // Progression de la phase 2 (0 à 1)
+                let t = Math.min(elapsedTime / (minImpactDuration / 2), 1);
+                
+                if (t >= 1) {
+                    impactPhase2Complete = true;
+                    t = 1;
+                }
+                
                 const easedT = easeOutBack(t);
                 
                 this.x = maxPushX - pushX * easedT;
@@ -1592,7 +1649,7 @@ class Player {
                 // Léger effet de balancement inverse
                 this.z = 3 * Math.sin(Math.PI * (1 - t));
                 
-                await new Promise(resolve => setTimeout(resolve, 5));
+                await new Promise(resolve => requestAnimationFrame(resolve));
             }
             
             // Normalisation finale de la position
@@ -1603,17 +1660,12 @@ class Player {
             // Marquer la fin du mouvement d'impact
             this.isMoving = false;
             
-            // Déclencher directement le combat au lieu d'utiliser la méthode enemyAttackUpdate
-            // Cette approche permet un meilleur contrôle sur la séquence d'animation
+            // Déclencher directement le combat
             if (this.turn) {
                 try {
-                    // Utiliser la méthode combat directement avec les paramètres appropriés
                     await collidedSprite.combat(this.might, this.criti, this);
-                    
-                    // Note: la méthode combat devrait gérer elle-même le this.turn = false;
                 } catch (error) {
                     console.error("Erreur lors du combat:", error);
-                    // Assurer que le tour est terminé même en cas d'erreur
                     this.turn = false;
                 }
             }
@@ -1665,12 +1717,25 @@ class Player {
             const maxPushX = startX + pushX;
             const maxPushY = startY + pushY;
             
-            // Animation de poussée contre l'obstacle
-            const impactSteps = 8;
+            // Durée minimale pour l'animation d'impact sur obstacle
+            const minImpactDuration = 250; // 250ms au total (125ms pour chaque phase)
             
             // Phase 1: Poussée vers l'avant/arrière
-            for (let i = 1; i <= impactSteps / 2; i++) {
-                const t = i / (impactSteps / 2);
+            const startImpactTime = performance.now();
+            let impactPhase1Complete = false;
+            
+            while (!impactPhase1Complete) {
+                const currentTime = performance.now();
+                const elapsedTime = currentTime - startImpactTime;
+                
+                // Progression de la phase 1 (0 à 1)
+                let t = Math.min(elapsedTime / (minImpactDuration / 2), 1);
+                
+                if (t >= 1) {
+                    impactPhase1Complete = true;
+                    t = 1;
+                }
+                
                 const easedT = easeInOut(t);
                 
                 this.x = startX + pushX * easedT;
@@ -1679,12 +1744,25 @@ class Player {
                 // Léger effet de balancement
                 this.z = 2 * Math.sin(Math.PI * t);
                 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await new Promise(resolve => requestAnimationFrame(resolve));
             }
             
             // Phase 2: Rebond
-            for (let i = 1; i <= impactSteps / 2; i++) {
-                const t = i / (impactSteps / 2);
+            const startReboundTime = performance.now();
+            let impactPhase2Complete = false;
+            
+            while (!impactPhase2Complete) {
+                const currentTime = performance.now();
+                const elapsedTime = currentTime - startReboundTime;
+                
+                // Progression de la phase 2 (0 à 1)
+                let t = Math.min(elapsedTime / (minImpactDuration / 2), 1);
+                
+                if (t >= 1) {
+                    impactPhase2Complete = true;
+                    t = 1;
+                }
+                
                 const easedT = easeOutBack(t); // Effet de rebond
                 
                 this.x = maxPushX - pushX * easedT;
@@ -1693,7 +1771,7 @@ class Player {
                 // Léger effet de balancement inverse
                 this.z = 2 * Math.sin(Math.PI * (1 - t));
                 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await new Promise(resolve => requestAnimationFrame(resolve));
             }
             
             // Normalisation finale de la position
@@ -1716,25 +1794,38 @@ class Player {
         const targetX = destX * this.tileSize + this.tileSize / 2; // Centre de la case
         const targetY = destY * this.tileSize + this.tileSize / 2; // Centre de la case
         
-        // Vitesse variable en fonction des attributs du joueur et de la direction
-        let baseSteps = isMovingBackward ? 6 : 8; // Mouvement de base plus rapide, recul encore plus rapide
-        let movementSteps = baseSteps;
+        // Durée minimale du mouvement en ms
+        let minMovementDuration = isMovingBackward ? 500 : 600; // Plus rapide en reculant
         
         // Ajuster selon les caractéristiques du joueur
-        if (this.hp < this.hpMax * 0.3) movementSteps += 2; // Légèrement plus lent si peu de vie
-        if (this.spells && this.spells.length > 0 && this.spells[this.selectedSpell].name === "Speed") movementSteps -= 2; // Plus rapide avec sort de vitesse
+        if (this.hp < this.hpMax * 0.3) minMovementDuration += 50; // Légèrement plus lent si peu de vie
+        if (this.spells && this.spells.length > 0 && this.spells[this.selectedSpell].name === "Speed") minMovementDuration -= 50; // Plus rapide avec sort de vitesse
         
-        // Vitesse minimale et maximale
-        movementSteps = Math.max(Math.min(movementSteps, 10), 4);
+        // Bornes min/max pour la durée
+        minMovementDuration = Math.max(Math.min(minMovementDuration, 400), 200);
         
         // Hauteur du saut et amplitude du bobbing, adaptés selon la direction
         const jumpHeight = isMovingBackward ? 8 : 15; // Saut moins haut en reculant
         const bobbingAmount = isMovingBackward ? 2 : 3; // Bobbing moins prononcé en reculant
         
-        // Animation principale avec bobbing et arc
-        for (let i = 1; i <= movementSteps; i++) {
-            const t = i / movementSteps;
-            const easedT = easeInOutQuart(t); // Easing plus prononcé pour un effet plus dynamique
+        // Animation principale avec durée minimale garantie
+        const startMovementTime = performance.now();
+        let movementComplete = false;
+        
+        while (!movementComplete) {
+            const currentTime = performance.now();
+            const elapsedTime = currentTime - startMovementTime;
+            
+            // Progression du mouvement (0 à 1)
+            let t = Math.min(elapsedTime / minMovementDuration, 1);
+            
+            if (t >= 1) {
+                movementComplete = true;
+                t = 1;
+            }
+            
+            // Appliquer l'easing
+            const easedT = easeInOutQuart(t);
             
             // Position horizontale avec easing
             this.x = startX + (targetX - startX) * easedT;
@@ -1744,10 +1835,10 @@ class Player {
             this.z = jumpHeight * Math.sin(Math.PI * t);
             
             // Bobbing (oscillation verticale supplémentaire)
-            // Fréquence plus rapide pour un mouvement plus dynamique
             this.z += Math.sin(t * Math.PI * 6) * bobbingAmount;
             
-            await new Promise(resolve => setTimeout(resolve, 12)); // Plus rapide (~83fps)
+            // Rendre la frame
+            await new Promise(resolve => requestAnimationFrame(resolve));
         }
         
         // Normalisation finale de la position
