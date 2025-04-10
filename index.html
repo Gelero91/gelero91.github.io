@@ -32,7 +32,7 @@ Gwendal L.R.
       /* Configuration du cadre avec border-image */
       border-width: 20px;
       border-style: solid;
-      border-image-source: url('pixelFrameTransparent.png');
+      border-image-source: url('assets/pixelFrameTransparent.png');
       border-image-slice: 20; /* Valeur en pixels correspondant à l'épaisseur des coins */
       border-image-repeat: repeat; /* Préserve l'aspect pixelisé */
       image-rendering: pixelated;
@@ -45,7 +45,7 @@ Gwendal L.R.
       /* Configuration du cadre avec border-image */
       border-width: 20px;
       border-style: solid;
-      border-image-source: url('pixelFrame-Item.png');
+      border-image-source: url('assets/pixelFrame-Item.png');
       border-image-slice: 20; /* Valeur en pixels correspondant à l'épaisseur des coins */
       border-image-repeat: repeat; /* Préserve l'aspect pixelisé */
       image-rendering: pixelated;
@@ -70,7 +70,7 @@ Gwendal L.R.
       pointer-events: none; /* Permet d'interagir avec le contenu en dessous */
       border-width: 20px;
       border-style: solid;
-      border-image-source: url('pixelFrameTransparent.png');
+      border-image-source: url('assets/pixelFrameTransparent.png');
       border-image-slice: 20;
       border-image-repeat: repeat;
       image-rendering: pixelated;
@@ -111,7 +111,7 @@ Gwendal L.R.
             <div id="infos" class="game-area">
               <div id="info">
                 <h1>Alakir</h1>
-                <img src="separatorLarge.png" alt="" class="separator"></img>
+                <img src="assets/separatorLarge.png" alt="" class="separator"></img>
                 <!-- PLAYER INFO OUTPUT, old -->
                 <div id="playerInfoOutput" style="display: none;">
                   <p id="PlayerHPoutput">XXX</p>
@@ -140,7 +140,7 @@ Gwendal L.R.
                     <label style="top:50%;">Mana</label>
                   </div>
                   
-                  <img src="separatorLarge.png" alt="" class="separator"></img>
+                  <img src="assets/separatorLarge.png" alt="" class="separator"></img>
                 </br>
 
                   <div class="menu-button-container">
@@ -154,16 +154,16 @@ Gwendal L.R.
                     background-color: var(--color-light-grey);"><p style="margin-top: -7px;color: black;">CHARACTER</p></button>
                   </div>
 
-                  <img src="separatorLarge.png" alt="" class="separator" style="padding-top:  15px;"></img>
+                  <img src="assets/separatorLarge.png" alt="" class="separator" style="padding-top:  15px;"></img>
 
                   <!--SPELLS-->
                   <div id="SpellButtons">
                     <button id="previousSpell" class="controlButton pixel-frame" style="border-radius: 0px;">
-                      <img src="left.png" alt=""></img>
+                      <img src="assets/left.png" alt=""></img>
                     </button>
                     <button id="castSpell" class="controlButton pixel-frame-item" style="border-radius: 0px;">❂</button>
                     <button id="nextSpell" class="controlButton pixel-frame" style="border-radius: 0px;">
-                      <img src="right.png" alt=""></img>
+                      <img src="assets/right.png" alt=""></img>
                     </button>
                   </div>
 
@@ -261,7 +261,7 @@ Gwendal L.R.
                   </div>
                 </div>
                 <h1 style="margin-top: 14px;">COMBAT STATS</h1>
-                <img src="separatorLarge.png" alt="" class="separator"></img>
+                <img src="assets/separatorLarge.png" alt="" class="separator"></img>
                 <div class="combat-stats-grid-3">
                   <div>Might</div>
                   <div>:</div>
@@ -271,7 +271,7 @@ Gwendal L.R.
                   <div id="PlayerMagicOutput">z</div>
                 </div>
                 <br>
-                <img src="separatorLarge.png" alt="" class="separator"></img>
+                <img src="assets/separatorLarge.png" alt="" class="separator"></img>
                 <div class="combat-stats-grid-4">
                   <div>Armor</div>
                   <div>:</div>
@@ -377,29 +377,33 @@ Gwendal L.R.
                     <button id="buttonA" class="grid-item controlButton pixel-frame"  style="background-color: #592918;height: 64px;
     width: 64px;">A</button>
 
-                    <div id="button2" class="grid-item" display="height: 64px;
-                    width: 64px; "></div>
+                    <div id="button2" class="grid-item pixel-frame-item" display="height: 64px;
+                    width: 64px; "><img id="weaponIcon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAXtJREFUSEtjLHT1/c+ABISFeBlqVi5jRBajhM0YZ+r4f+KuVXAzrr0XYdhfGU01S7BaALKNWpZgWLDmrAhDiPEbBmr5BGyBcNo+eBCJCjIwZDq/AfOpYQk4MkGW2LbvY9BSYmC4do+B4dp9Boa6EOpYAk8ttLIEJTnSwhKM9E5tS7BmKHItgWXa/t2b4ebizLGkWgIyXEDjMDj13T1hyLDo9H6w2XiLBGItgRmupcHLcO3GZ+ItICYJr0n3YwC5PMRLiuHavc+kW0DIkkl1qmDDwRnz3meGzQtU4MFDMIiQS1FswSVwSRCv4SRZgOwTEPvZRsKGk2wBzBJli/Nwl8N82VknjhI0MHGSKhZQMMEMh0UoyCBQ6tFS4mWY06fMgJwHSPIBzHCQYeAIhSZHEBtkKS5LiPIBzHCYa9HTOrrlxzYYgB0B8g3JFqDnVFhYIzsC5hBQkiXKAljkwgyDFQPIyRg5AcCCkSQL0A3Dxkf3BahMItoHxFiAzacAv081oabInKsAAAAASUVORK5CYII=" style="display:block;" alt="weaponIcon" /></div>
 
                     <button id="buttonB" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
     width: 64px;">B</button>
 
-                    <div class="grid-item" style="background-color: #200F09;height: 64px;
-    width: 64px;"></div>
+
+<button id="button4" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
+    width: 64px; border-radius: 0px;"><img src="assets/left.png" alt></button>
+
 
                     <button id="button5" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="up.png" alt></button>
+    width: 64px; border-radius: 0px;"><img src="assets/up.png" alt></button>
 
-                    <div class="grid-item" style="background-color: #200F09; height: 64px;
-    width: 64px;"></div>
+
+<button id="button6" class="grid-item controlButton pixel-frame"style="background-color: #592918;height: 64px;
+    width: 64px; border-radius: 0px;"><img src="assets/right.png" alt></button>
+
 
                     <button id="button7" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="left.png" alt></button>
+    width: 64px; border-radius: 0px;"><img src="assets/left-left.png" alt></button>
 
                     <button id="button8" class="grid-item controlButton pixel-frame"style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="down.png" alt></button>
+    width: 64px; border-radius: 0px;"><img src="assets/down.png" alt></button>
 
                     <button id="button9" class="grid-item controlButton pixel-frame"style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="right.png" alt></button>
+    width: 64px; border-radius: 0px;"><img src="assets/right-right.png" alt></button>
                   </div>
                 </div>
               </div>
@@ -412,15 +416,15 @@ Gwendal L.R.
             <div class="menuCenter">
               <H1>OASIS.JS</H1>
               <br>
-              <button id="newGameButton" class="menuButton">New Game</button>
+              <button id="newGameButton" class="menuButton pixel-frame" style="background-color: rgb(255, 248, 230);">New Game</button>
               <br>
-              <button id="loadButton" class="menuButton">Load save</button>
+              <button id="loadButton" class="menuButton  pixel-frame" style="background-color:  rgb(255, 248, 230)" >Load save</button>
               <br>
-              <button id="saveButton" class="menuButton">Save game</button>
+              <button id="saveButton" class="menuButton pixel-frame " style="background-color: rgb(255, 248, 230);">Save game</button>
               <br>
-              <button id="nextMapButton" class="menuButton">DEV TEST<br>*Next Map*</button>
+              <button id="nextMapButton" class="menuButton pixel-frame " style="background-color: rgb(255, 224, 137);">DEV TEST<br>*Next Map*</button>
               <br>
-              <button id="backMenuButton" class="menuButton">Back to Game</button>
+              <button id="backMenuButton" class="menuButton  pixel-frame" style="background-color: rgb(255, 224, 137);">Back to Game</button>
             </div>
           </div>
         </div>

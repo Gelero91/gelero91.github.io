@@ -786,19 +786,35 @@ class Player {
                     console.log("true");
                 }
                 break;
-                
+              
+            case 4: // TOURNER A GAUCHE (flèche gauche)
+                console.log("turnLeft");
+                if (!this.isMoving && !this.isRotating && this.turn) {
+                    this.button7Clicked = true;
+                    this.turnLeftButtonClicked = true;
+                }
+                break;  
+
             case 5: // AVANCER (flèche haut)
                 console.log("forward");
                 if (!this.isMoving && !this.isRotating && this.turn) {
                     this.button5Clicked = true;
                 }
                 break;
-                
-            case 7: // TOURNER A GAUCHE (flèche gauche)
-                console.log("turnLeft");
+            
+            case 6: // TOURNER A DROITE (flèche droite)
+                console.log("turnRight");
+                if (!this.isMoving && !this.isRotating && this.turn) {
+                    this.button9Clicked = true;
+                    this.turnRightButtonClicked = true;
+                }
+                break;
+
+            case 7: // ESQUIVE A GAUCHE (flèche gauche)
+                console.log("LeftLeft");
                 if (!this.isMoving && !this.isRotating && this.turn) {
                     this.button7Clicked = true;
-                    this.turnLeftButtonClicked = true;
+                    this.LeftLeftButtonClicked = true;
                 }
                 break;
                 
@@ -810,10 +826,10 @@ class Player {
                 break;
                 
             case 9: // TOURNER A DROITE (flèche droite)
-                console.log("turnRight");
+                console.log("RightRight");
                 if (!this.isMoving && !this.isRotating && this.turn) {
                     this.button9Clicked = true;
-                    this.turnRightButtonClicked = true;
+                    this.RightRightButtonClicked = true;
                 }
                 break;
                 
@@ -1005,7 +1021,9 @@ class Player {
         this.bindButton("button1", 1);
         this.bindButton("button2", 2);
         this.bindButton("button3", 3);
+        this.bindButton("button4", 4);
         this.bindButton("button5", 5);
+        this.bindButton("button6", 6);
         this.bindButton("button7", 7);
         this.bindButton("button8", 8);
         this.bindButton("button9", 9);
@@ -1387,12 +1405,16 @@ class Player {
         // Récupération des entrées utilisateur - combinaison du clavier et des contrôles UI
         let up = this.keysDown[KEY_UP] || this.keysDown[KEY_W] || this.joystickForwardClicked || this.button5Clicked;
         let down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S] || this.joystickBackwardClicked || this.button8Clicked;
-        let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A] || this.joystickLeftClicked || this.button7Clicked || this.turnLeftButtonClicked;
-        let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D] || this.joystickRightClicked || this.button9Clicked || this.turnRightButtonClicked;
+        let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A] || this.joystickLeftClicked || this.turnLeftButtonClicked;
+        let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D] || this.joystickRightClicked || this.turnRightButtonClicked;
+        let dodgeLeft = this.button7Clicked ; // Nouveau: esquive gauche
+        let dodgeRight = this.button9Clicked; // Nouveau: esquive droite
         const action = this.actionButtonClicked || this.keysDown[KEY_F] || this.keysDown[KEY_SPACE] || this.buttonAClicked;
         
         // Réinitialiser les états des boutons après leur détection
+        this.button4Clicked = false;
         this.button5Clicked = false;
+        this.button6Clicked = false;
         this.button7Clicked = false;
         this.button8Clicked = false;
         this.button9Clicked = false;
@@ -1442,7 +1464,7 @@ class Player {
             
             // Animation de rotation avec durée minimale garantie
             const startRot = this.rot;
-            const minRotationDuration = 500; // 200ms pour une rotation de 90 degrés
+            const minRotationDuration = 500; // 500ms pour une rotation de 90 degrés
             
             // Calculer la différence d'angle en prenant le chemin le plus court
             let angleDiff = targetRot - startRot;
@@ -1486,13 +1508,14 @@ class Player {
             return;
         }
         
-        // Calcul de la case de destination si mouvement
+        // Calcul de la case de destination selon le mouvement
         let destX = Math.floor(this.x / this.tileSize);
         let destY = Math.floor(this.y / this.tileSize);
         
         // Variable pour suivre si un mouvement est demandé
         let movementRequested = false;
         let isMovingBackward = false;
+        let isDodging = false;
         
         if (up) {
             // Avancer d'une case dans la direction actuelle
@@ -1519,6 +1542,23 @@ class Player {
             }
             movementRequested = true;
             isMovingBackward = true;
+        } else if (dodgeLeft || dodgeRight) {
+            // Esquive latérale (déplacement perpendiculaire à la direction)
+            if (Math.abs(this.rot - NORTH) < 0.1) {
+                // Face au nord, esquive à gauche = ouest, esquive à droite = est
+                destX += dodgeLeft ? -1 : 1;
+            } else if (Math.abs(this.rot - EAST) < 0.1) {
+                // Face à l'est, esquive à gauche = nord, esquive à droite = sud
+                destY += dodgeLeft ? -1 : 1;
+            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                // Face au sud, esquive à gauche = est, esquive à droite = ouest
+                destX += dodgeLeft ? 1 : -1;
+            } else if (Math.abs(this.rot - WEST) < 0.1) {
+                // Face à l'ouest, esquive à gauche = sud, esquive à droite = nord
+                destY += dodgeLeft ? 1 : -1;
+            }
+            movementRequested = true;
+            isDodging = true;
         } else if (action && this.turn) {
             // Gestion des actions
             this.handleSpriteAction(action, sprites);
@@ -1566,7 +1606,18 @@ class Player {
             let pushX = 0;
             let pushY = 0;
             
-            if (isMovingBackward) {
+            if (isDodging) {
+                // Direction pour l'esquive (même logique que le mouvement)
+                if (Math.abs(this.rot - NORTH) < 0.1) {
+                    pushX = dodgeLeft ? -pushDistance : pushDistance;
+                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                    pushY = dodgeLeft ? -pushDistance : pushDistance;
+                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                    pushX = dodgeLeft ? pushDistance : -pushDistance;
+                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                    pushY = dodgeLeft ? pushDistance : -pushDistance;
+                }
+            } else if (isMovingBackward) {
                 // Inversion pour le mouvement arrière
                 if (Math.abs(this.rot - NORTH) < 0.1) {
                     pushY = pushDistance; // Sud (inverse du Nord)
@@ -1595,7 +1646,7 @@ class Player {
             const maxPushY = startY + pushY;
             
             // Durée minimale pour l'animation d'impact contre un ennemi
-            const minImpactDuration = 500; // 150ms au total (75ms pour chaque phase)
+            const minImpactDuration = 500; // 500ms au total (250ms pour chaque phase)
             
             // Phase 1: Poussée vers l'avant/arrière rapide
             const startImpactTime = performance.now();
@@ -1659,8 +1710,8 @@ class Player {
             // Marquer la fin du mouvement d'impact
             this.isMoving = false;
             
-            // Déclencher directement le combat
-            if (this.turn) {
+            // Déclencher directement le combat seulement si c'est une attaque (pas une esquive)
+            if (this.turn && !isDodging) {
                 try {
                     await collidedSprite.combat(this.might, this.criti, this);
                 } catch (error) {
@@ -1688,7 +1739,18 @@ class Player {
             let pushX = 0;
             let pushY = 0;
             
-            if (isMovingBackward) {
+            if (isDodging) {
+                // Direction pour l'esquive (même logique que le mouvement)
+                if (Math.abs(this.rot - NORTH) < 0.1) {
+                    pushX = dodgeLeft ? -pushDistance : pushDistance;
+                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                    pushY = dodgeLeft ? -pushDistance : pushDistance;
+                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                    pushX = dodgeLeft ? pushDistance : -pushDistance;
+                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                    pushY = dodgeLeft ? pushDistance : -pushDistance;
+                }
+            } else if (isMovingBackward) {
                 // Inversion de la direction pour le mouvement arrière
                 if (Math.abs(this.rot - NORTH) < 0.1) {
                     pushY = pushDistance; // Sud (inverse du Nord)
@@ -1794,18 +1856,30 @@ class Player {
         const targetY = destY * this.tileSize + this.tileSize / 2; // Centre de la case
         
         // Durée minimale du mouvement en ms
-        let minMovementDuration = isMovingBackward ? 500 : 600; // Plus rapide en reculant
+        let minMovementDuration;
+        if (isDodging) {
+            minMovementDuration = 400; // Esquive plus rapide que le déplacement normal
+        } else {
+            minMovementDuration = isMovingBackward ? 500 : 600; // Plus rapide en reculant
+        }
         
         // Ajuster selon les caractéristiques du joueur
         if (this.hp < this.hpMax * 0.3) minMovementDuration += 50; // Légèrement plus lent si peu de vie
         if (this.spells && this.spells.length > 0 && this.spells[this.selectedSpell].name === "Speed") minMovementDuration -= 50; // Plus rapide avec sort de vitesse
         
         // Bornes min/max pour la durée
-        minMovementDuration = Math.max(Math.min(minMovementDuration, 400), 200);
+        minMovementDuration = Math.max(Math.min(minMovementDuration, 800), 200);
         
-        // Hauteur du saut et amplitude du bobbing, adaptés selon la direction
-        const jumpHeight = isMovingBackward ? 8 : 15; // Saut moins haut en reculant
-        const bobbingAmount = isMovingBackward ? 2 : 3; // Bobbing moins prononcé en reculant
+        // Hauteur du saut et amplitude du bobbing, adaptés selon le type de mouvement
+        let jumpHeight, bobbingAmount;
+        
+        if (isDodging) {
+            jumpHeight = 10; // Saut moyen pour esquive
+            bobbingAmount = 2; // Bobbing léger pour esquive
+        } else {
+            jumpHeight = isMovingBackward ? 8 : 15; // Saut moins haut en reculant
+            bobbingAmount = isMovingBackward ? 2 : 3; // Bobbing moins prononcé en reculant
+        }
         
         // Animation principale avec durée minimale garantie
         const startMovementTime = performance.now();
@@ -1896,6 +1970,7 @@ class Item {
         this.criti = criti;
     }
 
+    // xyz
     equip(player) {
         if (this.isEquipable(player)) {
             this.unequip(player);
@@ -1918,6 +1993,7 @@ class Item {
         }
     }
 
+    // yz
     unequip(player) {
         if (this.equipped) {
             player.strength -= this.strength;
@@ -2551,6 +2627,8 @@ class Sprite {
         // Cependant, face à un sprite, c'est aussi la touche qui permet d'intéragir avec ce dernier.
         // Il faut trouver un moyen de bloquer cette interaction le temps du dialogue, puis remettre
         // ce code.
+        // Juste mettre une variable globale "commandBlocking=false" qui passe en false pendant les
+        // dialogues et cinématiques. Vérifier en argument de bingButtons()
 
         const buttonA = document.getElementById("buttonA");
         if (buttonA) {
