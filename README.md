@@ -19,7 +19,9 @@ Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, m
 
 Nouveau ! Cadre en pixelArt et CSS refactorisé :
 
-![Cadres !](https://github.com/user-attachments/assets/7a422d5a-74d2-4a25-b35f-8f57c1ae4795)
+![2025-04-10T22_33_54](https://github.com/user-attachments/assets/e92e6d92-a2e5-47e2-9bab-4540ae634021)
+
+
 
 
 L'editeur de carte est disponible à cette adresse : https://gelero91.github.io/editor.html
