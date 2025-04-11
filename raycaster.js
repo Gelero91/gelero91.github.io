@@ -395,6 +395,9 @@ class Player {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     statsUpdate() {
+        // tick a chaque cycle
+        // intégrer changement d'icone d'arme équipé dans l'UI d'exploration
+
         // Old Progress bar
         const playerHP = document.getElementById("PlayerHPoutput");
         const playerMP = document.getElementById("PlayerMPoutput");
@@ -421,6 +424,7 @@ class Player {
         hpBar.value = this.hp;
         mpBar.value = this.mp;
 
+        // changer quand les points hpMax augmenteront
         updateProgressBar("hpBar", this.hp, 10);
         updateProgressBar("mpBar", this.mp, 10);
 
@@ -587,7 +591,7 @@ class Player {
                 if (item.slot === 1) {
                     inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
               item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
-            }; width:99%; margin-bottom: 5px; padding : 15px;" id="${
+            }; width:99%; margin-bottom: 5px;;" id="${
               item.name
             }" data-item="${
               item.name
@@ -597,7 +601,7 @@ class Player {
                 } else if (item.slot === 2) {
                     inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
               item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
-            }; width:99%; margin-bottom: 5px; padding : 15px;" id="${
+            }; width:99%; margin-bottom: 5px;;" id="${
               item.name
             }" data-item="${
               item.name
@@ -607,7 +611,7 @@ class Player {
                 } else {
                     inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
               item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
-            }; width:99%; margin-bottom: 5px; padding : 15px;" id="${
+            }; width:99%; margin-bottom: 5px;" id="${
               item.name
             }" data-item="${
               item.name
@@ -2517,8 +2521,8 @@ class Sprite {
                     }
 
                     shopContent.innerHTML += `
-              <button class="shop-item controlButton pixel-frame-item" style="line-height: 0.8;background-color: #281102; width:99%; margin-bottom: 5px; padding: 15px;" id="${item.name}" data-item="${item.id}">
-                <div style="font-size: 15px; text-align: left; padding-top:5px;">
+              <button class="shop-item controlButton pixel-frame-item" style="line-height: 0.8;background-color: #281102; width:99%;" id="${item.name}" data-item="${item.id}">
+                <div style="font-size: 15px; text-align: left; padding-top:5px; "padding-bottom:5px;>
                   <img src="${itemIconSrc}"> ► ${item.name}
                 </div>
                 <p style="font-size: 15px; text-align: left; padding-top:5px;">
