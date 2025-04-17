@@ -430,6 +430,16 @@ class Player {
         var playerGold = document.getElementById("PlayerGoldOutput");
         playerGold.textContent = this.gold;
 
+        //On affiche l'arme équipé
+        var playerWeapon = document.getElementById("weaponIcon");
+        
+        if (this.hands[0]){
+            // console.log(this.hands[0].icon);
+            playerWeapon.src = this.hands[0].icon ;
+        } else {
+            playerWeapon.src = "assets/icons/a.png";
+        }
+
         // changer quand les points hpMax augmenteront
         updateProgressBar("hpBar", this.hp, 10);
         updateProgressBar("mpBar", this.mp, 10);
@@ -489,6 +499,7 @@ class Player {
         this.mpMax = 10 + (this.intellect - 5);
 
         // on vérifie s'il y a une différence entre l'ancienne valeur et la nouvelle
+        // evite les incrémentations infinies dues à la boucle
 
         if (this.strength !== this.oldStrength) {
             this.might += (this.strength - 5);
@@ -500,9 +511,24 @@ class Player {
             this.oldIntellect = this.intellect;
         }
 
-        this.dodge = this.dexterity * 2;
+        // pareil pour dodge et critical
+        // opti pour équipement
+        if (this.hands[0]){
+            if (this.dodge!== this.oldDodge) {
+                this.dodge = this.dexterity * 2 + this.hands[0].dodge;
+                this.oldDodge = this.dodge;
+            }
+
+            if (this.criti !== this.oldCriti) {
+                this.criti = this.dexterity * 2 + this.hands[0].criti;
+                this.oldCriti = this.criti
+            }
+        } else {
+            this.dodge = this.dexterity * 2;
+            this.criti = this.dexterity * 2;
+        }
+        // L'armure n"a pas de modificateurs
         this.armor = this.armor;
-        this.criti = this.dexterity * 2;
 
         playerMight.textContent = this.might;
         playerDodge.textContent = this.dodge;
@@ -2180,8 +2206,8 @@ Item.itemList = [{
         strength: 0,
         dexterity: 0,
         intellect: 0,
-        might: 1,
-        magic: 0,
+        might: 0,
+        magic: 1,
         dodge: 0,
         armor: 0,
         criti: 0,
