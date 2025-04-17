@@ -17,12 +17,9 @@ Les touches directionnelles vous permettront de vous déplacer.
 Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, marchander, observer, ouvrir un coffre & combattre.
 
 
-Nouveau ! Cadre en pixelArt et CSS refactorisé :
+Nouveau ! Cadre en pixelArt et plein d'icônes :
 
-![2025-04-10T22_33_54](https://github.com/user-attachments/assets/e92e6d92-a2e5-47e2-9bab-4540ae634021)
-
-
-
+![2025-04-17T18_01_11](https://github.com/user-attachments/assets/b3aa2ba5-e729-43e2-9207-5b9a38e3c59c)
 
 L'editeur de carte est disponible à cette adresse : https://gelero91.github.io/editor.html
 
@@ -43,5 +40,7 @@ Screenshots des anciennes versions :
 
 
 Le projet s'appuie sur une version fortement modifiée de l'architecture JS/HTML5 de Jacob Seidelin (https://dev.opera.com/authors/jacob-seidelin/), adaptée par Andrew Lim (https://github.com/andrew-lim/). Ces travaux sont eux-mêmes inspirés des tutoriels de Permadi (https://permadi.com/1996/) et de Lode (https://lodev.org/cgtutor/raycasting.html).
+
+Icônes créé par 
 
 À noter que les assets graphiques utilisés dans ce projet ne m'appartiennent pas et restent la propriété de leurs auteurs respectifs, à l'exception de certaines illustrations en pixel art, notamment la bannière "Oasis.JS".
