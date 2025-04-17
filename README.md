@@ -19,7 +19,7 @@ Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, m
 
 Nouveau ! Cadre en pixelArt et plein d'icônes créés par Dusk :
 
-![2025-04-18T00_05_32](https://github.com/user-attachments/assets/dcf4380a-7810-44ab-ad80-d4b9a36900d6)
+![2025-04-18T00_05_32](https://github.com/user-attachments/assets/9a097448-538c-41ee-945e-082d61815abd)
 
 
 L'editeur de carte est disponible à cette adresse : https://gelero91.github.io/editor.html
