@@ -575,178 +575,276 @@ class Player {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // EQUIPEMENT INVENTAIRE
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     displayInventory() {
-        const inventoryContent = document.getElementById("inventoryContent");
-    
-        if (this.inventory.length > 0) {
-            inventoryContent.innerHTML = "";
-    
-            this.inventory.forEach((item) => {
-                // Obtenir une instance fraîche de l'item qui aura toutes les propriétés correctes
-                const fullItem = Item.getItemById(item.id);
+        // Mettre à jour l'affichage de l'or
+        const goldOutput = document.getElementById("PlayerGoldOutput");
+        if (goldOutput) {
+            goldOutput.textContent = this.gold || 0;
+        }
+        
+        const inventoryList = document.getElementById("inventory-list");
+        const itemDetailsPlaceholder = document.getElementById("item-details-placeholder");
+        
+        if (!inventoryList) return;
+        
+        // Vider la liste des objets
+        inventoryList.innerHTML = "";
+        
+        if (this.inventory && this.inventory.length > 0) {
+            // Générer la liste des objets
+            this.inventory.forEach((item, index) => {
+                const equippedMark = item.equipped ? "✓" : "";
                 
-                const equippedStatus = item.equipped ? "➜ Equipped" : "";
-                const equippedClass = item.equipped ? "equipped" : "";
-    
-                let statsHTML = "";
-                if (item.strength !== 0) {
-                    const sign = item.might > 0 ? "+" : "";
-                    statsHTML += `${sign}${item.strength} Strength<br>`;
+                // Déterminer l'icône en fonction du slot
+                let itemIcon = "";
+                if (item.slot === 1) {
+                    itemIcon = document.getElementById("weaponIcon").getAttribute("src");
+                } else if (item.slot === 2) {
+                    itemIcon = document.getElementById("cloakIcon").getAttribute("src");
+                } else {
+                    itemIcon = document.getElementById("itemIcon").getAttribute("src");
                 }
-                if (item.dexterity !== 0) {
-                    const sign = item.might > 0 ? "+" : "";
-                    statsHTML += `${sign}${item.dexterity} Dexterity<br>`;
-                }
-                if (item.intellect !== 0) {
-                    const sign = item.might > 0 ? "+" : "";
-                    statsHTML += `${sign}${item.intellect} Intellect<br>`;
-                }
-                if (item.might !== 0) {
-                    const sign = item.might > 0 ? "+" : "";
-                    statsHTML += `${sign}${item.might} Might<br>`;
-                }
-                if (item.magic !== 0) {
-                    const sign = item.magic > 0 ? "+" : "";
-                    statsHTML += `${sign}${item.magic} Magic<br>`;
-                }
-                if (item.dodge !== 0) {
-                    const sign = item.dodge > 0 ? "+" : "";
-                    statsHTML += `${sign}${item.dodge} Dodge<br>`;
-                }
-                if (item.criti !== 0) {
-                    const sign = item.criti > 0 ? "+" : "";
-                    statsHTML += `${sign}${item.criti} Crit.<br>`;
-                }
-                if (item.armor !== 0) {
-                    const sign = item.armor > 0 ? "+" : "";
-                    statsHTML += `${sign}${item.armor} Armor<br>`;
-                }
-                if (item.power !== 0) {
-                    // Power est généralement absolu, donc pas de signe
-                    statsHTML += `${item.power} Power<br>`;
-                }
-    
-                if (statsHTML.endsWith('<br>')) {
-                    statsHTML = statsHTML.slice(0, -4);
-                }
-    
-                // Utiliser l'icône de l'objet complet
-                let itemIconSrc = fullItem ? fullItem.icon : "";
                 
-                // Fallback pour les icônes en fonction du slot si nécessaire
-                /*
-                if (!itemIconSrc) {
-                    if (item.slot === 1) {
-                        itemIconSrc = document.getElementById("weaponIcon").getAttribute("src");
-                    } else if (item.slot === 2) {
-                        itemIconSrc = document.getElementById("cloakIcon").getAttribute("src");
-                    } else {
-                        itemIconSrc = document.getElementById("itemIcon").getAttribute("src");
+                const isEquipped = item.equipped;
+                const bgColor = isEquipped ? "rgba(0, 60, 0, 0.7)" : "#140c1c";
+                
+                const itemElement = document.createElement("div");
+                itemElement.className = "item-entry";
+                itemElement.setAttribute("data-index", index);
+                itemElement.style.cssText = `
+                    display: flex; 
+                    align-items: center; 
+                    padding: 4px; 
+                    margin-bottom: 3px; 
+                    cursor: pointer; 
+                    background-color: ${bgColor}; 
+                    border: 1px solid #663300;
+                    width: 95%;
+                `;
+                
+                itemElement.innerHTML = `
+                    <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
+                    <span style="flex-grow: 1; font-size: 13px; color: ${isEquipped ? '#aaffaa' : '#cccccc'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
+                    <span style="color: #66ff66; font-weight: bold;">${equippedMark}</span>
+                `;
+                
+                itemElement.addEventListener('click', () => {
+                    // Désélectionner tous les autres éléments
+                    document.querySelectorAll('.item-entry').forEach(e => {
+                        e.style.borderColor = '#663300';
+                        e.style.backgroundColor = e.classList.contains('equipped') ? 'rgba(0, 60, 0, 0.7)' : '#140c1c';
+                    });
+                    
+                    // Mettre en évidence l'élément sélectionné
+                    itemElement.style.borderColor = '#ffaa00';
+                    itemElement.style.backgroundColor = isEquipped ? 'rgba(20, 80, 20, 0.9)' : '#331a0c';
+                    
+                    // Afficher les détails
+                    this.showItemDetails(index);
+                    
+                    // Cacher le placeholder
+                    if (itemDetailsPlaceholder) {
+                        itemDetailsPlaceholder.style.display = 'none';
                     }
+                });
+                
+                // Marquer comme équipé pour le style
+                if (isEquipped) {
+                    itemElement.classList.add('equipped');
                 }
-                */
-    
-                inventoryContent.innerHTML += `
-                <button class="inventory-item controlButton pixel-frame-item ${equippedClass}" 
-                        style="line-height: 0.8;background-color: ${item.equipped ? "rgb(0, 60, 0)" : "#140c1c"}; 
-                              width:99%; margin-bottom: 5px;" 
-                        id="${item.name}" 
-                        data-item="${item.name}">
-                    <div style="font-size: 15px; text-align: left; padding-top:5px;">
-                        <img src="${itemIconSrc}"> ► ${item.name} ${equippedStatus}
-                    </div>
-                    <br> 
-                    <div style="text-align: right; line-height: 1.15">
-                        ${statsHTML}
-                    </div>
-                </button><br>`;
+                
+                inventoryList.appendChild(itemElement);
             });
+            
+            // Sélectionner automatiquement le premier élément
+            const firstItem = inventoryList.querySelector('.item-entry');
+            if (firstItem) {
+                firstItem.click();
+            }
         } else {
-            inventoryContent.innerHTML = "> The inventory is empty";
+            inventoryList.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c; width: 100%;">No items</div>';
+            
+            // S'assurer que le placeholder est visible
+            if (itemDetailsPlaceholder) {
+                itemDetailsPlaceholder.style.display = 'flex';
+            }
         }
     }
-
+    
+    // Méthode pour afficher les détails d'un objet
+    showItemDetails(index) {
+        const item = this.inventory[index];
+        const itemDetails = document.getElementById('item-details');
+        
+        if (!item || !itemDetails) return;
+        
+        // Déterminer l'icône en fonction du slot
+        let itemIcon = "";
+        if (item.slot === 1) {
+            itemIcon = document.getElementById("weaponIcon").getAttribute("src");
+        } else if (item.slot === 2) {
+            itemIcon = document.getElementById("cloakIcon").getAttribute("src");
+        } else {
+            itemIcon = document.getElementById("itemIcon").getAttribute("src");
+        }
+        
+        // Type d'équipement
+        let slotName = "";
+        switch(item.slot) {
+            case 1: slotName = "Weapon"; break;
+            case 2: slotName = "Armor"; break;
+            default: slotName = "Item"; break;
+        }
+        
+        // Construire la chaîne HTML des statistiques
+        let statsHTML = "";
+        
+        // Fonction helper pour ajouter une stat avec la bonne couleur
+        const addStat = (value, name) => {
+            if (value !== 0) {
+                const sign = value > 0 ? "+" : "";
+                const color = value > 0 ? "#66ff66" : "#ff6666";
+                statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
+            }
+        };
+        
+        // Ajouter toutes les stats dans l'ordre
+        addStat(item.strength, "Strength");
+        addStat(item.dexterity, "Dexterity");
+        addStat(item.intellect, "Intellect");
+        addStat(item.might, "Might");
+        addStat(item.magic, "Magic");
+        addStat(item.dodge, "Dodge");
+        addStat(item.criti, "Crit.");
+        addStat(item.armor, "Armor");
+        
+        if (item.power !== 0) {
+            statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
+        }
+        
+        // Si aucune statistique n'est définie
+        if (statsHTML === "") {
+            statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
+        }
+        
+        // Construire le HTML complet des détails
+        itemDetails.innerHTML = `
+            <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 100%;">
+                <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
+                <div style="width: calc(100% - 38px); overflow: hidden;">
+                    <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                    <div style="font-size: 12px; color: #a89986;">${slotName}</div>
+                </div>
+            </div>
+            
+            <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 100%; max-height: calc(100% - 80px);">
+                ${statsHTML}
+            </div>
+            
+            <div style="text-align: center; margin-top: 10px; width: 100%;">
+                <button id="item-action-btn" style="
+                    padding: 6px 12px; 
+                    background-color: ${item.equipped ? '#793020' : '#205020'}; 
+                    color: #e8d5a9; 
+                    border: 1px solid #663300; 
+                    cursor: pointer;
+                    font-family: monospace;
+                    text-transform: uppercase;
+                    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                    width: 90%;
+                    max-width: 180px;
+                ">
+                    ${item.equipped ? 'UNEQUIP' : 'EQUIP'}
+                </button>
+            </div>
+        `;
+        
+        // Ajouter l'écouteur d'événement pour le bouton d'action
+        document.getElementById('item-action-btn').addEventListener('click', () => {
+            if (item.equipped) {
+                item.unequip(this);
+            } else {
+                item.equip(this);
+            }
+            
+            // Mettre à jour l'interface
+            this.displayInventory();
+            this.equipmentDisplay();
+        });
+    }
+    
+    // Garde la fonction existante pour la compatibilité
     equipmentDisplay() {
         const handsContent = document.getElementById("handsContent");
         const torsoContent = document.getElementById("torsoContent");
-
+    
         // Vérifiez si hands est défini et non vide
         if (this.hands && this.hands.length > 0) {
-            handsContent.innerHTML = `<button class="equipped-item" style ="color:black;" data-item="${this.hands[0].name}">${this.hands[0].name}</button>`;
+            handsContent.innerHTML = `<button class="equipped-item" style="color:black;" data-item="${this.hands[0].name}">${this.hands[0].name}</button>`;
         } else {
             handsContent.innerHTML = "EMPTY";
         }
-
+    
         // Vérifiez si torso est défini et non vide
         if (this.torso && this.torso.length > 0) {
-            torsoContent.innerHTML = `<button class="equipped-item" style ="color:black;" data-item="${this.torso[0].name}">${this.torso[0].name}</button>`;
+            torsoContent.innerHTML = `<button class="equipped-item" style="color:black;" data-item="${this.torso[0].name}">${this.torso[0].name}</button>`;
         } else {
             torsoContent.innerHTML = "EMPTY";
         }
-
+    
         // Ajouter des gestionnaires d'événements aux boutons
         document
-            .querySelectorAll(".inventory-item, .equipped-item")
+            .querySelectorAll(".equipped-item")
             .forEach((itemButton) => {
                 itemButton.addEventListener("click", (event) => {
-                    console.log("clicked !");
                     const itemName = itemButton.getAttribute("data-item");
-                    const clickedItem =
-                        this.inventory.find((item) => item.name === itemName) ||
-                        (this.hands && this.hands[0]) ||
-                        (this.torso && this.torso[0]);
-
-                    if (clickedItem) {
-                        if (clickedItem.equipped) {
-                            console.log("equipped");
-                            clickedItem.unequip(this);
-                        } else {
-                            console.log("unequipped");
-                            clickedItem.equip(this);
-                        }
-
-                        // Mettre à jour l'affichage de l'inventaire et de l'équipement
+                    const clickedItem = this.inventory.find((item) => item.name === itemName);
+    
+                    if (clickedItem && clickedItem.equipped) {
+                        clickedItem.unequip(this);
+                        
+                        // Mettre à jour l'affichage
                         this.displayInventory();
                         this.equipmentDisplay();
                     }
                 });
             });
     }
-
+    
     toggleEquipment() {
         // AFFICHER INVENTAIRE
         this.displayInventory();
         this.equipmentDisplay();
-
+    
         var info = document.getElementById("info");
         var stats = document.getElementById("stats");
         var equipment = document.getElementById("equipment");
-
+    
         var items = document.getElementById("items");
         var output = document.getElementById("output");
         var dialWindow = document.getElementById("dialogueWindow");
-
+    
         var actionButton = document.getElementById('actionButtons');
-
+    
         // joystick adds
-        if (joystick) {
-            console.log("TOGGLE bouton inventaire en mode joystick");
+        if (typeof joystick !== 'undefined' && joystick) {
             document.getElementById("joystick-container").style.display = "none";
             document.getElementById("joystickBackButtonContainer").style.display = "block";
-
+    
             this.inventoryMenuShowed = true;
         }
-
-        actionButton.style.display = "none";
+    
+        if (actionButton) {
+            actionButton.style.display = "none";
+        }
+        
         document.getElementById("joystickBackButtonContainer").style.display = "block";
         this.inventoryMenuShowed = true;
-
-
+    
         info.style.display = "none";
         equipment.style.display = "block";
         stats.style.display = "none";
-
+    
         items.style.display = "block";
         output.style.display = "none";
         dialWindow.style.display = "none";
@@ -2703,95 +2801,145 @@ class Sprite {
         const shopName = document.getElementById("shopName");
         shopName.textContent = "'" + this.spriteName + "'";
     
-        if (this.spriteSell.length > 0) {
-            shopContent.innerHTML = "";
+        // Structure simple en deux colonnes
+        shopContent.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 5px; border-bottom: 1px solid #663300;">
+                <div style="font-weight: bold; color: #e8d5a9;">SHOP</div>
+                <div><span class="stat-label">Gold:</span>
+                    <span id="ShopPlayerGoldOutput" style="color: #ffcc00;">${player.gold || 0}</span> <span style="color: #ffcc00;">gp</span></div>
+            </div>
+            
+            <div style="display: flex; height: calc(100% - 30px); width: 100%;">
+                <!-- Liste des objets (40%) -->
+                <div id="shop-item-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto;"></div>
+                
+                <!-- Détails de l'objet (60%) -->
+                <div id="shop-item-details" style="width: 60%; height: 100%; padding-left: 10px;"></div>
+            </div>
+        `;
     
-            this.spriteSell.forEach((itemId) => {
+        const itemList = document.getElementById("shop-item-list");
+        const itemDetails = document.getElementById("shop-item-details");
+    
+        if (this.spriteSell.length > 0) {
+            // Générer la liste des objets
+            let listHTML = "";
+            
+            this.spriteSell.forEach((itemId, index) => {
                 const item = Item.getItemById(itemId);
                 if (item) {
-                    let statsHTML = "";
-                    // Vérifier si la valeur est différente de 0, qu'elle soit positive ou négative
-                    if (item.strength !== 0) {
-                        const sign = item.might > 0 ? "+" : "";
-                        statsHTML += `${sign}${item.strength} Strength<br>`;
+                    // Déterminer l'icône
+                    let itemIcon = "";
+                    if (item.slot === 1) {
+                        itemIcon = document.getElementById("weaponIcon").getAttribute("src");
+                    } else if (item.slot === 2) {
+                        itemIcon = document.getElementById("cloakIcon").getAttribute("src");
+                    } else {
+                        itemIcon = document.getElementById("itemIcon").getAttribute("src");
                     }
-                    if (item.dexterity !== 0) {
-                        const sign = item.might > 0 ? "+" : "";
-                        statsHTML += `${sign}${item.dexterity} Dexterity<br>`;
-                    }
-                    if (item.intellect !== 0) {
-                        const sign = item.might > 0 ? "+" : "";
-                        statsHTML += `${sign}${item.intellect} Intellect<br>`;
-                    }
-                    if (item.might !== 0) {
-                        // Ajouter un "+" seulement si la valeur est positive
-                        const sign = item.might > 0 ? "+" : "";
-                        statsHTML += `${sign}${item.might} Might<br>`;
-                    }
-                    if (item.magic !== 0) {
-                        const sign = item.magic > 0 ? "+" : "";
-                        statsHTML += `${sign}${item.magic} Magic<br>`;
-                    }
-                    if (item.dodge !== 0) {
-                        const sign = item.dodge > 0 ? "+" : "";
-                        statsHTML += `${sign}${item.dodge} Dodge<br>`;
-                    }
-                    if (item.criti !== 0) {
-                        const sign = item.criti > 0 ? "+" : "";
-                        statsHTML += `${sign}${item.criti} Crit.<br>`;
-                    }
-                    if (item.armor !== 0) {
-                        const sign = item.armor > 0 ? "+" : "";
-                        statsHTML += `${sign}${item.armor} Armor<br>`;
-                    }
-                    if (item.power !== 0) {
-                        // Power est généralement absolu, donc pas de signe
-                        statsHTML += `${item.power} Power<br>`;
-                    }
-                    statsHTML = statsHTML.slice(0, -4); // Enlever le dernier <br>
-    
-                    let itemIconSrc = item.icon;
-    
-                    // Afficher le prix ou "FREE" si le prix est 0 ou non défini
-                    const priceDisplay = item.price > 0 ? item.price : 'FREE';
                     
-                    // Ajouter une classe pour les objets que le joueur ne peut pas se permettre
-                    const canAfford = item.price <= player.gold || item.price === 0 || !item.price;
-                    const priceClass = canAfford ? "" : "cannot-afford";
-    
-                    shopContent.innerHTML += `
-                  <button class="shop-item controlButton ${priceClass} pixel-frame-item" style="line-height: 0.8;background-color: #281102; width:99%; margin-bottom: 5px;" id="${item.name}" data-item="${item.id}">
-                    <div style="font-size: 15px; text-align: left; padding-top:5px;">
-                      <img src="${itemIconSrc}"> ► ${item.name}
-                    </div>
-                    <p style="font-size: 15px; text-align: left; padding-top:5px;">
-                    <font style="font-size: 25px;">$</font> ► ${priceDisplay}</p>
-                    <div style="text-align: right; line-height: 1.15;">${statsHTML}</div>
-                  </button><br>`;
+                    const price = item.price || 'FREE';
+                    
+                    // Ligne simple pour chaque objet
+                    listHTML += `
+                        <div class="shop-item" data-item="${item.id}" style="display: flex; align-items: center; padding: 4px; margin: 3px; cursor: pointer; background-color: #140c1c; border: 1px solid #663300;">
+                            <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
+                            <span style="flex-grow: 1;">${item.name}</span>
+                            <span style="color: #ffcc00;">${price}</span>
+                        </div>
+                    `;
                 }
             });
-    
-            // Ajouter des écouteurs d'événements aux boutons des objets
-            document.querySelectorAll('.shop-item').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const itemId = parseInt(event.currentTarget.getAttribute('data-item'), 10);
-                    const itemToBuy = Item.getItemById(itemId);
-                    if (itemToBuy) {
-                        console.log("Buying item:", itemToBuy.name);
+            
+            itemList.innerHTML = listHTML;
+            
+            // Ajouter les événements de clic
+            document.querySelectorAll('.shop-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    // Désélectionner tous les autres
+                    document.querySelectorAll('.shop-item').forEach(i => {
+                        i.style.backgroundColor = '#140c1c';
+                        i.style.borderColor = '#663300';
+                    });
+                    
+                    // Sélectionner celui-ci
+                    e.currentTarget.style.backgroundColor = '#331a0c';
+                    e.currentTarget.style.borderColor = '#ffaa00';
+                    
+                    // Afficher les détails
+                    const itemId = parseInt(e.currentTarget.getAttribute('data-item'), 10);
+                    const selectedItem = Item.getItemById(itemId);
+                    
+                    if (selectedItem) {
+                        // Générer les statistiques
+                        let statsHTML = "";
                         
-                        // Utiliser la méthode sellItemToPlayer si l'objet a un prix
-                        if (itemToBuy.price > 0) {
-                            this.sellItemToPlayer(itemToBuy, player);
-                        } else {
-                            // Sinon, le donner gratuitement
-                            this.giveItemToPlayer(itemToBuy, player);
-                            Sprite.terminalLog(`Vous avez reçu ${itemToBuy.name}.`);
-                        }
+                        if (selectedItem.strength !== 0) statsHTML += `<div>Strength: ${selectedItem.strength}</div>`;
+                        if (selectedItem.dexterity !== 0) statsHTML += `<div>Dexterity: ${selectedItem.dexterity}</div>`;
+                        if (selectedItem.intellect !== 0) statsHTML += `<div>Intellect: ${selectedItem.intellect}</div>`;
+                        if (selectedItem.might !== 0) statsHTML += `<div>Might: ${selectedItem.might}</div>`;
+                        if (selectedItem.magic !== 0) statsHTML += `<div>Magic: ${selectedItem.magic}</div>`;
+                        if (selectedItem.dodge !== 0) statsHTML += `<div>Dodge: ${selectedItem.dodge}</div>`;
+                        if (selectedItem.criti !== 0) statsHTML += `<div>Crit.: ${selectedItem.criti}</div>`;
+                        if (selectedItem.armor !== 0) statsHTML += `<div>Armor: ${selectedItem.armor}</div>`;
+                        if (selectedItem.power !== 0) statsHTML += `<div>Power: ${selectedItem.power}</div>`;
+                        
+                        if (statsHTML === "") statsHTML = "<div>No stats available</div>";
+                        
+                        // Déterminer le type
+                        let type = "Item";
+                        if (selectedItem.slot === 1) type = "Weapon";
+                        if (selectedItem.slot === 2) type = "Armor";
+                        
+                        // Afficher les détails
+                        itemDetails.innerHTML = `
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #663300; padding-bottom: 5px;">
+                                <div style="font-size: 16px; font-weight: bold;">${selectedItem.name}</div>
+                                <div style="font-size: 12px; color: #aaaaaa;">${type}</div>
+                                <div style="font-size: 14px; color: #ffcc00;">Price: ${selectedItem.price || 'FREE'}</div>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                ${statsHTML}
+                            </div>
+                            
+                            <div style="text-align: center;">
+                                <button class="buy-button" data-item="${selectedItem.id}" style="padding: 5px 15px; background-color: #205020; color: #ffffff; border: 1px solid #663300; cursor: pointer;">
+                                    ${selectedItem.price ? 'BUY' : 'TAKE'}
+                                </button>
+                            </div>
+                        `;
+                        
+                        // Ajouter l'événement au bouton d'achat
+                        document.querySelector('.buy-button').addEventListener('click', () => {
+                            if (selectedItem.price && selectedItem.price > 0) {
+                                // Vérifier si le joueur a assez d'or
+                                if ((player.gold || 0) >= selectedItem.price) {
+                                    player.gold -= selectedItem.price;
+                                    this.addItemToInventory(selectedItem, player);
+                                    this.spriteSell = this.spriteSell.filter(id => id !== selectedItem.id);
+                                    Sprite.terminalLog(`Vous avez acheté ${selectedItem.name} pour ${selectedItem.price} gp.`);
+                                } else {
+                                    Sprite.terminalLog(`Vous n'avez pas assez d'or pour acheter ${selectedItem.name}.`);
+                                }
+                            } else {
+                                this.giveItemToPlayer(selectedItem, player);
+                                Sprite.terminalLog(`Vous avez reçu ${selectedItem.name}.`);
+                            }
+                            
+                            // Rafraîchir l'affichage
+                            this.displayItemsForSale(player);
+                        });
                     }
                 });
             });
+            
+            // Sélectionner le premier élément par défaut
+            const firstItem = document.querySelector('.shop-item');
+            if (firstItem) firstItem.click();
         } else {
-            shopContent.innerHTML = "> No items for sale";
+            itemList.innerHTML = "<div style='padding: 10px; text-align: center;'>No items for sale</div>";
+            itemDetails.innerHTML = "";
         }
     }
 

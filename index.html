@@ -318,18 +318,30 @@ Gwendal L.R.
                 </div>
               </div>              
               
-              <!--ITEMS-->
-              <div id="items" style="display: none;">
-                <div>
-                  <div>ITEMS</div>
-                  <div><span class="stat-label">Gold:</span>
-                       <span id="PlayerGoldOutput">-</span></div>
-                </div>
-                <br>
-                <div id="inventoryContent">
-                  > The inventory is empty
-                </div>
-              </div>
+<!--ITEMS-->
+<div id="items" style="display: none; width: 100%; height: 100%;">
+  <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 5px; border-bottom: 1px solid #663300;">
+    <div style="font-weight: bold; color: #e8d5a9;">ITEMS</div>
+    <div><span class="stat-label">Gold:</span>
+         <span id="PlayerGoldOutput" style="color: #ffcc00;">0</span> <span style="color: #ffcc00;">gp</span></div>
+  </div>
+  
+  <div id="inventory-container" style="display: flex; height: calc(100% - 30px); width: 100%;">
+    <!-- Liste des objets (40% de la largeur) -->
+    <div id="inventory-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+      <!-- Les items seront injectés ici par JS -->
+    </div>
+    
+    <!-- Détails de l'objet sélectionné (60% de la largeur) -->
+    <div id="item-details" style="width: 60%; height: 100%; padding-left: 10px; display: flex; flex-direction: column;">
+      <!-- Les détails de l'item seront injectés ici par JS -->
+      <div id="item-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
+        <div>Select an item</div>
+        <div>to view details</div>
+      </div>
+    </div>
+  </div>
+</div>
               
               <!--QUEST-->
               <div id="quests" style="display: none;">
