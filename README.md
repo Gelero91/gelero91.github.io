@@ -17,9 +17,10 @@ Les touches directionnelles vous permettront de vous déplacer.
 Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, marchander, observer, ouvrir un coffre & combattre.
 
 
-Nouveau ! Cadre en pixelArt et plein d'icônes :
+Nouveau ! Cadre en pixelArt et plein d'icônes créés par Dusk :
 
-![2025-04-17T18_01_11](https://github.com/user-attachments/assets/b3aa2ba5-e729-43e2-9207-5b9a38e3c59c)
+![2025-04-18T00_05_32](https://github.com/user-attachments/assets/dcf4380a-7810-44ab-ad80-d4b9a36900d6)
+
 
 L'editeur de carte est disponible à cette adresse : https://gelero91.github.io/editor.html
 
