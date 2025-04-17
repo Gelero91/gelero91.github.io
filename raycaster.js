@@ -195,7 +195,7 @@ var maps = [
                         ["faceMerchant", "Quill the Merchant", "Oy mate! Want to buy something?"],
                         ["facePlayer", "Alakir", "Oh, okay. Maybe later."]
                     ],
-                    [1, 2, 3, 4], 6, 4
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9], 6, 4
                 ],
     
                 [5, 15, 18, 5, 9],
@@ -383,6 +383,8 @@ class Player {
         this.selectedSpell = 0;
         this.combatSpell = false;
 
+        this.playerGold = this.playerGold;
+
         // Référence à la classe principale pour permettre au joueur d'interagir avec le moteur du jeu.
         // Bien que cette approche fonctionne, elle introduit un couplage fort entre Player et la classe principale.
         // Cela peut rendre le code moins flexible à long terme et plus difficile à maintenir ou à tester.
@@ -423,6 +425,10 @@ class Player {
 
         hpBar.value = this.hp;
         mpBar.value = this.mp;
+
+        // money !
+        var playerGold = document.getElementById("PlayerGoldOutput");
+        playerGold.textContent = this.gold;
 
         // changer quand les points hpMax augmenteront
         updateProgressBar("hpBar", this.hp, 10);
@@ -509,7 +515,7 @@ class Player {
         currentSpell.textContent = this.spells[this.selectedSpell].name;
 
         const currentSpellIcon = document.getElementById("castSpell");
-        currentSpellIcon.textContent = this.spells[this.selectedSpell].icon;
+        currentSpellIcon.src = this.spells[this.selectedSpell].icon;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -522,7 +528,7 @@ class Player {
             this.selectedSpell = 0;
         }
         const currentSpellIcon = document.getElementById("castSpell");
-        currentSpellIcon.textContent = this.spells[this.selectedSpell].icon;
+        currentSpellIcon.src = this.spells[this.selectedSpell].icon;
 
         const currentSpellName = document.getElementById("selectedSpell");
         currentSpellName.textContent = this.spells[this.selectedSpell].name;
@@ -534,7 +540,7 @@ class Player {
             this.selectedSpell = this.spells.length - 1;
         }
         const currentSpellIcon = document.getElementById("castSpell");
-        currentSpellIcon.textContent = this.spells[this.selectedSpell].icon;
+        currentSpellIcon.src = this.spells[this.selectedSpell].icon;
 
         const currentSpell = document.getElementById("selectedSpell");
         currentSpell.textContent = this.spells[this.selectedSpell].name;
@@ -546,80 +552,89 @@ class Player {
 
     displayInventory() {
         const inventoryContent = document.getElementById("inventoryContent");
-
+    
         if (this.inventory.length > 0) {
-
             inventoryContent.innerHTML = "";
-
+    
             this.inventory.forEach((item) => {
-                // on récupère l'icone de test
-                const itemIcon = document
-                    .getElementById("itemIcon")
-                    .getAttribute("src");
-                const swordIcon = document
-                    .getElementById("weaponIcon")
-                    .getAttribute("src");
-                const cloakIcon = document
-                    .getElementById("cloakIcon")
-                    .getAttribute("src");
-
+                // Obtenir une instance fraîche de l'item qui aura toutes les propriétés correctes
+                const fullItem = Item.getItemById(item.id);
+                
                 const equippedStatus = item.equipped ? "➜ Equipped" : "";
-                const equippedClass = item.equipped ? "equipped" : ""; // Ajout de la classe 'equipped' si l'élément est équipé
-
-                let statsHTML = ""; // Variable pour stocker les statistiques à afficher
-
-                // Vérifiez chaque statistique et n'ajoutez à statsHTML que si elle n'est pas égale à zéro
+                const equippedClass = item.equipped ? "equipped" : "";
+    
+                let statsHTML = "";
+                if (item.strength !== 0) {
+                    const sign = item.might > 0 ? "+" : "";
+                    statsHTML += `${sign}${item.strength} Strength<br>`;
+                }
+                if (item.dexterity !== 0) {
+                    const sign = item.might > 0 ? "+" : "";
+                    statsHTML += `${sign}${item.dexterity} Dexterity<br>`;
+                }
+                if (item.intellect !== 0) {
+                    const sign = item.might > 0 ? "+" : "";
+                    statsHTML += `${sign}${item.intellect} Intellect<br>`;
+                }
                 if (item.might !== 0) {
-                    statsHTML += `+${item.might} Might<br>`;
+                    const sign = item.might > 0 ? "+" : "";
+                    statsHTML += `${sign}${item.might} Might<br>`;
                 }
                 if (item.magic !== 0) {
-                    statsHTML += `+${item.magic} Magic<br>`;
+                    const sign = item.magic > 0 ? "+" : "";
+                    statsHTML += `${sign}${item.magic} Magic<br>`;
                 }
                 if (item.dodge !== 0) {
-                    statsHTML += `+${item.dodge} Dodge<br>`;
+                    const sign = item.dodge > 0 ? "+" : "";
+                    statsHTML += `${sign}${item.dodge} Dodge<br>`;
+                }
+                if (item.criti !== 0) {
+                    const sign = item.criti > 0 ? "+" : "";
+                    statsHTML += `${sign}${item.criti} Crit.<br>`;
                 }
                 if (item.armor !== 0) {
-                    statsHTML += `+${item.armor} Armor<br>`;
+                    const sign = item.armor > 0 ? "+" : "";
+                    statsHTML += `${sign}${item.armor} Armor<br>`;
                 }
                 if (item.power !== 0) {
+                    // Power est généralement absolu, donc pas de signe
                     statsHTML += `${item.power} Power<br>`;
                 }
-
-                // Supprime le dernier caractère (-) pour éviter un espace inutile à la fin
-                statsHTML = statsHTML.slice(0, -2);
-
-                if (item.slot === 1) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
-              item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
-            }; width:99%; margin-bottom: 5px;;" id="${
-              item.name
-            }" data-item="${
-              item.name
-            }"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${swordIcon}"> ► ${
-              item.name
-            } ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15">${statsHTML}</div></button><br>`;
-                } else if (item.slot === 2) {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
-              item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
-            }; width:99%; margin-bottom: 5px;;" id="${
-              item.name
-            }" data-item="${
-              item.name
-            }"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${cloakIcon}"> ► ${
-              item.name
-            } ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
-                } else {
-                    inventoryContent.innerHTML += `<button class="inventory-item controlButton pixel-frame-item ${equippedClass}" style ="line-height: 0.8;background-color: ${
-              item.equipped ? "rgb(0, 60, 0)" : "#140c1c"
-            }; width:99%; margin-bottom: 5px;" id="${
-              item.name
-            }" data-item="${
-              item.name
-            }"><div style="font-size: 15px; text-align : left; padding-top:5px;"><img src="${itemIcon}"> ► ${
-              item.name
-            } ${equippedStatus}</div><br> <div style="text-align : right; line-height: 1.15;">${statsHTML}</div></button><br>`;
-                    console.log(`Item: ${item.name}, Power: ${item.power}`);
+    
+                if (statsHTML.endsWith('<br>')) {
+                    statsHTML = statsHTML.slice(0, -4);
                 }
+    
+                // Utiliser l'icône de l'objet complet
+                let itemIconSrc = fullItem ? fullItem.icon : "";
+                
+                // Fallback pour les icônes en fonction du slot si nécessaire
+                /*
+                if (!itemIconSrc) {
+                    if (item.slot === 1) {
+                        itemIconSrc = document.getElementById("weaponIcon").getAttribute("src");
+                    } else if (item.slot === 2) {
+                        itemIconSrc = document.getElementById("cloakIcon").getAttribute("src");
+                    } else {
+                        itemIconSrc = document.getElementById("itemIcon").getAttribute("src");
+                    }
+                }
+                */
+    
+                inventoryContent.innerHTML += `
+                <button class="inventory-item controlButton pixel-frame-item ${equippedClass}" 
+                        style="line-height: 0.8;background-color: ${item.equipped ? "rgb(0, 60, 0)" : "#140c1c"}; 
+                              width:99%; margin-bottom: 5px;" 
+                        id="${item.name}" 
+                        data-item="${item.name}">
+                    <div style="font-size: 15px; text-align: left; padding-top:5px;">
+                        <img src="${itemIconSrc}"> ► ${item.name} ${equippedStatus}
+                    </div>
+                    <br> 
+                    <div style="text-align: right; line-height: 1.15">
+                        ${statsHTML}
+                    </div>
+                </button><br>`;
             });
         } else {
             inventoryContent.innerHTML = "> The inventory is empty";
@@ -1059,61 +1074,30 @@ class Player {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     playerQuadrant(player) {
-        const quadrants = [{
-                min: 337.5,
-                max: 360,
-                name: "ouest"
-            },
-            {
-                min: 0,
-                max: 22.5,
-                name: "ouest"
-            },
-            {
-                min: 22.5,
-                max: 67.5,
-                name: "nord-ouest"
-            },
-            {
-                min: 67.5,
-                max: 112.5,
-                name: "nord"
-            },
-            {
-                min: 112.5,
-                max: 157.5,
-                name: "nord-est"
-            },
-            {
-                min: 157.5,
-                max: 202.5,
-                name: "est"
-            },
-            {
-                min: 202.5,
-                max: 247.5,
-                name: "sud-est"
-            },
-            {
-                min: 247.5,
-                max: 292.5,
-                name: "sud"
-            },
-            {
-                min: 292.5,
-                max: 337.5,
-                name: "sud-ouest"
-            }
-        ];
-
-        for (const quadrant of quadrants) {
-            if ((player.rot >= quadrant.min * (Math.PI / 180) && player.rot < quadrant.max * (Math.PI / 180))) {
-                player.quadrant = quadrant.name;
-                // console.log(player.quadrant);
-                return;
-            }
+        if (!player) {
+            console.error("Player is undefined in playerQuadrant()");
+            return;
         }
-        // console.log("rot is out of range - need angle in radians between 0 and 2PI");
+        
+        // Convertir la rotation en degrés et normaliser entre 0 et 360
+        const rotDeg = (player.rot * 180 / Math.PI + 360) % 360;
+        
+        // Ne mapper qu'aux 4 directions cardinales
+        if (rotDeg >= 315 || rotDeg < 45) {
+            player.quadrant = "est";  // 0 degrés est Est dans ce système
+        } else if (rotDeg >= 45 && rotDeg < 135) {
+            player.quadrant = "nord";
+        } else if (rotDeg >= 135 && rotDeg < 225) {
+            player.quadrant = "ouest";
+        } else if (rotDeg >= 225 && rotDeg < 315) {
+            player.quadrant = "sud";
+        }
+        
+        // Vérification de sécurité
+        if (!player.quadrant) {
+            console.error(`Failed to determine quadrant for rotation ${rotDeg}° (${player.rot} rad)`);
+            player.quadrant = "nord"; // Valeur par défaut
+        }
     }
 
     handleSlidingCollision(player, map) {
@@ -1179,91 +1163,84 @@ class Player {
     }
 
     calculateFrontPosition() {
-        const player = this;
-        if (!player) {
-            console.error('Player is undefined');
-            return {
-                frontX: null,
-                frontY: null
-            };
-        }
-
-        const {
-            x,
-            y,
-            quadrant
-        } = player;
-
-        const frontOffsets = {
-            "nord-ouest": {
-                x: 0.5,
-                y: -0.5
-            },
-            "nord": {
-                x: 0,
-                y: -1
-            },
-            "nord-est": {
-                x: -0.5,
-                y: -0.5
-            },
-            "est": {
-                x: -1,
-                y: 0
-            },
-            "sud-est": {
-                x: -0.5,
-                y: 0.5
-            },
-            "sud": {
-                x: 0,
-                y: 1
-            },
-            "sud-ouest": {
-                x: 0.5,
-                y: 0.5
-            },
-            "ouest": {
-                x: 1,
-                y: 0
+        // S'assurer que la propriété quadrant est définie
+        if (!this.quadrant) {
+            // Calcul d'urgence du quadrant
+            this.playerQuadrant(this);
+            
+            // Si toujours indéfini après tentative de calcul, utiliser une valeur par défaut
+            if (!this.quadrant) {
+                // La rotation en radians nous permettra de déterminer un quadrant par défaut
+                const rotDeg = (this.rot * 180 / Math.PI + 360) % 360;
+                
+                // Déterminer un quadrant basé sur la rotation (seulement les 4 directions cardinales)
+                if (rotDeg >= 45 && rotDeg < 135) {
+                    this.quadrant = "nord";
+                } else if (rotDeg >= 135 && rotDeg < 225) {
+                    this.quadrant = "ouest";
+                } else if (rotDeg >= 225 && rotDeg < 315) {
+                    this.quadrant = "sud";
+                } else {
+                    this.quadrant = "est";
+                }
+                
+                console.log(`Quadrant fallback used: ${this.quadrant} based on rotation ${rotDeg.toFixed(2)}°`);
             }
+        }
+    
+        // Simplifions avec seulement les 4 directions cardinales
+        const frontOffsets = {
+            "nord": { x: 0, y: -1 },
+            "est": { x: 1, y: 0 },  // Correction ici: Est devrait être +1 en X
+            "sud": { x: 0, y: 1 },
+            "ouest": { x: -1, y: 0 }  // Correction ici: Ouest devrait être -1 en X
         };
-
-        const offset = frontOffsets[quadrant];
-        const frontX = Math.floor((x / this.tileSize) + offset.x);
-        const frontY = Math.floor((y / this.tileSize) + offset.y);
-
-        return {
-            frontX,
-            frontY
-        };
+    
+        // Récupérer l'offset basé sur le quadrant, avec une valeur par défaut
+        const offset = frontOffsets[this.quadrant] || { x: 0, y: 0 };
+        
+        // Calculer la position frontale
+        const frontX = Math.floor((this.x / this.tileSize) + offset.x);
+        const frontY = Math.floor((this.y / this.tileSize) + offset.y);
+    
+        return { frontX, frontY };
     }
 
     async handleSpriteAction(action, sprites) {
         if (!action || !this || !this.turn) return;
-
+    
         const {
             frontX,
             frontY
         } = this.calculateFrontPosition();
-
-        if (frontX === null || frontY === null) {
-            console.error('Failed to calculate front position');
-            return;
-        }
-
+    
+        console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
+        console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
+    
+        let spriteFound = false;
         for (const sprite of sprites) {
-            if (Math.floor(sprite.x / this.tileSize) === frontX && Math.floor(sprite.y / this.tileSize) === frontY) {
+            const spriteX = Math.floor(sprite.x / this.tileSize);
+            const spriteY = Math.floor(sprite.y / this.tileSize);
+            
+            console.log(`Checking sprite at (${spriteX}, ${spriteY}), type: ${sprite.spriteType}`);
+            
+            if (spriteX === frontX && spriteY === frontY) {
+                spriteFound = true;
+                console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
+                
                 switch (sprite.spriteType) {
                     case "A":
+                        console.log("Enemy detected, initiating combat!");
                         if (this.combatSpell) {
+                            console.log("Using combat spell");
                             sprite.combatSpell(this, sprite);
                         } else {
+                            console.log("Using normal attack");
                             sprite.combat(this.might, this.criti, this);
                         }
                         break;
                     case "EXIT":
-                        Sprite.terminalLog('Level finished !')
+                        Sprite.terminalLog('Level finished!')
                         this.raycaster.nextMap();
                         break;
                     case "DOOR":
@@ -1277,6 +1254,7 @@ class Player {
                         break;
                     case 1:
                         // décoration, ne rien faire
+                        console.log("Decoration sprite, no action");
                         break;
                     case 2:
                         sprite.talk(sprite.spriteTalk, sprite.spriteFace);
@@ -1288,24 +1266,32 @@ class Player {
                         break;
                     case 4:
                         // gestion des Quest Giver
+                        console.log("Quest Giver sprite, not implemented yet");
                         break;
                     case 5:
                         // valeur fixe de test
                         // ultérieurement : quests[currentMap].complete();
+                        console.log("Quest completion sprite");
                         this.quests[0].complete();
-
+    
                         // changement de texture temporaire
                         console.log("test changement de texture");
                         sprite.spriteTexture = 21;
-
+    
                         Sprite.resetToggle();
                         break;
                     default:
+                        console.log(`Sprite type ${sprite.spriteType} has no specific action`);
                         Sprite.resetToggle();
                         break;
                 }
             }
         }
+        
+        if (!spriteFound) {
+            console.log("No sprite found at front position");
+        }
+        
         // Réinitialisation de la touche d'action après utilisation
         this.actionButtonClicked = false;
     }
@@ -1953,7 +1939,9 @@ class Item {
         magic,
         dodge,
         armor,
-        criti
+        criti,
+        price,
+        icon
     ) {
         this.id = id;
         this.name = name;
@@ -1972,9 +1960,12 @@ class Item {
 
         this.armor = armor;
         this.criti = criti;
+        
+        this.price = price;
+        this.icon = icon;
     }
-
-    // xyz
+    
+    // Dans la classe Item
     equip(player) {
         if (this.isEquipable(player)) {
             this.unequip(player);
@@ -1988,27 +1979,24 @@ class Item {
             player.might += this.might || 0;
             player.magic += this.magic || 0;
             player.dodge += this.dodge || 0;
-
             player.armor += this.armor || 0;
-
             player.criti += this.criti || 0;
 
             player[this.getSlotName()] = [this];
         }
     }
 
-    // yz
     unequip(player) {
         if (this.equipped) {
-            player.strength -= this.strength;
-            player.dexterity -= this.dexterity;
-            player.intellect -= this.intellect;
+            player.strength -= this.strength || 0;
+            player.dexterity -= this.dexterity || 0;
+            player.intellect -= this.intellect || 0;
 
-            player.might -= this.might;
-            player.magic -= this.magic;
-            player.dodge -= this.dodge;
-
-            player.armor -= this.armor;
+            player.might -= this.might || 0;
+            player.magic -= this.magic || 0;
+            player.dodge -= this.dodge || 0;
+            player.armor -= this.armor || 0;
+            player.criti -= this.criti || 0;
 
             // Retirer l'objet de l'emplacement correspondant
             player[this.getSlotName()] = [];
@@ -2053,7 +2041,8 @@ class Item {
                 itemData.magic,
                 itemData.dodge,
                 itemData.armor,
-                itemData.criti
+                itemData.criti,
+                itemData.price
             );
             item.give(player);
         } else {
@@ -2077,7 +2066,9 @@ class Item {
                 itemData.magic,
                 itemData.dodge,
                 itemData.armor,
-                itemData.criti
+                itemData.criti,
+                itemData.price,
+                itemData.icon
             );
         }
         return null;
@@ -2108,7 +2099,9 @@ Item.itemList = [{
         magic: 0,
         dodge: 0,
         armor: 0,
-        criti: 0
+        criti: 0,
+        price: 1,
+        icon: "assets/icons/sword.png",
     },
     {
         id: 2,
@@ -2123,7 +2116,9 @@ Item.itemList = [{
         magic: 0,
         dodge: 0,
         armor: 1,
-        criti: 0
+        criti: 0,
+        price: 1,
+        icon: "assets/icons/cape.png"
     },
     {
         id: 3,
@@ -2138,11 +2133,13 @@ Item.itemList = [{
         magic: 2,
         dodge: 0,
         armor: 0,
-        criti: 0
+        criti: 0,
+        price: 1,
+        icon: "assets/icons/magicSword.png"
     },
     {
         id: 4,
-        name: "Robe",
+        name: "Tunic",
         slot: 2,
         equipped: false,
         power: 0,
@@ -2153,10 +2150,29 @@ Item.itemList = [{
         magic: 0,
         dodge: 0,
         armor: 1,
-        criti: 0
+        criti: 0,
+        price: 1,
+        icon: "assets/icons/tunic.png"
     },
     {
         id: 5,
+        name: "Club",
+        slot: 1,
+        equipped: false,
+        power: 0,
+        strength: 0,
+        dexterity: 0,
+        intellect: 0,
+        might: 1,
+        magic: 0,
+        dodge: 0,
+        armor: 0,
+        criti: 0,
+        price: 1,
+        icon: "assets/icons/club.png"
+    },
+    {
+        id: 6,
         name: "Staff",
         slot: 1,
         equipped: false,
@@ -2168,7 +2184,43 @@ Item.itemList = [{
         magic: 0,
         dodge: 0,
         armor: 0,
-        criti: 0
+        criti: 0,
+        price: 1,
+        icon: "assets/icons/staff.png"
+    },
+    {
+        id: 7,
+        name: "Armor",
+        slot: 2,
+        equipped: false,
+        power: 0,
+        strength: 0,
+        dexterity: -1,
+        intellect: 0,
+        might: 0,
+        magic: 0,
+        dodge: 0,
+        armor: 3,
+        criti: 0,
+        price: 1,
+        icon: "assets/icons/armor.png"
+    },
+    {
+        id: 8,
+        name: "Dagger",
+        slot: 1,
+        equipped: false,
+        power: 0,
+        strength: 0,
+        dexterity: 0,
+        intellect: 0,
+        might: 0,
+        magic: 0,
+        dodge: 10,
+        armor: 0,
+        criti: 10,
+        price: 1,
+        icon: "assets/icons/dagger.png"
     },
 ];
 
@@ -2276,7 +2328,7 @@ Spell.spellList = [{
         description: "Heal the player for 10hp.",
         effect: Spell.healEffect,
         selfCast: true,
-        icon: "✙"
+        icon: "assets/icons/heal.png"
     },
     {
         id: 2,
@@ -2285,7 +2337,7 @@ Spell.spellList = [{
         description: "Inflict 2pts of electric damage.",
         effect: Spell.damageEffect,
         selfCast: false,
-        icon: "🗲"
+        icon: "assets/icons/sparks.png"
     }
 ];
 
@@ -2374,7 +2426,8 @@ class Sprite {
         spriteFace = '',
         spriteTalk = [],
         spriteSell = [],
-        id = 0
+        id = 0,
+        lootClass = null  // Nouvelle propriété: classe de loot
     ) {
         this.x = x;
         this.y = y;
@@ -2409,6 +2462,145 @@ class Sprite {
         this.spriteTalk = spriteTalk;
         this.spriteSell = spriteSell;
         this.id = id;
+
+        if (lootClass === null || lootClass === 0) {
+            if (spriteType === "A") {
+                this.lootClass = Sprite.calculateLootClass(hp, dmg);
+            } else {
+                this.lootClass = 0; // 0 pour les sprites non-ennemis
+            }
+        } else {
+            this.lootClass = lootClass;
+        }
+    }
+
+
+
+    // Tables de loot statiques pour la classe Sprite
+    // Format: Minimum gold, Maximum gold, Chances d'obtenir un objet, Tableau d'IDs d'items possibles
+    // Tables de loot optimisées pour le calcul automatique
+    static lootTables = {
+        0: { minGold: 0, maxGold: 0, itemChance: 0, possibleItems: [] }, // Pas de loot
+        1: { minGold: 5, maxGold: 15, itemChance: 0.1, possibleItems: [1, 2] }, // Créatures très faibles (PV=2, DMG=1)
+        2: { minGold: 10, maxGold: 30, itemChance: 0.2, possibleItems: [1, 2, 5] }, // Créatures faibles
+        3: { minGold: 25, maxGold: 60, itemChance: 0.3, possibleItems: [1, 2, 3, 5] }, // Créatures moyennes
+        4: { minGold: 50, maxGold: 120, itemChance: 0.5, possibleItems: [2, 3, 4, 5] }, // Créatures fortes
+        5: { minGold: 100, maxGold: 250, itemChance: 0.7, possibleItems: [3, 4, 5] }  // Créatures très fortes ou boss
+    };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Looting
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Calcule automatiquement la classe de loot basée sur les statistiques de l'ennemi
+     * @param {number} hp - Points de vie de l'ennemi
+     * @param {number} dmg - Dégâts de l'ennemi
+     * @return {number} - Classe de loot calculée (1-5)
+     */
+    static calculateLootClass(hp, dmg) {
+        // Formule simple basée sur les PV et les dégâts
+        // Math.floor(hp/dmg) comme suggéré, mais avec quelques ajustements
+        // pour s'assurer que les valeurs restent dans la plage 1-5
+        
+        // Si l'ennemi n'a pas de dégâts, on utilise 1 pour éviter une division par zéro
+        const effectiveDmg = dmg || 1;
+        
+        // Calcul de base selon la formule hp/dmg
+        let baseClass = Math.floor(hp / effectiveDmg);
+        
+        // Ajouter un petit bonus basé sur les dégâts
+        baseClass += Math.floor(dmg / 2);
+        
+        // Limiter la classe entre 1 et 5
+        return Math.max(1, Math.min(5, baseClass));
+    }
+
+    static displayLootAnimation(message, type = 'gold') {
+        const outputElement = document.getElementById("output");
+        const animationClass = type === 'gold' ? 'loot-gold-animation' : 'loot-item-animation';
+        
+        // Créer un élément span pour le message avec la classe d'animation
+        const lootSpan = document.createElement('span');
+        lootSpan.className = animationClass;
+        lootSpan.innerHTML = message;
+        
+        // Ajouter au terminal
+        outputElement.innerHTML += "> ";
+        outputElement.appendChild(lootSpan);
+        outputElement.innerHTML += "<br>";
+        outputElement.scrollTop = outputElement.scrollHeight;
+    }
+
+    generateLoot(player) {
+        // Pas de loot si la classe est 0
+        if (this.lootClass === 0) {
+            return;
+        }
+    
+        // Récupérer la table de loot correspondante à la classe
+        const lootTable = Sprite.lootTables[this.lootClass] || Sprite.lootTables[1];
+        
+        // Générer une quantité aléatoire d'or avec un peu de variance
+        const baseGold = Math.floor(Math.random() * (lootTable.maxGold - lootTable.minGold + 1)) + lootTable.minGold;
+        
+        // Appliquer un modificateur basé sur les caractéristiques de l'ennemi
+        const goldModifier = (this.hp * this.dmg) / 10;
+        const goldAmount = Math.floor(baseGold * (1 + goldModifier / 100));
+        
+        // Ajouter l'or au joueur
+        player.gold += goldAmount;
+        
+        // Message pour l'or trouvé avec animation
+        Sprite.displayLootAnimation(`You found ${goldAmount} gold coins!`, 'gold');
+        
+        // Déterminer si un objet est obtenu, avec une chance influencée par la difficulté de l'ennemi
+        const baseItemChance = lootTable.itemChance;
+        const difficultyBonus = (this.hp * this.dmg) / 200; // Bonus de 0.5% par point de "puissance"
+        const adjustedItemChance = Math.min(0.95, baseItemChance + difficultyBonus); // Plafond à 95%
+        
+        const getItem = Math.random() < adjustedItemChance;
+        
+        if (getItem && lootTable.possibleItems.length > 0) {
+            // Choisir un objet aléatoire dans la liste des possibles
+            // Plus l'ennemi est fort, plus il y a de chances d'obtenir un meilleur objet
+            
+            // Trier les objets par "valeur" (prix ou puissance)
+            const sortedItems = [...lootTable.possibleItems].sort((a, b) => {
+                const itemA = Item.getItemById(a);
+                const itemB = Item.getItemById(b);
+                
+                // Estimation simple de la valeur: prix ou somme des attributs
+                const valueA = itemA.price || (itemA.might + itemA.magic + itemA.armor + itemA.dodge);
+                const valueB = itemB.price || (itemB.might + itemB.magic + itemB.armor + itemB.dodge);
+                
+                return valueA - valueB;
+            });
+            
+            // Calcul d'un index pondéré qui favorise les meilleurs objets pour les ennemis plus forts
+            const powerRatio = Math.min(1, (this.hp * this.dmg) / 50); // 0 à 1 selon la puissance
+            const weightedIndex = Math.floor(Math.random() * (1 + powerRatio) * sortedItems.length);
+            const clampedIndex = Math.min(weightedIndex, sortedItems.length - 1);
+            
+            const itemId = sortedItems[clampedIndex];
+            
+            // Créer l'objet et l'ajouter à l'inventaire du joueur
+            const lootItem = Item.getItemById(itemId);
+            if (lootItem) {
+                lootItem.give(player);
+                
+                // Message différent selon la rareté de l'objet
+                let qualityDesc = "a";
+                if (clampedIndex >= sortedItems.length * 0.8) qualityDesc = "an exceptional";
+                else if (clampedIndex >= sortedItems.length * 0.6) qualityDesc = "a valuable";
+                else if (clampedIndex >= sortedItems.length * 0.4) qualityDesc = "a good";
+                
+                Sprite.displayLootAnimation(`You found ${qualityDesc} ${lootItem.name}!`, 'item');
+            }
+        }
+        
+        // Mise à jour de l'affichage
+        player.statsUpdate(player);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2478,68 +2670,97 @@ class Sprite {
         var dialWindow = document.getElementById("dialogueWindow");
         output.style.display = "none";
         dialWindow.style.display = "none";
-
+    
         const shopContent = document.getElementById("shopContent");
         document.getElementById("shop").style.display = "block";
-
+    
         const shopName = document.getElementById("shopName");
         shopName.textContent = "'" + this.spriteName + "'";
-
+    
         if (this.spriteSell.length > 0) {
             shopContent.innerHTML = "";
-
+    
             this.spriteSell.forEach((itemId) => {
                 const item = Item.getItemById(itemId);
                 if (item) {
-                    const itemIcon = document.getElementById("itemIcon").getAttribute("src");
-                    const swordIcon = document.getElementById("weaponIcon").getAttribute("src");
-                    const cloakIcon = document.getElementById("cloakIcon").getAttribute("src");
-
                     let statsHTML = "";
+                    // Vérifier si la valeur est différente de 0, qu'elle soit positive ou négative
+                    if (item.strength !== 0) {
+                        const sign = item.might > 0 ? "+" : "";
+                        statsHTML += `${sign}${item.strength} Strength<br>`;
+                    }
+                    if (item.dexterity !== 0) {
+                        const sign = item.might > 0 ? "+" : "";
+                        statsHTML += `${sign}${item.dexterity} Dexterity<br>`;
+                    }
+                    if (item.intellect !== 0) {
+                        const sign = item.might > 0 ? "+" : "";
+                        statsHTML += `${sign}${item.intellect} Intellect<br>`;
+                    }
                     if (item.might !== 0) {
-                        statsHTML += `+${item.might} Might<br>`;
+                        // Ajouter un "+" seulement si la valeur est positive
+                        const sign = item.might > 0 ? "+" : "";
+                        statsHTML += `${sign}${item.might} Might<br>`;
                     }
                     if (item.magic !== 0) {
-                        statsHTML += `+${item.magic} Magic<br>`;
+                        const sign = item.magic > 0 ? "+" : "";
+                        statsHTML += `${sign}${item.magic} Magic<br>`;
                     }
                     if (item.dodge !== 0) {
-                        statsHTML += `+${item.dodge} Dodge<br>`;
+                        const sign = item.dodge > 0 ? "+" : "";
+                        statsHTML += `${sign}${item.dodge} Dodge<br>`;
+                    }
+                    if (item.criti !== 0) {
+                        const sign = item.criti > 0 ? "+" : "";
+                        statsHTML += `${sign}${item.criti} Crit.<br>`;
                     }
                     if (item.armor !== 0) {
-                        statsHTML += `+${item.armor} Armor<br>`;
+                        const sign = item.armor > 0 ? "+" : "";
+                        statsHTML += `${sign}${item.armor} Armor<br>`;
                     }
                     if (item.power !== 0) {
+                        // Power est généralement absolu, donc pas de signe
                         statsHTML += `${item.power} Power<br>`;
                     }
-                    statsHTML = statsHTML.slice(0, -2);
-
-                    let itemIconSrc = itemIcon;
-                    if (item.slot === 1) {
-                        itemIconSrc = swordIcon;
-                    } else if (item.slot === 2) {
-                        itemIconSrc = cloakIcon;
-                    }
-
+                    statsHTML = statsHTML.slice(0, -4); // Enlever le dernier <br>
+    
+                    let itemIconSrc = item.icon;
+    
+                    // Afficher le prix ou "FREE" si le prix est 0 ou non défini
+                    const priceDisplay = item.price > 0 ? item.price : 'FREE';
+                    
+                    // Ajouter une classe pour les objets que le joueur ne peut pas se permettre
+                    const canAfford = item.price <= player.gold || item.price === 0 || !item.price;
+                    const priceClass = canAfford ? "" : "cannot-afford";
+    
                     shopContent.innerHTML += `
-              <button class="shop-item controlButton pixel-frame-item" style="line-height: 0.8;background-color: #281102; width:99%;" id="${item.name}" data-item="${item.id}">
-                <div style="font-size: 15px; text-align: left; padding-top:5px; "padding-bottom:5px;>
-                  <img src="${itemIconSrc}"> ► ${item.name}
-                </div>
-                <p style="font-size: 15px; text-align: left; padding-top:5px;">
-                <font style="font-size: 25px;">$</font> ► FREE</p>
-                <div style="text-align: right; line-height: 1.15;">${statsHTML}</div>
-              </button><br>`;
+                  <button class="shop-item controlButton ${priceClass} pixel-frame-item" style="line-height: 0.8;background-color: #281102; width:99%; margin-bottom: 5px;" id="${item.name}" data-item="${item.id}">
+                    <div style="font-size: 15px; text-align: left; padding-top:5px;">
+                      <img src="${itemIconSrc}"> ► ${item.name}
+                    </div>
+                    <p style="font-size: 15px; text-align: left; padding-top:5px;">
+                    <font style="font-size: 25px;">$</font> ► ${priceDisplay}</p>
+                    <div style="text-align: right; line-height: 1.15;">${statsHTML}</div>
+                  </button><br>`;
                 }
             });
-
-            // Ajoute des écouteurs d'événements aux boutons des objets
+    
+            // Ajouter des écouteurs d'événements aux boutons des objets
             document.querySelectorAll('.shop-item').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const itemId = parseInt(event.currentTarget.getAttribute('data-item'), 10);
                     const itemToBuy = Item.getItemById(itemId);
                     if (itemToBuy) {
                         console.log("Buying item:", itemToBuy.name);
-                        this.giveItemToPlayer(itemToBuy, player);
+                        
+                        // Utiliser la méthode sellItemToPlayer si l'objet a un prix
+                        if (itemToBuy.price > 0) {
+                            this.sellItemToPlayer(itemToBuy, player);
+                        } else {
+                            // Sinon, le donner gratuitement
+                            this.giveItemToPlayer(itemToBuy, player);
+                            Sprite.terminalLog(`Vous avez reçu ${itemToBuy.name}.`);
+                        }
                     }
                 });
             });
@@ -2562,6 +2783,32 @@ class Sprite {
             this.spriteSell = this.spriteSell.filter(itemId => itemId !== item.id);
 
             this.displayItemsForSale(player);
+        } else {
+            console.log("Player not defined");
+        }
+    }
+
+    // Dans Sprites.js, ajoutez cette nouvelle méthode
+    sellItemToPlayer(item, player) {
+        if (player) {
+            // Vérifier si le joueur a assez d'argent
+            if (player.gold >= item.price) {
+                // Déduire l'argent
+                player.gold -= item.price;
+                console.log(player.gold);
+                
+                // Utiliser la méthode existante pour ajouter l'objet à l'inventaire
+                this.giveItemToPlayer(item, player);
+                
+                // Mettre à jour l'affichage de l'or
+                player.statsUpdate(player);
+                
+                // Message d'achat
+                Sprite.terminalLog(`Vous avez acheté ${item.name} pour ${item.price} pièces d'or.`);
+            } else {
+                // Message si le joueur n'a pas assez d'argent
+                Sprite.terminalLog("Vous n'avez pas assez d'or pour acheter cet objet!");
+            }
         } else {
             console.log("Player not defined");
         }
@@ -3022,31 +3269,32 @@ class Sprite {
     }
 
     enemyAttackUpdate(player) {
-
         if (this.hp <= 0) {
             let entry = "The enemy is dead!";
-
             Sprite.terminalLog(entry);
-
+    
+            // Générer le loot avec le système amélioré
+            this.generateLoot(player);
+    
             this.spriteType = 0;
             this.spriteTexture = 10;
             this.spriteTalk = [
                 ["facePlayer", "Alakir", "It's dead..."]
             ];
             this.isBlocking = false;
+    
+            player.statsUpdate(player); // Mettre à jour l'affichage
         } else {
-
             const chanceEchec = Math.floor(Math.random() * 100);
-
+    
             if (chanceEchec > player.dodge) {
                 setTimeout(() => this.attack(player), 500);
-
             } else {
                 const outputElement = document.getElementById("output");
                 const consoleContent = outputElement.innerHTML;
-
+    
                 outputElement.innerHTML = consoleContent + "> You dodge the attack !<br>";
-
+    
                 player.XPdexterity += 1;
                 console.log(player.XPdexterity + "pts dexterity experience.");
             }
@@ -3281,6 +3529,9 @@ class Raycaster {
 
         // ajout de "this.statsUpdate", pour remplacer les manipulations HTML redondantes
         this.player.statsUpdate(this.player)
+
+        // Initialiser l'or du joueur
+        this.player.gold = 100; // Montant initial
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3452,11 +3703,15 @@ class Raycaster {
     // Fonction de sauvegarde complète (joueur + sprites)
     saveGameState() {
         if (this.player) {
+
             // Exclure explicitement l'instance de Raycaster
             const {
                 raycaster,
                 ...playerState
             } = this.player;
+
+            // Sauvegarder l'or
+            playerState.gold = this.player.gold;
 
             // Créer un objet de sauvegarde pour l'état du joueur
             playerState.inventory = this.player.inventory.map(item => ({
@@ -3495,6 +3750,7 @@ class Raycaster {
                 spriteFace: sprite.spriteFace,
                 spriteTalk: sprite.spriteTalk,
                 spriteSell: sprite.spriteSell,
+                lootClass: sprite.lootClass  // Ajout de la classe de loot
             }));
 
             // Créer un objet global pour stocker l'état du jeu
@@ -3571,6 +3827,9 @@ class Raycaster {
             return item;
         });
 
+        // Restaurer l'or
+        this.player.gold = loadedState.gold || 0;
+
         this.player.spells = loadedState.spells.map(id => Spell.getSpellById(id));
         this.player.quests = loadedState.quests.map(q => {
             const quest = Quest.getQuestById(q.id);
@@ -3618,7 +3877,8 @@ class Raycaster {
                 state.spriteFace,
                 state.spriteTalk,
                 state.spriteSell,
-                state.id
+                state.id,
+                state.lootClass  // Ajout de la classe de loot
             );
             this.sprites.push(sprite);
         });
@@ -3693,46 +3953,43 @@ class Raycaster {
     }
 
     initSprites(spriteList) {
-
         this.clearSprites();
-
+    
         const tileSizeHalf = Math.floor(this.tileSize / 2);
-
         let spritePositions = spriteList;
-
         this.sprites = [];
-
+    
         let additionalDecoration = [];
         let additionalDecorationCount = 0;
         let additionalDecorationSpriteCount = 0;
-
-
+    
         for (let pos of spritePositions) {
             let id = pos[0];
             let x = pos[1] * this.tileSize + tileSizeHalf;
             let y = pos[2] * this.tileSize + tileSizeHalf;
-
+    
             let type = pos[3];
             let texture = pos[4];
             let face = pos[5];
             let name = pos[6];
             let dialogue = pos[7];
             let spriteSell = pos[8] || [];
-
+    
             let hp = pos[9] || 2;
             let dmg = pos[10] || 1;
-
+            let lootClass = pos[11] || null; // Nouveau paramètre pour la classe de loot
+    
             if (type === 10) {
                 for (let j = 0; j < 2; j++) {
                     let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
                     let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
-
+    
                     let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
                     newDecoration.spriteTexture = 13;
                     newDecoration.spriteType = 1;
                     newDecoration.isBlocking = false;
                     newDecoration.id = 0;
-
+    
                     additionalDecoration.push(newDecoration);
                     additionalDecorationCount++;
                 }
@@ -3743,21 +4000,39 @@ class Raycaster {
                     continue;
                 }
 
-                let isBlocking = true;
-                // console.log("sprite #" + id + " loaded.");
-                this.sprites.push(new Sprite(x, y, 0, this.tileSize, this.tileSize, 0, type, texture, isBlocking, false, true, hp, dmg, 0, name, face, dialogue, spriteSell, id));
-            }
 
+                let isBlocking = true;
+                // Créer le sprite avec le paramètre lootClass
+                this.sprites.push(new Sprite(
+                    x, y, 0, this.tileSize, this.tileSize, 0, type, texture, 
+                    isBlocking, false, true, hp, dmg, 0, name, face, dialogue, 
+                    spriteSell, id, lootClass
+                ));
+
+                // Si la classe de loot n'est pas définie et que c'est un ennemi (type "A"),
+                // la calculer automatiquement
+                if (lootClass === null || lootClass === 0) {
+                    if (type === "A") {
+                        lootClass = Sprite.calculateLootClass(hp, dmg);
+                        console.log(lootClass);
+                    } else {
+                        lootClass = 0; // 0 pour les sprites non-ennemis
+                    }
+                } else {
+                    lootClass = lootClass;
+                }
+            }
+    
             if (!dialogue && !face && !name) {
                 type = 1;
             }
         }
-
+    
         for (let newDecoration of additionalDecoration) {
             newDecoration.id = 0; // ID pour les décorations
             this.sprites.push(newDecoration);
         }
-
+    
         // Définition du sprite de combat avec l'ID 0
         this.sprites.push(Sprite.combatAnimationSprite = new Sprite(
             tileSizeHalf, // x
@@ -3778,11 +4053,12 @@ class Raycaster {
             1, // spriteFace
             "", // spriteTalk
             [], // spriteSell
-            0 // id
+            0, // id
+            0  // lootClass (0 car ce n'est pas un ennemi à looter)
         ));
-
+    
         Sprite.combatAnimationSprite.spriteTexture = 19;
-
+    
         console.log(this.sprites.length + " sprites créés.");
         console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
     }

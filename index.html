@@ -127,15 +127,20 @@ Gwendal L.R.
                   <p id="NextLevelXP">ZZZ</p>
                   <p class="text-bold"> XP </p>
                 </div>
-                <!-- PLAYER INFO PROGRESS BAR OUTPUT -->
+                <!-- PLAYER INFO PROGRESS BAR OUTPUT 
+                 
+                
+                    <button id="button5" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
+    width: 64px; border-radius: 0px;"><img src="assets/up.png" alt></button>
+                -->
                 <div>
                   <div class="progress-bar" id="hpBar">
-                    <i class="icon">♥</i>
-                    <div class="progress"></div>
+                    
+                    <div class="progress"></div><img class="icon" src="assets/icons/life.png" ></img>
                     <label style="top:50%;">Health</label>
                   </div>
                   <div class="progress-bar" id="mpBar">
-                    <i class="icon">✦</i>
+                    <div class="progress"></div><img class="icon" src="assets/icons/energy.png">
                     <div class="progress"></div>
                     <label style="top:50%;">Mana</label>
                   </div>
@@ -161,7 +166,7 @@ Gwendal L.R.
                     <button id="previousSpell" class="controlButton pixel-frame" style="border-radius: 0px;">
                       <img src="assets/left.png" alt=""></img>
                     </button>
-                    <button id="castSpell" class="controlButton pixel-frame-item" style="border-radius: 0px;">❂</button>
+                    <img id="castSpell" class="controlButton pixel-frame-item" style="border-radius: 0px; background: none;"></img>
                     <button id="nextSpell" class="controlButton pixel-frame" style="border-radius: 0px;">
                       <img src="assets/right.png" alt=""></img>
                     </button>
@@ -317,7 +322,8 @@ Gwendal L.R.
               <div id="items" style="display: none;">
                 <div>
                   <div>ITEMS</div>
-                  <div>GOLD : 10GP</div>
+                  <div><span class="stat-label">Gold:</span>
+                       <span id="PlayerGoldOutput">-</span></div>
                 </div>
                 <br>
                 <div id="inventoryContent">
@@ -375,13 +381,13 @@ Gwendal L.R.
                 <div id="actionButtons" style="display:block;">
                   <div class="grid-container">
                     <button id="buttonA" class="grid-item controlButton pixel-frame"  style="background-color: #592918;height: 64px;
-    width: 64px;">A</button>
+    width: 64px;"><img src="assets/icons/action.png" alt></button>
 
                     <div id="button2" class="grid-item pixel-frame-item" display="height: 64px;
-                    width: 64px; "><img id="weaponIcon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAXtJREFUSEtjLHT1/c+ABISFeBlqVi5jRBajhM0YZ+r4f+KuVXAzrr0XYdhfGU01S7BaALKNWpZgWLDmrAhDiPEbBmr5BGyBcNo+eBCJCjIwZDq/AfOpYQk4MkGW2LbvY9BSYmC4do+B4dp9Boa6EOpYAk8ttLIEJTnSwhKM9E5tS7BmKHItgWXa/t2b4ebizLGkWgIyXEDjMDj13T1hyLDo9H6w2XiLBGItgRmupcHLcO3GZ+ItICYJr0n3YwC5PMRLiuHavc+kW0DIkkl1qmDDwRnz3meGzQtU4MFDMIiQS1FswSVwSRCv4SRZgOwTEPvZRsKGk2wBzBJli/Nwl8N82VknjhI0MHGSKhZQMMEMh0UoyCBQ6tFS4mWY06fMgJwHSPIBzHCQYeAIhSZHEBtkKS5LiPIBzHCYa9HTOrrlxzYYgB0B8g3JFqDnVFhYIzsC5hBQkiXKAljkwgyDFQPIyRg5AcCCkSQL0A3Dxkf3BahMItoHxFiAzacAv081oabInKsAAAAASUVORK5CYII=" style="display:block;" alt="weaponIcon" /></div>
+                    width: 64px; "><img id="weaponIcon" src="assets/icons/sword.png"display:block;" alt="weaponIcon" /></div>
 
                     <button id="buttonB" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
-    width: 64px;">B</button>
+    width: 64px;"><img src="assets/icons/spell.png" alt></button>
 
 
 <button id="button4" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
