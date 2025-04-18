@@ -575,6 +575,9 @@ class Player {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // EQUIPEMENT INVENTAIRE
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // xyz
+
     displayInventory() {
         // Mettre à jour l'affichage de l'or
         const goldOutput = document.getElementById("PlayerGoldOutput");
@@ -596,14 +599,7 @@ class Player {
                 const equippedMark = item.equipped ? "✓" : "";
                 
                 // Déterminer l'icône en fonction du slot
-                let itemIcon = "";
-                if (item.slot === 1) {
-                    itemIcon = document.getElementById("weaponIcon").getAttribute("src");
-                } else if (item.slot === 2) {
-                    itemIcon = document.getElementById("cloakIcon").getAttribute("src");
-                } else {
-                    itemIcon = document.getElementById("itemIcon").getAttribute("src");
-                }
+                const itemIcon = item.icon;
                 
                 const isEquipped = item.equipped;
                 const bgColor = isEquipped ? "rgba(0, 60, 0, 0.7)" : "#140c1c";
@@ -679,14 +675,7 @@ class Player {
         if (!item || !itemDetails) return;
         
         // Déterminer l'icône en fonction du slot
-        let itemIcon = "";
-        if (item.slot === 1) {
-            itemIcon = document.getElementById("weaponIcon").getAttribute("src");
-        } else if (item.slot === 2) {
-            itemIcon = document.getElementById("cloakIcon").getAttribute("src");
-        } else {
-            itemIcon = document.getElementById("itemIcon").getAttribute("src");
-        }
+        let itemIcon = item.icon;
         
         // Type d'équipement
         let slotName = "";
@@ -856,21 +845,121 @@ class Player {
 
     displayQuests() {
         const questContent = document.getElementById("questContent");
-
-        if (this.quests.length > 0) {
-            questContent.innerHTML = "";
-            this.quests.forEach((quest) => {
-                const questStatus = quest.completed ? "Completed" : "In progress";
-                const statusClass = quest.completed ? "completed" : ""; // Ajout de la classe 'completed' si la quête est complétée
-
-                questContent.innerHTML += `<div class="quest-item pixel-frame-item ${statusClass}">
-                                              <h3>${quest.title}</h3>
-                                              <p>${quest.description}</p>
-                                              <p>Status: ${questStatus}</p>
-                                          </div>`;
+        
+        // Mettre à jour le compteur de quêtes
+        const questCount = document.getElementById("quest-count");
+        if (questCount) {
+            const completedCount = this.quests.filter(quest => quest.completed).length;
+            questCount.textContent = `${completedCount}/${this.quests.length}`;
+        }
+    
+        if (this.quests && this.quests.length > 0) {
+            // Structure à deux colonnes comme pour l'inventaire et la boutique
+            let html = `<div style="display: flex; height: 170px; width: 100%;">
+                <!-- Liste des quêtes (40% de la largeur) -->
+                <div id="quest-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+                    <!-- Les quêtes seront listées ici -->
+                </div>
+                
+                <!-- Détails de la quête sélectionnée (60% de la largeur) -->
+                <div id="quest-details" style="width: 60%; height: 100%; padding-left: 10px; display: flex; flex-direction: column;">
+                    <!-- Les détails seront affichés ici -->
+                    <div id="quest-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
+                        <div>Select a quest</div>
+                        <div>to view details</div>
+                    </div>
+                </div>
+            </div>`;
+            
+            questContent.innerHTML = html;
+            
+            const questList = document.getElementById("quest-list");
+            
+            // Générer la liste des quêtes
+            this.quests.forEach((quest, index) => {
+                const isCompleted = quest.completed;
+                const bgColor = isCompleted ? "rgba(0, 60, 0, 0.7)" : "#140c1c";
+                const statusIcon = isCompleted ? "✓" : "⋯";
+                
+                const questElement = document.createElement("div");
+                questElement.className = `quest-item-entry ${isCompleted ? 'completed' : ''}`;
+                questElement.setAttribute("data-index", index);
+                questElement.style.cssText = `
+                    display: flex; 
+                    align-items: center; 
+                    padding: 4px; 
+                    margin-bottom: 3px; 
+                    cursor: pointer; 
+                    background-color: ${bgColor}; 
+                    border: 1px solid #663300;
+                    width: 95%;
+                `;
+                
+                questElement.innerHTML = `
+                    <span style="flex-grow: 1; font-size: 13px; color: ${isCompleted ? '#aaffaa' : '#cccccc'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</span>
+                    <span style="color: ${isCompleted ? '#66ff66' : '#aaaaaa'}; font-weight: bold;">${statusIcon}</span>
+                `;
+                
+                questElement.addEventListener('click', () => {
+                    // Désélectionner tous les autres éléments
+                    document.querySelectorAll('.quest-item-entry').forEach(e => {
+                        e.style.borderColor = '#663300';
+                        e.style.backgroundColor = e.classList.contains('completed') ? 'rgba(0, 60, 0, 0.7)' : '#140c1c';
+                    });
+                    
+                    // Mettre en évidence l'élément sélectionné
+                    questElement.style.borderColor = '#ffaa00';
+                    questElement.style.backgroundColor = isCompleted ? 'rgba(20, 80, 20, 0.9)' : '#331a0c';
+                    
+                    // Afficher les détails
+                    showQuestDetails(quest);
+                    
+                    // Cacher le placeholder
+                    const placeholder = document.getElementById('quest-details-placeholder');
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
+                    }
+                });
+                
+                questList.appendChild(questElement);
             });
+            
+            // Fonction pour afficher les détails d'une quête
+            const showQuestDetails = (quest) => {
+                const questDetails = document.getElementById('quest-details');
+                if (!questDetails) return;
+                
+                // État de la quête
+                const questStatus = quest.completed ? "Completed" : "In progress";
+                const statusColor = quest.completed ? "#66ff66" : "#ffcc66";
+                
+                // Construire le HTML des détails
+                questDetails.innerHTML = `
+                    <div style="margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 100%;">
+                        <div style="font-size: 16px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</div>
+                        <div style="font-size: 12px; color: ${statusColor};">${questStatus}</div>
+                    </div>
+                    
+                    <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 100%; max-height: calc(100% - 80px);">
+                        <p style="margin-bottom: 10px;">${quest.description}</p>
+                        
+                        ${quest.reward ? 
+                            `<div style="margin-top: 15px;">
+                                <div style="font-weight: bold; color: #e8d5a9;">Reward:</div>
+                                <div style="color: #ffcc00;">${quest.reward}</div>
+                            </div>` 
+                            : ''}
+                    </div>
+                `;
+            };
+            
+            // Sélectionner automatiquement la première quête
+            const firstQuest = questList.querySelector('.quest-item-entry');
+            if (firstQuest) {
+                firstQuest.click();
+            }
         } else {
-            questContent.innerHTML = "> No quests in progress";
+            questContent.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c;">No quests in progress</div>';
         }
     }
 
@@ -2734,16 +2823,11 @@ class Sprite {
     static terminalLog(entry) {
         const outputElement = document.getElementById("output");
         const consoleContent = outputElement.innerHTML;
-        /* Fonction pour éviter les doublons, mais empêche de comprendre ce qui se passe.
-            if (entry === lastEntry) {
-              outputElement.scrollTop = outputElement.scrollHeight;
-              
-            } else {
-              outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
-              outputElement.scrollTop = outputElement.scrollHeight;
-            }
-        */
-        outputElement.innerHTML = consoleContent + "> " + entry + "<br>";
+        
+        // Formatage simple: séparation du préfixe ">" et du contenu du message
+        const formattedEntry = `<span style="color:#aaa; font-weight:bold;">&gt;</span> ${entry}`;
+        
+        outputElement.innerHTML = consoleContent + formattedEntry + "<br>";
         outputElement.scrollTop = outputElement.scrollHeight;
 
         lastEntry = entry;
@@ -2751,8 +2835,7 @@ class Sprite {
 
     static resetTerminal() {
         const outputElement = document.getElementById("output");
-        const consoleContent = outputElement.innerHTML;
-        outputElement.innerHTML = "- New Terminal -</br>";
+        outputElement.innerHTML = "<span style='color:#77ee77; font-weight:bold;'>- New Terminal -</span><br>";
     }
 
     static resetToggle() {
@@ -2789,160 +2872,234 @@ class Sprite {
     // boutique, pas de prix pour le moment
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // xyz
+
     displayItemsForSale(player) {
         var output = document.getElementById("output");
         var dialWindow = document.getElementById("dialogueWindow");
         output.style.display = "none";
         dialWindow.style.display = "none";
     
-        const shopContent = document.getElementById("shopContent");
+        // Afficher la boutique
         document.getElementById("shop").style.display = "block";
     
+        // Mettre à jour le nom de la boutique
         const shopName = document.getElementById("shopName");
-        shopName.textContent = "'" + this.spriteName + "'";
+        shopName.textContent = this.spriteName;
     
-        // Structure simple en deux colonnes
-        shopContent.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 5px; border-bottom: 1px solid #663300;">
-                <div style="font-weight: bold; color: #e8d5a9;">SHOP</div>
-                <div><span class="stat-label">Gold:</span>
-                    <span id="ShopPlayerGoldOutput" style="color: #ffcc00;">${player.gold || 0}</span> <span style="color: #ffcc00;">gp</span></div>
-            </div>
-            
-            <div style="display: flex; height: calc(100% - 30px); width: 100%;">
-                <!-- Liste des objets (40%) -->
-                <div id="shop-item-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto;"></div>
+        // Mettre à jour l'affichage de l'or
+        const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+        if (goldOutput) {
+            goldOutput.textContent = player.gold || 0;
+        }
+    
+        const shopContent = document.getElementById("shopContent");
+        
+        if (this.spriteSell && this.spriteSell.length > 0) {
+            // Division en deux colonnes identique à l'inventaire
+            let html = `<div style="display: flex; height: 170px; width: 100%;">
+                <!-- Liste des objets (40% de la largeur) -->
+                <div id="shop-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+                    <!-- Les items seront listés ici -->
+                </div>
                 
-                <!-- Détails de l'objet (60%) -->
-                <div id="shop-item-details" style="width: 60%; height: 100%; padding-left: 10px;"></div>
-            </div>
-        `;
-    
-        const itemList = document.getElementById("shop-item-list");
-        const itemDetails = document.getElementById("shop-item-details");
-    
-        if (this.spriteSell.length > 0) {
-            // Générer la liste des objets
-            let listHTML = "";
+                <!-- Détails de l'objet sélectionné (60% de la largeur) -->
+                <div id="shop-details" style="width: 60%; height: 100%; padding-left: 10px; display: flex; flex-direction: column;">
+                    <!-- Les détails seront affichés ici -->
+                    <div id="shop-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
+                        <div>Select an item</div>
+                        <div>to view details</div>
+                    </div>
+                </div>
+            </div>`;
             
+            shopContent.innerHTML = html;
+            
+            const shopList = document.getElementById("shop-list");
+            
+            // Générer la liste des objets
             this.spriteSell.forEach((itemId, index) => {
                 const item = Item.getItemById(itemId);
-                if (item) {
-                    // Déterminer l'icône
-                    let itemIcon = "";
-                    if (item.slot === 1) {
-                        itemIcon = document.getElementById("weaponIcon").getAttribute("src");
-                    } else if (item.slot === 2) {
-                        itemIcon = document.getElementById("cloakIcon").getAttribute("src");
-                    } else {
-                        itemIcon = document.getElementById("itemIcon").getAttribute("src");
-                    }
-                    
-                    const price = item.price || 'FREE';
-                    
-                    // Ligne simple pour chaque objet
-                    listHTML += `
-                        <div class="shop-item" data-item="${item.id}" style="display: flex; align-items: center; padding: 4px; margin: 3px; cursor: pointer; background-color: #140c1c; border: 1px solid #663300;">
-                            <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
-                            <span style="flex-grow: 1;">${item.name}</span>
-                            <span style="color: #ffcc00;">${price}</span>
-                        </div>
-                    `;
-                }
-            });
-            
-            itemList.innerHTML = listHTML;
-            
-            // Ajouter les événements de clic
-            document.querySelectorAll('.shop-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    // Désélectionner tous les autres
-                    document.querySelectorAll('.shop-item').forEach(i => {
-                        i.style.backgroundColor = '#140c1c';
-                        i.style.borderColor = '#663300';
+                if (!item) return;
+                
+                // Déterminer l'icône en fonction du slot
+                let itemIcon = item.icon;
+                
+                // Afficher le prix ou "FREE" si le prix est 0 ou non défini
+                const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
+                
+                const itemElement = document.createElement("div");
+                itemElement.className = "shop-item-entry";
+                itemElement.setAttribute("data-index", index);
+                itemElement.setAttribute("data-item-id", item.id);
+                itemElement.style.cssText = `
+                    display: flex; 
+                    align-items: center; 
+                    padding: 4px; 
+                    margin-bottom: 3px; 
+                    cursor: pointer; 
+                    background-color: #140c1c; 
+                    border: 1px solid #663300;
+                    width: 95%;
+                `;
+                
+                itemElement.innerHTML = `
+                    <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
+                    <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
+                    <span style="color: #ffcc00; font-weight: bold;">${priceDisplay}</span>
+                `;
+                
+                itemElement.addEventListener('click', () => {
+                    // Désélectionner tous les autres éléments
+                    document.querySelectorAll('.shop-item-entry').forEach(e => {
+                        e.style.borderColor = '#663300';
+                        e.style.backgroundColor = '#140c1c';
                     });
                     
-                    // Sélectionner celui-ci
-                    e.currentTarget.style.backgroundColor = '#331a0c';
-                    e.currentTarget.style.borderColor = '#ffaa00';
+                    // Mettre en évidence l'élément sélectionné
+                    itemElement.style.borderColor = '#ffaa00';
+                    itemElement.style.backgroundColor = '#331a0c';
                     
                     // Afficher les détails
-                    const itemId = parseInt(e.currentTarget.getAttribute('data-item'), 10);
-                    const selectedItem = Item.getItemById(itemId);
+                    showShopItemDetails(this, item, player, index);
                     
-                    if (selectedItem) {
-                        // Générer les statistiques
-                        let statsHTML = "";
-                        
-                        if (selectedItem.strength !== 0) statsHTML += `<div>Strength: ${selectedItem.strength}</div>`;
-                        if (selectedItem.dexterity !== 0) statsHTML += `<div>Dexterity: ${selectedItem.dexterity}</div>`;
-                        if (selectedItem.intellect !== 0) statsHTML += `<div>Intellect: ${selectedItem.intellect}</div>`;
-                        if (selectedItem.might !== 0) statsHTML += `<div>Might: ${selectedItem.might}</div>`;
-                        if (selectedItem.magic !== 0) statsHTML += `<div>Magic: ${selectedItem.magic}</div>`;
-                        if (selectedItem.dodge !== 0) statsHTML += `<div>Dodge: ${selectedItem.dodge}</div>`;
-                        if (selectedItem.criti !== 0) statsHTML += `<div>Crit.: ${selectedItem.criti}</div>`;
-                        if (selectedItem.armor !== 0) statsHTML += `<div>Armor: ${selectedItem.armor}</div>`;
-                        if (selectedItem.power !== 0) statsHTML += `<div>Power: ${selectedItem.power}</div>`;
-                        
-                        if (statsHTML === "") statsHTML = "<div>No stats available</div>";
-                        
-                        // Déterminer le type
-                        let type = "Item";
-                        if (selectedItem.slot === 1) type = "Weapon";
-                        if (selectedItem.slot === 2) type = "Armor";
-                        
-                        // Afficher les détails
-                        itemDetails.innerHTML = `
-                            <div style="margin-bottom: 10px; border-bottom: 1px solid #663300; padding-bottom: 5px;">
-                                <div style="font-size: 16px; font-weight: bold;">${selectedItem.name}</div>
-                                <div style="font-size: 12px; color: #aaaaaa;">${type}</div>
-                                <div style="font-size: 14px; color: #ffcc00;">Price: ${selectedItem.price || 'FREE'}</div>
-                            </div>
-                            
-                            <div style="margin-bottom: 15px;">
-                                ${statsHTML}
-                            </div>
-                            
-                            <div style="text-align: center;">
-                                <button class="buy-button" data-item="${selectedItem.id}" style="padding: 5px 15px; background-color: #205020; color: #ffffff; border: 1px solid #663300; cursor: pointer;">
-                                    ${selectedItem.price ? 'BUY' : 'TAKE'}
-                                </button>
-                            </div>
-                        `;
-                        
-                        // Ajouter l'événement au bouton d'achat
-                        document.querySelector('.buy-button').addEventListener('click', () => {
-                            if (selectedItem.price && selectedItem.price > 0) {
-                                // Vérifier si le joueur a assez d'or
-                                if ((player.gold || 0) >= selectedItem.price) {
-                                    player.gold -= selectedItem.price;
-                                    this.addItemToInventory(selectedItem, player);
-                                    this.spriteSell = this.spriteSell.filter(id => id !== selectedItem.id);
-                                    Sprite.terminalLog(`Vous avez acheté ${selectedItem.name} pour ${selectedItem.price} gp.`);
-                                } else {
-                                    Sprite.terminalLog(`Vous n'avez pas assez d'or pour acheter ${selectedItem.name}.`);
-                                }
-                            } else {
-                                this.giveItemToPlayer(selectedItem, player);
-                                Sprite.terminalLog(`Vous avez reçu ${selectedItem.name}.`);
-                            }
-                            
-                            // Rafraîchir l'affichage
-                            this.displayItemsForSale(player);
-                        });
+                    // Cacher le placeholder
+                    const placeholder = document.getElementById('shop-details-placeholder');
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
                     }
                 });
+                
+                shopList.appendChild(itemElement);
             });
             
-            // Sélectionner le premier élément par défaut
-            const firstItem = document.querySelector('.shop-item');
-            if (firstItem) firstItem.click();
+            // Fonction pour afficher les détails d'un objet
+            const showShopItemDetails = (context, item, player, index) => {
+                const shopDetails = document.getElementById('shop-details');
+                if (!shopDetails) return;
+                
+                // Déterminer l'icône en fonction du slot
+                let itemIcon = item.icon;;
+                                
+                // Type d'équipement
+                let slotName = "";
+                switch(item.slot) {
+                    case 1: slotName = "Weapon"; break;
+                    case 2: slotName = "Armor"; break;
+                    default: slotName = "Item"; break;
+                }
+                
+                // Construire la chaîne HTML des statistiques
+                let statsHTML = "";
+                
+                // Fonction helper pour ajouter une stat avec la bonne couleur
+                const addStat = (value, name) => {
+                    if (value !== 0) {
+                        const sign = value > 0 ? "+" : "";
+                        const color = value > 0 ? "#66ff66" : "#ff6666";
+                        statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
+                    }
+                };
+                
+                // Ajouter toutes les stats dans l'ordre
+                addStat(item.strength, "Strength");
+                addStat(item.dexterity, "Dexterity");
+                addStat(item.intellect, "Intellect");
+                addStat(item.might, "Might");
+                addStat(item.magic, "Magic");
+                addStat(item.dodge, "Dodge");
+                addStat(item.criti, "Crit.");
+                addStat(item.armor, "Armor");
+                
+                if (item.power !== 0) {
+                    statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
+                }
+                
+                // Si aucune statistique n'est définie
+                if (statsHTML === "") {
+                    statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
+                }
+                
+                // Afficher le prix ou "FREE" si le prix est 0 ou non défini
+                const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
+                const buyText = item.price > 0 ? 'BUY' : 'TAKE';
+                
+                // Construire le HTML complet des détails
+                shopDetails.innerHTML = `
+                    <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 100%;">
+                        <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
+                        <div style="width: calc(100% - 38px); overflow: hidden;">
+                            <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                            <div style="font-size: 12px; color: #a89986;">${slotName}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 5px; font-size: 14px; color: #ffcc00; font-weight: bold;">
+                        Price: ${priceDisplay}
+                    </div>
+                    
+                    <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 100%; max-height: calc(100% - 80px);">
+                        ${statsHTML}
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 10px; width: 100%;">
+                        <button id="buy-item-btn" style="
+                            padding: 6px 12px; 
+                            background-color: #205020; 
+                            color: #e8d5a9; 
+                            border: 1px solid #663300; 
+                            cursor: pointer;
+                            font-family: monospace;
+                            text-transform: uppercase;
+                            box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                            width: 90%;
+                            max-width: 180px;
+                        ">
+                            ${buyText}
+                        </button>
+                    </div>
+                `;
+                
+                // Ajouter l'écouteur d'événement pour le bouton d'achat
+                document.getElementById('buy-item-btn').addEventListener('click', () => {
+                    if (item.price > 0) {
+                        // Vérifier si le joueur a assez d'or
+                        if ((player.gold || 0) >= item.price) {
+                            // Déduire le coût
+                            player.gold -= item.price;
+                            
+                            // Ajouter l'objet à l'inventaire
+                            context.addItemToInventory(item, player);
+                            
+                            // Retirer l'objet de la liste de vente
+                            context.spriteSell = context.spriteSell.filter(itemId => itemId !== item.id);
+                            
+                            // Message de confirmation
+                            Sprite.terminalLog(`Vous avez acheté ${item.name} pour ${item.price} gp.`);
+                        } else {
+                            Sprite.terminalLog(`Vous n'avez pas assez d'or pour acheter ${item.name}.`);
+                            return; // Ne pas poursuivre l'achat
+                        }
+                    } else {
+                        // Donner gratuitement
+                        context.giveItemToPlayer(item, player);
+                        Sprite.terminalLog(`Vous avez reçu ${item.name}.`);
+                    }
+                    
+                    // Actualiser l'affichage
+                    context.displayItemsForSale(player);
+                });
+            };
+            
+            // Sélectionner automatiquement le premier élément
+            const firstItem = shopList.querySelector('.shop-item-entry');
+            if (firstItem) {
+                firstItem.click();
+            }
         } else {
-            itemList.innerHTML = "<div style='padding: 10px; text-align: center;'>No items for sale</div>";
-            itemDetails.innerHTML = "";
+            shopContent.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c;">No items for sale</div>';
         }
     }
-
     addItemToInventory(item, player) {
         player.inventory.push(item);
     }

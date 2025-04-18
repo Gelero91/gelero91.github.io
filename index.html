@@ -344,25 +344,28 @@ Gwendal L.R.
 </div>
               
               <!--QUEST-->
-              <div id="quests" style="display: none;">
-                <div>
-                  <div>QUEST JOURNAL</div>
-                  <div>-</div>
-                </div>
-                <br>
-                <div id="questContent">
-                  > No quest in progress
-                </div>
-              </div>
+<!--QUESTS-->
+<div id="quests" style="display: none;">
+  <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 5px; border-bottom: 1px solid #663300;">
+    <div style="font-weight: bold; color: #e8d5a9;">QUEST JOURNAL</div>
+    <div id="quest-count" style="color: #e8d5a9;">-</div>
+  </div>
+  
+  <div id="questContent" style="margin-top: 5px;">
+    > No quests in progress
+  </div>
+</div>
               
               <!--boutique-->
+              <!--SHOP-->
               <div id="shop" style="display: none;">
-                <div>
-                  <div>SHOP</div>
-                  <div id="shopName">-</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 5px; border-bottom: 1px solid #663300;">
+                  <div id="shopName" style="font-weight: bold; color: #e8d5a9;">-</div>
+                  <div><span class="stat-label">Gold:</span>
+                      <span id="ShopPlayerGoldOutput" style="color: #ffcc00;">0</span> <span style="color: #ffcc00;">gp</span></div>
                 </div>
-                <br>
-                <div id="shopContent">
+                
+                <div id="shopContent" style="margin-top: 5px;">
                   > No items for sale
                 </div>
               </div>
