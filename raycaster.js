@@ -599,7 +599,7 @@ class Player {
                 const equippedMark = item.equipped ? "✓" : "";
                 
                 // Déterminer l'icône en fonction du slot
-                const itemIcon = item.icon;
+                var itemIcon = this.inventory[index].icon;
                 
                 const isEquipped = item.equipped;
                 const bgColor = isEquipped ? "rgba(0, 60, 0, 0.7)" : "#140c1c";
@@ -2255,7 +2255,8 @@ class Item {
                 itemData.dodge,
                 itemData.armor,
                 itemData.criti,
-                itemData.price
+                itemData.price,
+                itemData.icon
             );
             item.give(player);
         } else {
@@ -2479,13 +2480,16 @@ class Spell {
 
         caster.XPintellect += 1;
 
-        target.hp += 10;
+        var healEffect = 10 + caster.magic
+
+        target.hp += healEffect;
 
         if (target.hp > target.hpMax) {
             target.hp = target.hpMax;
+            Sprite.terminalLog(`${target.name} is healed for ${healEffect}HP.`);
             Sprite.terminalLog(`${target.name} is completely healed.`);
         } else {
-            Sprite.terminalLog(`${target.name} is healed for 10hp.`);
+            Sprite.terminalLog(`${target.name} is healed for ${healEffect}HP.`);
         }
     }
 
@@ -2493,9 +2497,12 @@ class Spell {
     static damageEffect(caster, target) {
         Raycaster.playerHealFlash();
         target.startSpriteFlash();
-        target.hp -= 2;
+ 
+        var damage = 1 + caster.magic;
+
+        target.hp -= damage;
         caster.XPintellect += 1;
-        Sprite.terminalLog(`${target.name} suffered 2 points of damage from ${caster.name}`);
+        Sprite.terminalLog(`The target suffered ${damage} points of damage from ${caster.name}`);
     }
 
     // à suprimer ?
@@ -2945,8 +2952,8 @@ class Sprite {
                 
                 itemElement.innerHTML = `
                     <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
-                    <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
-                    <span style="color: #ffcc00; font-weight: bold;">${priceDisplay}</span>
+                    <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span></br>
+                    <span style="color: #ffcc00; font-weight: bold; display: none;">${priceDisplay}</span>
                 `;
                 
                 itemElement.addEventListener('click', () => {
