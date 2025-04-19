@@ -509,8 +509,8 @@ body {
   justify-content: space-between;
 }
 
+/*Quest a été retiré*/
 #inventoryContent,
-#questContent,
 #shopContent {
   width: 645px;
   height: calc(100% - 30px);
@@ -738,6 +738,32 @@ body {
   padding-top: 25vh;
   padding-bottom: 25vh;
   z-index: 9999;
+}
+
+.cannot-afford {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: #501102 !important; /* Couleur rouge foncé pour indiquer que l'objet n'est pas accessible */
+}
+
+@keyframes loot-gold {
+  0% { transform: scale(1); color: gold; text-shadow: 0 0 10px gold; }
+  50% { transform: scale(1.2); color: yellow; text-shadow: 0 0 15px yellow; }
+  100% { transform: scale(1); color: gold; text-shadow: 0 0 5px gold; }
+}
+
+@keyframes loot-item {
+  0% { transform: scale(1); color: purple; text-shadow: 0 0 10px purple; }
+  50% { transform: scale(1.2); color: magenta; text-shadow: 0 0 15px magenta; }
+  100% { transform: scale(1); color: purple; text-shadow: 0 0 5px purple; }
+}
+
+.loot-gold-animation {
+  animation: loot-gold 1s ease-in-out;
+}
+
+.loot-item-animation {
+  animation: loot-item 1s ease-in-out;
 }
 
 /* Media queries pour la responsivité */
