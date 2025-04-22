@@ -97,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function() {
     Sprite.terminalLog("N.B. : the joystick is crappy, sorry ♥");
     Sprite.terminalLog("")
     Sprite.terminalLog("=========================================")
+    Sprite.resetToggle()
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,6 +256,10 @@ var maps = [
                 [44, 16, 4, 1, 15],
                 [45, 10, 9, 1, 15],
                 [46, 11, 1, 1, 15],
+                
+                // xyz
+                // coffre
+                [47, 22, 21, 6, 9],
     
                 [0, 10, 1, 10, 13],
                 [0, 11, 1, 10, 13],
@@ -350,11 +355,11 @@ class Player {
             this.quadrant = "",
             this.speed = 0,
 
-            this.tileSize = 1280,
-            this.moveSpeed = Math.round(1280 / ((DESIRED_FPS / 60.0) * 16)),
-            this.rotSpeed = (1.5 * Math.PI) / 180,
+        this.tileSize = 1280,
+        this.moveSpeed = Math.round(1280 / ((DESIRED_FPS / 60.0) * 16)),
+        this.rotSpeed = (1.5 * Math.PI) / 180,
 
-            this.hp = 10;
+        this.hp = 10;
         this.mp = 10;
         this.hpMax = 10;
         this.mpMax = 10;
@@ -576,8 +581,6 @@ class Player {
     // EQUIPEMENT INVENTAIRE
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // xyz
-
     displayInventory() {
         // Mettre à jour l'affichage de l'or
         const goldOutput = document.getElementById("PlayerGoldOutput");
@@ -615,7 +618,7 @@ class Player {
                     cursor: pointer; 
                     background-color: ${bgColor}; 
                     border: 1px solid #663300;
-                    width: 95%;
+                    
                 `;
                 
                 itemElement.innerHTML = `
@@ -935,12 +938,12 @@ class Player {
                 
                 // Construire le HTML des détails
                 questDetails.innerHTML = `
-                    <div style="margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 100%;">
+                    <div style="margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 110%;">
                         <div style="font-size: 16px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</div>
                         <div style="font-size: 12px; color: ${statusColor};">${questStatus}</div>
                     </div>
                     
-                    <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 100%; max-height: calc(100% - 80px);">
+                    <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 102zzz%; max-height: calc(100% - 80px);">
                         <p style="margin-bottom: 10px;">${quest.description}</p>
                         
                         ${quest.reward ? 
@@ -1485,14 +1488,43 @@ class Player {
                         // valeur fixe de test
                         // ultérieurement : quests[currentMap].complete();
                         console.log("Quest completion sprite");
-                        this.quests[0].complete();
+                        // xyz
+                        if (this.quests[0].completed === false) {
+                            this.quests[0].complete();
+
+                            this.lootClass = Sprite.calculateLootClass(hp, dmg);
+                           // changement de texture temporaire
+                           console.log("test changement de texture");
+                           sprite.spriteTexture = 21;
     
-                        // changement de texture temporaire
-                        console.log("test changement de texture");
-                        sprite.spriteTexture = 21;
-    
-                        Sprite.resetToggle();
+                            Sprite.resetToggle();
+                         } else {
+                            
+                            Sprite.terminalLog("I've already looted that.")
+                        }
+
                         break;
+                    case 6:
+                            // valeur fixe de test
+                            // ultérieurement : quests[currentMap].complete();
+                            console.log("chest !");
+                            // xyé
+                            if (sprite.step !=  1) {
+                                sprite.lootClass = 5;
+
+                                sprite.generateLoot(this);
+
+                               // changement de texture temporaire
+                               sprite.spriteTexture = 21;
+
+                               sprite.step = 1
+        
+                                Sprite.resetToggle();
+                             } else {
+                                Sprite.terminalLog("I've already looted that.")
+                             }
+    
+                            break;
                     default:
                         console.log(`Sprite type ${sprite.spriteType} has no specific action`);
                         Sprite.resetToggle();
@@ -2647,6 +2679,7 @@ class Sprite {
         spriteTalk = [],
         spriteSell = [],
         id = 0,
+        step = 0,
         lootClass = null  // Nouvelle propriété: classe de loot
     ) {
         this.x = x;
@@ -2682,6 +2715,7 @@ class Sprite {
         this.spriteTalk = spriteTalk;
         this.spriteSell = spriteSell;
         this.id = id;
+        this.step = 0;
 
         if (lootClass === null || lootClass === 0) {
             if (spriteType === "A") {
@@ -2878,8 +2912,6 @@ class Sprite {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // boutique, pas de prix pour le moment
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // xyz
 
     displayItemsForSale(player) {
         var output = document.getElementById("output");
