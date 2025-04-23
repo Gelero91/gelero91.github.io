@@ -1494,6 +1494,7 @@ class Player {
 
                             this.lootClass = Sprite.calculateLootClass(hp, dmg);
                            // changement de texture temporaire
+                           
                            console.log("test changement de texture");
                            sprite.spriteTexture = 21;
     
@@ -3018,7 +3019,7 @@ class Sprite {
                 if (!shopDetails) return;
                 
                 // Déterminer l'icône en fonction du slot
-                let itemIcon = item.icon;;
+                let itemIcon = item.icon;
                                 
                 // Type d'équipement
                 let slotName = "";
@@ -3063,39 +3064,47 @@ class Sprite {
                 const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
                 const buyText = item.price > 0 ? 'BUY' : 'TAKE';
                 
-                // Construire le HTML complet des détails
+                // Structure avec positions absolues et défilement central
                 shopDetails.innerHTML = `
-                    <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 100%;">
-                        <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
-                        <div style="width: calc(100% - 38px); overflow: hidden;">
-                            <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
-                            <div style="font-size: 12px; color: #a89986;">${slotName}</div>
+                    <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
+                    <div style="position: relative; width: 100%; height: 82%;">
+                        <!-- Division 1: Nom et icône (position absolue en haut) -->
+                        <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
+                            <div style="display: flex; align-items: center; width: 100%;">
+                                <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
+                                <div style="width: calc(100% - 38px);">
+                                    <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                                    <div style="font-size: 12px; color: #a89986;">${slotName}</div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 5px; font-size: 14px; color: #ffcc00; font-weight: bold;">
-                        Price: ${priceDisplay}
-                    </div>
-                    
-                    <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 100%; max-height: calc(100% - 80px);">
-                        ${statsHTML}
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 10px; width: 100%;">
-                        <button id="buy-item-btn" style="
-                            padding: 6px 12px; 
-                            background-color: #205020; 
-                            color: #e8d5a9; 
-                            border: 1px solid #663300; 
-                            cursor: pointer;
-                            font-family: monospace;
-                            text-transform: uppercase;
-                            box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
-                            width: 90%;
-                            max-width: 180px;
-                        ">
-                            ${buyText}
-                        </button>
+                        
+                        <!-- Division 3: Prix et bouton d'achat (position absolue en bas) -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                <div style="font-size: 14px; color: #ffcc00; font-weight: bold;">
+                                    Price: ${priceDisplay}
+                                </div>
+                                <button id="buy-item-btn" style="
+                                    padding: 6px 12px; 
+                                    background-color: #205020; 
+                                    color: #e8d5a9; 
+                                    border: 1px solid #663300; 
+                                    cursor: pointer;
+                                    font-family: monospace;
+                                    text-transform: uppercase;
+                                    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                                    width: auto;
+                                ">
+                                    ${buyText}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Division 2: Statistiques (zone avec défilement) -->
+                        <div style="position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
+                            ${statsHTML}
+                        </div>
                     </div>
                 `;
                 
@@ -3139,6 +3148,7 @@ class Sprite {
             shopContent.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c;">No items for sale</div>';
         }
     }
+    
     addItemToInventory(item, player) {
         player.inventory.push(item);
     }

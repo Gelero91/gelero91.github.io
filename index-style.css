@@ -433,7 +433,7 @@ body {
   padding: 14px;
   line-height: 125%;
   image-rendering: pixelated;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: #1F0E08;
   /*box-shadow: var(--shadow-standard);*/
   border-radius: var(--border-radius-standard);
 }
@@ -479,6 +479,7 @@ body {
 }
 
 /* Items, Quests, Shop */
+/**/
 #items,
 #quests,
 #shop,
@@ -499,6 +500,7 @@ body {
   color: var(--color-black);
 }
 
+/*
 #items > div:first-child,
 #quests > div:first-child,
 #shop > div:first-child {
@@ -508,8 +510,9 @@ body {
   display: flex;
   justify-content: space-between;
 }
-
+*/
 /*Quest a été retiré*/
+/*
 #inventoryContent,
 #shopContent {
   width: 645px;
@@ -517,7 +520,9 @@ body {
   overflow-y: scroll;
   border-radius: var(--border-radius-medium);
 }
+*/
 
+/*
 #inventoryContent {
   border: 1px;
   border-color: var(--color-dark-bg);
@@ -532,6 +537,7 @@ body {
   border: 0 solid var(--color-dark-bg);
 }
 
+*/
 /* Mini carte */
 #minimapcontainer {
   width: 100%;
@@ -675,6 +681,7 @@ body {
 }
 
 /* Classes supplémentaires */
+
 .itemInventory {
   width: 100%;
 }

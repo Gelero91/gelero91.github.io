@@ -149,14 +149,14 @@ Gwendal L.R.
                 </br>
 
                   <div class="menu-button-container">
-                    <button id="mainMenuButton" class="pixel-frame" style="margin-top: 9px;background-color: #582817;"><p style="margin-top: -7px;color: white;">MENU</p></button>
+                    <button id="mainMenuButton" class="pixel-frame" style="margin-top: 9px;background-color: #582817;color: white;"><p style="margin-top: -7px;">MENU</p></button>
                   </div>
 
                   <div class="menu-button-container">
                     <button id="characterButton" class="pixel-frame" style="margin-top: 9px;
                     height: 30px;
                     width: 100%;
-                    background-color: #582817"><p style="margin-top: -7px;color: white;">CHARACTER</p></button>
+                    background-color: #582817;color: white;"><p style="margin-top: -7px;">CHARACTER</p></button>
                   </div>
 
                   <img src="assets/separatorLarge.png" alt="" class="separator" style="padding-top:  15px;"></img>
@@ -320,7 +320,7 @@ Gwendal L.R.
               
 <!--ITEMS-->
 <div id="items" style="display: none; width: 654px; height: 100%+30px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 0px; border-bottom: 1px solid #663300; width:642px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 5px; border-bottom: 1px solid #663300; width:642px;">
     <div style="font-weight: bold; color: #e8d5a9;">ITEMS</div>
     <div><span class="stat-label">Gold:</span>
          <span id="PlayerGoldOutput" style="color: #ffcc00;">0</span> <span style="color: #ffcc00;">gp</span></div>
@@ -328,7 +328,7 @@ Gwendal L.R.
   
   <div id="inventory-container" style="display: flex; height: calc(100% - 30px); width: 654px;">
     <!-- Liste des objets (40% de la largeur) -->
-    <div id="inventory-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+    <div id="inventory-list" style="width: 40%; height: 105%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
       <!-- Les items seront injectés ici par JS -->
     </div>
     
@@ -436,16 +436,16 @@ Gwendal L.R.
           <div id="gameWindow" class="container pixel-frame">
             <div class="menuCenter">
               <H1>OASIS.JS</H1>
+              <br><!--changement des couleurs-->
+              <button id="newGameButton" class="menuButton pixel-frame" style="background-color: #582817;color: white;">New Game</button>
               <br>
-              <button id="newGameButton" class="menuButton pixel-frame" style="background-color: rgb(255, 248, 230);">New Game</button>
+              <button id="loadButton" class="menuButton  pixel-frame" style="background-color: #582817;color: white;" >Load save</button>
               <br>
-              <button id="loadButton" class="menuButton  pixel-frame" style="background-color:  rgb(255, 248, 230)" >Load save</button>
+              <button id="saveButton" class="menuButton pixel-frame " style="background-color: #582817;color: white;">Save game</button>
               <br>
-              <button id="saveButton" class="menuButton pixel-frame " style="background-color: rgb(255, 248, 230);">Save game</button>
+              <button id="nextMapButton" class="menuButton pixel-frame " style="background-color: #582817;color: white;">DEV TEST<br>*Next Map*</button>
               <br>
-              <button id="nextMapButton" class="menuButton pixel-frame " style="background-color: rgb(255, 248, 230);">DEV TEST<br>*Next Map*</button>
-              <br>
-              <button id="backMenuButton" class="menuButton  pixel-frame" style="background-color: rgb(255, 248, 230);">Back to Game</button>
+              <button id="backMenuButton" class="menuButton  pixel-frame" style="background-color: #582817;color: white;">Back to Game</button>
             </div>
           </div>
         </div>
