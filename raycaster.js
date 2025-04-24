@@ -520,19 +520,19 @@ class Player {
 
         // pareil pour dodge et critical
         // opti pour équipement
-        if (this.hands[0]){
-            if (this.dodge!== this.oldDodge) {
-                this.dodge = this.dexterity * 2 + this.hands[0].dodge;
-                this.oldDodge = this.dodge;
-            }
 
-            if (this.criti !== this.oldCriti) {
-                this.criti = this.dexterity * 2 + this.hands[0].criti;
-                this.oldCriti = this.criti
-            }
+        var baseDodge = 0;
+        var baseCriti = 0;
+
+        baseDodge = this.dexterity * 2
+        baseCriti = this.dexterity * 2
+
+        if (this.hands[0]){
+            this.dodge = baseDodge + this.hands[0].dodge;
+            this.criti = baseCriti + this.hands[0].criti;
         } else {
-            this.dodge = this.dexterity * 2;
-            this.criti = this.dexterity * 2;
+            this.dodge = baseDodge;
+            this.criti = baseCriti;
         }
         // L'armure n"a pas de modificateurs
         this.armor = this.armor;
@@ -1508,9 +1508,7 @@ async handleSpriteAction(action, sprites) {
                         if (this.quests[0].completed === false) {
                             this.quests[0].complete();
 
-                            this.lootClass = Sprite.calculateLootClass(hp, dmg);
                            // changement de texture temporaire
-                           
                            console.log("test changement de texture");
                            sprite.spriteTexture = 21;
     

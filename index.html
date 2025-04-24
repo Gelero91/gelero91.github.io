@@ -333,7 +333,7 @@ Gwendal L.R.
     </div>
     
     <!-- Détails de l'objet sélectionné (60% de la largeur) -->
-    <div id="item-details" style="width: 60%; height: 100%; padding-left: 10px; display: flex; flex-direction: column;">
+    <div id="item-details" style="width: 60%; height: 100%; display: flex; flex-direction: column;">
       <!-- Les détails de l'item seront injectés ici par JS -->
       <div id="item-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
         <div>Select an item</div>
@@ -346,12 +346,12 @@ Gwendal L.R.
               <!--QUEST-->
 <!--QUESTS-->
 <div id="quests" style="display: none;">
-  <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 5px; border-bottom: 1px solid #663300; width:642px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; border-bottom: 1px solid #663300; width:642px;">
     <div style="font-weight: bold; color: #e8d5a9;">QUEST JOURNAL</div>
     <div id="quest-count" style="color: #e8d5a9;">-</div>
   </div>
   
-  <div id="questContent" style="margin-top: 5px;">
+  <div id="questContent" style="">
     > No quests in progress
   </div>
 </div>
@@ -359,13 +359,14 @@ Gwendal L.R.
               <!--boutique-->
               <!--SHOP-->
               <div id="shop" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e; padding: 5px; border-bottom: 1px solid #663300; width:642px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; background-color: #331a0e;
+                border-bottom: 1px solid #663300; width:642px;">
                   <div id="shopName" style="font-weight: bold; color: #e8d5a9;">-</div>
                   <div><span class="stat-label">Gold:</span>
                       <span id="ShopPlayerGoldOutput" style="color: #ffcc00;">0</span> <span style="color: #ffcc00;">gp</span></div>
                 </div>
                 
-                <div id="shopContent" style="margin-top: 5px;">
+                <div id="shopContent" style="">
                   > No items for sale
                 </div>
               </div>
