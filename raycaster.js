@@ -395,6 +395,8 @@ class Player {
         // Cela peut rendre le code moins flexible à long terme et plus difficile à maintenir ou à tester.
         // Il serait préférable d'envisager des alternatives comme l'utilisation d'événements ou de services pour réduire ce couplage.
         this.raycaster = raycaster;
+
+        this.lastAttackTime = 0; // Nouveau attribut pour suivre le temps de la dernière attaque
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -614,7 +616,8 @@ class Player {
                     display: flex; 
                     align-items: center; 
                     padding: 4px; 
-                    margin-bottom: 3px; 
+                    margin-top: 3px;
+                    margin-bottom: 3px: 
                     cursor: pointer; 
                     background-color: ${bgColor}; 
                     border: 1px solid #663300;
@@ -696,7 +699,7 @@ class Player {
             if (value !== 0) {
                 const sign = value > 0 ? "+" : "";
                 const color = value > 0 ? "#66ff66" : "#ff6666";
-                statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
+                statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};margin-left: 5px;">${sign}${value}</span> ${name}</div>`;
             }
         };
         
@@ -722,14 +725,14 @@ class Player {
         // Construire le HTML complet des détails
         itemDetails.innerHTML = `
             <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 100%;">
-                <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
+                <img src="${itemIcon}" style="width: 28px; height: 28px; margin : 5px;">
                 <div style="width: calc(100% - 38px); overflow: hidden;">
-                    <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                    <div style="margin-top: 5px; font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
                     <div style="font-size: 12px; color: #a89986;">${slotName}</div>
                 </div>
             </div>
             
-            <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 100%; max-height: calc(100% - 80px);">
+            <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 100%; max-height: calc(100% - 80px);  margin-right: 5px;">
                 ${statsHTML}
             </div>
             
@@ -860,12 +863,12 @@ class Player {
             // Structure à deux colonnes comme pour l'inventaire et la boutique
             let html = `<div style="display: flex; height: 170px; width: 100%;">
                 <!-- Liste des quêtes (40% de la largeur) -->
-                <div id="quest-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+                <div id="quest-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto;">
                     <!-- Les quêtes seront listées ici -->
                 </div>
                 
                 <!-- Détails de la quête sélectionnée (60% de la largeur) -->
-                <div id="quest-details" style="width: 60%; height: 100%; padding-left: 10px; display: flex; flex-direction: column;">
+                <div id="quest-details" style="margin-top: 5px; width: 60%; height: 100%; display: flex; flex-direction: column;">
                     <!-- Les détails seront affichés ici -->
                     <div id="quest-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
                         <div>Select a quest</div>
@@ -891,16 +894,17 @@ class Player {
                     display: flex; 
                     align-items: center; 
                     padding: 4px; 
-                    margin-bottom: 3px; 
+                    margin-top: 3px;
+                    margin-bottom: 3px: 
                     cursor: pointer; 
                     background-color: ${bgColor}; 
                     border: 1px solid #663300;
-                    width: 95%;
+                    width: 99%;
                 `;
                 
                 questElement.innerHTML = `
-                    <span style="flex-grow: 1; font-size: 13px; color: ${isCompleted ? '#aaffaa' : '#cccccc'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</span>
-                    <span style="color: ${isCompleted ? '#66ff66' : '#aaaaaa'}; font-weight: bold;">${statusIcon}</span>
+                    <span style="margin-left: 5px; margin-top:5px; flex-grow: 1; font-size: 13px; color: ${isCompleted ? '#aaffaa' : '#cccccc'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</span>
+                    <span style="margin-left: 5px; color: ${isCompleted ? '#66ff66' : '#aaaaaa'}; font-weight: bold;">${statusIcon}</span>
                 `;
                 
                 questElement.addEventListener('click', () => {
@@ -938,18 +942,18 @@ class Player {
                 
                 // Construire le HTML des détails
                 questDetails.innerHTML = `
-                    <div style="margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 110%;">
-                        <div style="font-size: 16px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</div>
-                        <div style="font-size: 12px; color: ${statusColor};">${questStatus}</div>
+                    <div style="border-bottom: 1px solid #553311; padding-bottom: 5px; width: 110%;">
+                        <div style="margin-left: 5px;font-size: 16px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</div>
+                        <div style="margin-left: 5px;font-size: 12px; color: ${statusColor};">${questStatus}</div>
                     </div>
                     
-                    <div style="flex-grow: 1; font-size: 13px; overflow-y: auto; width: 102zzz%; max-height: calc(100% - 80px);">
+                    <div style="margin-left: 5px; flex-grow: 1; font-size: 13px; overflow-y: auto; width: 101%; max-height: calc(100% - 60px);">
                         <p style="margin-bottom: 10px;">${quest.description}</p>
                         
                         ${quest.reward ? 
                             `<div style="margin-top: 15px;">
-                                <div style="font-weight: bold; color: #e8d5a9;">Reward:</div>
-                                <div style="color: #ffcc00;">${quest.reward}</div>
+                                <div style="margin-left: 5px; font-weight: bold; color: #e8d5a9;">Reward:</div>
+                                <div style="margin-left: 5px;color: #ffcc00;">${quest.reward}</div>
                             </div>` 
                             : ''}
                     </div>
@@ -1422,31 +1426,43 @@ class Player {
         return { frontX, frontY };
     }
 
-    async handleSpriteAction(action, sprites) {
-        if (!action || !this || !this.turn) return;
-    
-        const {
-            frontX,
-            frontY
-        } = this.calculateFrontPosition();
-    
-        console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
-        console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
-    
-        let spriteFound = false;
-        for (const sprite of sprites) {
-            const spriteX = Math.floor(sprite.x / this.tileSize);
-            const spriteY = Math.floor(sprite.y / this.tileSize);
+// Modifions la méthode handleSpriteAction pour gérer le délai
+async handleSpriteAction(action, sprites) {
+    if (!action || !this || !this.turn) return;
+
+    // Vérifier si suffisamment de temps s'est écoulé depuis la dernière attaque
+    const currentTime = Date.now();
+    if (currentTime - this.lastAttackTime < 2000) { // 2000ms = 2 secondes
+        // Pas assez de temps écoulé, afficher un message et annuler l'action
+        Sprite.terminalLog("Vous n'êtes pas prêt à attaquer de nouveau.");
+        return;
+    }
+
+    const {
+        frontX,
+        frontY
+    } = this.calculateFrontPosition();
+
+    console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
+    console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
+
+    let spriteFound = false;
+    for (const sprite of sprites) {
+        const spriteX = Math.floor(sprite.x / this.tileSize);
+        const spriteY = Math.floor(sprite.y / this.tileSize);
+        
+        console.log(`Checking sprite at (${spriteX}, ${spriteY}), type: ${sprite.spriteType}`);
+        
+        if (spriteX === frontX && spriteY === frontY) {
+            spriteFound = true;
+            console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
             
-            console.log(`Checking sprite at (${spriteX}, ${spriteY}), type: ${sprite.spriteType}`);
-            
-            if (spriteX === frontX && spriteY === frontY) {
-                spriteFound = true;
-                console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
-                
                 switch (sprite.spriteType) {
                     case "A":
                         console.log("Enemy detected, initiating combat!");
+                        // Enregistrer le temps de cette attaque
+                        this.lastAttackTime = currentTime;
+                        
                         if (this.combatSpell) {
                             console.log("Using combat spell");
                             sprite.combatSpell(this, sprite);
@@ -1946,14 +1962,19 @@ class Player {
             // Marquer la fin du mouvement d'impact
             this.isMoving = false;
             
-            // Déclencher directement le combat seulement si c'est une attaque (pas une esquive)
-            if (this.turn && !isDodging) {
+            // Vérifier le délai avant de déclencher le combat
+            const currentTime = Date.now();
+            if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) >= 2000)) {
                 try {
+                    this.lastAttackTime = currentTime; // Mettre à jour le temps de la dernière attaque
                     await collidedSprite.combat(this.might, this.criti, this);
                 } catch (error) {
-                    console.error("Erreur lors du combat:", error);
+                    console.error("Error:", error);
                     this.turn = false;
                 }
+            } else if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) < 2000)) {
+                // Informer le joueur qu'il n'est pas prêt à attaquer
+                Sprite.terminalLog("Can't attack yet !");
             }
             
             return;
@@ -2682,6 +2703,7 @@ class Sprite {
         id = 0,
         step = 0,
         lootClass = null  // Nouvelle propriété: classe de loot
+        
     ) {
         this.x = x;
         this.y = y;
@@ -2727,8 +2749,274 @@ class Sprite {
         } else {
             this.lootClass = lootClass;
         }
+    
+        this.lastAttackTime = null; // Pour suivre le timing des attaques
     }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IA / Deplacements ennemis
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+async moveRandomlyOrChase(map, sprites, player) {
+    // Ne pas déplacer si le sprite n'est pas un ennemi ou s'il est mort ou déjà en mouvement
+    if (this.spriteType !== "A" || this.hp <= 0 || this.isMoving) {
+        return false;
+    }
+    
+    const tileSize = 1280;
+    const currentCellX = Math.floor(this.x / tileSize);
+    const currentCellY = Math.floor(this.y / tileSize);
+    const playerCellX = Math.floor(player.x / tileSize);
+    const playerCellY = Math.floor(player.y / tileSize);
+    
+    // Calculer la distance entre l'ennemi et le joueur (distance Manhattan)
+    const distanceToPlayer = Math.abs(currentCellX - playerCellX) + Math.abs(currentCellY - playerCellY);
+    
+    // Si on est en contact avec le joueur, attaquer et planifier l'attaque suivante
+    if (distanceToPlayer <= 1) {
+        // Ne pas bouger, mais attaquer
+        if (!this.lastAttackTime || (Date.now() - this.lastAttackTime) >= 2000) {
+            this.attackPlayer(player);
+            
+            // Planifier une attaque supplémentaire dans 2 secondes
+            this.lastAttackTime = Date.now();
+            setTimeout(() => {
+                if (this.hp > 0 && player.hp > 0) {
+                    // Vérifier à nouveau la distance avant d'attaquer
+                    const newCurrentCellX = Math.floor(this.x / tileSize);
+                    const newCurrentCellY = Math.floor(this.y / tileSize);
+                    const newPlayerCellX = Math.floor(player.x / tileSize);
+                    const newPlayerCellY = Math.floor(player.y / tileSize);
+                    const newDistanceToPlayer = Math.abs(newCurrentCellX - newPlayerCellX) + 
+                                                Math.abs(newCurrentCellY - newPlayerCellY);
+                    
+                    if (newDistanceToPlayer <= 1) {
+                        this.attackPlayer(player);
+                    }
+                }
+            }, 2000);
+        }
+        return false;
+    }
+    
+    // Zone de détection (ajustable)
+    const detectionRange = 5; // Détecte le joueur à 5 cases ou moins
+    
+    // Déterminer le mode: poursuite ou aléatoire
+    const isChasing = distanceToPlayer <= detectionRange;
+    
+    // Chance de se déplacer (plus élevée en mode poursuite)
+    const moveChance = isChasing ? 0.8 : 0.4; // 80% en mode poursuite, 40% en mode aléatoire
+    
+    if (Math.random() > moveChance) {
+        return false;
+    }
+    
+    let directionToMove = null;
+    
+    if (isChasing) {
+        // Mode poursuite: essayer de se rapprocher du joueur
+        const dx = playerCellX - currentCellX;
+        const dy = playerCellY - currentCellY;
+        
+        // Choisir d'abord l'axe avec la plus grande différence
+        if (Math.abs(dx) >= Math.abs(dy)) {
+            // Se déplacer horizontalement en priorité
+            directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
+            
+            // Si bloqué horizontalement, essayer verticalement
+            if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+                directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
+            }
+        } else {
+            // Se déplacer verticalement en priorité
+            directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
+            
+            // Si bloqué verticalement, essayer horizontalement
+            if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+                directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
+            }
+        }
+        
+        // Si toujours bloqué, essayer une direction aléatoire
+        if (!directionToMove || !this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+            return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
+        }
+    } else {
+        // Mode aléatoire
+        return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
+    }
+    
+    // Exécuter le mouvement si une direction valide a été trouvée
+    if (directionToMove && this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+        return this.executeMove(directionToMove, currentCellX, currentCellY, tileSize);
+    }
+    
+    return false;
+}
+
+// Nouvelle méthode pour gérer l'attaque de l'ennemi
+attackPlayer(player) {
+    if (player.hp <= 0 || this.hp <= 0) return;
+    
+    // Animation de l'attaque
+    this.startAttackAnimation();
+    
+    const chanceEchec = Math.floor(Math.random() * 100);
+    
+    if (chanceEchec > player.dodge) {
+        // L'attaque réussit
+        if (player.armor >= this.dmg) {
+            Sprite.terminalLog("<font style='font-style: italic;'>Your armor absorbs all the damages.</font>");
+        } else {
+            const damageDone = this.dmg - player.armor;
+            Sprite.terminalLog(`<font style='font-style: italic;'>${this.spriteName || "L'ennemi"} attack : <font style='font-weight: bold;'>${damageDone} dmg !</font></font>`);
+            Raycaster.playerDamageFlash();
+            player.hp -= damageDone;
+            
+            // Vérifier si le joueur est mort
+            if (player.hp <= 0) {
+                Sprite.terminalLog("You're dead !");
+                // Logique de game over déjà gérée dans player.statsUpdate()
+            }
+        }
+    } else {
+        // Le joueur esquive
+        Sprite.terminalLog(`<font style='font-style: italic;'>You dodge ${this.spriteName || "the enemy"}'s attack !</font>`);
+        player.XPdexterity += 1;
+    }
+    
+    // Mettre à jour les statistiques du joueur
+    player.statsUpdate(player);
+}
+
+// Vérifier si un mouvement est valide
+isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
+    if (!direction) return false;
+    
+    const tileSize = 1280;
+    const newCellX = currentCellX + direction.dx;
+    const newCellY = currentCellY + direction.dy;
+    
+    // Vérifier les limites de la carte
+    if (newCellX < 0 || newCellY < 0 || newCellX >= map[0].length || newCellY >= map.length) {
+        return false;
+    }
+    
+    // Vérifier si la case est vide (0 = traversable)
+    if (map[newCellY][newCellX] !== 0) {
+        return false;
+    }
+    
+    // Vérifier si le joueur est dans la case de destination
+    const playerCellX = Math.floor(player.x / tileSize);
+    const playerCellY = Math.floor(player.y / tileSize);
+    if (newCellX === playerCellX && newCellY === playerCellY) {
+        return false;
+    }
+    
+    // Vérifier s'il y a déjà un sprite sur cette case
+    for (const sprite of sprites) {
+        if (sprite !== this && sprite.isBlocking) {
+            const spriteCellX = Math.floor(sprite.x / tileSize);
+            const spriteCellY = Math.floor(sprite.y / tileSize);
+            
+            if (spriteCellX === newCellX && spriteCellY === newCellY) {
+                return false; // Case déjà occupée
+            }
+        }
+    }
+    
+    return true;
+}
+
+// Essayer un mouvement aléatoire
+tryRandomMove(map, sprites, player, currentCellX, currentCellY) {
+    // Directions possibles: nord, est, sud, ouest
+    const directions = [
+        { dx: 0, dy: -1 }, // nord
+        { dx: 1, dy: 0 },  // est
+        { dx: 0, dy: 1 },  // sud
+        { dx: -1, dy: 0 }  // ouest
+    ];
+    
+    // Mélanger les directions pour un choix vraiment aléatoire
+    directions.sort(() => Math.random() - 0.5);
+    
+    // Essayer chaque direction jusqu'à en trouver une valide
+    for (const direction of directions) {
+        if (this.isValidMove(direction, map, sprites, player, currentCellX, currentCellY)) {
+            return this.executeMove(direction, currentCellX, currentCellY, 1280);
+        }
+    }
+    
+    return false; // Aucune direction valide
+}
+
+// Exécuter le mouvement avec animation
+async executeMove(direction, currentCellX, currentCellY, tileSize) {
+    const newCellX = currentCellX + direction.dx;
+    const newCellY = currentCellY + direction.dy;
+    
+    // Tout est OK, on peut déplacer l'ennemi avec animation
+    this.isMoving = true;
+    
+    // Positions initiale et finale
+    const startX = this.x;
+    const startY = this.y;
+    const targetX = newCellX * tileSize + tileSize / 2;
+    const targetY = newCellY * tileSize + tileSize / 2;
+    
+    // Durée de l'animation en ms (plus rapide en mode poursuite)
+    const animationDuration = 600; // 600ms = 0.6 seconde
+    
+    // Fonctions d'easing pour animation plus fluide
+    const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+    
+    // Animation du déplacement
+    const startTime = performance.now();
+    let animationComplete = false;
+    
+    while (!animationComplete) {
+        const currentTime = performance.now();
+        const elapsedTime = currentTime - startTime;
+        
+        // Progression de l'animation (0 à 1)
+        let t = Math.min(elapsedTime / animationDuration, 1);
+        
+        if (t >= 1) {
+            animationComplete = true;
+            t = 1;
+        }
+        
+        // Appliquer l'easing pour un mouvement plus naturel
+        const easedT = easeInOutQuart(t);
+        
+        // Mettre à jour la position
+        this.x = startX + (targetX - startX) * easedT;
+        this.y = startY + (targetY - startY) * easedT;
+        
+        // Petit effet de rebond vertical
+        this.z = 5 * Math.sin(Math.PI * t);
+        
+        // Attendre la prochaine frame
+        await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    
+    // S'assurer que la position finale est exacte
+    this.x = targetX;
+    this.y = targetY;
+    this.z = 0;
+    
+    // Animation terminée
+    this.isMoving = false;
+    
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Looting
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     // Tables de loot statiques pour la classe Sprite
@@ -2743,9 +3031,6 @@ class Sprite {
         5: { minGold: 100, maxGold: 250, itemChance: 0.7, possibleItems: [3, 4, 5] }  // Créatures très fortes ou boss
     };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Looting
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Calcule automatiquement la classe de loot basée sur les statistiques de l'ennemi
@@ -2939,12 +3224,12 @@ class Sprite {
             // Division en deux colonnes identique à l'inventaire
             let html = `<div style="display: flex; height: 170px; width: 100%;">
                 <!-- Liste des objets (40% de la largeur) -->
-                <div id="shop-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+                <div id="shop-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
                     <!-- Les items seront listés ici -->
                 </div>
                 
                 <!-- Détails de l'objet sélectionné (60% de la largeur) -->
-                <div id="shop-details" style="width: 60%; height: 100%; padding-left: 10px; display: flex; flex-direction: column;">
+                <div id="shop-details" style="width: 60%; height: 100%; display: flex; flex-direction: column;">
                     <!-- Les détails seront affichés ici -->
                     <div id="shop-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
                         <div>Select an item</div>
@@ -2975,12 +3260,12 @@ class Sprite {
                 itemElement.style.cssText = `
                     display: flex; 
                     align-items: center; 
-                    padding: 4px; 
-                    margin-bottom: 3px; 
+                    margin-top: 3px;
+                    margin-bottom: 3px: 
                     cursor: pointer; 
                     background-color: #140c1c; 
                     border: 1px solid #663300;
-                    width: 95%;
+                    width: 100%;
                 `;
                 
                 itemElement.innerHTML = `
@@ -3067,10 +3352,10 @@ class Sprite {
                 // Structure avec positions absolues et défilement central
                 shopDetails.innerHTML = `
                     <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
-                    <div style="position: relative; width: 100%; height: 82%;">
+                    <div style="position: relative; width: 103%; height: 95%;">
                         <!-- Division 1: Nom et icône (position absolue en haut) -->
                         <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
-                            <div style="display: flex; align-items: center; width: 100%;">
+                            <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
                                 <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
                                 <div style="width: calc(100% - 38px);">
                                     <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
@@ -3082,10 +3367,12 @@ class Sprite {
                         <!-- Division 3: Prix et bouton d'achat (position absolue en bas) -->
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
                             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                                <div style="font-size: 14px; color: #ffcc00; font-weight: bold;">
+                                <div style="margin-left : 5px;font-size: 14px; color: #ffcc00; font-weight: bold;">
                                     Price: ${priceDisplay}
                                 </div>
                                 <button id="buy-item-btn" style="
+                                    margin-right:5px;
+                                    margin-bottom:6px;
                                     padding: 6px 12px; 
                                     background-color: #205020; 
                                     color: #e8d5a9; 
@@ -3102,7 +3389,7 @@ class Sprite {
                         </div>
                         
                         <!-- Division 2: Statistiques (zone avec défilement) -->
-                        <div style="position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
+                        <div style="margin-left : 5px; position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
                             ${statsHTML}
                         </div>
                     </div>
@@ -3686,7 +3973,32 @@ class Sprite {
         if (player.turn == true) {
             player.turn = false;
             this.playerAttack(damage, criti, player);
-            this.enemyAttackUpdate(player);
+            
+            // Au lieu d'appeler enemyAttackUpdate immédiatement, nous laissons
+            // le cycle d'attaque automatique s'en charger
+            if (this.hp <= 0) {
+                let entry = "The ennemy's dead !";
+                Sprite.terminalLog(entry);
+                
+                // Générer le loot
+                this.generateLoot(player);
+                
+                this.spriteType = 0;
+                this.spriteTexture = 10;
+                this.spriteTalk = [
+                    ["facePlayer", "Alakir", "It's dead..."]
+                ];
+                this.isBlocking = false;
+                
+                player.statsUpdate(player);
+            } else {
+                // Définir le moment de la dernière attaque pour synchroniser
+                // avec le système d'attaque au contact
+                this.lastAttackTime = Date.now();
+            }
+            
+            Sprite.resetToggle();
+            player.turn = true; // Rendre le tour au joueur après son attaque
         } else {
             console.log('not your turn');
         }
@@ -3806,6 +4118,9 @@ class Raycaster {
         this.createRayAngles();
         this.createViewDistances();
         this.past = Date.now();
+
+        // IA / Deplacement Ennemis
+        this.enemyMoveCounter = 0;
     }
 
     static get TWO_PI() {
@@ -3835,6 +4150,26 @@ class Raycaster {
         window.requestAnimationFrame(function() {
             this2.gameCycle();
         });
+
+        //////////////////////////////////////////////////////////////////////////////
+        /// IA / Deplacements ennemis
+        //////////////////////////////////////////////////////////////////////////////
+        
+        // Dans gameCycle de Raycaster
+        this.enemyMoveCounter = (this.enemyMoveCounter || 0) + timeElapsed;
+        const baseInterval = 1500;
+
+        if (this.enemyMoveCounter >= baseInterval) {
+            this.enemyMoveCounter = 0;
+            
+            // Parcourir tous les sprites et déplacer les ennemis
+            for (let sprite of this.sprites) {
+                if (sprite.spriteType === "A" && sprite.hp > 0) {
+                    // Déplacer chaque ennemi
+                    sprite.moveRandomlyOrChase(this.map, this.sprites, this.player);
+                }
+            }
+        }
 
         //////////////////////////////////////////////////////////////////////////////
         /// UNITE TEMPORELLE ("TOUR") redondant
