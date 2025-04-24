@@ -2870,7 +2870,7 @@ attackPlayer(player) {
             Sprite.terminalLog("<font style='font-style: italic;'>Your armor absorbs all the damages.</font>");
         } else {
             const damageDone = this.dmg - player.armor;
-            Sprite.terminalLog(`<font style='font-style: italic;'>${this.spriteName || "L'ennemi"} attack : <font style='font-weight: bold;'>${damageDone} dmg !</font></font>`);
+            Sprite.terminalLog(`<font style='font-style: italic;'>${this.spriteName || "The ennemy"} attacks : <font style='font-weight: bold;'>${damageDone} dmg !</font></font>`);
             Raycaster.playerDamageFlash();
             player.hp -= damageDone;
             
