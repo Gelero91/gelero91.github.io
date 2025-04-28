@@ -58,7 +58,7 @@
   color: var(--color-white);
   font-size: 14px;
   box-sizing: border-box;
-  /*margin: 0;*/
+  margin: 0;
   padding: 0;
 }
 
@@ -112,16 +112,12 @@ body {
   grid-template-columns: calc(100% - var(--info-width)) var(--info-width);
   grid-template-rows: calc(100% - var(--command-size)) var(--command-size);
   width: var(--game-width);
-  height: var(--game-height);
+  height: var(--game-height)-5px;
   background-color: var(--color-grey);
   box-shadow: 0 0 30px rgba(0, 0, 0, 1);
   padding-bottom: var(--padding-bottom);
-/*
-  padding-top: var(--padding-top);
-  padding-right: var(--padding-right);
-  padding-left: var(--padding-left);
-*/
-  gap: var(--gap-size);
+  column-gap: var(--gap-size);       /* Garde l'écart horizontal de 10px */
+  row-gap: calc(var(--gap-size)*0.55);  /* Réduit l'écart vertical à 5px */
 }
 
 /* Zones du jeu */
@@ -349,6 +345,7 @@ body {
 }
 
 #selectedSpell {
+  margin-top: 12px;
   text-align: center;
 }
 
@@ -798,7 +795,7 @@ body {
 
   #renderWindow > *,
   #mainMenuWindow > * {
-    transform: scale(0.6);
+    transform: scale(0.5);
     transform-origin: center;
   }
 }
