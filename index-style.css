@@ -111,13 +111,13 @@ body {
   display: grid;
   grid-template-columns: calc(100% - var(--info-width)) var(--info-width);
   grid-template-rows: calc(100% - var(--command-size)) var(--command-size);
-  width: var(--game-width);
+  width: var(--game-width)+10px;
   height: var(--game-height)-5px;
   background-color: var(--color-grey);
   box-shadow: 0 0 30px rgba(0, 0, 0, 1);
   padding-bottom: var(--padding-bottom);
-  column-gap: var(--gap-size);       /* Garde l'écart horizontal de 10px */
-  row-gap: calc(var(--gap-size)*0.55);  /* Réduit l'écart vertical à 5px */
+  column-gap: calc(var(--gap-size)*1.5);       /* Garde l'écart horizontal de 10px */
+  row-gap: calc(var(--gap-size)*0.8);  /* Réduit l'écart vertical à 5px */
 }
 
 /* Zones du jeu */
@@ -345,7 +345,8 @@ body {
 }
 
 #selectedSpell {
-  margin-top: 12px;
+  margin-top: 9px;
+  margin-bottom: 15px;
   text-align: center;
 }
 
