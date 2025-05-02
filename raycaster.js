@@ -6347,8 +6347,8 @@ class Raycaster {
 // ou conservées dans un objet de configuration séparé
 drawSkybox() {
     // Variables d'ajustement de la skybox - modifiez ces valeurs pour ajuster le comportement
-    const cloudSpeed = 0.2;          // Vitesse du mouvement autonome des nuages
-    const rotationFactor = -3.0;     // Facteur de rotation relative au joueur (-1.0 = sens opposé)
+    const cloudSpeed = 0.05;          // Vitesse du mouvement autonome des nuages
+    const rotationFactor = -1.0;     // Facteur de rotation relative au joueur (-1.0 = sens opposé)
     
     // Calculer les facteurs d'échelle pour les coordonnées de texture
     let scaleX = this.skyboxImageData.width / this.displayWidth;
