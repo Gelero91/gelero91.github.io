@@ -3197,30 +3197,95 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
     // boutique, pas de prix pour le moment
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    displayItemsForSale(player) {
-        var output = document.getElementById("output");
-        var dialWindow = document.getElementById("dialogueWindow");
-        output.style.display = "none";
-        dialWindow.style.display = "none";
+    // Modifions la méthode displayItemsForSale pour proposer un choix entre acheter et vendre
+// Modifions la méthode displayItemsForSale pour proposer un choix entre acheter et vendre
+displayItemsForSale(player) {
+    var output = document.getElementById("output");
+    var dialWindow = document.getElementById("dialogueWindow");
+    output.style.display = "none";
+    dialWindow.style.display = "none";
+
+    // Afficher la boutique
+    document.getElementById("shop").style.display = "block";
+
+    // Mettre à jour le nom de la boutique
+    const shopName = document.getElementById("shopName");
+    shopName.textContent = this.spriteName;
+
+    // Mettre à jour l'affichage de l'or
+    const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+    if (goldOutput) {
+        goldOutput.textContent = player.gold || 0;
+    }
+
+    const shopContent = document.getElementById("shopContent");
     
-        // Afficher la boutique
-        document.getElementById("shop").style.display = "block";
+    // Afficher l'écran d'accueil avec les deux options
+    shopContent.innerHTML = `
+        <div style="height: 170px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div style="font-size: 16px; color: #e8d5a9; margin-bottom: 20px; text-align: center;">
+                Welcome to ${this.spriteName}'s shop
+            </div>
+            <div style="display: flex; justify-content: center; gap: 20px;">
+                <button id="buy-option" style="
+                    padding: 8px 20px; 
+                    background-color: #205020; 
+                    color: #e8d5a9; 
+                    border: 1px solid #663300; 
+                    cursor: pointer;
+                    font-family: monospace;
+                    text-transform: uppercase;
+                    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                ">BUY ITEMS</button>
+                <button id="sell-option" style="
+                    padding: 8px 20px; 
+                    background-color: #793020; 
+                    color: #e8d5a9; 
+                    border: 1px solid #663300; 
+                    cursor: pointer;
+                    font-family: monospace;
+                    text-transform: uppercase;
+                    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                ">SELL ITEMS</button>
+            </div>
+            <div style="margin-top: 20px;">
+                <button id="back-button" style="
+                    padding: 5px 10px; 
+                    background-color: #140c1c; 
+                    color: #e8d5a9; 
+                    border: 1px solid #663300; 
+                    cursor: pointer;
+                    font-family: monospace;
+                ">BACK</button>
+            </div>
+        </div>
+    `;
     
-        // Mettre à jour le nom de la boutique
-        const shopName = document.getElementById("shopName");
-        shopName.textContent = this.spriteName;
+    // Ajouter l'écouteur d'événement pour l'option d'achat
+    document.getElementById('buy-option').addEventListener('click', () => {
+        this.displayBuyInterface(player);
+    });
     
-        // Mettre à jour l'affichage de l'or
-        const goldOutput = document.getElementById("ShopPlayerGoldOutput");
-        if (goldOutput) {
-            goldOutput.textContent = player.gold || 0;
-        }
+    // Ajouter l'écouteur d'événement pour l'option de vente
+    document.getElementById('sell-option').addEventListener('click', () => {
+        this.displaySellInterface(player);
+    });
     
-        const shopContent = document.getElementById("shopContent");
-        
-        if (this.spriteSell && this.spriteSell.length > 0) {
-            // Division en deux colonnes identique à l'inventaire
-            let html = `<div style="display: flex; height: 170px; width: 100%;">
+    // Ajouter l'écouteur d'événement pour le bouton de retour
+    document.getElementById('back-button').addEventListener('click', () => {
+        Sprite.resetToggle();
+    });
+}
+
+// Méthode pour afficher l'interface d'achat
+displayBuyInterface(player) {
+    const shopContent = document.getElementById("shopContent");
+    const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+    
+    if (this.spriteSell && this.spriteSell.length > 0) {
+        // Division en deux colonnes identique à l'inventaire
+        shopContent.innerHTML = `
+            <div style="display: flex; height: 170px; width: 100%;">
                 <!-- Liste des objets (40% de la largeur) -->
                 <div id="shop-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
                     <!-- Les items seront listés ici -->
@@ -3234,9 +3299,552 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
                         <div>to view details</div>
                     </div>
                 </div>
-            </div>`;
+            </div>
+        `;
+        
+        const shopList = document.getElementById("shop-list");
+        
+        // Générer la liste des objets
+        this.spriteSell.forEach((itemId, index) => {
+            const item = Item.getItemById(itemId);
+            if (!item) return;
             
-            shopContent.innerHTML = html;
+            // Déterminer l'icône en fonction du slot
+            let itemIcon = item.icon;
+            
+            // Afficher le prix ou "FREE" si le prix est 0 ou non défini
+            const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
+            
+            const itemElement = document.createElement("div");
+            itemElement.className = "shop-item-entry";
+            itemElement.setAttribute("data-index", index);
+            itemElement.setAttribute("data-item-id", item.id);
+            itemElement.style.cssText = `
+                display: flex; 
+                align-items: center; 
+                margin-top: 3px;
+                margin-bottom: 3px: 
+                cursor: pointer; 
+                background-color: #140c1c; 
+                border: 1px solid #663300;
+                width: 100%;
+            `;
+            
+            itemElement.innerHTML = `
+                <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
+                <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
+                <span style="color: #ffcc00; font-weight: bold;">${priceDisplay}</span>
+            `;
+            
+            itemElement.addEventListener('click', () => {
+                // Désélectionner tous les autres éléments
+                document.querySelectorAll('.shop-item-entry').forEach(e => {
+                    e.style.borderColor = '#663300';
+                    e.style.backgroundColor = '#140c1c';
+                });
+                
+                // Mettre en évidence l'élément sélectionné
+                itemElement.style.borderColor = '#ffaa00';
+                itemElement.style.backgroundColor = '#331a0c';
+                
+                // Afficher les détails
+                this.showShopItemDetails(item, player, index);
+                
+                // Cacher le placeholder
+                const placeholder = document.getElementById('shop-details-placeholder');
+                if (placeholder) {
+                    placeholder.style.display = 'none';
+                }
+            });
+            
+            shopList.appendChild(itemElement);
+        });
+        
+        // Sélectionner automatiquement le premier élément
+        const firstItem = shopList.querySelector('.shop-item-entry');
+        if (firstItem) {
+            firstItem.click();
+        }
+    } else {
+        shopContent.innerHTML = `
+            <div style="height: 170px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="padding: 10px; text-align: center; color: #8a7b6c;">No items for sale</div>
+                <div style="margin-top: 20px;">
+                    <button id="return-to-shop" style="
+                        padding: 5px 10px; 
+                        background-color: #140c1c; 
+                        color: #e8d5a9; 
+                        border: 1px solid #663300; 
+                        cursor: pointer;
+                        font-family: monospace;
+                    ">BACK</button>
+                </div>
+            </div>
+        `;
+        
+        // Ajouter l'écouteur d'événement pour le bouton de retour
+        document.getElementById('return-to-shop').addEventListener('click', () => {
+            this.displayItemsForSale(player);
+        });
+    }
+}
+
+// Méthode pour afficher l'interface de vente
+displaySellInterface(player) {
+    const shopContent = document.getElementById("shopContent");
+    const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+    
+    if (player.inventory && player.inventory.length > 0) {
+        // Division en deux colonnes identique à l'inventaire
+        shopContent.innerHTML = `
+            <div style="display: flex; height: 170px; width: 100%;">
+                <!-- Liste des objets (40% de la largeur) -->
+                <div id="sell-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+                    <!-- Les items seront listés ici -->
+                </div>
+                
+                <!-- Détails de l'objet sélectionné (60% de la largeur) -->
+                <div id="sell-details" style="width: 60%; height: 100%; display: flex; flex-direction: column;">
+                    <!-- Les détails seront affichés ici -->
+                    <div id="sell-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
+                        <div>Select an item</div>
+                        <div>to sell</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const sellList = document.getElementById("sell-list");
+        
+        // Générer la liste des objets que le joueur peut vendre
+        player.inventory.forEach((item, index) => {
+            if (!item) return;
+            
+            // Déterminer l'icône en fonction du slot
+            let itemIcon = item.icon;
+            
+            // Calculer le prix de vente (moitié du prix d'achat, minimum 1 gp)
+            const sellPrice = item.price > 0 ? Math.max(Math.floor(item.price / 2), 1) : 1;
+            
+            // Ne pas permettre de vendre des objets équipés
+            const isEquipped = item.equipped;
+            const bgColor = isEquipped ? 'rgba(20, 20, 20, 0.7)' : '#140c1c';
+            
+            const itemElement = document.createElement("div");
+            itemElement.className = "sell-item-entry";
+            itemElement.setAttribute("data-index", index);
+            itemElement.setAttribute("data-equipped", isEquipped.toString());
+            itemElement.style.cssText = `
+                display: flex; 
+                align-items: center; 
+                margin-top: 3px;
+                margin-bottom: 3px: 
+                cursor: ${isEquipped ? 'not-allowed' : 'pointer'}; 
+                background-color: ${bgColor}; 
+                border: 1px solid #663300;
+                width: 100%;
+                opacity: ${isEquipped ? '0.7' : '1'};
+            `;
+            
+            itemElement.innerHTML = `
+                <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
+                <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}${isEquipped ? ' (equipped)' : ''}</span>
+                <span style="color: #ffcc00; font-weight: bold;">${sellPrice} gp</span>
+            `;
+            
+            if (!isEquipped) {
+                itemElement.addEventListener('click', () => {
+                    // Désélectionner tous les autres éléments
+                    document.querySelectorAll('.sell-item-entry').forEach(e => {
+                        e.style.borderColor = '#663300';
+                        e.style.backgroundColor = '#140c1c';
+                    });
+                    
+                    // Mettre en évidence l'élément sélectionné
+                    itemElement.style.borderColor = '#ffaa00';
+                    itemElement.style.backgroundColor = '#331a0c';
+                    
+                    // Afficher les détails
+                    this.showSellItemDetails(item, player, index, sellPrice);
+                    
+                    // Cacher le placeholder
+                    const placeholder = document.getElementById('sell-details-placeholder');
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
+                    }
+                });
+            }
+            
+            sellList.appendChild(itemElement);
+        });
+        
+        // Sélectionner automatiquement le premier élément non équipé
+        const firstItem = sellList.querySelector('.sell-item-entry[data-equipped="false"]');
+        if (firstItem) {
+            firstItem.click();
+        }
+    } else {
+        shopContent.innerHTML = `
+            <div style="height: 170px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="padding: 10px; text-align: center; color: #8a7b6c;">Your inventory is empty</div>
+                <div style="margin-top: 20px;">
+                    <button id="return-to-shop" style="
+                        padding: 5px 10px; 
+                        background-color: #140c1c; 
+                        color: #e8d5a9; 
+                        border: 1px solid #663300; 
+                        cursor: pointer;
+                        font-family: monospace;
+                    ">BACK</button>
+                </div>
+            </div>
+        `;
+        
+        // Ajouter l'écouteur d'événement pour le bouton de retour
+        document.getElementById('return-to-shop').addEventListener('click', () => {
+            this.displayItemsForSale(player);
+        });
+    }
+}
+
+// Méthode pour afficher les détails d'un objet à acheter
+showShopItemDetails(item, player, index) {
+    const shopDetails = document.getElementById('shop-details');
+    if (!shopDetails) return;
+    
+    // Déterminer l'icône en fonction du slot
+    let itemIcon = item.icon;
+                    
+    // Type d'équipement
+    let slotName = "";
+    switch(item.slot) {
+        case 1: slotName = "Weapon"; break;
+        case 2: slotName = "Armor"; break;
+        default: slotName = "Item"; break;
+    }
+    
+    // Construire la chaîne HTML des statistiques
+    let statsHTML = "";
+    
+    // Fonction helper pour ajouter une stat avec la bonne couleur
+    const addStat = (value, name) => {
+        if (value !== 0) {
+            const sign = value > 0 ? "+" : "";
+            const color = value > 0 ? "#66ff66" : "#ff6666";
+            statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
+        }
+    };
+    
+    // Ajouter toutes les stats dans l'ordre
+    addStat(item.strength, "Strength");
+    addStat(item.dexterity, "Dexterity");
+    addStat(item.intellect, "Intellect");
+    addStat(item.might, "Might");
+    addStat(item.magic, "Magic");
+    addStat(item.dodge, "Dodge");
+    addStat(item.criti, "Crit.");
+    addStat(item.armor, "Armor");
+    
+    if (item.power !== 0) {
+        statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
+    }
+    
+    // Si aucune statistique n'est définie
+    if (statsHTML === "") {
+        statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
+    }
+    
+    // Afficher le prix ou "FREE" si le prix est 0 ou non défini
+    const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
+    const buyText = item.price > 0 ? 'BUY' : 'TAKE';
+    
+    // Vérifier si le joueur a assez d'or
+    const canAfford = (player.gold || 0) >= item.price;
+    const buttonClass = !canAfford && item.price > 0 ? 'cannot-afford' : '';
+    
+    // Structure avec positions absolues et défilement central
+    shopDetails.innerHTML = `
+        <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
+        <div style="position: relative; width: 103%; height: 95%;">
+            <!-- Division 1: Nom et icône (position absolue en haut) -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
+                <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
+                    <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
+                    <div style="width: calc(100% - 38px);">
+                        <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                        <div style="font-size: 12px; color: #a89986;">${slotName}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Division 3: Prix et bouton d'achat (position absolue en bas) -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <div style="margin-left : 5px;font-size: 14px; color: #ffcc00; font-weight: bold;">
+                        Price: ${priceDisplay}
+                    </div>
+                    <button id="buy-item-btn" class="${buttonClass}" style="
+                        margin-right:5px;
+                        margin-bottom:6px;
+                        padding: 6px 12px; 
+                        background-color: ${canAfford || item.price === 0 ? '#205020' : '#501102'}; 
+                        color: #e8d5a9; 
+                        border: 1px solid #663300; 
+                        cursor: ${canAfford || item.price === 0 ? 'pointer' : 'not-allowed'};
+                        font-family: monospace;
+                        text-transform: uppercase;
+                        box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                        width: auto;
+                    ">
+                        ${buyText}
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Division 2: Statistiques (zone avec défilement) -->
+            <div style="margin-left : 5px; position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
+                ${statsHTML}
+            </div>
+        </div>
+    `;
+    
+    // Ajouter l'écouteur d'événement pour le bouton d'achat
+    document.getElementById('buy-item-btn').addEventListener('click', () => {
+        if (item.price > 0) {
+            // Vérifier si le joueur a assez d'or
+            if ((player.gold || 0) >= item.price) {
+                // Déduire le coût
+                player.gold -= item.price;
+                
+                // Ajouter l'objet à l'inventaire
+                this.addItemToInventory(item, player);
+                
+                // Retirer l'objet de la liste de vente
+                this.spriteSell = this.spriteSell.filter(itemId => itemId !== item.id);
+                
+                // Message de confirmation
+                Sprite.terminalLog(`You bought ${item.name} for ${item.price} gp.`);
+                
+                // Actualiser l'or affiché
+                const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+                if (goldOutput) {
+                    goldOutput.textContent = player.gold || 0;
+                }
+                
+                // Recharger l'interface d'achat
+                this.displayBuyInterface(player);
+            } else {
+                Sprite.terminalLog(`You don't have enough gold to buy ${item.name}.`);
+            }
+        } else {
+            // Donner gratuitement
+            this.giveItemToPlayer(item, player);
+            Sprite.terminalLog(`You received ${item.name} for free.`);
+            
+            // Recharger l'interface d'achat
+            this.displayBuyInterface(player);
+        }
+    });
+}
+
+// Méthode pour afficher les détails d'un objet à vendre
+showSellItemDetails(item, player, index, sellPrice) {
+    const sellDetails = document.getElementById('sell-details');
+    if (!sellDetails) return;
+    
+    // Déterminer l'icône en fonction du slot
+    let itemIcon = item.icon;
+                    
+    // Type d'équipement
+    let slotName = "";
+    switch(item.slot) {
+        case 1: slotName = "Weapon"; break;
+        case 2: slotName = "Armor"; break;
+        default: slotName = "Item"; break;
+    }
+    
+    // Construire la chaîne HTML des statistiques
+    let statsHTML = "";
+    
+    // Fonction helper pour ajouter une stat avec la bonne couleur
+    const addStat = (value, name) => {
+        if (value !== 0) {
+            const sign = value > 0 ? "+" : "";
+            const color = value > 0 ? "#66ff66" : "#ff6666";
+            statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
+        }
+    };
+    
+    // Ajouter toutes les stats dans l'ordre
+    addStat(item.strength, "Strength");
+    addStat(item.dexterity, "Dexterity");
+    addStat(item.intellect, "Intellect");
+    addStat(item.might, "Might");
+    addStat(item.magic, "Magic");
+    addStat(item.dodge, "Dodge");
+    addStat(item.criti, "Crit.");
+    addStat(item.armor, "Armor");
+    
+    if (item.power !== 0) {
+        statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
+    }
+    
+    // Si aucune statistique n'est définie
+    if (statsHTML === "") {
+        statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
+    }
+    
+    // Structure avec positions absolues et défilement central
+    sellDetails.innerHTML = `
+        <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
+        <div style="position: relative; width: 103%; height: 95%;">
+            <!-- Division 1: Nom et icône (position absolue en haut) -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
+                <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
+                    <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
+                    <div style="width: calc(100% - 38px);">
+                        <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                        <div style="font-size: 12px; color: #a89986;">${slotName}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Division 3: Prix et bouton de vente (position absolue en bas) -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <div style="margin-left : 5px;font-size: 14px; color: #ffcc00; font-weight: bold;">
+                        Sell price: ${sellPrice} gp
+                    </div>
+                    <button id="sell-item-btn" style="
+                        margin-right:5px;
+                        margin-bottom:6px;
+                        padding: 6px 12px; 
+                        background-color: #793020; 
+                        color: #e8d5a9; 
+                        border: 1px solid #663300; 
+                        cursor: pointer;
+                        font-family: monospace;
+                        text-transform: uppercase;
+                        box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                        width: auto;
+                    ">
+                        SELL
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Division 2: Statistiques (zone avec défilement) -->
+            <div style="margin-left : 5px; position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
+                ${statsHTML}
+            </div>
+        </div>
+    `;
+    
+    // Ajouter l'écouteur d'événement pour le bouton de vente
+    document.getElementById('sell-item-btn').addEventListener('click', () => {
+        // Obtenir l'or de la vente
+        player.gold += sellPrice;
+        
+        // Ajouter l'objet aux objets en vente du marchand
+        if (!this.spriteSell) {
+            this.spriteSell = [];
+        }
+        this.spriteSell.push(item.id);
+        
+        // Supprimer l'objet de l'inventaire
+        player.inventory.splice(index, 1);
+        
+        // Message de confirmation
+        Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gp.`);
+        
+        // Actualiser l'or affiché
+        const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+        if (goldOutput) {
+            goldOutput.textContent = player.gold || 0;
+        }
+        
+        // Mettre à jour les statistiques du joueur
+        player.statsUpdate(player);
+        
+        // Recharger l'interface de vente
+        this.displaySellInterface(player);
+    });
+}
+
+// Méthode pour permettre au joueur de vendre un objet au marchand
+// Méthode pour permettre au joueur de vendre un objet au marchand
+playerSellItem(player, itemIndex, sellPrice) {
+    if (player && player.inventory && player.inventory[itemIndex]) {
+        const item = player.inventory[itemIndex];
+        
+        // Ne pas permettre de vendre un objet équipé
+        if (item.equipped) {
+            Sprite.terminalLog("You can't sell an equipped item. Unequip it first.");
+            return false;
+        }
+        
+        // Ajouter l'or au joueur
+        player.gold += sellPrice;
+        
+        // Ajouter l'ID de l'objet aux objets en vente du marchand
+        this.spriteSell.push(item.id);
+        
+        // Retirer l'objet de l'inventaire
+        player.inventory.splice(itemIndex, 1);
+        
+        // Message de vente
+        Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gold coins.`);
+        
+        // Mettre à jour les statistiques du joueur
+        player.statsUpdate();
+        
+        return true;
+    }
+    
+    return false;
+}
+
+    // Méthode pour afficher l'interface d'achat
+    displayBuyInterface(player) {
+        const shopContent = document.getElementById("shopContent");
+        const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+        
+        if (this.spriteSell && this.spriteSell.length > 0) {
+            // Division en deux colonnes identique à l'inventaire
+            shopContent.innerHTML = `
+                <div style="display: flex; height: 170px; width: 100%;">
+                    <!-- Bouton de retour -->
+                    <div style="position: absolute; top: 10px; left: 10px; display:none;">
+                        <button id="return-to-shop" style="
+                            padding: 3px 8px; 
+                            background-color: #140c1c; 
+                            color: #e8d5a9; 
+                            border: 1px solid #663300; 
+                            cursor: pointer;
+                            font-family: monospace;
+                        ">BACK</button>
+                    </div>
+                    
+                    <!-- Liste des objets (40% de la largeur) -->
+                    <div id="shop-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+                        <!-- Les items seront listés ici -->
+                    </div>
+                    
+                    <!-- Détails de l'objet sélectionné (60% de la largeur) -->
+                    <div id="shop-details" style="width: 60%; height: 100%; display: flex; flex-direction: column;">
+                        <!-- Les détails seront affichés ici -->
+                        <div id="shop-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
+                            <div>Select an item</div>
+                            <div>to view details</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Ajouter l'écouteur d'événement pour le bouton de retour
+            document.getElementById('return-to-shop').addEventListener('click', () => {
+                this.displayItemsForSale(player);
+            });
             
             const shopList = document.getElementById("shop-list");
             
@@ -3268,8 +3876,8 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
                 
                 itemElement.innerHTML = `
                     <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
-                    <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span></br>
-                    <span style="color: #ffcc00; font-weight: bold; display: none;">${priceDisplay}</span>
+                    <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
+                    <span style="color: #ffcc00; font-weight: bold;">${priceDisplay}</span>
                 `;
                 
                 itemElement.addEventListener('click', () => {
@@ -3284,7 +3892,7 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
                     itemElement.style.backgroundColor = '#331a0c';
                     
                     // Afficher les détails
-                    showShopItemDetails(this, item, player, index);
+                    this.showShopItemDetails(item, player, index);
                     
                     // Cacher le placeholder
                     const placeholder = document.getElementById('shop-details-placeholder');
@@ -3296,142 +3904,489 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
                 shopList.appendChild(itemElement);
             });
             
-            // Fonction pour afficher les détails d'un objet
-            const showShopItemDetails = (context, item, player, index) => {
-                const shopDetails = document.getElementById('shop-details');
-                if (!shopDetails) return;
-                
-                // Déterminer l'icône en fonction du slot
-                let itemIcon = item.icon;
-                                
-                // Type d'équipement
-                let slotName = "";
-                switch(item.slot) {
-                    case 1: slotName = "Weapon"; break;
-                    case 2: slotName = "Armor"; break;
-                    default: slotName = "Item"; break;
-                }
-                
-                // Construire la chaîne HTML des statistiques
-                let statsHTML = "";
-                
-                // Fonction helper pour ajouter une stat avec la bonne couleur
-                const addStat = (value, name) => {
-                    if (value !== 0) {
-                        const sign = value > 0 ? "+" : "";
-                        const color = value > 0 ? "#66ff66" : "#ff6666";
-                        statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
-                    }
-                };
-                
-                // Ajouter toutes les stats dans l'ordre
-                addStat(item.strength, "Strength");
-                addStat(item.dexterity, "Dexterity");
-                addStat(item.intellect, "Intellect");
-                addStat(item.might, "Might");
-                addStat(item.magic, "Magic");
-                addStat(item.dodge, "Dodge");
-                addStat(item.criti, "Crit.");
-                addStat(item.armor, "Armor");
-                
-                if (item.power !== 0) {
-                    statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
-                }
-                
-                // Si aucune statistique n'est définie
-                if (statsHTML === "") {
-                    statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
-                }
-                
-                // Afficher le prix ou "FREE" si le prix est 0 ou non défini
-                const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
-                const buyText = item.price > 0 ? 'BUY' : 'TAKE';
-                
-                // Structure avec positions absolues et défilement central
-                shopDetails.innerHTML = `
-                    <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
-                    <div style="position: relative; width: 103%; height: 95%;">
-                        <!-- Division 1: Nom et icône (position absolue en haut) -->
-                        <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
-                            <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
-                                <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
-                                <div style="width: calc(100% - 38px);">
-                                    <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
-                                    <div style="font-size: 12px; color: #a89986;">${slotName}</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Division 3: Prix et bouton d'achat (position absolue en bas) -->
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                                <div style="margin-left : 5px;font-size: 14px; color: #ffcc00; font-weight: bold;">
-                                    Price: ${priceDisplay}
-                                </div>
-                                <button id="buy-item-btn" style="
-                                    margin-right:5px;
-                                    margin-bottom:6px;
-                                    padding: 6px 12px; 
-                                    background-color: #205020; 
-                                    color: #e8d5a9; 
-                                    border: 1px solid #663300; 
-                                    cursor: pointer;
-                                    font-family: monospace;
-                                    text-transform: uppercase;
-                                    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
-                                    width: auto;
-                                ">
-                                    ${buyText}
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Division 2: Statistiques (zone avec défilement) -->
-                        <div style="margin-left : 5px; position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
-                            ${statsHTML}
-                        </div>
-                    </div>
-                `;
-                
-                // Ajouter l'écouteur d'événement pour le bouton d'achat
-                document.getElementById('buy-item-btn').addEventListener('click', () => {
-                    if (item.price > 0) {
-                        // Vérifier si le joueur a assez d'or
-                        if ((player.gold || 0) >= item.price) {
-                            // Déduire le coût
-                            player.gold -= item.price;
-                            
-                            // Ajouter l'objet à l'inventaire
-                            context.addItemToInventory(item, player);
-                            
-                            // Retirer l'objet de la liste de vente
-                            context.spriteSell = context.spriteSell.filter(itemId => itemId !== item.id);
-                            
-                            // Message de confirmation
-                            Sprite.terminalLog(`Vous avez acheté ${item.name} pour ${item.price} gp.`);
-                        } else {
-                            Sprite.terminalLog(`Vous n'avez pas assez d'or pour acheter ${item.name}.`);
-                            return; // Ne pas poursuivre l'achat
-                        }
-                    } else {
-                        // Donner gratuitement
-                        context.giveItemToPlayer(item, player);
-                        Sprite.terminalLog(`Vous avez reçu ${item.name}.`);
-                    }
-                    
-                    // Actualiser l'affichage
-                    context.displayItemsForSale(player);
-                });
-            };
-            
             // Sélectionner automatiquement le premier élément
             const firstItem = shopList.querySelector('.shop-item-entry');
             if (firstItem) {
                 firstItem.click();
             }
         } else {
-            shopContent.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c;">No items for sale</div>';
+            shopContent.innerHTML = `
+                <div style="height: 170px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="padding: 10px; text-align: center; color: #8a7b6c;">No items for sale</div>
+                    <div style="margin-top: 20px;">
+                        <button id="return-to-shop" style="
+                            padding: 5px 10px; 
+                            background-color: #140c1c; 
+                            color: #e8d5a9; 
+                            border: 1px solid #663300; 
+                            cursor: pointer;
+                            font-family: monospace;
+                        ">BACK</button>
+                    </div>
+                </div>
+            `;
+            
+            // Ajouter l'écouteur d'événement pour le bouton de retour
+            document.getElementById('return-to-shop').addEventListener('click', () => {
+                this.displayItemsForSale(player);
+            });
         }
+    }
+
+    // Méthode pour afficher l'interface de vente
+    displaySellInterface(player) {
+        const shopContent = document.getElementById("shopContent");
+        const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+        
+        if (player.inventory && player.inventory.length > 0) {
+            // Division en deux colonnes identique à l'inventaire
+            shopContent.innerHTML = `
+                <div style="display: flex; height: 170px; width: 100%;">
+                    <!-- Bouton de retour -->
+                    <div style="position: absolute; top: 10px; left: 10px; display:none;">
+                        <button id="return-to-shop" style="
+                            padding: 3px 8px; 
+                            background-color: #140c1c; 
+                            color: #e8d5a9; 
+                            border: 1px solid #663300; 
+                            cursor: pointer;
+                            font-family: monospace;
+                        ">BACK</button>
+                    </div>
+                    
+                    <!-- Liste des objets (40% de la largeur) -->
+                    <div id="sell-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
+                        <!-- Les items seront listés ici -->
+                    </div>
+                    
+                    <!-- Détails de l'objet sélectionné (60% de la largeur) -->
+                    <div id="sell-details" style="width: 60%; height: 100%; display: flex; flex-direction: column;">
+                        <!-- Les détails seront affichés ici -->
+                        <div id="sell-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
+                            <div>Select an item</div>
+                            <div>to sell</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Ajouter l'écouteur d'événement pour le bouton de retour
+            document.getElementById('return-to-shop').addEventListener('click', () => {
+                this.displayItemsForSale(player);
+            });
+            
+            const sellList = document.getElementById("sell-list");
+            
+            // Générer la liste des objets que le joueur peut vendre
+            player.inventory.forEach((item, index) => {
+                if (!item) return;
+                
+                // Déterminer l'icône en fonction du slot
+                let itemIcon = item.icon;
+                
+                // Calculer le prix de vente (moitié du prix d'achat, minimum 1 gp)
+                const sellPrice = item.price > 0 ? Math.max(Math.floor(item.price / 2), 1) : 1;
+                
+                // Ne pas permettre de vendre des objets équipés
+                const isEquipped = item.equipped;
+                const bgColor = isEquipped ? 'rgba(20, 20, 20, 0.7)' : '#140c1c';
+                
+                const itemElement = document.createElement("div");
+                itemElement.className = "sell-item-entry";
+                itemElement.setAttribute("data-index", index);
+                itemElement.setAttribute("data-equipped", isEquipped.toString());
+                itemElement.style.cssText = `
+                    display: flex; 
+                    align-items: center; 
+                    margin-top: 3px;
+                    margin-bottom: 3px: 
+                    cursor: ${isEquipped ? 'not-allowed' : 'pointer'}; 
+                    background-color: ${bgColor}; 
+                    border: 1px solid #663300;
+                    width: 100%;
+                    opacity: ${isEquipped ? '0.7' : '1'};
+                `;
+                
+                itemElement.innerHTML = `
+                    <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
+                    <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}${isEquipped ? ' (equipped)' : ''}</span>
+                    <span style="color: #ffcc00; font-weight: bold;">${sellPrice} gp</span>
+                `;
+                
+                if (!isEquipped) {
+                    itemElement.addEventListener('click', () => {
+                        // Désélectionner tous les autres éléments
+                        document.querySelectorAll('.sell-item-entry').forEach(e => {
+                            e.style.borderColor = '#663300';
+                            e.style.backgroundColor = '#140c1c';
+                        });
+                        
+                        // Mettre en évidence l'élément sélectionné
+                        itemElement.style.borderColor = '#ffaa00';
+                        itemElement.style.backgroundColor = '#331a0c';
+                        
+                        // Afficher les détails
+                        this.showSellItemDetails(item, player, index, sellPrice);
+                        
+                        // Cacher le placeholder
+                        const placeholder = document.getElementById('sell-details-placeholder');
+                        if (placeholder) {
+                            placeholder.style.display = 'none';
+                        }
+                    });
+                }
+                
+                sellList.appendChild(itemElement);
+            });
+            
+            // Sélectionner automatiquement le premier élément non équipé
+            const firstItem = sellList.querySelector('.sell-item-entry[data-equipped="false"]');
+            if (firstItem) {
+                firstItem.click();
+            }
+        } else {
+            shopContent.innerHTML = `
+                <div style="height: 170px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="padding: 10px; text-align: center; color: #8a7b6c;">Your inventory is empty</div>
+                    <div style="margin-top: 20px;">
+                        <button id="return-to-shop" style="
+                            padding: 5px 10px; 
+                            background-color: #140c1c; 
+                            color: #e8d5a9; 
+                            border: 1px solid #663300; 
+                            cursor: pointer;
+                            font-family: monospace;
+                        ">BACK</button>
+                    </div>
+                </div>
+            `;
+            
+            // Ajouter l'écouteur d'événement pour le bouton de retour
+            document.getElementById('return-to-shop').addEventListener('click', () => {
+                this.displayItemsForSale(player);
+            });
+        }
+    }
+
+    // Méthode pour afficher les détails d'un objet à acheter
+    showShopItemDetails(item, player, index) {
+        const shopDetails = document.getElementById('shop-details');
+        if (!shopDetails) return;
+        
+        // Déterminer l'icône en fonction du slot
+        let itemIcon = item.icon;
+                        
+        // Type d'équipement
+        let slotName = "";
+        switch(item.slot) {
+            case 1: slotName = "Weapon"; break;
+            case 2: slotName = "Armor"; break;
+            default: slotName = "Item"; break;
+        }
+        
+        // Construire la chaîne HTML des statistiques
+        let statsHTML = "";
+        
+        // Fonction helper pour ajouter une stat avec la bonne couleur
+        const addStat = (value, name) => {
+            if (value !== 0) {
+                const sign = value > 0 ? "+" : "";
+                const color = value > 0 ? "#66ff66" : "#ff6666";
+                statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
+            }
+        };
+        
+        // Ajouter toutes les stats dans l'ordre
+        addStat(item.strength, "Strength");
+        addStat(item.dexterity, "Dexterity");
+        addStat(item.intellect, "Intellect");
+        addStat(item.might, "Might");
+        addStat(item.magic, "Magic");
+        addStat(item.dodge, "Dodge");
+        addStat(item.criti, "Crit.");
+        addStat(item.armor, "Armor");
+        
+        if (item.power !== 0) {
+            statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
+        }
+        
+        // Si aucune statistique n'est définie
+        if (statsHTML === "") {
+            statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
+        }
+        
+        // Afficher le prix ou "FREE" si le prix est 0 ou non défini
+        const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
+        const buyText = item.price > 0 ? 'BUY' : 'TAKE';
+        
+        // Vérifier si le joueur a assez d'or
+        const canAfford = (player.gold || 0) >= item.price;
+        const buttonClass = !canAfford && item.price > 0 ? 'cannot-afford' : '';
+        
+        // Structure avec positions absolues et défilement central
+        shopDetails.innerHTML = `
+            <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
+            <div style="position: relative; width: 103%; height: 95%;">
+                <!-- Division 1: Nom et icône (position absolue en haut) -->
+                <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
+                    <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
+                        <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
+                        <div style="width: calc(100% - 38px);">
+                            <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                            <div style="font-size: 12px; color: #a89986;">${slotName}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Division 3: Prix et bouton d'achat (position absolue en bas) -->
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <div style="margin-left : 5px;font-size: 14px; color: #ffcc00; font-weight: bold;">
+                            Price: ${priceDisplay}
+                        </div>
+                        <button id="buy-item-btn" class="${buttonClass}" style="
+                            margin-right:5px;
+                            margin-bottom:6px;
+                            padding: 6px 12px; 
+                            background-color: ${canAfford || item.price === 0 ? '#205020' : '#501102'}; 
+                            color: #e8d5a9; 
+                            border: 1px solid #663300; 
+                            cursor: ${canAfford || item.price === 0 ? 'pointer' : 'not-allowed'};
+                            font-family: monospace;
+                            text-transform: uppercase;
+                            box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                            width: auto;
+                        ">
+                            ${buyText}
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Division 2: Statistiques (zone avec défilement) -->
+                <div style="margin-left : 5px; position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
+                    ${statsHTML}
+                </div>
+            </div>
+        `;
+        
+        // Ajouter l'écouteur d'événement pour le bouton d'achat
+        document.getElementById('buy-item-btn').addEventListener('click', () => {
+            if (item.price > 0) {
+                // Vérifier si le joueur a assez d'or
+                if ((player.gold || 0) >= item.price) {
+                    // Déduire le coût
+                    player.gold -= item.price;
+                    
+                    // Ajouter l'objet à l'inventaire
+                    this.addItemToInventory(item, player);
+                    
+                    // Retirer l'objet de la liste de vente
+                    this.spriteSell = this.spriteSell.filter(itemId => itemId !== item.id);
+                    
+                    // Message de confirmation
+                    Sprite.terminalLog(`You bought ${item.name} for ${item.price} gp.`);
+                    
+                    // Actualiser l'or affiché
+                    const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+                    if (goldOutput) {
+                        goldOutput.textContent = player.gold || 0;
+                    }
+                    
+                    // Recharger l'interface d'achat
+                    this.displayBuyInterface(player);
+                } else {
+                    Sprite.terminalLog(`You don't have enough gold to buy ${item.name}.`);
+                }
+            } else {
+                // Donner gratuitement
+                this.giveItemToPlayer(item, player);
+                Sprite.terminalLog(`You received ${item.name} for free.`);
+                
+                // Recharger l'interface d'achat
+                this.displayBuyInterface(player);
+            }
+        });
+    }
+
+    // Méthode pour afficher les détails d'un objet à vendre
+    showSellItemDetails(item, player, index, sellPrice) {
+        const sellDetails = document.getElementById('sell-details');
+        if (!sellDetails) return;
+        
+        // Déterminer l'icône en fonction du slot
+        let itemIcon = item.icon;
+                        
+        // Type d'équipement
+        let slotName = "";
+        switch(item.slot) {
+            case 1: slotName = "Weapon"; break;
+            case 2: slotName = "Armor"; break;
+            default: slotName = "Item"; break;
+        }
+        
+        // Construire la chaîne HTML des statistiques
+        let statsHTML = "";
+        
+        // Fonction helper pour ajouter une stat avec la bonne couleur
+        const addStat = (value, name) => {
+            if (value !== 0) {
+                const sign = value > 0 ? "+" : "";
+                const color = value > 0 ? "#66ff66" : "#ff6666";
+                statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
+            }
+        };
+        
+        // Ajouter toutes les stats dans l'ordre
+        addStat(item.strength, "Strength");
+        addStat(item.dexterity, "Dexterity");
+        addStat(item.intellect, "Intellect");
+        addStat(item.might, "Might");
+        addStat(item.magic, "Magic");
+        addStat(item.dodge, "Dodge");
+        addStat(item.criti, "Crit.");
+        addStat(item.armor, "Armor");
+        
+        if (item.power !== 0) {
+            statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
+        }
+        
+        // Si aucune statistique n'est définie
+        if (statsHTML === "") {
+            statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
+        }
+        
+        // Structure avec positions absolues et défilement central
+        sellDetails.innerHTML = `
+            <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
+            <div style="position: relative; width: 103%; height: 95%;">
+                <!-- Division 1: Nom et icône (position absolue en haut) -->
+                <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
+                    <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
+                        <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
+                        <div style="width: calc(100% - 38px);">
+                            <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
+                            <div style="font-size: 12px; color: #a89986;">${slotName}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Division 3: Prix et bouton de vente (position absolue en bas) -->
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <div style="margin-left : 5px;font-size: 14px; color: #ffcc00; font-weight: bold;">
+                            Sell price: ${sellPrice} gp
+                        </div>
+                        <button id="sell-item-btn" style="
+                            margin-right:5px;
+                            margin-bottom:6px;
+                            padding: 6px 12px; 
+                            background-color: #793020; 
+                            color: #e8d5a9; 
+                            border: 1px solid #663300; 
+                            cursor: pointer;
+                            font-family: monospace;
+                            text-transform: uppercase;
+                            box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
+                            width: auto;
+                        ">
+                            SELL
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Division 2: Statistiques (zone avec défilement) -->
+                <div style="margin-left : 5px; position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
+                    ${statsHTML}
+                </div>
+            </div>
+        `;
+        
+        // Ajouter l'écouteur d'événement pour le bouton de vente
+        document.getElementById('sell-item-btn').addEventListener('click', () => {
+            // Obtenir l'or de la vente
+            player.gold += sellPrice;
+            
+            // Supprimer l'objet de l'inventaire
+            player.inventory.splice(index, 1);
+            
+            // Message de confirmation
+            Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gp.`);
+            
+            // Actualiser l'or affiché
+            const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+            if (goldOutput) {
+                goldOutput.textContent = player.gold || 0;
+            }
+            
+            // Mettre à jour les statistiques du joueur
+            player.statsUpdate(player);
+            
+            // Recharger l'interface de vente
+            this.displaySellInterface(player);
+        });
+    }
+
+    // Méthode pour permettre au joueur de vendre un objet au marchand
+    playerSellItem(player, itemIndex, sellPrice) {
+        if (player && player.inventory && player.inventory[itemIndex]) {
+            const item = player.inventory[itemIndex];
+            
+            // Ne pas permettre de vendre un objet équipé
+            if (item.equipped) {
+                Sprite.terminalLog("You can't sell an equipped item. Unequip it first.");
+                return false;
+            }
+            
+            // Ajouter l'or au joueur
+            player.gold += sellPrice;
+            
+            // Retirer l'objet de l'inventaire
+            player.inventory.splice(itemIndex, 1);
+            
+            // Message de vente
+            Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gold coins.`);
+            
+            // Mettre à jour les statistiques du joueur
+            player.statsUpdate();
+            
+            return true;
+        }
+        
+        return false;
+    }
+
+    // Ajoutons une méthode pour permettre au joueur de vendre un objet au marchand
+    playerSellItem(player, itemIndex, sellPrice) {
+        if (player && player.inventory && player.inventory[itemIndex]) {
+            const item = player.inventory[itemIndex];
+            
+            this.sellList.push(int(item.id))
+
+            // Ne pas permettre de vendre un objet équipé
+            if (item.equipped) {
+                Sprite.terminalLog("You can't sell an equipped item. Unequip it first.");
+                return false;
+            }
+            
+            // Ajouter l'or au joueur
+            player.gold += sellPrice;
+            
+            // l'objet est ajouté à la liste de vente du pnj
+            this.sellList.push(str(item.id))
+
+            // Retirer l'objet de l'inventaire
+            player.inventory.splice(itemIndex, 1);
+            
+            // Message de vente
+            Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gold coins.`);
+            
+            // Mettre à jour les statistiques du joueur
+            player.statsUpdate();
+            
+            return true;
+        }
+        
+        return false;
     }
     
     addItemToInventory(item, player) {
@@ -4860,6 +5815,9 @@ class Raycaster {
         context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
         this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
 
+        // xyz
+        // texture des sprites
+
         // Chargement des textures de sol
         const floorTextures = {
             1: "floorimg1",
@@ -5384,25 +6342,57 @@ class Raycaster {
         }
     }
 
-    drawSkybox() {
-        // Calculer les facteurs d'échelle pour les coordonnées de texture
-        let scaleX = this.skyboxImageData.width / this.displayWidth;
-        let scaleY = this.skyboxImageData.height / this.displayHeight;
+// Paramètres de la skybox configurable
+// Ces variables peuvent être définies comme des propriétés de la classe Raycaster
+// ou conservées dans un objet de configuration séparé
+drawSkybox() {
+    // Variables d'ajustement de la skybox - modifiez ces valeurs pour ajuster le comportement
+    const cloudSpeed = 0.2;          // Vitesse du mouvement autonome des nuages
+    const rotationFactor = -3.0;     // Facteur de rotation relative au joueur (-1.0 = sens opposé)
+    
+    // Calculer les facteurs d'échelle pour les coordonnées de texture
+    let scaleX = this.skyboxImageData.width / this.displayWidth;
+    let scaleY = this.skyboxImageData.height / this.displayHeight;
 
-        // Calculer le décalage horizontal en fonction de l'angle de la caméra
-        let offsetX = Math.floor((-this.player.rot / Math.PI) * this.skyboxImageData.width * 3);
+    // Initialiser la variable d'animation si elle n'existe pas encore
+    if (!this.skyboxAnimationOffset) {
+        this.skyboxAnimationOffset = 0;
+    }
+    
+    // Animation autonome des nuages
+    this.skyboxAnimationOffset += cloudSpeed;
+    
+    // Empêcher le débordement de la variable
+    this.skyboxAnimationOffset = this.skyboxAnimationOffset % this.skyboxImageData.width;
+    
+    // Compensation pour la rotation du joueur
+    let playerRotationOffset = rotationFactor * Math.floor((this.player.rot / (2 * Math.PI)) * this.skyboxImageData.width);
+    
+    // Décalage total = mouvement autonome + effet de rotation
+    let totalOffsetX = Math.floor(this.skyboxAnimationOffset) + playerRotationOffset;
+    
+    for (let y = 0; y < this.displayHeight / 2; ++y) {
+        // Calculer les coordonnées de texture pour cette ligne de pixels
+        let textureY = Math.floor(y * scaleY);
 
-        for (let y = 0; y < this.displayHeight / 2; ++y) {
-            // Calculer les coordonnées de texture pour cette ligne de pixels
-            let textureY = Math.floor(y * scaleY);
+        for (let x = 0; x < this.displayWidth; ++x) {
+            // Calculer les coordonnées de texture pour ce pixel
+            // Assurons-nous que textureX est toujours dans les limites de l'image
+            let rawTextureX = Math.floor(x * scaleX) + totalOffsetX;
+            let textureX = rawTextureX % this.skyboxImageData.width;
+            
+            // Correction pour les valeurs négatives
+            if (textureX < 0) textureX += this.skyboxImageData.width;
 
-            for (let x = 0; x < this.displayWidth; ++x) {
-                // Calculer les coordonnées de texture pour ce pixel
-                let textureX = Math.floor((x + offsetX) * scaleX) % this.skyboxImageData.width;
+            // S'assurer que les coordonnées sont entières et dans les limites
+            textureX = Math.max(0, Math.min(Math.floor(textureX), this.skyboxImageData.width - 1));
+            textureY = Math.max(0, Math.min(Math.floor(textureY), this.skyboxImageData.height - 1));
 
-                // Trouver l'index du pixel dans le tableau de données de l'image
-                let index = (textureX + textureY * this.skyboxImageData.width) * 4;
-
+            // Trouver l'index du pixel dans le tableau de données de l'image
+            let index = (textureX + textureY * this.skyboxImageData.width) * 4;
+            
+            // Vérifier les limites du tableau pour éviter les erreurs
+            if (index >= 0 && index + 3 < this.skyboxImageData.data.length) {
                 // Extraire les valeurs de couleur du pixel
                 let r = this.skyboxImageData.data[index];
                 let g = this.skyboxImageData.data[index + 1];
@@ -5411,16 +6401,19 @@ class Raycaster {
 
                 // Trouver l'index du pixel dans le tableau de données du backBuffer
                 let backBufferIndex = (x + y * this.displayWidth) * 4;
-
-                // Modifier les données du backBuffer pour mettre à jour le pixel
-                this.backBuffer.data[backBufferIndex] = r;
-                this.backBuffer.data[backBufferIndex + 1] = g;
-                this.backBuffer.data[backBufferIndex + 2] = b;
-                this.backBuffer.data[backBufferIndex + 3] = a;
+                
+                // Vérifier les limites du backBuffer également
+                if (backBufferIndex >= 0 && backBufferIndex + 3 < this.backBuffer.data.length) {
+                    // Modifier les données du backBuffer pour mettre à jour le pixel
+                    this.backBuffer.data[backBufferIndex] = r;
+                    this.backBuffer.data[backBufferIndex + 1] = g;
+                    this.backBuffer.data[backBufferIndex + 2] = b;
+                    this.backBuffer.data[backBufferIndex + 3] = a;
+                }
             }
         }
     }
-
+}
     //////////////////////////////////////////////////////////////////////
     // détection des murs
     //////////////////////////////////////////////////////////////////////
