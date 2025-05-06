@@ -22,6 +22,8 @@ let consoleContent = "";
 
 let lastEntry = "";
 
+let commandBlocking = false; // Variable globale pour bloquer les commandes pendant dialogues/cinématiques
+
 var totalTimeElapsed = 0;
 var timeSinceLastSecond = 0;
 
@@ -1457,104 +1459,103 @@ async handleSpriteAction(action, sprites) {
             spriteFound = true;
             console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
             
-                switch (sprite.spriteType) {
-                    case "A":
-                        console.log("Enemy detected, initiating combat!");
-                        // Enregistrer le temps de cette attaque
-                        this.lastAttackTime = currentTime;
-                        
-                        if (this.combatSpell) {
-                            console.log("Using combat spell");
-                            sprite.combatSpell(this, sprite);
-                        } else {
-                            console.log("Using normal attack");
-                            sprite.combat(this.might, this.criti, this);
-                        }
-                        break;
-                    case "EXIT":
-                        Sprite.terminalLog('Level finished!')
-                        this.raycaster.nextMap();
-                        break;
-                    case "DOOR":
-                        sprite.door(this, null);
-                        this.raycaster.loadFloorCeilingImages();
-                        Sprite.terminalLog('You enter/exit the area.')
-                        break;
-                    case 0:
-                        sprite.talk(sprite.spriteTalk, sprite.spriteFace);
-                        this.turn = false;
-                        break;
-                    case 1:
-                        // décoration, ne rien faire
-                        console.log("Decoration sprite, no action");
-                        break;
-                    case 2:
-                        sprite.talk(sprite.spriteTalk, sprite.spriteFace);
-                        this.turn = false;
-                        break;
-                    case 3:
-                        sprite.displayItemsForSale(this);
-                        this.turn = false;
-                        break;
-                    case 4:
-                        // gestion des Quest Giver
-                        console.log("Quest Giver sprite, not implemented yet");
-                        break;
-                    case 5:
-                        // valeur fixe de test
-                        // ultérieurement : quests[currentMap].complete();
-                        console.log("Quest completion sprite");
-                        // xyz
-                        if (this.quests[0].completed === false) {
-                            this.quests[0].complete();
+            switch (sprite.spriteType) {
+                case "A":
+                    console.log("Enemy detected, initiating combat!");
+                    // Enregistrer le temps de cette attaque
+                    this.lastAttackTime = currentTime;
+                    
+                    if (this.combatSpell) {
+                        console.log("Using combat spell");
+                        sprite.combatSpell(this, sprite);
+                    } else {
+                        console.log("Using normal attack");
+                        sprite.combat(this.might, this.criti, this);
+                    }
+                    break;
+                case "EXIT":
+                    Sprite.terminalLog('Level finished!')
+                    this.raycaster.nextMap();
+                    break;
+                case "DOOR":
+                    // IMPORTANT: Traiter les portes de manière spéciale
+                    // Appeler door() mais NE PAS appeler handleTeleportation ensuite
+                    sprite.door(this, null);
+                    this.raycaster.loadFloorCeilingImages();
+                    Sprite.terminalLog('You enter/exit the area.');
+                    // Réinitialiser l'état de l'action pour éviter de lancer handleTeleportation après
+                    this.actionButtonClicked = false;
+                    return; // Sortir immédiatement pour éviter l'appel à handleTeleportation
+                case 0:
+                    sprite.talk(sprite.spriteTalk, sprite.spriteFace);
+                    this.turn = false;
+                    break;
+                case 1:
+                    // décoration, ne rien faire
+                    console.log("Decoration sprite, no action");
+                    break;
+                case 2:
+                    sprite.talk(sprite.spriteTalk, sprite.spriteFace);
+                    this.turn = false;
+                    break;
+                case 3:
+                    sprite.displayItemsForSale(this);
+                    this.turn = false;
+                    break;
+                case 4:
+                    // gestion des Quest Giver
+                    console.log("Quest Giver sprite, not implemented yet");
+                    break;
+                case 5:
+                    // valeur fixe de test
+                    // ultérieurement : quests[currentMap].complete();
+                    console.log("Quest completion sprite");
+                    if (this.quests[0].completed === false) {
+                        this.quests[0].complete();
 
-                           // changement de texture temporaire
-                           console.log("test changement de texture");
-                           sprite.spriteTexture = 21;
-    
-                            Sprite.resetToggle();
-                         } else {
-                            
-                            Sprite.terminalLog("I've already looted that.")
-                        }
+                        // changement de texture temporaire
+                        console.log("test changement de texture");
+                        sprite.spriteTexture = 21;
 
-                        break;
-                    case 6:
-                            // valeur fixe de test
-                            // ultérieurement : quests[currentMap].complete();
-                            console.log("chest !");
-                            // xyé
-                            if (sprite.step !=  1) {
-                                sprite.lootClass = 5;
-
-                                sprite.generateLoot(this);
-
-                               // changement de texture temporaire
-                               sprite.spriteTexture = 21;
-
-                               sprite.step = 1
-        
-                                Sprite.resetToggle();
-                             } else {
-                                Sprite.terminalLog("I've already looted that.")
-                             }
-    
-                            break;
-                    default:
-                        console.log(`Sprite type ${sprite.spriteType} has no specific action`);
                         Sprite.resetToggle();
-                        break;
-                }
+                    } else {
+                        Sprite.terminalLog("I've already looted that.")
+                    }
+                    break;
+                case 6:
+                    // valeur fixe de test
+                    // ultérieurement : quests[currentMap].complete();
+                    console.log("chest !");
+                    if (sprite.step != 1) {
+                        sprite.lootClass = 5;
+
+                        sprite.generateLoot(this);
+
+                        // changement de texture temporaire
+                        sprite.spriteTexture = 21;
+
+                        sprite.step = 1;
+
+                        Sprite.resetToggle();
+                    } else {
+                        Sprite.terminalLog("I've already looted that.")
+                    }
+                    break;
+                default:
+                    console.log(`Sprite type ${sprite.spriteType} has no specific action`);
+                    Sprite.resetToggle();
+                    break;
             }
         }
-        
-        if (!spriteFound) {
-            console.log("No sprite found at front position");
-        }
-        
-        // Réinitialisation de la touche d'action après utilisation
-        this.actionButtonClicked = false;
     }
+    
+    if (!spriteFound) {
+        console.log("No sprite found at front position");
+    }
+    
+    // Réinitialisation de la touche d'action après utilisation
+    this.actionButtonClicked = false;
+}
 
     async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
         const tolerance = Math.PI / 6; // 30° en radians
@@ -1650,16 +1651,54 @@ async handleSpriteAction(action, sprites) {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /// Gestion interaction joueur avec monde (Move/Action)
     ///////////////////////////////////////////////////////////////////////////////////////////////
-
     async move(timeElapsed, map, eventA, eventB, sprites) {
+        // PARAMÈTRES AJUSTABLES DE MOUVEMENT
+        // ----------------------------------
+        // Durées d'animation (en millisecondes)
+        const ROTATION_DURATION = 500;      // Durée de rotation de 90 degrés
+        const DODGE_DURATION = 400;         // Durée d'une esquive latérale
+        const FORWARD_DURATION = 600;       // Durée de base pour avancer
+        const BACKWARD_DURATION = 500;      // Durée de base pour reculer
+        const CONTINUOUS_MOVE_SPEEDUP = 150; // Réduction de temps pour mouvements continus
+        const WALL_IMPACT_DURATION = 250;   // Durée de l'animation d'impact sur un mur
+        const ENEMY_IMPACT_DURATION = 500;  // Durée de l'animation d'impact sur un ennemi
+        
+        // Distances et facteurs
+        const PUSH_WALL_FACTOR = 0.2;      // % de la taille d'une case pour l'animation d'impact mur
+        const PUSH_ENEMY_FACTOR = 0.15;    // % de la taille d'une case pour l'animation d'impact ennemi
+        const MOVEMENT_THRESHOLD = 0.1;    // Précision de détection des angles cardinaux
+        const ATTACK_COOLDOWN = 2000;      // Temps minimum entre deux attaques (ms)
+        const CONTINUOUS_MOVE_DELAY = 50;  // Délai entre mouvements continus (ms)
+        
+        // Facteurs d'easing pour les animations
+        const easeInOut = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+        const easeOutBack = (t) => {
+            const c1 = 1.70158;
+            const c3 = c1 + 1;
+            return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+        };
+        
+        // Définir les angles cardinaux précis (en radians)
+        const NORTH = Math.PI / 2;
+        const EAST = 0;
+        const SOUTH = 3 * Math.PI / 2;
+        const WEST = Math.PI;
+        
         // Récupération des entrées utilisateur - combinaison du clavier et des contrôles UI
         let up = this.keysDown[KEY_UP] || this.keysDown[KEY_W] || this.joystickForwardClicked || this.button5Clicked;
         let down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S] || this.joystickBackwardClicked || this.button8Clicked;
         let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A] || this.joystickLeftClicked || this.turnLeftButtonClicked;
         let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D] || this.joystickRightClicked || this.turnRightButtonClicked;
-        let dodgeLeft = this.button7Clicked ; // Nouveau: esquive gauche
-        let dodgeRight = this.button9Clicked; // Nouveau: esquive droite
+        let dodgeLeft = this.button7Clicked;
+        let dodgeRight = this.button9Clicked;
         const action = this.actionButtonClicked || this.keysDown[KEY_F] || this.keysDown[KEY_SPACE] || this.buttonAClicked;
+        
+        // Sauvegarde l'état des touches pour vérification ultérieure
+        this.continuousUpPressed = this.keysDown[KEY_UP] || this.keysDown[KEY_W];
+        this.continuousDownPressed = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S];
+        this.continuousJoystickUp = this.joystickForwardClicked;
+        this.continuousJoystickDown = this.joystickBackwardClicked;
         
         // Réinitialiser les états des boutons après leur détection
         this.button4Clicked = false;
@@ -1673,23 +1712,13 @@ async handleSpriteAction(action, sprites) {
         this.turnRightButtonClicked = false;
         this.actionButtonClicked = false;
         
+        // Si les commandes sont bloquées, ignorer les déplacements
+        if (commandBlocking) {
+            return;
+        }
+        
         // Éviter les mouvements multiples pendant une animation ou une action
         if (this.isMoving || this.isRotating) return;
-        
-        // Définir les angles cardinaux précis (en radians)
-        const NORTH = Math.PI / 2;
-        const EAST = 0;
-        const SOUTH = 3 * Math.PI / 2;
-        const WEST = Math.PI;
-        
-        // Fonctions d'easing
-        const easeInOut = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
-        const easeOutBack = (t) => {
-            const c1 = 1.70158;
-            const c3 = c1 + 1;
-            return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-        };
         
         // Traitement des rotations (par incréments de 90 degrés)
         if (left || right) {
@@ -1700,21 +1729,21 @@ async handleSpriteAction(action, sprites) {
             let targetRot;
             if (left) {
                 // Rotation de 90 degrés dans le sens horaire
-                if (Math.abs(this.rot - NORTH) < 0.1) targetRot = WEST;
-                else if (Math.abs(this.rot - EAST) < 0.1) targetRot = NORTH;
-                else if (Math.abs(this.rot - SOUTH) < 0.1) targetRot = EAST;
-                else if (Math.abs(this.rot - WEST) < 0.1) targetRot = SOUTH;
+                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) targetRot = WEST;
+                else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) targetRot = NORTH;
+                else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) targetRot = EAST;
+                else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) targetRot = SOUTH;
             } else if (right) {
                 // Rotation de 90 degrés dans le sens anti-horaire
-                if (Math.abs(this.rot - NORTH) < 0.1) targetRot = EAST;
-                else if (Math.abs(this.rot - EAST) < 0.1) targetRot = SOUTH;
-                else if (Math.abs(this.rot - SOUTH) < 0.1) targetRot = WEST;
-                else if (Math.abs(this.rot - WEST) < 0.1) targetRot = NORTH;
+                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) targetRot = EAST;
+                else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) targetRot = SOUTH;
+                else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) targetRot = WEST;
+                else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) targetRot = NORTH;
             }
             
             // Animation de rotation avec durée minimale garantie
             const startRot = this.rot;
-            const minRotationDuration = 500; // 500ms pour une rotation de 90 degrés
+            const minRotationDuration = ROTATION_DURATION;
             
             // Calculer la différence d'angle en prenant le chemin le plus court
             let angleDiff = targetRot - startRot;
@@ -1769,41 +1798,41 @@ async handleSpriteAction(action, sprites) {
         
         if (up) {
             // Avancer d'une case dans la direction actuelle
-            if (Math.abs(this.rot - NORTH) < 0.1) {
+            if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                 destY -= 1; // Nord
-            } else if (Math.abs(this.rot - EAST) < 0.1) {
+            } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                 destX += 1; // Est
-            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+            } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                 destY += 1; // Sud
-            } else if (Math.abs(this.rot - WEST) < 0.1) {
+            } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                 destX -= 1; // Ouest
             }
             movementRequested = true;
         } else if (down) {
             // Reculer d'une case (direction opposée)
-            if (Math.abs(this.rot - NORTH) < 0.1) {
+            if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                 destY += 1; // Sud (opposé du Nord)
-            } else if (Math.abs(this.rot - EAST) < 0.1) {
+            } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                 destX -= 1; // Ouest (opposé de l'Est)
-            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+            } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                 destY -= 1; // Nord (opposé du Sud)
-            } else if (Math.abs(this.rot - WEST) < 0.1) {
+            } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                 destX += 1; // Est (opposé de l'Ouest)
             }
             movementRequested = true;
             isMovingBackward = true;
         } else if (dodgeLeft || dodgeRight) {
             // Esquive latérale (déplacement perpendiculaire à la direction)
-            if (Math.abs(this.rot - NORTH) < 0.1) {
+            if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                 // Face au nord, esquive à gauche = ouest, esquive à droite = est
                 destX += dodgeLeft ? -1 : 1;
-            } else if (Math.abs(this.rot - EAST) < 0.1) {
+            } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                 // Face à l'est, esquive à gauche = nord, esquive à droite = sud
                 destY += dodgeLeft ? -1 : 1;
-            } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+            } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                 // Face au sud, esquive à gauche = est, esquive à droite = ouest
                 destX += dodgeLeft ? 1 : -1;
-            } else if (Math.abs(this.rot - WEST) < 0.1) {
+            } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                 // Face à l'ouest, esquive à gauche = sud, esquive à droite = nord
                 destY += dodgeLeft ? 1 : -1;
             }
@@ -1811,7 +1840,7 @@ async handleSpriteAction(action, sprites) {
             isDodging = true;
         } else if (action && this.turn) {
             // Gestion des actions
-            this.handleSpriteAction(action, sprites);
+            await this.handleSpriteAction(action, sprites);
             
             if (action) {
                 await this.handleTeleportation(this, eventA, eventB, this.x, this.y, this.tileSize);
@@ -1849,8 +1878,8 @@ async handleSpriteAction(action, sprites) {
             const startX = this.x;
             const startY = this.y;
             
-            // Distance de "poussée" vers l'ennemi (15% de la taille d'une case)
-            const pushDistance = this.tileSize * 0.15;
+            // Distance de "poussée" vers l'ennemi
+            const pushDistance = this.tileSize * PUSH_ENEMY_FACTOR;
             
             // Calculer la direction de la poussée
             let pushX = 0;
@@ -1858,35 +1887,35 @@ async handleSpriteAction(action, sprites) {
             
             if (isDodging) {
                 // Direction pour l'esquive (même logique que le mouvement)
-                if (Math.abs(this.rot - NORTH) < 0.1) {
+                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                     pushX = dodgeLeft ? -pushDistance : pushDistance;
-                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                     pushY = dodgeLeft ? -pushDistance : pushDistance;
-                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                     pushX = dodgeLeft ? pushDistance : -pushDistance;
-                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                     pushY = dodgeLeft ? pushDistance : -pushDistance;
                 }
             } else if (isMovingBackward) {
                 // Inversion pour le mouvement arrière
-                if (Math.abs(this.rot - NORTH) < 0.1) {
+                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                     pushY = pushDistance; // Sud (inverse du Nord)
-                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                     pushX = -pushDistance; // Ouest (inverse de l'Est)
-                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                     pushY = -pushDistance; // Nord (inverse du Sud)
-                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                     pushX = pushDistance; // Est (inverse de l'Ouest)
                 }
             } else {
                 // Direction normale pour le mouvement avant
-                if (Math.abs(this.rot - NORTH) < 0.1) {
+                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                     pushY = -pushDistance; // Nord
-                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                     pushX = pushDistance;  // Est
-                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                     pushY = pushDistance;  // Sud
-                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                     pushX = -pushDistance; // Ouest
                 }
             }
@@ -1894,9 +1923,6 @@ async handleSpriteAction(action, sprites) {
             // Position cible maximale de la poussée
             const maxPushX = startX + pushX;
             const maxPushY = startY + pushY;
-            
-            // Durée minimale pour l'animation d'impact contre un ennemi
-            const minImpactDuration = 500; // 500ms au total (250ms pour chaque phase)
             
             // Phase 1: Poussée vers l'avant/arrière rapide
             const startImpactTime = performance.now();
@@ -1907,7 +1933,7 @@ async handleSpriteAction(action, sprites) {
                 const elapsedTime = currentTime - startImpactTime;
                 
                 // Progression de la phase 1 (0 à 1)
-                let t = Math.min(elapsedTime / (minImpactDuration / 2), 1);
+                let t = Math.min(elapsedTime / (ENEMY_IMPACT_DURATION / 2), 1);
                 
                 if (t >= 1) {
                     impactPhase1Complete = true;
@@ -1918,9 +1944,6 @@ async handleSpriteAction(action, sprites) {
                 
                 this.x = startX + pushX * easedT;
                 this.y = startY + pushY * easedT;
-                
-                // Léger effet de balancement
-                this.z = 3 * Math.sin(Math.PI * t);
                 
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
@@ -1934,7 +1957,7 @@ async handleSpriteAction(action, sprites) {
                 const elapsedTime = currentTime - startReboundTime;
                 
                 // Progression de la phase 2 (0 à 1)
-                let t = Math.min(elapsedTime / (minImpactDuration / 2), 1);
+                let t = Math.min(elapsedTime / (ENEMY_IMPACT_DURATION / 2), 1);
                 
                 if (t >= 1) {
                     impactPhase2Complete = true;
@@ -1945,9 +1968,6 @@ async handleSpriteAction(action, sprites) {
                 
                 this.x = maxPushX - pushX * easedT;
                 this.y = maxPushY - pushY * easedT;
-                
-                // Léger effet de balancement inverse
-                this.z = 3 * Math.sin(Math.PI * (1 - t));
                 
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
@@ -1962,7 +1982,7 @@ async handleSpriteAction(action, sprites) {
             
             // Vérifier le délai avant de déclencher le combat
             const currentTime = Date.now();
-            if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) >= 2000)) {
+            if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) >= ATTACK_COOLDOWN)) {
                 try {
                     this.lastAttackTime = currentTime; // Mettre à jour le temps de la dernière attaque
                     await collidedSprite.combat(this.might, this.criti, this);
@@ -1970,7 +1990,7 @@ async handleSpriteAction(action, sprites) {
                     console.error("Error:", error);
                     this.turn = false;
                 }
-            } else if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) < 2000)) {
+            } else if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) < ATTACK_COOLDOWN)) {
                 // Informer le joueur qu'il n'est pas prêt à attaquer
                 Sprite.terminalLog("Can't attack yet !");
             }
@@ -1987,8 +2007,8 @@ async handleSpriteAction(action, sprites) {
             const startX = this.x;
             const startY = this.y;
             
-            // Déterminer la distance maximale de "poussée" vers l'obstacle (20% de la taille d'une case)
-            const pushDistance = this.tileSize * 0.2;
+            // Déterminer la distance maximale de "poussée" vers l'obstacle
+            const pushDistance = this.tileSize * PUSH_WALL_FACTOR;
             
             // Calculer la direction de la poussée
             let pushX = 0;
@@ -1996,35 +2016,35 @@ async handleSpriteAction(action, sprites) {
             
             if (isDodging) {
                 // Direction pour l'esquive (même logique que le mouvement)
-                if (Math.abs(this.rot - NORTH) < 0.1) {
+                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                     pushX = dodgeLeft ? -pushDistance : pushDistance;
-                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                     pushY = dodgeLeft ? -pushDistance : pushDistance;
-                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                     pushX = dodgeLeft ? pushDistance : -pushDistance;
-                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                     pushY = dodgeLeft ? pushDistance : -pushDistance;
                 }
             } else if (isMovingBackward) {
                 // Inversion de la direction pour le mouvement arrière
-                if (Math.abs(this.rot - NORTH) < 0.1) {
+                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                     pushY = pushDistance; // Sud (inverse du Nord)
-                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                     pushX = -pushDistance; // Ouest (inverse de l'Est)
-                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                     pushY = -pushDistance; // Nord (inverse du Sud)
-                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                     pushX = pushDistance; // Est (inverse de l'Ouest)
                 }
             } else {
                 // Direction normale pour le mouvement avant
-                if (Math.abs(this.rot - NORTH) < 0.1) {
+                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                     pushY = -pushDistance; // Nord
-                } else if (Math.abs(this.rot - EAST) < 0.1) {
+                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
                     pushX = pushDistance;  // Est
-                } else if (Math.abs(this.rot - SOUTH) < 0.1) {
+                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
                     pushY = pushDistance;  // Sud
-                } else if (Math.abs(this.rot - WEST) < 0.1) {
+                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
                     pushX = -pushDistance; // Ouest
                 }
             }
@@ -2032,9 +2052,6 @@ async handleSpriteAction(action, sprites) {
             // Position cible maximale de la poussée
             const maxPushX = startX + pushX;
             const maxPushY = startY + pushY;
-            
-            // Durée minimale pour l'animation d'impact sur obstacle
-            const minImpactDuration = 250; // 250ms au total (125ms pour chaque phase)
             
             // Phase 1: Poussée vers l'avant/arrière
             const startImpactTime = performance.now();
@@ -2045,7 +2062,7 @@ async handleSpriteAction(action, sprites) {
                 const elapsedTime = currentTime - startImpactTime;
                 
                 // Progression de la phase 1 (0 à 1)
-                let t = Math.min(elapsedTime / (minImpactDuration / 2), 1);
+                let t = Math.min(elapsedTime / (WALL_IMPACT_DURATION / 2), 1);
                 
                 if (t >= 1) {
                     impactPhase1Complete = true;
@@ -2056,9 +2073,6 @@ async handleSpriteAction(action, sprites) {
                 
                 this.x = startX + pushX * easedT;
                 this.y = startY + pushY * easedT;
-                
-                // Léger effet de balancement
-                this.z = 2 * Math.sin(Math.PI * t);
                 
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
@@ -2072,7 +2086,7 @@ async handleSpriteAction(action, sprites) {
                 const elapsedTime = currentTime - startReboundTime;
                 
                 // Progression de la phase 2 (0 à 1)
-                let t = Math.min(elapsedTime / (minImpactDuration / 2), 1);
+                let t = Math.min(elapsedTime / (WALL_IMPACT_DURATION / 2), 1);
                 
                 if (t >= 1) {
                     impactPhase2Complete = true;
@@ -2083,9 +2097,6 @@ async handleSpriteAction(action, sprites) {
                 
                 this.x = maxPushX - pushX * easedT;
                 this.y = maxPushY - pushY * easedT;
-                
-                // Léger effet de balancement inverse
-                this.z = 2 * Math.sin(Math.PI * (1 - t));
                 
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
@@ -2110,31 +2121,28 @@ async handleSpriteAction(action, sprites) {
         const targetX = destX * this.tileSize + this.tileSize / 2; // Centre de la case
         const targetY = destY * this.tileSize + this.tileSize / 2; // Centre de la case
         
-        // Durée minimale du mouvement en ms
+        // Durée minimale du mouvement en ms - réduite pour les mouvements continus
         let minMovementDuration;
         if (isDodging) {
-            minMovementDuration = 400; // Esquive plus rapide que le déplacement normal
+            minMovementDuration = DODGE_DURATION;
         } else {
-            minMovementDuration = isMovingBackward ? 500 : 600; // Plus rapide en reculant
+            // Accélérer les mouvements continus (après le premier)
+            const isContinuousMovement = (up && this.lastMoveWasForward) || (down && this.lastMoveWasBackward);
+            minMovementDuration = isMovingBackward ? 
+                                  (isContinuousMovement ? BACKWARD_DURATION - CONTINUOUS_MOVE_SPEEDUP : BACKWARD_DURATION) : 
+                                  (isContinuousMovement ? FORWARD_DURATION - CONTINUOUS_MOVE_SPEEDUP : FORWARD_DURATION);
         }
         
-        // Ajuster selon les caractéristiques du joueur
-        if (this.hp < this.hpMax * 0.3) minMovementDuration += 50; // Légèrement plus lent si peu de vie
-        if (this.spells && this.spells.length > 0 && this.spells[this.selectedSpell].name === "Speed") minMovementDuration -= 50; // Plus rapide avec sort de vitesse
+        // Mémoriser la direction du mouvement actuel pour le prochain cycle
+        this.lastMoveWasForward = up;
+        this.lastMoveWasBackward = down;
+        
+        // Ajustement de vitesse avec le sort Speed (conservé)
+        if (this.spells && this.spells.length > 0 && this.spells[this.selectedSpell].name === "Speed") 
+            minMovementDuration -= 50;
         
         // Bornes min/max pour la durée
         minMovementDuration = Math.max(Math.min(minMovementDuration, 800), 200);
-        
-        // Hauteur du saut et amplitude du bobbing, adaptés selon le type de mouvement
-        let jumpHeight, bobbingAmount;
-        
-        if (isDodging) {
-            jumpHeight = 10; // Saut moyen pour esquive
-            bobbingAmount = 2; // Bobbing léger pour esquive
-        } else {
-            jumpHeight = isMovingBackward ? 8 : 15; // Saut moins haut en reculant
-            bobbingAmount = isMovingBackward ? 2 : 3; // Bobbing moins prononcé en reculant
-        }
         
         // Animation principale avec durée minimale garantie
         const startMovementTime = performance.now();
@@ -2159,12 +2167,6 @@ async handleSpriteAction(action, sprites) {
             this.x = startX + (targetX - startX) * easedT;
             this.y = startY + (targetY - startY) * easedT;
             
-            // Mouvement vertical (arc/saut)
-            this.z = jumpHeight * Math.sin(Math.PI * t);
-            
-            // Bobbing (oscillation verticale supplémentaire)
-            this.z += Math.sin(t * Math.PI * 6) * bobbingAmount;
-            
             // Rendre la frame
             await new Promise(resolve => requestAnimationFrame(resolve));
         }
@@ -2182,6 +2184,19 @@ async handleSpriteAction(action, sprites) {
         
         // Marquer la fin du mouvement
         this.isMoving = false;
+        
+        // Déclencher immédiatement un nouveau mouvement si le bouton est toujours enfoncé
+        // Cela permet des déplacements continus sans avoir à relâcher et réappuyer le bouton
+        if (this.continuousUpPressed || this.continuousJoystickUp) {
+            // Créer un léger délai pour éviter les mouvements trop rapides
+            await new Promise(resolve => setTimeout(resolve, CONTINUOUS_MOVE_DELAY));
+            this.button5Clicked = true;  // Simuler un nouveau clic sur le bouton d'avance
+            this.move(timeElapsed, map, eventA, eventB, sprites);
+        } else if (this.continuousDownPressed || this.continuousJoystickDown) {
+            await new Promise(resolve => setTimeout(resolve, CONTINUOUS_MOVE_DELAY));
+            this.button8Clicked = true;  // Simuler un nouveau clic sur le bouton de recul
+            this.move(timeElapsed, map, eventA, eventB, sprites);
+        }
     }
     
 }
@@ -2865,10 +2880,10 @@ attackPlayer(player) {
     if (chanceEchec > player.dodge) {
         // L'attaque réussit
         if (player.armor >= this.dmg) {
-            Sprite.terminalLog("<font style='font-style: italic;'>Your armor absorbs all the damages.</font>");
+            Sprite.terminalLog("Your armor absorbs all the damages.", 1);
         } else {
             const damageDone = this.dmg - player.armor;
-            Sprite.terminalLog(`<font style='font-style: italic;'>${this.spriteName || "The ennemy"} attacks : <font style='font-weight: bold;'>${damageDone} dmg !</font></font>`);
+            Sprite.terminalLog(`${this.spriteName || "The ennemy"} attacks : ${damageDone} dmg !`, 2);
             Raycaster.playerDamageFlash();
             player.hp -= damageDone;
             
@@ -2880,7 +2895,7 @@ attackPlayer(player) {
         }
     } else {
         // Le joueur esquive
-        Sprite.terminalLog(`<font style='font-style: italic;'>You dodge ${this.spriteName || "the enemy"}'s attack !</font>`);
+        Sprite.terminalLog(`You dodge ${this.spriteName || "the enemy"}'s attack !`, 2);
         player.XPdexterity += 1;
     }
     
@@ -3054,21 +3069,8 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         return Math.max(1, Math.min(5, baseClass));
     }
 
-    static displayLootAnimation(message, type = 'gold') {
-        const outputElement = document.getElementById("output");
-        const animationClass = type === 'gold' ? 'loot-gold-animation' : 'loot-item-animation';
-        
-        // Créer un élément span pour le message avec la classe d'animation
-        const lootSpan = document.createElement('span');
-        lootSpan.className = animationClass;
-        lootSpan.innerHTML = message;
-        
-        // Ajouter au terminal
-        outputElement.innerHTML += "> ";
-        outputElement.appendChild(lootSpan);
-        outputElement.innerHTML += "<br>";
-        outputElement.scrollTop = outputElement.scrollHeight;
-    }
+    // XYZ
+    // displayLootAnimation() était ici
 
     generateLoot(player) {
         // Pas de loot si la classe est 0
@@ -3091,6 +3093,7 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         
         // Message pour l'or trouvé avec animation
         Sprite.displayLootAnimation(`You found ${goldAmount} gold coins!`, 'gold');
+        //Sprite.terminalLog(`You found ${goldAmount} gold coins!`, 'gold')
         
         // Déterminer si un objet est obtenu, avec une chance influencée par la difficulté de l'ennemi
         const baseItemChance = lootTable.itemChance;
@@ -3134,6 +3137,7 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
                 else if (clampedIndex >= sortedItems.length * 0.4) qualityDesc = "a good";
                 
                 Sprite.displayLootAnimation(`You found ${qualityDesc} ${lootItem.name}!`, 'item');
+                // Sprite.terminalLog(`You found ${qualityDesc} ${lootItem.name}!`, 'item');
             }
         }
         
@@ -3145,17 +3149,117 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
     // Contrôle UI & terminal log
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static terminalLog(entry) {
+    // Fonction principale de log du terminal
+    // Fonction principale de log du terminal avec apparition en fondu
+    static terminalLog(entry, style = 0) {
         const outputElement = document.getElementById("output");
-        const consoleContent = outputElement.innerHTML;
         
-        // Formatage simple: séparation du préfixe ">" et du contenu du message
-        const formattedEntry = `<span style="color:#aaa; font-weight:bold;">&gt;</span> ${entry}`;
+        // Définition des styles disponibles (couleurs contrastées sur fond #1F0E08)
+        const styles = {
+            0: { color: "#FFFFFF" },                  // Blanc (par défaut)
+            1: { color: "#77DD77" },                  // Vert clair
+            2: { color: "#FF6B6B" },                  // Rouge vif
+            3: { color: "#FFD166" },                  // Jaune doré
+            4: { color: "#79ADDC" },                  // Bleu ciel
+            5: { color: "#FF9E80" },                  // Orange corail
+            6: { color: "#CCCCFF" },                  // Lavande
+            7: { color: "#D4A5A5" },                  // Rose poussiéreux
+            8: { color: "#FFFFFF", fontWeight: "bold" },     // Blanc gras
+            9: { color: "#FFFFFF", fontStyle: "italic" },    // Blanc italique
+            10: { color: "#AAFFAA", fontWeight: "bold" },    // Vert clair gras
+            11: { color: "#FFAAAA", fontStyle: "italic" }    // Rouge clair italique
+        };
         
-        outputElement.innerHTML = consoleContent + formattedEntry + "<br>";
+        // Obtenir le style sélectionné ou utiliser le style par défaut
+        const selectedStyle = styles[style] || styles[0];
+        
+        // Créer un conteneur pour chaque ligne du terminal
+        const logLine = document.createElement("div");
+        logLine.className = "terminal-line";
+        logLine.style.display = "flex";
+        logLine.style.fontFamily = "monospace"; // Police à chasse fixe
+        logLine.style.marginBottom = "2px";
+        
+        // Animation de fondu
+        logLine.style.opacity = "0";
+        logLine.style.transition = "opacity 0.3s ease-in";
+        
+        // Créer le symbole du terminal comme une colonne fixe
+        const promptColumn = document.createElement("div");
+        promptColumn.className = "terminal-prompt-column";
+        promptColumn.style.width = "25px"; // Largeur fixe
+        promptColumn.style.flexShrink = "0"; // Empêche la réduction
+        promptColumn.style.textAlign = "center"; // Centré dans sa colonne
+        promptColumn.innerHTML = '<span style="color:#aaa; font-weight:bold;">&gt;</span>';
+        
+        // Créer le contenu du message avec le style spécifié
+        const messageContent = document.createElement("div");
+        messageContent.className = "terminal-content";
+        messageContent.style.flexGrow = "1";
+        messageContent.style.color = selectedStyle.color || "";
+        messageContent.style.fontWeight = selectedStyle.fontWeight || "";
+        messageContent.style.fontStyle = selectedStyle.fontStyle || "";
+        messageContent.innerHTML = entry;
+        
+        // Assembler la ligne
+        logLine.appendChild(promptColumn);
+        logLine.appendChild(messageContent);
+        
+        // Ajouter la ligne au terminal
+        outputElement.appendChild(logLine);
+        
+        // Déclencher l'animation de fondu après un bref délai
+        setTimeout(() => {
+            logLine.style.opacity = "1";
+        }, 10);
+        
+        // Faire défiler vers le bas pour voir les nouveaux messages
         outputElement.scrollTop = outputElement.scrollHeight;
-
+        
+        // Stocker la dernière entrée
         lastEntry = entry;
+    }
+
+    // Fonction pour les animations de loot adaptée au nouveau format
+    static displayLootAnimation(message, type = 'gold') {
+        const outputElement = document.getElementById("output");
+        const animationClass = type === 'gold' ? 'loot-gold-animation' : 'loot-item-animation';
+        
+        // Créer un conteneur pour la ligne du terminal
+        const logLine = document.createElement("div");
+        logLine.className = "terminal-line";
+        logLine.style.display = "flex";
+        logLine.style.fontFamily = "monospace"; // Police à chasse fixe
+        logLine.style.marginBottom = "2px";
+        
+        // Créer le symbole du terminal comme une colonne fixe
+        const promptColumn = document.createElement("div");
+        promptColumn.className = "terminal-prompt-column";
+        promptColumn.style.width = "25px"; // Largeur fixe
+        promptColumn.style.flexShrink = "0"; // Empêche la réduction
+        promptColumn.style.textAlign = "center"; // Centré dans sa colonne
+        promptColumn.innerHTML = '<span style="color:#aaa; font-weight:bold;">&gt;</span>';
+        
+        // Créer le contenu animé du message
+        const messageContent = document.createElement("div");
+        messageContent.className = "terminal-content";
+        messageContent.style.flexGrow = "1";
+        
+        // Créer le span avec animation à l'intérieur du contenu
+        const lootSpan = document.createElement('span');
+        lootSpan.className = animationClass;
+        lootSpan.innerHTML = message;
+        messageContent.appendChild(lootSpan);
+        
+        // Assembler la ligne
+        logLine.appendChild(promptColumn);
+        logLine.appendChild(messageContent);
+        
+        // Ajouter la ligne au terminal
+        outputElement.appendChild(logLine);
+        
+        // Faire défiler vers le bas pour voir les nouveaux messages
+        outputElement.scrollTop = outputElement.scrollHeight;
     }
 
     static resetTerminal() {
@@ -3198,7 +3302,6 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Modifions la méthode displayItemsForSale pour proposer un choix entre acheter et vendre
-// Modifions la méthode displayItemsForSale pour proposer un choix entre acheter et vendre
 displayItemsForSale(player) {
     var output = document.getElementById("output");
     var dialWindow = document.getElementById("dialogueWindow");
@@ -3697,7 +3800,7 @@ showSellItemDetails(item, player, index, sellPrice) {
     // Structure avec positions absolues et défilement central
     sellDetails.innerHTML = `
         <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
-        <div style="position: relative; width: 103%; height: 95%;">
+        <div style="position: relative; width: 103%; height: 160px;">
             <!-- Division 1: Nom et icône (position absolue en haut) -->
             <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
                 <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
@@ -4443,8 +4546,12 @@ playerSellItem(player, itemIndex, sellPrice) {
         return this.spriteTalk.length;
     }
 
+    //
     talk() {
         Sprite.resetToggle();
+
+        // Activer le blocage des commandes pendant le dialogue
+        commandBlocking = true;
     
         const dialogue = document.getElementById("dialogue");
         const faceOutput = document.getElementById("faceOutput");
@@ -4481,13 +4588,25 @@ playerSellItem(player, itemIndex, sellPrice) {
             } else {
                 for (let i = 0; i < this.spriteTalk.length; i++) {
                     const [face, name, entry] = this.spriteTalk[i];
-                    Sprite.terminalLog(`<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"></br>${entry}</font>`);
+                    Sprite.terminalLog(`${name} :</br>${entry}`, 4);
                 }
-    
+
+                // Blocage des commandes ! Hihihihi
+                commandBlocking = false;
+                
                 outputElement.style.display = "block";
                 dialWindow.style.display = "none";
             }
         };
+
+        // Écouteur pour les touches clavier
+        const keyListener = (event) => {
+            if (event.code === "Space" || event.key.toLowerCase() === "f") {
+                event.preventDefault();
+                showNextDialogue();
+            }
+        };
+                
     
         // Ajout des bons event listeners
         newNextButton.addEventListener("click", showNextDialogue);
@@ -4520,6 +4639,7 @@ playerSellItem(player, itemIndex, sellPrice) {
         // Affiche le premier dialogue immédiatement
         showNextDialogue();
     }
+
     
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4848,15 +4968,14 @@ playerSellItem(player, itemIndex, sellPrice) {
 
     attack(target) {
         if (target.armor >= this.dmg) {
-            let entry =
-                "<font style='font-style: italic;'>Your armor absorbs all the damages.</font>";
-            Sprite.terminalLog(entry);
+            let entry = "Your armor absorbs all the damages.";
+            Sprite.terminalLog(entry, 1);
         } else {
             let entry =
-                "<font style='font-style: italic;'>The opponent attacks : <font style='font-weight: bold;'>" +
+                "The opponent attacks :" +
                 (this.dmg - target.armor) +
-                " dmg !</font></font>";
-            Sprite.terminalLog(entry);
+                "dmg !";
+            Sprite.terminalLog(entry, 2);
             Raycaster.playerDamageFlash();
             target.hp -= this.dmg - target.armor;
         }
@@ -4868,7 +4987,7 @@ playerSellItem(player, itemIndex, sellPrice) {
 
         if (chanceCriti < criti) {
             factor = 2
-            Sprite.terminalLog('Critical hit !');
+            Sprite.terminalLog('Critical hit !', 5);
             player.XPdexterity += 1;
         }
 
@@ -4881,17 +5000,17 @@ playerSellItem(player, itemIndex, sellPrice) {
         player.XPstrength += 1;
 
         var entry =
-            "<font style='font-style: italic;'>You attack : <font style='font-weight: bold;'>" +
+            'You attack :' +
             damage * factor +
-            " dmg</font> points ! </font>";
+            " dmg points !";
 
-        Sprite.terminalLog(entry);
+        Sprite.terminalLog(entry, 1);
     }
 
     enemyAttackUpdate(player) {
         if (this.hp <= 0) {
             let entry = "The enemy is dead!";
-            Sprite.terminalLog(entry);
+            Sprite.terminalLog(entry, 3);
     
             // Générer le loot avec le système amélioré
             this.generateLoot(player);
@@ -4931,7 +5050,7 @@ playerSellItem(player, itemIndex, sellPrice) {
             // le cycle d'attaque automatique s'en charger
             if (this.hp <= 0) {
                 let entry = "The ennemy's dead !";
-                Sprite.terminalLog(entry);
+                Sprite.terminalLog(entry, 3);
                 
                 // Générer le loot
                 this.generateLoot(player);
@@ -4976,50 +5095,63 @@ playerSellItem(player, itemIndex, sellPrice) {
     }
 
     door(player, textureSet) {
+        // Store initial position for debugging
+        const initialX = player.x;
+        const initialY = player.y;
+        
+        // Determine floor texture to use
         let floor;
-
-        if (textureSet == null) {
+        if (textureSet === null) {
             floor = 1;
         } else if (textureSet) {
-            // alternance : si le sol est le même que celui définit par défaut,
-            // on revient aux valeurs de base de la carte.
+            // If a texture set is provided, use it
             floor = floorType;
         }
-
-        // N.B. : est et ouest sont inversés
-        if (player.quadrant == "nord") {
-            player.y = player.y - 2 * 1280;
-        } else if (player.quadrant == "est") {
-            player.x = player.x - 2 * 1280;
-        } else if (player.quadrant == "sud") {
-            player.y = player.y + 2 * 1280;
-        } else if (player.quadrant == "ouest") {
-            player.x = player.x + 2 * 1280;
+    
+        // Calculate new position based on player's facing direction
+        // The teleportation distance is 2 tiles (2 * tileSize)
+        const tileSize = 1280; // Make sure this matches the game's tileSize
+        const teleportDistance = 2 * tileSize;
+        
+        // Log current position and quadrant for debugging
+        console.log(`Before teleport: x=${player.x}, y=${player.y}, quadrant=${player.quadrant}`);
+        
+        // Apply teleportation based on direction
+        // Using more precise quadrant detection
+        if (player.quadrant === "nord") {
+            player.y -= teleportDistance;
+        } else if (player.quadrant === "est") {
+            player.x -= teleportDistance;
+        } else if (player.quadrant === "sud") {
+            player.y += teleportDistance;
+        } else if (player.quadrant === "ouest") {
+            player.x += teleportDistance;
         } else {
-            console.log("don't try to enter in diagonal please...");
+            console.log("Invalid quadrant or diagonal movement not supported");
+            return; // Exit without making any changes
         }
-
-        if (ceilingRender == true) {
+        
+        // Toggle ceiling rendering and update environment properties
+        if (ceilingRender === true) {
+            // Restore map default values
             ceilingRender = mapData.playerStart.ceilingRender;
-
-            // mettre chemin d'accès aux données de la map
             ceilingHeight = mapData.playerStart.ceilingHeight;
             ceilingTexture = mapData.playerStart.ceilingTexture;
             floorTexture = mapData.playerStart.floorTexture;
-
-            console.log("ceiling render : " + ceilingRender)
-
-        } else if (ceilingRender == false) {
+            
+            console.log(`Ceiling render OFF: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
+        } else {
+            // Turn ceiling rendering on with specific values
             ceilingRender = true;
             ceilingHeight = 1;
             ceilingTexture = 2;
-            floorTexture = 2;
-            console.log("ceiling render : " + ceilingRender)
+            floorTexture = floor || 2; // Use the determined floor or default to 2
+            
+            console.log(`Ceiling render ON: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
         }
-
-        // player.x = Math.floor(1280 * player.x + 640);
-        // player.y = Math.floor(1280 * player.y + 640);
-        console.log(player.quadrant);
+        
+        // Log the new position for debugging
+        console.log(`After teleport: x=${player.x}, y=${player.y}, moved: x=${player.x - initialX}, y=${player.y - initialY}`);
     }
 }
 
@@ -6342,78 +6474,79 @@ class Raycaster {
         }
     }
 
-// Paramètres de la skybox configurable
-// Ces variables peuvent être définies comme des propriétés de la classe Raycaster
-// ou conservées dans un objet de configuration séparé
-drawSkybox() {
-    // Variables d'ajustement de la skybox - modifiez ces valeurs pour ajuster le comportement
-    const cloudSpeed = 0.05;          // Vitesse du mouvement autonome des nuages
-    const rotationFactor = -1.0;     // Facteur de rotation relative au joueur (-1.0 = sens opposé)
-    
-    // Calculer les facteurs d'échelle pour les coordonnées de texture
-    let scaleX = this.skyboxImageData.width / this.displayWidth;
-    let scaleY = this.skyboxImageData.height / this.displayHeight;
+    // Paramètres de la skybox configurable
+    // Ces variables peuvent être définies comme des propriétés de la classe Raycaster
+    // ou conservées dans un objet de configuration séparé
+    drawSkybox() {
+        // Variables d'ajustement de la skybox - modifiez ces valeurs pour ajuster le comportement
+        const cloudSpeed = 0.05;          // Vitesse du mouvement autonome des nuages
+        const rotationFactor = -1.0;     // Facteur de rotation relative au joueur (-1.0 = sens opposé)
+        
+        // Calculer les facteurs d'échelle pour les coordonnées de texture
+        let scaleX = this.skyboxImageData.width / this.displayWidth;
+        let scaleY = this.skyboxImageData.height / this.displayHeight;
 
-    // Initialiser la variable d'animation si elle n'existe pas encore
-    if (!this.skyboxAnimationOffset) {
-        this.skyboxAnimationOffset = 0;
-    }
-    
-    // Animation autonome des nuages
-    this.skyboxAnimationOffset += cloudSpeed;
-    
-    // Empêcher le débordement de la variable
-    this.skyboxAnimationOffset = this.skyboxAnimationOffset % this.skyboxImageData.width;
-    
-    // Compensation pour la rotation du joueur
-    let playerRotationOffset = rotationFactor * Math.floor((this.player.rot / (2 * Math.PI)) * this.skyboxImageData.width);
-    
-    // Décalage total = mouvement autonome + effet de rotation
-    let totalOffsetX = Math.floor(this.skyboxAnimationOffset) + playerRotationOffset;
-    
-    for (let y = 0; y < this.displayHeight / 2; ++y) {
-        // Calculer les coordonnées de texture pour cette ligne de pixels
-        let textureY = Math.floor(y * scaleY);
+        // Initialiser la variable d'animation si elle n'existe pas encore
+        if (!this.skyboxAnimationOffset) {
+            this.skyboxAnimationOffset = 0;
+        }
+        
+        // Animation autonome des nuages
+        this.skyboxAnimationOffset += cloudSpeed;
+        
+        // Empêcher le débordement de la variable
+        this.skyboxAnimationOffset = this.skyboxAnimationOffset % this.skyboxImageData.width;
+        
+        // Compensation pour la rotation du joueur
+        let playerRotationOffset = rotationFactor * Math.floor((this.player.rot / (2 * Math.PI)) * this.skyboxImageData.width);
+        
+        // Décalage total = mouvement autonome + effet de rotation
+        let totalOffsetX = Math.floor(this.skyboxAnimationOffset) + playerRotationOffset;
+        
+        for (let y = 0; y < this.displayHeight / 2; ++y) {
+            // Calculer les coordonnées de texture pour cette ligne de pixels
+            let textureY = Math.floor(y * scaleY);
 
-        for (let x = 0; x < this.displayWidth; ++x) {
-            // Calculer les coordonnées de texture pour ce pixel
-            // Assurons-nous que textureX est toujours dans les limites de l'image
-            let rawTextureX = Math.floor(x * scaleX) + totalOffsetX;
-            let textureX = rawTextureX % this.skyboxImageData.width;
-            
-            // Correction pour les valeurs négatives
-            if (textureX < 0) textureX += this.skyboxImageData.width;
-
-            // S'assurer que les coordonnées sont entières et dans les limites
-            textureX = Math.max(0, Math.min(Math.floor(textureX), this.skyboxImageData.width - 1));
-            textureY = Math.max(0, Math.min(Math.floor(textureY), this.skyboxImageData.height - 1));
-
-            // Trouver l'index du pixel dans le tableau de données de l'image
-            let index = (textureX + textureY * this.skyboxImageData.width) * 4;
-            
-            // Vérifier les limites du tableau pour éviter les erreurs
-            if (index >= 0 && index + 3 < this.skyboxImageData.data.length) {
-                // Extraire les valeurs de couleur du pixel
-                let r = this.skyboxImageData.data[index];
-                let g = this.skyboxImageData.data[index + 1];
-                let b = this.skyboxImageData.data[index + 2];
-                let a = this.skyboxImageData.data[index + 3];
-
-                // Trouver l'index du pixel dans le tableau de données du backBuffer
-                let backBufferIndex = (x + y * this.displayWidth) * 4;
+            for (let x = 0; x < this.displayWidth; ++x) {
+                // Calculer les coordonnées de texture pour ce pixel
+                // Assurons-nous que textureX est toujours dans les limites de l'image
+                let rawTextureX = Math.floor(x * scaleX) + totalOffsetX;
+                let textureX = rawTextureX % this.skyboxImageData.width;
                 
-                // Vérifier les limites du backBuffer également
-                if (backBufferIndex >= 0 && backBufferIndex + 3 < this.backBuffer.data.length) {
-                    // Modifier les données du backBuffer pour mettre à jour le pixel
-                    this.backBuffer.data[backBufferIndex] = r;
-                    this.backBuffer.data[backBufferIndex + 1] = g;
-                    this.backBuffer.data[backBufferIndex + 2] = b;
-                    this.backBuffer.data[backBufferIndex + 3] = a;
+                // Correction pour les valeurs négatives
+                if (textureX < 0) textureX += this.skyboxImageData.width;
+
+                // S'assurer que les coordonnées sont entières et dans les limites
+                textureX = Math.max(0, Math.min(Math.floor(textureX), this.skyboxImageData.width - 1));
+                textureY = Math.max(0, Math.min(Math.floor(textureY), this.skyboxImageData.height - 1));
+
+                // Trouver l'index du pixel dans le tableau de données de l'image
+                let index = (textureX + textureY * this.skyboxImageData.width) * 4;
+                
+                // Vérifier les limites du tableau pour éviter les erreurs
+                if (index >= 0 && index + 3 < this.skyboxImageData.data.length) {
+                    // Extraire les valeurs de couleur du pixel
+                    let r = this.skyboxImageData.data[index];
+                    let g = this.skyboxImageData.data[index + 1];
+                    let b = this.skyboxImageData.data[index + 2];
+                    let a = this.skyboxImageData.data[index + 3];
+
+                    // Trouver l'index du pixel dans le tableau de données du backBuffer
+                    let backBufferIndex = (x + y * this.displayWidth) * 4;
+                    
+                    // Vérifier les limites du backBuffer également
+                    if (backBufferIndex >= 0 && backBufferIndex + 3 < this.backBuffer.data.length) {
+                        // Modifier les données du backBuffer pour mettre à jour le pixel
+                        this.backBuffer.data[backBufferIndex] = r;
+                        this.backBuffer.data[backBufferIndex + 1] = g;
+                        this.backBuffer.data[backBufferIndex + 2] = b;
+                        this.backBuffer.data[backBufferIndex + 3] = a;
+                    }
                 }
             }
         }
     }
-}
+    
     //////////////////////////////////////////////////////////////////////
     // détection des murs
     //////////////////////////////////////////////////////////////////////
