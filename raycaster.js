@@ -2532,9 +2532,9 @@ class Spell {
                 // Appliquer l'effet du sort sur la cible
                 this.effect(caster, target);
 
-                Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.spriteName}`);
+                // Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.spriteName}`, 4);
             } else {
-                Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`);
+                Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`, 4);
             }
         } else {
             console.log("not your turn");
@@ -2553,10 +2553,9 @@ class Spell {
 
         if (target.hp > target.hpMax) {
             target.hp = target.hpMax;
-            Sprite.terminalLog(`${target.name} is healed for ${healEffect}HP.`);
-            Sprite.terminalLog(`${target.name} is completely healed.`);
+            Sprite.terminalLog(`${target.name} is healed for ${healEffect}HP, and is completely healed by ${caster.name}'s ${this.name}.`, 4);
         } else {
-            Sprite.terminalLog(`${target.name} is healed for ${healEffect}HP.`);
+            Sprite.terminalLog(`${target.name} is healed for ${healEffect}HP by ${caster.name}'s ${this.name}..`, 4);
         }
     }
 
@@ -2569,7 +2568,7 @@ class Spell {
 
         target.hp -= damage;
         caster.XPintellect += 1;
-        Sprite.terminalLog(`The target suffered ${damage} points of damage from ${caster.name}`);
+        Sprite.terminalLog(`The target suffered ${damage} points of damage from ${caster.name}'s ${this.name}`, 4);
     }
 
     // à suprimer ?
@@ -3223,7 +3222,6 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
     // Fonction pour les animations de loot adaptée au nouveau format
     static displayLootAnimation(message, type = 'gold') {
         const outputElement = document.getElementById("output");
-        const animationClass = type === 'gold' ? 'loot-gold-animation' : 'loot-item-animation';
         
         // Créer un conteneur pour la ligne du terminal
         const logLine = document.createElement("div");
@@ -3231,6 +3229,10 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         logLine.style.display = "flex";
         logLine.style.fontFamily = "monospace"; // Police à chasse fixe
         logLine.style.marginBottom = "2px";
+        
+        // Animation de fondu
+        logLine.style.opacity = "0";
+        logLine.style.transition = "opacity 0.3s ease-in";
         
         // Créer le symbole du terminal comme une colonne fixe
         const promptColumn = document.createElement("div");
@@ -3245,10 +3247,16 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         messageContent.className = "terminal-content";
         messageContent.style.flexGrow = "1";
         
-        // Créer le span avec animation à l'intérieur du contenu
+        // Créer le span pour le contenu du message
         const lootSpan = document.createElement('span');
-        lootSpan.className = animationClass;
+        lootSpan.style.color = type === 'gold' ? "#FFD700" : "#DA70D6"; // Or ou Orchidée
+        lootSpan.style.fontWeight = "";
+        lootSpan.style.display = "inline-block";
         lootSpan.innerHTML = message;
+        
+        // Ajouter une légère animation d'échelle avec CSS pour le loot
+        lootSpan.style.transition = "transform 0.5s ease";
+        
         messageContent.appendChild(lootSpan);
         
         // Assembler la ligne
@@ -3258,10 +3266,24 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         // Ajouter la ligne au terminal
         outputElement.appendChild(logLine);
         
+        // Déclencher l'animation de fondu après un bref délai
+        setTimeout(() => {
+            logLine.style.opacity = "1";
+            
+            // Ajouter un petit effet de grossissement après le fondu
+            setTimeout(() => {
+                lootSpan.style.transform = "scale(1.1)";
+                
+                // Puis revenir à la taille normale
+                setTimeout(() => {
+                    lootSpan.style.transform = "scale(1.0)"; // Explicitement à 1.0 pour garantir la taille normale
+                }, 250);
+            }, 300);
+        }, 10);
+        
         // Faire défiler vers le bas pour voir les nouveaux messages
         outputElement.scrollTop = outputElement.scrollHeight;
     }
-
     static resetTerminal() {
         const outputElement = document.getElementById("output");
         outputElement.innerHTML = "<span style='color:#77ee77; font-weight:bold;'>- New Terminal -</span><br>";
@@ -4974,7 +4996,7 @@ playerSellItem(player, itemIndex, sellPrice) {
             let entry =
                 "The opponent attacks :" +
                 (this.dmg - target.armor) +
-                "dmg !";
+                "dmg";
             Sprite.terminalLog(entry, 2);
             Raycaster.playerDamageFlash();
             target.hp -= this.dmg - target.armor;
@@ -5002,7 +5024,7 @@ playerSellItem(player, itemIndex, sellPrice) {
         var entry =
             'You attack :' +
             damage * factor +
-            " dmg points !";
+            " dmg";
 
         Sprite.terminalLog(entry, 1);
     }
@@ -5029,11 +5051,9 @@ playerSellItem(player, itemIndex, sellPrice) {
             if (chanceEchec > player.dodge) {
                 setTimeout(() => this.attack(player), 500);
             } else {
-                const outputElement = document.getElementById("output");
-                const consoleContent = outputElement.innerHTML;
-    
-                outputElement.innerHTML = consoleContent + "> You dodge the attack !<br>";
-    
+
+                Sprite.terminalLog('You dodge the attack.', 1)
+
                 player.XPdexterity += 1;
                 console.log(player.XPdexterity + "pts dexterity experience.");
             }
