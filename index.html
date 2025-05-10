@@ -111,7 +111,7 @@ Gwendal L.R.
             <!-- Zone d'information (haut droite) -->
             <div id="infos" class="game-area">
               <div id="info">
-                <h1>Alakir</h1>
+                <h1>Alakir  </h1>
                 <img src="assets/separatorLarge.png" alt="" class="separator"></img>
                 <!-- PLAYER INFO OUTPUT, old -->
                 <div id="playerInfoOutput" style="display: none;">
@@ -166,14 +166,19 @@ Gwendal L.R.
                     <p id="selectedSpell">-</p>
                   </div>
                   
-                  <!--SPELLS-->
+                  <!--SPELLS xyz-->
                   <div id="SpellButtons">
-                    <button id="previousSpell" class="controlButton pixel-frame" style="border-radius: 0px;">
-                      <img src="assets/left.png" alt=""></img>
+                    <button id="previousSpell" class="controlButton pixel-frame" style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;">
+                      <img src="assets/left.png" alt="" style="width: 150%; height: 150%; object-fit: contain;object-fit: contain;" ></img>
                     </button>
-                    <img id="castSpell" class="controlButton pixel-frame-item" style="border-radius: 0px; background: none;"></img>
-                    <button id="nextSpell" class="controlButton pixel-frame" style="border-radius: 0px;">
-                      <img src="assets/right.png" alt=""></img>
+
+                    <div class="controlButton pixel-frame-item" style="height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;">
+                    <img id="castSpell"  style="border-radius: 0px; background: none;width: 150%; height: 150%; object-fit: contain;"></img>
+                    </div>
+
+                    <button id="nextSpell" class="controlButton pixel-frame"
+                    style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;">
+                    <img src="assets/right.png" alt=""style="width: 150%; height: 150%; object-fit: contain;"></img>
                     </button>
                   </div>
 
@@ -314,7 +319,7 @@ Gwendal L.R.
                   <img id="faceOutput" src="" alt="No face error !">
                   <!-- dialogue et bouton -->
                   <div>
-                    <div id="dialogue"></div>
+                    <div id="dialogue" style="width: 80%;"></div>
                     <button class="pixel-frame-item" id="nextButton">Next</button>
                   </div>
                 </div>
@@ -398,36 +403,49 @@ Gwendal L.R.
                 <!--CLAVIER-->
                 <div id="actionButtons" style="display:block;">
                   <div class="grid-container">
-                    <button id="buttonA" class="grid-item controlButton pixel-frame"  style="background-color: #592918;height: 64px;
-    width: 64px;"><img src="assets/icons/action.png" alt></button>
+                    <button id="buttonA"   class="grid-item controlButton pixel-frame" style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;"><img src="assets/icons/action.png" style="width: 150%; height: 150%; object-fit: contain;" alt></button>
 
-                    <div id="button2" class="grid-item pixel-frame-item" display="height: 64px;
-                    width: 64px; "><img id="weaponIcon" src="assets/icons/sword.png"display:block;" alt="weaponIcon" /></div>
-
-                    <button id="buttonB" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
-    width: 64px;"><img src="assets/icons/spell.png" alt></button>
+                    <div id="button2"  class="grid-item controlButton pixel-frame" style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;"><img id="weaponIcon" src="assets/icons/sword.png" alt="weaponIcon" style="width: 200%; height: 200%; object-fit: contain;"/></div>
 
 
-<button id="button4" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="assets/left.png" alt></button>
+                    <button id="buttonB" class="grid-item controlButton pixel-frame" style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;">
+                      <img src="assets/icons/spell.png" alt="spell" style="width: 150%; height: 150%; object-fit: contain;">
+                  </button>
 
 
-                    <button id="button5" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="assets/up.png" alt></button>
+                    <button id="button4"   class="grid-item controlButton pixel-frame" style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;"><img src="assets/left.png" 
+                      style="
+                      height: 150%;
+                      width:  150%;
+                      border-radius: 0px;"></button>
 
 
-<button id="button6" class="grid-item controlButton pixel-frame"style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="assets/right.png" alt></button>
+                    <button id="button5" class="grid-item controlButton pixel-frame" style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;"><img src="assets/up.png"  style="height: 100%;
+                    width:  150%; border-radius: 0px;"></button>
 
 
-                    <button id="button7" class="grid-item controlButton pixel-frame" style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="assets/left-left.png" alt></button>
+                    <button id="button6" class="grid-item controlButton pixel-frame" style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;"><img src="assets/right.png"  
+                    style="
+                    height: 150%;
+                    width:  150%;
+                    border-radius: 0px;"></button>
 
-                    <button id="button8" class="grid-item controlButton pixel-frame"style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="assets/down.png" alt></button>
 
-                    <button id="button9" class="grid-item controlButton pixel-frame"style="background-color: #592918;height: 64px;
-    width: 64px; border-radius: 0px;"><img src="assets/right-right.png" alt></button>
+                    <button id="button7" class="grid-item controlButton pixel-frame" style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;"><img src="assets/left-left.png"  
+                    style="
+                    height: 150%; 
+                    width:  150%;
+                    border-radius: 0px;"
+                    ></button>
+
+                    <button id="button8" class="grid-item controlButton pixel-frame"style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;"><img src="assets/down.png"  style="height: 100%;
+                    width:  150%; border-radius: 0px;"></button>
+
+                    <button id="button9" class="grid-item controlButton pixel-frame"style="background-color: #592918; height: 64px; width: 64px; position: relative; display: flex; justify-content: center; align-items: center; padding: 0;"><img src="assets/right-right.png"  
+                    style="
+                    height: 150%; 
+                    width:  150%;
+                    border-radius: 0px;"></button>
                   </div>
                 </div>
               </div>

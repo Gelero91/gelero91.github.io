@@ -2553,9 +2553,9 @@ class Spell {
 
         if (target.hp > target.hpMax) {
             target.hp = target.hpMax;
-            Sprite.terminalLog(`${target.name} is healed for ${healEffect}HP, and is completely healed by ${caster.name}'s ${this.name}.`, 4);
+            Sprite.displayCombatAnimation(`${target.name} is healed for ${healEffect}HP, and is completely healed by ${caster.name}'s ${this.name}.`, 4);
         } else {
-            Sprite.terminalLog(`${target.name} is healed for ${healEffect}HP by ${caster.name}'s ${this.name}..`, 4);
+            Sprite.displayCombatAnimation(`${target.name} is healed for ${healEffect}HP by ${caster.name}'s ${this.name}..`, 4);
         }
     }
 
@@ -2568,7 +2568,7 @@ class Spell {
 
         target.hp -= damage;
         caster.XPintellect += 1;
-        Sprite.terminalLog(`The target suffered ${damage} points of damage from ${caster.name}'s ${this.name}`, 4);
+        Sprite.displayCombatAnimation(`The target suffered ${damage} points of damage from ${caster.name}'s ${this.name}`, 4);
     }
 
     // à suprimer ?
@@ -2643,7 +2643,7 @@ class Quest {
     // Méthode pour marquer une quête comme complétée
     complete() {
         this.completed = true;
-        Sprite.terminalLog(`The quest "${this.title}" has been completed! Reward: ${this.reward}`);
+        Sprite.displayCombatAnimation(`The quest "${this.title}" has been completed! Reward: ${this.reward}`, 3);
     }
 
     // à suprimer ?
@@ -2882,7 +2882,7 @@ attackPlayer(player) {
             Sprite.terminalLog("Your armor absorbs all the damages.", 1);
         } else {
             const damageDone = this.dmg - player.armor;
-            Sprite.terminalLog(`${this.spriteName || "The ennemy"} attacks : ${damageDone} dmg !`, 2);
+            Sprite.displayCombatAnimation(`${this.spriteName || "The ennemy"} attacks : ${damageDone} dmg !`, 2);
             Raycaster.playerDamageFlash();
             player.hp -= damageDone;
             
@@ -3284,6 +3284,92 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         // Faire défiler vers le bas pour voir les nouveaux messages
         outputElement.scrollTop = outputElement.scrollHeight;
     }
+
+    static displayCombatAnimation(message, styleType = 0) {
+        const outputElement = document.getElementById("output");
+        
+        // Définition des styles disponibles (couleurs contrastées sur fond #1F0E08)
+        const styles = {
+            0: { color: "#FFFFFF" },                  // Blanc (par défaut)
+            1: { color: "#77DD77" },                  // Vert clair
+            2: { color: "#FF6B6B" },                  // Rouge vif
+            3: { color: "#FFD166" },                  // Jaune doré
+            4: { color: "#79ADDC" },                  // Bleu ciel
+            5: { color: "#FF9E80" },                  // Orange corail
+            6: { color: "#CCCCFF" },                  // Lavande
+            7: { color: "#D4A5A5" },                  // Rose poussiéreux
+            8: { color: "#FFFFFF", fontWeight: "bold" },     // Blanc gras
+            9: { color: "#FFFFFF", fontStyle: "italic" },    // Blanc italique
+            10: { color: "#AAFFAA", fontWeight: "bold" },    // Vert clair gras
+            11: { color: "#FFAAAA", fontStyle: "italic" }    // Rouge clair italique
+        };
+    
+        // S'assurer que le styleType est valide, sinon utiliser le style par défaut
+        const style = styles[styleType] || styles[0];
+    
+        // Créer un conteneur pour la ligne du terminal
+        const logLine = document.createElement("div");
+        logLine.className = "terminal-line";
+        logLine.style.display = "flex";
+        logLine.style.fontFamily = "monospace"; // Police à chasse fixe
+        logLine.style.marginBottom = "2px";
+        
+        // Animation de fondu
+        logLine.style.opacity = "0";
+        logLine.style.transition = "opacity 0.3s ease-in";
+        
+        // Créer le symbole du terminal comme une colonne fixe
+        const promptColumn = document.createElement("div");
+        promptColumn.className = "terminal-prompt-column";
+        promptColumn.style.width = "25px"; // Largeur fixe
+        promptColumn.style.flexShrink = "0"; // Empêche la réduction
+        promptColumn.style.textAlign = "center"; // Centré dans sa colonne
+        promptColumn.innerHTML = '<span style="color:#aaa; font-weight:bold;">&gt;</span>';
+        
+        // Créer le contenu animé du message
+        const messageContent = document.createElement("div");
+        messageContent.className = "terminal-content";
+        messageContent.style.flexGrow = "1";
+        
+        // Créer le span pour le contenu du message avec le style sélectionné
+        const animatedSpan = document.createElement('span');
+        animatedSpan.style.color = style.color;
+        if (style.fontWeight) animatedSpan.style.fontWeight = style.fontWeight;
+        if (style.fontStyle) animatedSpan.style.fontStyle = style.fontStyle;
+        animatedSpan.style.display = "inline-block";
+        animatedSpan.innerHTML = message;
+        
+        // Ajouter une légère animation d'échelle avec CSS
+        animatedSpan.style.transition = "transform 0.5s ease";
+        
+        messageContent.appendChild(animatedSpan);
+        
+        // Assembler la ligne
+        logLine.appendChild(promptColumn);
+        logLine.appendChild(messageContent);
+        
+        // Ajouter la ligne au terminal
+        outputElement.appendChild(logLine);
+        
+        // Déclencher l'animation de fondu après un bref délai
+        setTimeout(() => {
+            logLine.style.opacity = "1";
+            
+            // Ajouter un petit effet de grossissement après le fondu
+            setTimeout(() => {
+                animatedSpan.style.transform = "scale(1.1)";
+                
+                // Puis revenir à la taille normale
+                setTimeout(() => {
+                    animatedSpan.style.transform = "scale(1.0)"; // Explicitement à 1.0 pour garantir la taille normale
+                }, 250);
+            }, 300);
+        }, 10);
+        
+        // Faire défiler vers le bas pour voir les nouveaux messages
+        outputElement.scrollTop = outputElement.scrollHeight;
+    }
+
     static resetTerminal() {
         const outputElement = document.getElementById("output");
         outputElement.innerHTML = "<span style='color:#77ee77; font-weight:bold;'>- New Terminal -</span><br>";
@@ -4600,17 +4686,17 @@ playerSellItem(player, itemIndex, sellPrice) {
                 const [face, name, entry] = this.spriteTalk[currentDialogue];
     
                 if (face && name && entry) {
-                    dialogue.innerHTML = `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br>${entry}</font>`;
+                    dialogue.innerHTML = `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br><br>${entry}</font>`;
                     const imgElement = document.getElementById(face);
                     faceOutput.src = imgElement ? imgElement.src : '';
-                    allDialoguesLog += `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br>${entry}</font><br>`;
+                    allDialoguesLog += `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br><br>${entry}</font><br>`;
                 }
     
                 currentDialogue++;
             } else {
                 for (let i = 0; i < this.spriteTalk.length; i++) {
                     const [face, name, entry] = this.spriteTalk[i];
-                    Sprite.terminalLog(`${name} :</br>${entry}`, 4);
+                    Sprite.terminalLog(`${name} :</br>${entry}</br>`, 4);
                 }
 
                 // Blocage des commandes ! Hihihihi
@@ -5026,7 +5112,7 @@ playerSellItem(player, itemIndex, sellPrice) {
             damage * factor +
             " dmg";
 
-        Sprite.terminalLog(entry, 1);
+        Sprite.displayCombatAnimation(entry, 1);
     }
 
     enemyAttackUpdate(player) {
@@ -5795,8 +5881,9 @@ class Raycaster {
             let dialogue = pos[7];
             let spriteSell = pos[8] || [];
     
-            let hp = pos[9] || 2;
-            let dmg = pos[10] || 1;
+            // valeur par defaut des ennemis
+            let hp = pos[9] || 4;
+            let dmg = pos[10] || 3;
             let lootClass = pos[11] || null; // Nouveau paramètre pour la classe de loot
     
             if (type === 10) {
