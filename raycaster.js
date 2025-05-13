@@ -130,8 +130,8 @@ var maps = [
             mapID: 1,
             map: [[3,3,4,3,3,3,3,1,1,1,1,1,5,5,5,1,9,1,5,5,5,5,5,5],[3,0,0,0,3,3,3,1,1,1,5,5,5,0,0,0,0,0,0,0,5,5,5,5],[3,0,0,0,3,3,3,1,5,5,0,0,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,0,0,3,0,3,6,6,7,6,0,0,0,0,0,0,0,0,0,0,0,5,5],[3,0,0,0,3,0,3,6,0,0,7,0,0,0,0,0,0,0,0,0,0,0,5,5],[3,3,3,3,3,0,3,6,0,0,6,0,0,0,0,0,0,0,0,0,0,5,5,5],[3,3,3,0,0,0,3,6,6,0,6,7,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,0,0,0,0,3,6,0,0,0,6,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,3,3,3,3,3,6,0,0,0,8,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,0,0,0,3,3,6,0,0,0,6,0,0,0,0,0,0,0,0,0,5,5,5],[3,3,0,0,0,3,3,6,6,7,6,7,0,0,0,0,0,0,0,0,0,0,5,5],[3,3,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[3,3,3,4,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[1,1,1,0,1,1,1,1,3,3,0,0,0,0,0,0,0,0,0,0,0,0,5,5],[1,1,0,0,0,1,1,1,3,3,0,0,0,0,0,0,0,0,0,0,0,0,5,5],[1,1,0,0,0,0,0,1,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[1,1,0,0,0,1,0,1,1,1,3,0,0,0,0,0,0,0,0,0,0,0,3,3],[1,1,1,1,1,1,0,1,0,0,3,3,0,0,0,0,0,0,0,0,0,0,3,1],[1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,0,0,1,1,1,3,3,1],[2,2,2,2,0,0,0,0,0,0,0,1,0,0,1,2,4,2,1,0,0,1,1,1],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[2,2,2,2,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
             sprites: [[1,2,1,"EXIT",16],[2,1,2,1,12],[3,1,3,5,9],[4,3,3,"A",14,null,"Sprite 3,3",[],[],2,1],[5,18,3,1,13],[6,1,4,1,12],[7,13,4,1,13],[8,5,5,"A",14,null,"Sprite 5,5",[],[],2,1],[9,8,5,1,17],[10,9,5,1,17],[11,12,5,1,15],[12,14,7,1,13],[13,20,7,2,2,"facePlayer","Sprite 20,7",[["faceGuard","Gwen","Le plus dur ? C'est de se tenir à un objectif. Le developpement d'un jeux video est un défis qu'on sous-estime facilement."],["faceGuard","Gwen","Par chance, j'ai pu présenter mon projet au public, donc ça m'a encourage."],["faceGuard","Gwen","Finalement je l'ai présenté comme projet de fin d'étude.\nJ'arrive pas à croire que j'ai reussi."]]],[14,3,8,"A",14,null,"Sprite 3,8",[],[],2,1],[15,8,8,1,5],[16,12,8,3,1,"faceMerchant","Sprite 12,8",[],[3]],[17,17,8,1,13],[18,8,9,2,2,"facePlayer","Sprite 8,9",[["faceThief","Pnj aux cheveux bleux","On a réussi à faire fonctionner l'éditeur ?\nJ'arrive pas à y croire..."]]],[19,11,9,"DOOR",2],[20,2,10,"A",14,null,"Sprite 2,10",[],[],2,1],[21,8,10,1,17],[22,10,10,1,5],[23,18,10,1,15],[24,12,11,1,17],[25,19,11,1,6],[26,12,12,1,13],[27,18,13,1,13],[28,19,13,1,13],[29,15,14,1,1],[30,18,14,1,6],[31,2,15,1,5],[32,13,15,1,6],[33,11,16,1,13],[34,3,17,1,17],[35,4,17,1,17],[36,17,17,1,6],[37,21,17,1,13],[38,20,18,1,15],[39,4,20,1,12],[40,7,20,1,12],[41,12,20,1,16],[42,13,20,1,16],[43,16,20,"DOOR",2],[44,22,21,1,5],[45,4,22,1,12],[46,7,22,1,12],[47,12,22,1,16],[48,13,22,1,16],[49,15,22,1,12],[50,17,22,1,12],[51,19,22,1,5]],
-            eventA: [[3,14,4.71238898038469,true,2,1,2,"Moving out..."]],
-            eventB: [[3,12,4.71238898038469,true,1,2,1,"Moving in..."]],
+            eventA: [[3,14, 4.71238898038469,true,2,1,2,"Moving out..."]],
+            eventB: [[3,12, 1.57,true,1,2,1,"Moving in..."]],
             playerStart: {
             X: 16,
             Y: 1,
@@ -259,7 +259,6 @@ var maps = [
                 [45, 10, 9, 1, 15],
                 [46, 11, 1, 1, 15],
                 
-                // xyz
                 // coffre
                 [47, 22, 21, 6, 9],
     
@@ -352,10 +351,10 @@ class Player {
         this.x = x;
         this.y = y;
         this.z = 0,
-            this.dir = 0,
-            this.rot = rot,
-            this.quadrant = "",
-            this.speed = 0,
+        this.dir = 0,
+        this.rot = rot,
+        this.quadrant = "",
+        this.speed = 0,
 
         this.tileSize = 1280,
         this.moveSpeed = Math.round(1280 / ((DESIRED_FPS / 60.0) * 16)),
@@ -1428,208 +1427,232 @@ class Player {
         return { frontX, frontY };
     }
 
-// Modifions la méthode handleSpriteAction pour gérer le délai
-async handleSpriteAction(action, sprites) {
-    if (!action || !this || !this.turn) return;
+    // Modifions la méthode handleSpriteAction pour gérer le délai
+    async handleSpriteAction(action, sprites) {
+        if (!action || !this || !this.turn) return;
+    
+        // Vérifier qu'aucune action n'est en cours
+        // n'est-ce pas un doublon de la vérification précédente ?
+        if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
+            console.log("Cannot perform action - player is busy");
+            return;
+        }
+    
+        // Vérifier si suffisamment de temps s'est écoulé depuis la dernière attaque
+        const currentTime = Date.now();
+        if (currentTime - this.lastAttackTime < 2000) {
+            Sprite.terminalLog("Vous n'êtes pas prêt à attaquer de nouveau.");
+            return;
+        }
 
-    // Vérifier si suffisamment de temps s'est écoulé depuis la dernière attaque
-    const currentTime = Date.now();
-    if (currentTime - this.lastAttackTime < 2000) { // 2000ms = 2 secondes
-        // Pas assez de temps écoulé, afficher un message et annuler l'action
-        Sprite.terminalLog("Vous n'êtes pas prêt à attaquer de nouveau.");
-        return;
-    }
+        const {
+            frontX,
+            frontY
+        } = this.calculateFrontPosition();
 
-    const {
-        frontX,
-        frontY
-    } = this.calculateFrontPosition();
+        console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
+        console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
 
-    console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
-    console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
-
-    let spriteFound = false;
-    for (const sprite of sprites) {
-        const spriteX = Math.floor(sprite.x / this.tileSize);
-        const spriteY = Math.floor(sprite.y / this.tileSize);
-        
-        console.log(`Checking sprite at (${spriteX}, ${spriteY}), type: ${sprite.spriteType}`);
-        
-        if (spriteX === frontX && spriteY === frontY) {
-            spriteFound = true;
-            console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
+        let spriteFound = false;
+        for (const sprite of sprites) {
+            const spriteX = Math.floor(sprite.x / this.tileSize);
+            const spriteY = Math.floor(sprite.y / this.tileSize);
             
-            switch (sprite.spriteType) {
-                case "A":
-                    console.log("Enemy detected, initiating combat!");
-                    // Enregistrer le temps de cette attaque
-                    this.lastAttackTime = currentTime;
-                    
-                    if (this.combatSpell) {
-                        console.log("Using combat spell");
-                        sprite.combatSpell(this, sprite);
-                    } else {
-                        console.log("Using normal attack");
-                        sprite.combat(this.might, this.criti, this);
-                    }
-                    break;
-                case "EXIT":
-                    Sprite.terminalLog('Level finished!')
-                    this.raycaster.nextMap();
-                    break;
-                case "DOOR":
-                    // IMPORTANT: Traiter les portes de manière spéciale
-                    // Appeler door() mais NE PAS appeler handleTeleportation ensuite
-                    sprite.door(this, null);
-                    this.raycaster.loadFloorCeilingImages();
-                    Sprite.terminalLog('You enter/exit the area.');
-                    // Réinitialiser l'état de l'action pour éviter de lancer handleTeleportation après
-                    this.actionButtonClicked = false;
-                    return; // Sortir immédiatement pour éviter l'appel à handleTeleportation
-                case 0:
-                    sprite.talk(sprite.spriteTalk, sprite.spriteFace);
-                    this.turn = false;
-                    break;
-                case 1:
-                    // décoration, ne rien faire
-                    console.log("Decoration sprite, no action");
-                    break;
-                case 2:
-                    sprite.talk(sprite.spriteTalk, sprite.spriteFace);
-                    this.turn = false;
-                    break;
-                case 3:
-                    sprite.displayItemsForSale(this);
-                    this.turn = false;
-                    break;
-                case 4:
-                    // gestion des Quest Giver
-                    console.log("Quest Giver sprite, not implemented yet");
-                    break;
-                case 5:
-                    // valeur fixe de test
-                    // ultérieurement : quests[currentMap].complete();
-                    console.log("Quest completion sprite");
-                    if (this.quests[0].completed === false) {
-                        this.quests[0].complete();
+            //console.log(`Checking sprite at (${spriteX}, ${spriteY}), type: ${sprite.spriteType}`);
+            
+            if (spriteX === frontX && spriteY === frontY) {
+                spriteFound = true;
+                console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
+                
+                switch (sprite.spriteType) {
+                    case "A":
+                        console.log("Enemy detected, initiating combat!");
+                        // Enregistrer le temps de cette attaque
+                        this.lastAttackTime = currentTime;
+                        
+                        if (this.combatSpell) {
+                            console.log("Using combat spell");
+                            sprite.combatSpell(this, sprite);
+                        } else {
+                            console.log("Using normal attack");
+                            sprite.combat(this.might, this.criti, this);
+                        }
+                        break;
+                    case "EXIT":
+                        Sprite.terminalLog('Level finished!')
+                        this.raycaster.nextMap();
+                        break;
+                    case "DOOR":
+                        // IMPORTANT: Traiter les portes de manière spéciale
+                        // Appeler door() mais NE PAS appeler handleTeleportation ensuite
+                        
+                        sprite.door(this, null);
+                        this.raycaster.loadFloorCeilingImages();
+                        Sprite.terminalLog('You enter/exit the area.');
+                        // Réinitialiser l'état de l'action pour éviter de lancer handleTeleportation après
+                        this.actionButtonClicked = false;
+                        return; // Sortir immédiatement pour éviter l'appel à handleTeleportation
+                    case 0:
+                        sprite.talk(sprite.spriteTalk, sprite.spriteFace);
+                        this.turn = false;
+                        break;
+                    case 1:
+                        // décoration, ne rien faire
+                        console.log("Decoration sprite, no action");
+                        break;
+                    case 2:
+                        sprite.talk(sprite.spriteTalk, sprite.spriteFace);
+                        this.turn = false;
+                        break;
+                    case 3:
+                        sprite.displayItemsForSale(this);
+                        this.turn = false;
+                        break;
+                    case 4:
+                        // gestion des Quest Giver
+                        console.log("Quest Giver sprite, not implemented yet");
+                        break;
+                    case 5:
+                        // valeur fixe de test
+                        // ultérieurement : quests[currentMap].complete();
+                        console.log("Quest completion sprite");
+                        if (this.quests[0].completed === false) {
+                            this.quests[0].complete();
 
-                        // changement de texture temporaire
-                        console.log("test changement de texture");
-                        sprite.spriteTexture = 21;
+                            // changement de texture temporaire
+                            console.log("test changement de texture");
+                            sprite.spriteTexture = 21;
 
+                            Sprite.resetToggle();
+                        } else {
+                            Sprite.terminalLog("I've already looted that.")
+                        }
+                        break;
+                    case 6:
+                        // valeur fixe de test
+                        // ultérieurement : quests[currentMap].complete();
+                        console.log("chest !");
+                        if (sprite.step != 1) {
+                            sprite.lootClass = 5;
+
+                            sprite.generateLoot(this);
+
+                            // changement de texture temporaire
+                            sprite.spriteTexture = 21;
+
+                            sprite.step = 1;
+
+                            Sprite.resetToggle();
+                        } else {
+                            Sprite.terminalLog("I've already looted that.")
+                        }
+                        break;
+                    default:
+                        console.log(`Sprite type ${sprite.spriteType} has no specific action`);
                         Sprite.resetToggle();
-                    } else {
-                        Sprite.terminalLog("I've already looted that.")
-                    }
-                    break;
-                case 6:
-                    // valeur fixe de test
-                    // ultérieurement : quests[currentMap].complete();
-                    console.log("chest !");
-                    if (sprite.step != 1) {
-                        sprite.lootClass = 5;
-
-                        sprite.generateLoot(this);
-
-                        // changement de texture temporaire
-                        sprite.spriteTexture = 21;
-
-                        sprite.step = 1;
-
-                        Sprite.resetToggle();
-                    } else {
-                        Sprite.terminalLog("I've already looted that.")
-                    }
-                    break;
-                default:
-                    console.log(`Sprite type ${sprite.spriteType} has no specific action`);
-                    Sprite.resetToggle();
-                    break;
+                        break;
+                }
             }
         }
+        
+        if (!spriteFound) {
+            console.log("No sprite found at front position");
+        }
+        
+        // Réinitialisation de la touche d'action après utilisation
+        this.actionButtonClicked = false;
     }
-    
-    if (!spriteFound) {
-        console.log("No sprite found at front position");
-    }
-    
-    // Réinitialisation de la touche d'action après utilisation
-    this.actionButtonClicked = false;
-}
 
     async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
-        const tolerance = Math.PI / 6; // 30° en radians
-
-        for (var i = 0; i < mapEventA.length; i++) {
-            // Calculer l'orientation opposée (ajout de π radians)
-            const oppositeOrientationA = (mapEventA[i][2] + Math.PI) % (2 * Math.PI);
-            const oppositeOrientationB = (mapEventB[i][2] + Math.PI) % (2 * Math.PI);
-
-            // Vérification pour la téléportation depuis A vers B
-            if (
-                Math.floor(newX / tileSize) === mapEventA[i][0] &&
-                Math.floor(newY / tileSize) === mapEventA[i][1] &&
-                (player.rot >= oppositeOrientationA - tolerance && player.rot <= oppositeOrientationA + tolerance)
-            ) {
-                // Téléportation aux coordonnées données dans l'Event
-                newX = mapEventB[i][0] * tileSize + 640;
-                newY = mapEventB[i][1] * tileSize + 640;
-                player.rot = mapEventB[i][2];
-
-                // Variable de modification d'environnement
-                ceilingRender = mapEventB[i][3];
-                ceilingTexture = mapEventB[i][4];
-                ceilingHeight = mapEventB[i][5];
-                // Variable de modification des textures (vers le type '1' = terre)
-                floorTexture = mapEventB[i][6];
-
-                // On recharge toutes les textures, sinon le canvas ne sera pas modifié
-                this.raycaster.loadFloorCeilingImages();
-
-                console.log(mapEventB[i][7]);
-
-                // Évite les doubles téléportations
-                await pause(250);
-                // Set new position
-                player.x = newX;
-                player.y = newY;
-
-                break; // Sortir de la boucle une fois la téléportation effectuée
+        // Vérifier qu'aucune autre action n'est en cours
+        if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
+            console.log("Cannot teleport - player is busy");
+            return;
+        }
+        
+        // Marquer qu'une téléportation est en cours
+        player.isTeleporting = true;
+        
+        try {
+            const tolerance = Math.PI / 6; // 30° en radians
+    
+            for (var i = 0; i < mapEventA.length; i++) {
+                // Calculer l'orientation opposée (ajout de π radians)
+                const oppositeOrientationA = (mapEventA[i][2] + Math.PI) % (2 * Math.PI);
+                const oppositeOrientationB = (mapEventB[i][2] + Math.PI) % (2 * Math.PI);
+    
+                // Vérification pour la téléportation depuis A vers B
+                if (
+                    Math.floor(newX / tileSize) === mapEventA[i][0] &&
+                    Math.floor(newY / tileSize) === mapEventA[i][1] &&
+                    (player.rot >= oppositeOrientationA - tolerance && player.rot <= oppositeOrientationA + tolerance)
+                ) {
+                    // Téléportation aux coordonnées données dans l'Event
+                    newX = mapEventB[i][0] * tileSize + 640;
+                    newY = mapEventB[i][1] * tileSize + 640;
+                    player.rot = mapEventB[i][2];
+    
+                    // Variable de modification d'environnement
+                    ceilingRender = mapEventB[i][3];
+                    ceilingTexture = mapEventB[i][4];
+                    ceilingHeight = mapEventB[i][5];
+                    // Variable de modification des textures (vers le type '1' = terre)
+                    floorTexture = mapEventB[i][6];
+    
+                    // On recharge toutes les textures, sinon le canvas ne sera pas modifié
+                    this.raycaster.loadFloorCeilingImages();
+    
+                    console.log(mapEventB[i][7]);
+    
+                    // Évite les doubles téléportations
+                    await new Promise(resolve => setTimeout(resolve, 250));
+                    
+                    // Set new position
+                    player.x = newX;
+                    player.y = newY;
+    
+                    break; // Sortir de la boucle une fois la téléportation effectuée
+                }
+    
+                // Vérification pour la téléportation depuis B vers A
+                if (
+                    Math.floor(newX / tileSize) === mapEventB[i][0] &&
+                    Math.floor(newY / tileSize) === mapEventB[i][1] &&
+                    (player.rot >= oppositeOrientationB - tolerance && player.rot <= oppositeOrientationB + tolerance)
+                ) {
+                    // Téléportation aux coordonnées données dans l'Event
+                    newX = mapEventA[i][0] * tileSize + 640;
+                    newY = mapEventA[i][1] * tileSize + 640;
+                    player.rot = mapEventA[i][2];
+    
+                    // Variable de modification d'environnement
+                    ceilingRender = mapEventA[i][3];
+                    ceilingTexture = mapEventA[i][4];
+                    ceilingHeight = mapEventA[i][5];
+                    // Variable de modification des textures (vers le type '1' = terre)
+                    floorTexture = mapEventA[i][6];
+    
+                    // On recharge toutes les textures, sinon le canvas ne sera pas modifié
+                    this.raycaster.loadFloorCeilingImages();
+    
+                    console.log(mapEventA[i][7]);
+    
+                    // Évite les doubles téléportations
+                    await new Promise(resolve => setTimeout(resolve, 250));
+                    
+                    // Set new position
+                    player.x = newX;
+                    player.y = newY;
+    
+                    break; // Sortir de la boucle une fois la téléportation effectuée
+                }
             }
-
-            // Vérification pour la téléportation depuis B vers A
-            if (
-                Math.floor(newX / tileSize) === mapEventB[i][0] &&
-                Math.floor(newY / tileSize) === mapEventB[i][1] &&
-                (player.rot >= oppositeOrientationB - tolerance && player.rot <= oppositeOrientationB + tolerance)
-            ) {
-                // Téléportation aux coordonnées données dans l'Event
-                newX = mapEventA[i][0] * tileSize + 640;
-                newY = mapEventA[i][1] * tileSize + 640;
-                player.rot = mapEventA[i][2];
-
-                // Variable de modification d'environnement
-                ceilingRender = mapEventA[i][3];
-                ceilingTexture = mapEventA[i][4];
-                ceilingHeight = mapEventA[i][5];
-                // Variable de modification des textures (vers le type '1' = terre)
-                floorTexture = mapEventA[i][6];
-
-                // On recharge toutes les textures, sinon le canvas ne sera pas modifié
-                this.raycaster.loadFloorCeilingImages();
-
-                console.log(mapEventA[i][7]);
-
-                // Évite les doubles téléportations
-                await pause(250);
-                // Set new position
-                player.x = newX;
-                player.y = newY;
-
-                break; // Sortir de la boucle une fois la téléportation effectuée
-            }
+        } finally {
+            // Toujours libérer le verrou, même en cas d'erreur
+            player.isTeleporting = false;
         }
     }
+    
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Logique de blocage
@@ -1716,9 +1739,14 @@ async handleSpriteAction(action, sprites) {
         if (commandBlocking) {
             return;
         }
-        
+
+        // Éviter les mouvements multiples pendant une téléportation ou utilisation porte
+        if (this.isTeleporting || this.isDooring) return;
+
         // Éviter les mouvements multiples pendant une animation ou une action
         if (this.isMoving || this.isRotating) return;
+
+
         
         // Traitement des rotations (par incréments de 90 degrés)
         if (left || right) {
@@ -3068,7 +3096,6 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         return Math.max(1, Math.min(5, baseClass));
     }
 
-    // XYZ
     // displayLootAnimation() était ici
 
     generateLoot(player) {
@@ -3409,527 +3436,46 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
     // boutique, pas de prix pour le moment
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Modifions la méthode displayItemsForSale pour proposer un choix entre acheter et vendre
-displayItemsForSale(player) {
-    var output = document.getElementById("output");
-    var dialWindow = document.getElementById("dialogueWindow");
-    output.style.display = "none";
-    dialWindow.style.display = "none";
+    displayItemsForSale(player) {
+        var output = document.getElementById("output");
+        var dialWindow = document.getElementById("dialogueWindow");
+        output.style.display = "none";
+        dialWindow.style.display = "none";
 
-    // Afficher la boutique
-    document.getElementById("shop").style.display = "block";
+        // Afficher la boutique
+        document.getElementById("shop").style.display = "block";
 
-    // Mettre à jour le nom de la boutique
-    const shopName = document.getElementById("shopName");
-    shopName.textContent = this.spriteName;
+        // Mettre à jour le nom de la boutique
+        const shopName = document.getElementById("shopName");
+        shopName.textContent = this.spriteName;
 
-    // Mettre à jour l'affichage de l'or
-    const goldOutput = document.getElementById("ShopPlayerGoldOutput");
-    if (goldOutput) {
-        goldOutput.textContent = player.gold || 0;
-    }
-
-    const shopContent = document.getElementById("shopContent");
-    
-    // Afficher l'écran d'accueil avec les deux options
-    shopContent.innerHTML = `
-        <div style="height: 170px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <div style="font-size: 16px; color: #e8d5a9; margin-bottom: 20px; text-align: center;">
-                Welcome to ${this.spriteName}'s shop
-            </div>
-            <div style="display: flex; justify-content: center; gap: 20px;">
-                <button id="buy-option" style="
-                    padding: 8px 20px; 
-                    background-color: #205020; 
-                    color: #e8d5a9; 
-                    border: 1px solid #663300; 
-                    cursor: pointer;
-                    font-family: monospace;
-                    text-transform: uppercase;
-                    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
-                ">BUY ITEMS</button>
-                <button id="sell-option" style="
-                    padding: 8px 20px; 
-                    background-color: #793020; 
-                    color: #e8d5a9; 
-                    border: 1px solid #663300; 
-                    cursor: pointer;
-                    font-family: monospace;
-                    text-transform: uppercase;
-                    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
-                ">SELL ITEMS</button>
-            </div>
-            <div style="margin-top: 20px;">
-                <button id="back-button" style="
-                    padding: 5px 10px; 
-                    background-color: #140c1c; 
-                    color: #e8d5a9; 
-                    border: 1px solid #663300; 
-                    cursor: pointer;
-                    font-family: monospace;
-                ">BACK</button>
-            </div>
-        </div>
-    `;
-    
-    // Ajouter l'écouteur d'événement pour l'option d'achat
-    document.getElementById('buy-option').addEventListener('click', () => {
-        this.displayBuyInterface(player);
-    });
-    
-    // Ajouter l'écouteur d'événement pour l'option de vente
-    document.getElementById('sell-option').addEventListener('click', () => {
-        this.displaySellInterface(player);
-    });
-    
-    // Ajouter l'écouteur d'événement pour le bouton de retour
-    document.getElementById('back-button').addEventListener('click', () => {
-        Sprite.resetToggle();
-    });
-}
-
-// Méthode pour afficher l'interface d'achat
-displayBuyInterface(player) {
-    const shopContent = document.getElementById("shopContent");
-    const goldOutput = document.getElementById("ShopPlayerGoldOutput");
-    
-    if (this.spriteSell && this.spriteSell.length > 0) {
-        // Division en deux colonnes identique à l'inventaire
-        shopContent.innerHTML = `
-            <div style="display: flex; height: 170px; width: 100%;">
-                <!-- Liste des objets (40% de la largeur) -->
-                <div id="shop-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
-                    <!-- Les items seront listés ici -->
-                </div>
-                
-                <!-- Détails de l'objet sélectionné (60% de la largeur) -->
-                <div id="shop-details" style="width: 60%; height: 100%; display: flex; flex-direction: column;">
-                    <!-- Les détails seront affichés ici -->
-                    <div id="shop-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
-                        <div>Select an item</div>
-                        <div>to view details</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        const shopList = document.getElementById("shop-list");
-        
-        // Générer la liste des objets
-        this.spriteSell.forEach((itemId, index) => {
-            const item = Item.getItemById(itemId);
-            if (!item) return;
-            
-            // Déterminer l'icône en fonction du slot
-            let itemIcon = item.icon;
-            
-            // Afficher le prix ou "FREE" si le prix est 0 ou non défini
-            const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
-            
-            const itemElement = document.createElement("div");
-            itemElement.className = "shop-item-entry";
-            itemElement.setAttribute("data-index", index);
-            itemElement.setAttribute("data-item-id", item.id);
-            itemElement.style.cssText = `
-                display: flex; 
-                align-items: center; 
-                margin-top: 3px;
-                margin-bottom: 3px: 
-                cursor: pointer; 
-                background-color: #140c1c; 
-                border: 1px solid #663300;
-                width: 100%;
-            `;
-            
-            itemElement.innerHTML = `
-                <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
-                <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
-                <span style="color: #ffcc00; font-weight: bold;">${priceDisplay}</span>
-            `;
-            
-            itemElement.addEventListener('click', () => {
-                // Désélectionner tous les autres éléments
-                document.querySelectorAll('.shop-item-entry').forEach(e => {
-                    e.style.borderColor = '#663300';
-                    e.style.backgroundColor = '#140c1c';
-                });
-                
-                // Mettre en évidence l'élément sélectionné
-                itemElement.style.borderColor = '#ffaa00';
-                itemElement.style.backgroundColor = '#331a0c';
-                
-                // Afficher les détails
-                this.showShopItemDetails(item, player, index);
-                
-                // Cacher le placeholder
-                const placeholder = document.getElementById('shop-details-placeholder');
-                if (placeholder) {
-                    placeholder.style.display = 'none';
-                }
-            });
-            
-            shopList.appendChild(itemElement);
-        });
-        
-        // Sélectionner automatiquement le premier élément
-        const firstItem = shopList.querySelector('.shop-item-entry');
-        if (firstItem) {
-            firstItem.click();
+        // Mettre à jour l'affichage de l'or
+        const goldOutput = document.getElementById("ShopPlayerGoldOutput");
+        if (goldOutput) {
+            goldOutput.textContent = player.gold || 0;
         }
-    } else {
+
+        const shopContent = document.getElementById("shopContent");
+        
+        // Afficher l'écran d'accueil avec les deux options
         shopContent.innerHTML = `
             <div style="height: 170px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <div style="padding: 10px; text-align: center; color: #8a7b6c;">No items for sale</div>
-                <div style="margin-top: 20px;">
-                    <button id="return-to-shop" style="
-                        padding: 5px 10px; 
-                        background-color: #140c1c; 
+                <div style="font-size: 16px; color: #e8d5a9; margin-bottom: 20px; text-align: center;">
+                    Welcome to ${this.spriteName}'s shop
+                </div>
+                <div style="display: flex; justify-content: center; gap: 20px;">
+                    <button id="buy-option" style="
+                        padding: 8px 20px; 
+                        background-color: #205020; 
                         color: #e8d5a9; 
                         border: 1px solid #663300; 
                         cursor: pointer;
-                        font-family: monospace;
-                    ">BACK</button>
-                </div>
-            </div>
-        `;
-        
-        // Ajouter l'écouteur d'événement pour le bouton de retour
-        document.getElementById('return-to-shop').addEventListener('click', () => {
-            this.displayItemsForSale(player);
-        });
-    }
-}
-
-// Méthode pour afficher l'interface de vente
-displaySellInterface(player) {
-    const shopContent = document.getElementById("shopContent");
-    const goldOutput = document.getElementById("ShopPlayerGoldOutput");
-    
-    if (player.inventory && player.inventory.length > 0) {
-        // Division en deux colonnes identique à l'inventaire
-        shopContent.innerHTML = `
-            <div style="display: flex; height: 170px; width: 100%;">
-                <!-- Liste des objets (40% de la largeur) -->
-                <div id="sell-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
-                    <!-- Les items seront listés ici -->
-                </div>
-                
-                <!-- Détails de l'objet sélectionné (60% de la largeur) -->
-                <div id="sell-details" style="width: 60%; height: 100%; display: flex; flex-direction: column;">
-                    <!-- Les détails seront affichés ici -->
-                    <div id="sell-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
-                        <div>Select an item</div>
-                        <div>to sell</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        const sellList = document.getElementById("sell-list");
-        
-        // Générer la liste des objets que le joueur peut vendre
-        player.inventory.forEach((item, index) => {
-            if (!item) return;
-            
-            // Déterminer l'icône en fonction du slot
-            let itemIcon = item.icon;
-            
-            // Calculer le prix de vente (moitié du prix d'achat, minimum 1 gp)
-            const sellPrice = item.price > 0 ? Math.max(Math.floor(item.price / 2), 1) : 1;
-            
-            // Ne pas permettre de vendre des objets équipés
-            const isEquipped = item.equipped;
-            const bgColor = isEquipped ? 'rgba(20, 20, 20, 0.7)' : '#140c1c';
-            
-            const itemElement = document.createElement("div");
-            itemElement.className = "sell-item-entry";
-            itemElement.setAttribute("data-index", index);
-            itemElement.setAttribute("data-equipped", isEquipped.toString());
-            itemElement.style.cssText = `
-                display: flex; 
-                align-items: center; 
-                margin-top: 3px;
-                margin-bottom: 3px: 
-                cursor: ${isEquipped ? 'not-allowed' : 'pointer'}; 
-                background-color: ${bgColor}; 
-                border: 1px solid #663300;
-                width: 100%;
-                opacity: ${isEquipped ? '0.7' : '1'};
-            `;
-            
-            itemElement.innerHTML = `
-                <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
-                <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}${isEquipped ? ' (equipped)' : ''}</span>
-                <span style="color: #ffcc00; font-weight: bold;">${sellPrice} gp</span>
-            `;
-            
-            if (!isEquipped) {
-                itemElement.addEventListener('click', () => {
-                    // Désélectionner tous les autres éléments
-                    document.querySelectorAll('.sell-item-entry').forEach(e => {
-                        e.style.borderColor = '#663300';
-                        e.style.backgroundColor = '#140c1c';
-                    });
-                    
-                    // Mettre en évidence l'élément sélectionné
-                    itemElement.style.borderColor = '#ffaa00';
-                    itemElement.style.backgroundColor = '#331a0c';
-                    
-                    // Afficher les détails
-                    this.showSellItemDetails(item, player, index, sellPrice);
-                    
-                    // Cacher le placeholder
-                    const placeholder = document.getElementById('sell-details-placeholder');
-                    if (placeholder) {
-                        placeholder.style.display = 'none';
-                    }
-                });
-            }
-            
-            sellList.appendChild(itemElement);
-        });
-        
-        // Sélectionner automatiquement le premier élément non équipé
-        const firstItem = sellList.querySelector('.sell-item-entry[data-equipped="false"]');
-        if (firstItem) {
-            firstItem.click();
-        }
-    } else {
-        shopContent.innerHTML = `
-            <div style="height: 170px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <div style="padding: 10px; text-align: center; color: #8a7b6c;">Your inventory is empty</div>
-                <div style="margin-top: 20px;">
-                    <button id="return-to-shop" style="
-                        padding: 5px 10px; 
-                        background-color: #140c1c; 
-                        color: #e8d5a9; 
-                        border: 1px solid #663300; 
-                        cursor: pointer;
-                        font-family: monospace;
-                    ">BACK</button>
-                </div>
-            </div>
-        `;
-        
-        // Ajouter l'écouteur d'événement pour le bouton de retour
-        document.getElementById('return-to-shop').addEventListener('click', () => {
-            this.displayItemsForSale(player);
-        });
-    }
-}
-
-// Méthode pour afficher les détails d'un objet à acheter
-showShopItemDetails(item, player, index) {
-    const shopDetails = document.getElementById('shop-details');
-    if (!shopDetails) return;
-    
-    // Déterminer l'icône en fonction du slot
-    let itemIcon = item.icon;
-                    
-    // Type d'équipement
-    let slotName = "";
-    switch(item.slot) {
-        case 1: slotName = "Weapon"; break;
-        case 2: slotName = "Armor"; break;
-        default: slotName = "Item"; break;
-    }
-    
-    // Construire la chaîne HTML des statistiques
-    let statsHTML = "";
-    
-    // Fonction helper pour ajouter une stat avec la bonne couleur
-    const addStat = (value, name) => {
-        if (value !== 0) {
-            const sign = value > 0 ? "+" : "";
-            const color = value > 0 ? "#66ff66" : "#ff6666";
-            statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
-        }
-    };
-    
-    // Ajouter toutes les stats dans l'ordre
-    addStat(item.strength, "Strength");
-    addStat(item.dexterity, "Dexterity");
-    addStat(item.intellect, "Intellect");
-    addStat(item.might, "Might");
-    addStat(item.magic, "Magic");
-    addStat(item.dodge, "Dodge");
-    addStat(item.criti, "Crit.");
-    addStat(item.armor, "Armor");
-    
-    if (item.power !== 0) {
-        statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
-    }
-    
-    // Si aucune statistique n'est définie
-    if (statsHTML === "") {
-        statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
-    }
-    
-    // Afficher le prix ou "FREE" si le prix est 0 ou non défini
-    const priceDisplay = item.price > 0 ? `${item.price} gp` : 'FREE';
-    const buyText = item.price > 0 ? 'BUY' : 'TAKE';
-    
-    // Vérifier si le joueur a assez d'or
-    const canAfford = (player.gold || 0) >= item.price;
-    const buttonClass = !canAfford && item.price > 0 ? 'cannot-afford' : '';
-    
-    // Structure avec positions absolues et défilement central
-    shopDetails.innerHTML = `
-        <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
-        <div style="position: relative; width: 103%; height: 95%;">
-            <!-- Division 1: Nom et icône (position absolue en haut) -->
-            <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
-                <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
-                    <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
-                    <div style="width: calc(100% - 38px);">
-                        <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
-                        <div style="font-size: 12px; color: #a89986;">${slotName}</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Division 3: Prix et bouton d'achat (position absolue en bas) -->
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                    <div style="margin-left : 5px;font-size: 14px; color: #ffcc00; font-weight: bold;">
-                        Price: ${priceDisplay}
-                    </div>
-                    <button id="buy-item-btn" class="${buttonClass}" style="
-                        margin-right:5px;
-                        margin-bottom:6px;
-                        padding: 6px 12px; 
-                        background-color: ${canAfford || item.price === 0 ? '#205020' : '#501102'}; 
-                        color: #e8d5a9; 
-                        border: 1px solid #663300; 
-                        cursor: ${canAfford || item.price === 0 ? 'pointer' : 'not-allowed'};
                         font-family: monospace;
                         text-transform: uppercase;
                         box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
-                        width: auto;
-                    ">
-                        ${buyText}
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Division 2: Statistiques (zone avec défilement) -->
-            <div style="margin-left : 5px; position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
-                ${statsHTML}
-            </div>
-        </div>
-    `;
-    
-    // Ajouter l'écouteur d'événement pour le bouton d'achat
-    document.getElementById('buy-item-btn').addEventListener('click', () => {
-        if (item.price > 0) {
-            // Vérifier si le joueur a assez d'or
-            if ((player.gold || 0) >= item.price) {
-                // Déduire le coût
-                player.gold -= item.price;
-                
-                // Ajouter l'objet à l'inventaire
-                this.addItemToInventory(item, player);
-                
-                // Retirer l'objet de la liste de vente
-                this.spriteSell = this.spriteSell.filter(itemId => itemId !== item.id);
-                
-                // Message de confirmation
-                Sprite.terminalLog(`You bought ${item.name} for ${item.price} gp.`);
-                
-                // Actualiser l'or affiché
-                const goldOutput = document.getElementById("ShopPlayerGoldOutput");
-                if (goldOutput) {
-                    goldOutput.textContent = player.gold || 0;
-                }
-                
-                // Recharger l'interface d'achat
-                this.displayBuyInterface(player);
-            } else {
-                Sprite.terminalLog(`You don't have enough gold to buy ${item.name}.`);
-            }
-        } else {
-            // Donner gratuitement
-            this.giveItemToPlayer(item, player);
-            Sprite.terminalLog(`You received ${item.name} for free.`);
-            
-            // Recharger l'interface d'achat
-            this.displayBuyInterface(player);
-        }
-    });
-}
-
-// Méthode pour afficher les détails d'un objet à vendre
-showSellItemDetails(item, player, index, sellPrice) {
-    const sellDetails = document.getElementById('sell-details');
-    if (!sellDetails) return;
-    
-    // Déterminer l'icône en fonction du slot
-    let itemIcon = item.icon;
-                    
-    // Type d'équipement
-    let slotName = "";
-    switch(item.slot) {
-        case 1: slotName = "Weapon"; break;
-        case 2: slotName = "Armor"; break;
-        default: slotName = "Item"; break;
-    }
-    
-    // Construire la chaîne HTML des statistiques
-    let statsHTML = "";
-    
-    // Fonction helper pour ajouter une stat avec la bonne couleur
-    const addStat = (value, name) => {
-        if (value !== 0) {
-            const sign = value > 0 ? "+" : "";
-            const color = value > 0 ? "#66ff66" : "#ff6666";
-            statsHTML += `<div style="margin: 2px 0;"><span style="color: ${color};">${sign}${value}</span> ${name}</div>`;
-        }
-    };
-    
-    // Ajouter toutes les stats dans l'ordre
-    addStat(item.strength, "Strength");
-    addStat(item.dexterity, "Dexterity");
-    addStat(item.intellect, "Intellect");
-    addStat(item.might, "Might");
-    addStat(item.magic, "Magic");
-    addStat(item.dodge, "Dodge");
-    addStat(item.criti, "Crit.");
-    addStat(item.armor, "Armor");
-    
-    if (item.power !== 0) {
-        statsHTML += `<div style="margin: 2px 0;">${item.power} Power</div>`;
-    }
-    
-    // Si aucune statistique n'est définie
-    if (statsHTML === "") {
-        statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
-    }
-    
-    // Structure avec positions absolues et défilement central
-    sellDetails.innerHTML = `
-        <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
-        <div style="position: relative; width: 103%; height: 160px;">
-            <!-- Division 1: Nom et icône (position absolue en haut) -->
-            <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
-                <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
-                    <img src="${itemIcon}" style="width: 28px; height: 28px; margin-right: 10px;">
-                    <div style="width: calc(100% - 38px);">
-                        <div style="font-size: 15px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</div>
-                        <div style="font-size: 12px; color: #a89986;">${slotName}</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Division 3: Prix et bouton de vente (position absolue en bas) -->
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-top: 1px solid #553311; padding-top: 5px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                    <div style="margin-left : 5px;font-size: 14px; color: #ffcc00; font-weight: bold;">
-                        Sell price: ${sellPrice} gp
-                    </div>
-                    <button id="sell-item-btn" style="
-                        margin-right:5px;
-                        margin-bottom:6px;
-                        padding: 6px 12px; 
+                    ">BUY ITEMS</button>
+                    <button id="sell-option" style="
+                        padding: 8px 20px; 
                         background-color: #793020; 
                         color: #e8d5a9; 
                         border: 1px solid #663300; 
@@ -3937,83 +3483,36 @@ showSellItemDetails(item, player, index, sellPrice) {
                         font-family: monospace;
                         text-transform: uppercase;
                         box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2), inset -1px -1px 0px rgba(0, 0, 0, 0.4);
-                        width: auto;
-                    ">
-                        SELL
-                    </button>
+                    ">SELL ITEMS</button>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button id="back-button" style="
+                        padding: 5px 10px; 
+                        background-color: #140c1c; 
+                        color: #e8d5a9; 
+                        border: 1px solid #663300; 
+                        cursor: pointer;
+                        font-family: monospace;
+                    ">BACK</button>
                 </div>
             </div>
-            
-            <!-- Division 2: Statistiques (zone avec défilement) -->
-            <div style="margin-left : 5px; position: absolute; top: 45px; bottom: 40px; left: 0; right: 0; overflow-y: scroll; font-size: 13px; padding: 5px 5px 5px 0;">
-                ${statsHTML}
-            </div>
-        </div>
-    `;
-    
-    // Ajouter l'écouteur d'événement pour le bouton de vente
-    document.getElementById('sell-item-btn').addEventListener('click', () => {
-        // Obtenir l'or de la vente
-        player.gold += sellPrice;
+        `;
         
-        // Ajouter l'objet aux objets en vente du marchand
-        if (!this.spriteSell) {
-            this.spriteSell = [];
-        }
-        this.spriteSell.push(item.id);
+        // Ajouter l'écouteur d'événement pour l'option d'achat
+        document.getElementById('buy-option').addEventListener('click', () => {
+            this.displayBuyInterface(player);
+        });
         
-        // Supprimer l'objet de l'inventaire
-        player.inventory.splice(index, 1);
+        // Ajouter l'écouteur d'événement pour l'option de vente
+        document.getElementById('sell-option').addEventListener('click', () => {
+            this.displaySellInterface(player);
+        });
         
-        // Message de confirmation
-        Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gp.`);
-        
-        // Actualiser l'or affiché
-        const goldOutput = document.getElementById("ShopPlayerGoldOutput");
-        if (goldOutput) {
-            goldOutput.textContent = player.gold || 0;
-        }
-        
-        // Mettre à jour les statistiques du joueur
-        player.statsUpdate(player);
-        
-        // Recharger l'interface de vente
-        this.displaySellInterface(player);
-    });
-}
-
-// Méthode pour permettre au joueur de vendre un objet au marchand
-// Méthode pour permettre au joueur de vendre un objet au marchand
-playerSellItem(player, itemIndex, sellPrice) {
-    if (player && player.inventory && player.inventory[itemIndex]) {
-        const item = player.inventory[itemIndex];
-        
-        // Ne pas permettre de vendre un objet équipé
-        if (item.equipped) {
-            Sprite.terminalLog("You can't sell an equipped item. Unequip it first.");
-            return false;
-        }
-        
-        // Ajouter l'or au joueur
-        player.gold += sellPrice;
-        
-        // Ajouter l'ID de l'objet aux objets en vente du marchand
-        this.spriteSell.push(item.id);
-        
-        // Retirer l'objet de l'inventaire
-        player.inventory.splice(itemIndex, 1);
-        
-        // Message de vente
-        Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gold coins.`);
-        
-        // Mettre à jour les statistiques du joueur
-        player.statsUpdate();
-        
-        return true;
+        // Ajouter l'écouteur d'événement pour le bouton de retour
+        document.getElementById('back-button').addEventListener('click', () => {
+            Sprite.resetToggle();
+        });
     }
-    
-    return false;
-}
 
     // Méthode pour afficher l'interface d'achat
     displayBuyInterface(player) {
@@ -4024,18 +3523,6 @@ playerSellItem(player, itemIndex, sellPrice) {
             // Division en deux colonnes identique à l'inventaire
             shopContent.innerHTML = `
                 <div style="display: flex; height: 170px; width: 100%;">
-                    <!-- Bouton de retour -->
-                    <div style="position: absolute; top: 10px; left: 10px; display:none;">
-                        <button id="return-to-shop" style="
-                            padding: 3px 8px; 
-                            background-color: #140c1c; 
-                            color: #e8d5a9; 
-                            border: 1px solid #663300; 
-                            cursor: pointer;
-                            font-family: monospace;
-                        ">BACK</button>
-                    </div>
-                    
                     <!-- Liste des objets (40% de la largeur) -->
                     <div id="shop-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
                         <!-- Les items seront listés ici -->
@@ -4051,11 +3538,6 @@ playerSellItem(player, itemIndex, sellPrice) {
                     </div>
                 </div>
             `;
-            
-            // Ajouter l'écouteur d'événement pour le bouton de retour
-            document.getElementById('return-to-shop').addEventListener('click', () => {
-                this.displayItemsForSale(player);
-            });
             
             const shopList = document.getElementById("shop-list");
             
@@ -4153,18 +3635,6 @@ playerSellItem(player, itemIndex, sellPrice) {
             // Division en deux colonnes identique à l'inventaire
             shopContent.innerHTML = `
                 <div style="display: flex; height: 170px; width: 100%;">
-                    <!-- Bouton de retour -->
-                    <div style="position: absolute; top: 10px; left: 10px; display:none;">
-                        <button id="return-to-shop" style="
-                            padding: 3px 8px; 
-                            background-color: #140c1c; 
-                            color: #e8d5a9; 
-                            border: 1px solid #663300; 
-                            cursor: pointer;
-                            font-family: monospace;
-                        ">BACK</button>
-                    </div>
-                    
                     <!-- Liste des objets (40% de la largeur) -->
                     <div id="sell-list" style="width: 40%; height: 95%; border-right: 1px solid #663300; overflow-y: auto; padding-right: 5px;">
                         <!-- Les items seront listés ici -->
@@ -4180,11 +3650,6 @@ playerSellItem(player, itemIndex, sellPrice) {
                     </div>
                 </div>
             `;
-            
-            // Ajouter l'écouteur d'événement pour le bouton de retour
-            document.getElementById('return-to-shop').addEventListener('click', () => {
-                this.displayItemsForSale(player);
-            });
             
             const sellList = document.getElementById("sell-list");
             
@@ -4424,8 +3889,21 @@ playerSellItem(player, itemIndex, sellPrice) {
         const sellDetails = document.getElementById('sell-details');
         if (!sellDetails) return;
         
+        // DEBUG: Vérifier l'état initial
+        console.log('=== showSellItemDetails - DÉBUT ===');
+        console.log('Item à vendre:', item);
+        console.log('Item ID:', item?.id);
+        console.log('Player inventory (avant vente):', player.inventory);
+        console.log('Index de l\'item dans l\'inventaire:', index);
+        console.log('Sprite spriteSell (avant vente):', this.spriteSell);
+        console.log('Type de this.spriteSell:', typeof this.spriteSell);
+        console.log('Marchand (this):', this);
+        
         // Déterminer l'icône en fonction du slot
         let itemIcon = item.icon;
+        let itemId = item.id;
+        
+        console.log('Variable itemId extraite:', itemId);
                         
         // Type d'équipement
         let slotName = "";
@@ -4469,7 +3947,7 @@ playerSellItem(player, itemIndex, sellPrice) {
         // Structure avec positions absolues et défilement central
         sellDetails.innerHTML = `
             <!-- Conteneur principal avec position relative pour servir de référence aux positions absolues -->
-            <div style="position: relative; width: 103%; height: 95%;">
+            <div style="position: relative; width: 103%; height: 160px;">
                 <!-- Division 1: Nom et icône (position absolue en haut) -->
                 <div style="position: absolute; top: 0; left: 0; right: 0; background-color: #140c1c; z-index: 2; border-bottom: 1px solid #553311; padding-bottom: 5px;">
                     <div style="display: flex; align-items: center; width: 100%;padding : 5px;">
@@ -4514,11 +3992,49 @@ playerSellItem(player, itemIndex, sellPrice) {
         
         // Ajouter l'écouteur d'événement pour le bouton de vente
         document.getElementById('sell-item-btn').addEventListener('click', () => {
+            console.log('\n--- BOUTON VENTE CLIQUÉ ---');
+            console.log('Tentative de vente de l\'item:', item);
+            console.log('Index de l\'item:', index);
+            console.log('Prix de vente:', sellPrice);
+            
             // Obtenir l'or de la vente
+            console.log('Or du joueur avant vente:', player.gold);
             player.gold += sellPrice;
+            console.log('Or du joueur après vente:', player.gold);
+            
+            // Vérifier l'état de spriteSell avant modification
+            console.log('spriteSell avant ajout:', this.spriteSell);
+            console.log('Type de spriteSell:', typeof this.spriteSell);
+            console.log('Est-ce un tableau?', Array.isArray(this.spriteSell));
+            
+            // Initialiser spriteSell si nécessaire
+            if (!this.spriteSell) {
+                console.log('spriteSell est null/undefined, initialisation...');
+                this.spriteSell = [];
+            }
+            
+            // Ajouter l'objet aux objets en vente du marchand
+            console.log('Ajout de l\'itemId à spriteSell:', itemId);
+            this.spriteSell.push(itemId);
+            console.log('spriteSell après ajout:', this.spriteSell);
+            
+            // Vérifier l'inventaire avant suppression
+            console.log('Inventaire du joueur avant suppression:', player.inventory);
+            console.log('Item à l\'index', index, ':', player.inventory[index]);
             
             // Supprimer l'objet de l'inventaire
-            player.inventory.splice(index, 1);
+            const removedItem = player.inventory.splice(index, 1);
+            console.log('Item supprimé de l\'inventaire:', removedItem);
+            console.log('Inventaire du joueur après suppression:', player.inventory);
+            
+            // Vérifier si l'item existe encore dans le système global
+            console.log('Vérification de l\'existence de l\'item dans le système global...');
+            if (typeof Item !== 'undefined' && Item.getItemById) {
+                const globalItem = Item.getItemById(itemId);
+                console.log('Item trouvé dans le système global?', globalItem);
+            } else {
+                console.log('Item.getItemById n\'est pas disponible ou Item n\'est pas défini');
+            }
             
             // Message de confirmation
             Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gp.`);
@@ -4530,76 +4046,22 @@ playerSellItem(player, itemIndex, sellPrice) {
             }
             
             // Mettre à jour les statistiques du joueur
+            console.log('Mise à jour des statistiques du joueur...');
             player.statsUpdate(player);
+            
+            // Vérifier l'état final
+            console.log('\n--- ÉTAT FINAL ---');
+            console.log('spriteSell final:', this.spriteSell);
+            console.log('Inventaire final du joueur:', player.inventory);
+            console.log('Or final du joueur:', player.gold);
+            console.log('=== showSellItemDetails - FIN ===\n');
             
             // Recharger l'interface de vente
             this.displaySellInterface(player);
         });
     }
 
-    // Méthode pour permettre au joueur de vendre un objet au marchand
-    playerSellItem(player, itemIndex, sellPrice) {
-        if (player && player.inventory && player.inventory[itemIndex]) {
-            const item = player.inventory[itemIndex];
-            
-            // Ne pas permettre de vendre un objet équipé
-            if (item.equipped) {
-                Sprite.terminalLog("You can't sell an equipped item. Unequip it first.");
-                return false;
-            }
-            
-            // Ajouter l'or au joueur
-            player.gold += sellPrice;
-            
-            // Retirer l'objet de l'inventaire
-            player.inventory.splice(itemIndex, 1);
-            
-            // Message de vente
-            Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gold coins.`);
-            
-            // Mettre à jour les statistiques du joueur
-            player.statsUpdate();
-            
-            return true;
-        }
-        
-        return false;
-    }
 
-    // Ajoutons une méthode pour permettre au joueur de vendre un objet au marchand
-    playerSellItem(player, itemIndex, sellPrice) {
-        if (player && player.inventory && player.inventory[itemIndex]) {
-            const item = player.inventory[itemIndex];
-            
-            this.sellList.push(int(item.id))
-
-            // Ne pas permettre de vendre un objet équipé
-            if (item.equipped) {
-                Sprite.terminalLog("You can't sell an equipped item. Unequip it first.");
-                return false;
-            }
-            
-            // Ajouter l'or au joueur
-            player.gold += sellPrice;
-            
-            // l'objet est ajouté à la liste de vente du pnj
-            this.sellList.push(str(item.id))
-
-            // Retirer l'objet de l'inventaire
-            player.inventory.splice(itemIndex, 1);
-            
-            // Message de vente
-            Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gold coins.`);
-            
-            // Mettre à jour les statistiques du joueur
-            player.statsUpdate();
-            
-            return true;
-        }
-        
-        return false;
-    }
-    
     addItemToInventory(item, player) {
         player.inventory.push(item);
     }
@@ -5200,64 +4662,85 @@ playerSellItem(player, itemIndex, sellPrice) {
         }
     }
 
-    door(player, textureSet) {
-        // Store initial position for debugging
-        const initialX = player.x;
-        const initialY = player.y;
-        
-        // Determine floor texture to use
-        let floor;
-        if (textureSet === null) {
-            floor = 1;
-        } else if (textureSet) {
-            // If a texture set is provided, use it
-            floor = floorType;
-        }
-    
-        // Calculate new position based on player's facing direction
-        // The teleportation distance is 2 tiles (2 * tileSize)
-        const tileSize = 1280; // Make sure this matches the game's tileSize
-        const teleportDistance = 2 * tileSize;
-        
-        // Log current position and quadrant for debugging
-        console.log(`Before teleport: x=${player.x}, y=${player.y}, quadrant=${player.quadrant}`);
-        
-        // Apply teleportation based on direction
-        // Using more precise quadrant detection
-        if (player.quadrant === "nord") {
-            player.y -= teleportDistance;
-        } else if (player.quadrant === "est") {
-            player.x -= teleportDistance;
-        } else if (player.quadrant === "sud") {
-            player.y += teleportDistance;
-        } else if (player.quadrant === "ouest") {
-            player.x += teleportDistance;
-        } else {
-            console.log("Invalid quadrant or diagonal movement not supported");
-            return; // Exit without making any changes
+    async door(player, textureSet) {
+        // Vérifier qu'aucune autre action n'est en cours
+        if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
+            console.log("Cannot use door - player is busy");
+            return;
         }
         
-        // Toggle ceiling rendering and update environment properties
-        if (ceilingRender === true) {
-            // Restore map default values
-            ceilingRender = mapData.playerStart.ceilingRender;
-            ceilingHeight = mapData.playerStart.ceilingHeight;
-            ceilingTexture = mapData.playerStart.ceilingTexture;
-            floorTexture = mapData.playerStart.floorTexture;
+        // Marquer qu'une action de porte est en cours
+        player.isDooring = true;
+        
+        try {
+            // Store initial position for debugging
+            const initialX = player.x;
+            const initialY = player.y;
             
-            console.log(`Ceiling render OFF: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
-        } else {
-            // Turn ceiling rendering on with specific values
-            ceilingRender = true;
-            ceilingHeight = 1;
-            ceilingTexture = 2;
-            floorTexture = floor || 2; // Use the determined floor or default to 2
-            
-            console.log(`Ceiling render ON: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
-        }
+            // Determine floor texture to use
+            let floor;
+            if (textureSet === null) {
+                floor = 1;
+            } else if (textureSet) {
+                // If a texture set is provided, use it
+                floor = floorType;
+            }
         
-        // Log the new position for debugging
-        console.log(`After teleport: x=${player.x}, y=${player.y}, moved: x=${player.x - initialX}, y=${player.y - initialY}`);
+            // Calculate new position based on player's facing direction
+            // The teleportation distance is 2 tiles (2 * tileSize)
+            const tileSize = 1280; // Make sure this matches the game's tileSize
+            const teleportDistance = 2 * tileSize;
+            
+            // Log current position and quadrant for debugging
+            console.log(`Before teleport: x=${player.x}, y=${player.y}, quadrant=${player.quadrant}`);
+            
+            // Apply teleportation based on direction
+            // Using more precise quadrant detection
+            if (player.quadrant === "nord") {
+                player.y -= teleportDistance;
+            } else if (player.quadrant === "est") {
+                player.x += teleportDistance;
+            } else if (player.quadrant === "sud") {
+                player.y += teleportDistance;
+            } else if (player.quadrant === "ouest") {
+                player.x -= teleportDistance;
+            } else {
+                console.log("Invalid quadrant or diagonal movement not supported");
+                return; // Exit without making any changes
+            }
+            
+            // Toggle ceiling rendering and update environment properties
+            if (ceilingRender === true) {
+                // Restore map default values
+                ceilingRender = mapData.playerStart.ceilingRender;
+                ceilingHeight = mapData.playerStart.ceilingHeight;
+                ceilingTexture = mapData.playerStart.ceilingTexture;
+                floorTexture = mapData.playerStart.floorTexture;
+                
+                console.log(`Ceiling render OFF: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
+            } else {
+                // Turn ceiling rendering on with specific values
+                ceilingRender = true;
+                ceilingHeight = 1;
+                ceilingTexture = 1;
+                floorTexture = floor || 1; // Use the determined floor or default to 2
+                
+                console.log(`Ceiling render ON: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
+            }
+            
+            // Recharger les textures
+            this.raycaster.loadFloorCeilingImages();
+            
+            // Pause courte pour permettre la mise à jour visuelle
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Log the new position for debugging
+            console.log(`After teleport: x=${player.x}, y=${player.y}, moved: x=${player.x - initialX}, y=${player.y - initialY}`);
+            
+        } finally {
+            // Toujours libérer le verrou, même en cas d'erreur
+            player.isDooring = false;
+        }
     }
 }
 
@@ -6054,7 +5537,6 @@ class Raycaster {
         context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
         this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
 
-        // xyz
         // texture des sprites
 
         // Chargement des textures de sol
