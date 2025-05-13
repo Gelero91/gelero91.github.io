@@ -1653,7 +1653,6 @@ class Player {
         }
     }
     
-
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Logique de blocage
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1740,13 +1739,16 @@ class Player {
             return;
         }
 
+        // pour éviter les doubles actions (en test)
+        if (!this.turn) {
+            return;
+        }
+        
         // Éviter les mouvements multiples pendant une téléportation ou utilisation porte
         if (this.isTeleporting || this.isDooring) return;
 
         // Éviter les mouvements multiples pendant une animation ou une action
         if (this.isMoving || this.isRotating) return;
-
-
         
         // Traitement des rotations (par incréments de 90 degrés)
         if (left || right) {
