@@ -1464,6 +1464,9 @@ class Player {
                 spriteFound = true;
                 console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
                 
+                // on passe "turn" en false 
+                // this.turn = false;
+
                 switch (sprite.spriteType) {
                     case "A":
                         console.log("Enemy detected, initiating combat!");
@@ -1486,6 +1489,7 @@ class Player {
                         // IMPORTANT: Traiter les portes de manière spéciale
                         // Appeler door() mais NE PAS appeler handleTeleportation ensuite
                         
+                    
                         sprite.door(this, null);
                         this.raycaster.loadFloorCeilingImages();
                         Sprite.terminalLog('You enter/exit the area.');
@@ -1493,16 +1497,31 @@ class Player {
                         this.actionButtonClicked = false;
                         return; // Sortir immédiatement pour éviter l'appel à handleTeleportation
                     case 0:
-                        sprite.talk(sprite.spriteTalk, sprite.spriteFace);
-                        this.turn = false;
+                        console.log("Dialogue sprite detected");
+
+                        sprite.talk();
+
+                        // Attendre 0.5 seconde puis débloquer les commandes
+                        setTimeout(() => {
+                            this.turn = false;
+                        }, 500);
+
                         break;
                     case 1:
                         // décoration, ne rien faire
                         console.log("Decoration sprite, no action");
+                        this.turn = false;
                         break;
                     case 2:
-                        sprite.talk(sprite.spriteTalk, sprite.spriteFace);
-                        this.turn = false;
+                        console.log("Dialogue sprite type 2 detected");
+
+                        sprite.talk();
+
+                        // Attendre 0.5 seconde puis débloquer les commandes
+                        setTimeout(() => {
+                            this.turn = false;
+                        }, 500);
+
                         break;
                     case 3:
                         sprite.displayItemsForSale(this);
@@ -1511,6 +1530,7 @@ class Player {
                     case 4:
                         // gestion des Quest Giver
                         console.log("Quest Giver sprite, not implemented yet");
+                        this.turn = false;
                         break;
                     case 5:
                         // valeur fixe de test
@@ -1527,6 +1547,9 @@ class Player {
                         } else {
                             Sprite.terminalLog("I've already looted that.")
                         }
+
+                        this.turn = false;
+                        
                         break;
                     case 6:
                         // valeur fixe de test
@@ -1546,6 +1569,9 @@ class Player {
                         } else {
                             Sprite.terminalLog("I've already looted that.")
                         }
+
+                        this.turn = false;
+
                         break;
                     default:
                         console.log(`Sprite type ${sprite.spriteType} has no specific action`);
@@ -4118,10 +4144,10 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         return this.spriteTalk.length;
     }
 
-    //
+    // XYZ
     talk() {
         Sprite.resetToggle();
-
+    
         // Activer le blocage des commandes pendant le dialogue
         commandBlocking = true;
     
@@ -4145,6 +4171,9 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
         let currentDialogue = 0;
         let allDialoguesLog = ''; // Stocker tous les dialogues pour le log
     
+        // Variable pour stocker la référence de l'écouteur actuel
+        let activeKeyListener = null;
+    
         const showNextDialogue = () => {
             if (currentDialogue < this.spriteTalk.length) {
                 const [face, name, entry] = this.spriteTalk[currentDialogue];
@@ -4158,19 +4187,27 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
     
                 currentDialogue++;
             } else {
+                // Fin du dialogue - retirer l'écouteur d'événements
+                if (activeKeyListener) {
+                    document.removeEventListener("keydown", activeKeyListener);
+                    activeKeyListener = null;
+                }
+                
                 for (let i = 0; i < this.spriteTalk.length; i++) {
                     const [face, name, entry] = this.spriteTalk[i];
                     Sprite.terminalLog(`${name} :</br>${entry}</br>`, 4);
                 }
+    
 
-                // Blocage des commandes ! Hihihihi
-                commandBlocking = false;
-                
                 outputElement.style.display = "block";
                 dialWindow.style.display = "none";
+
+                setTimeout(() => {
+                    commandBlocking = false;
+                }, 500);
             }
         };
-
+    
         // Écouteur pour les touches clavier
         const keyListener = (event) => {
             if (event.code === "Space" || event.key.toLowerCase() === "f") {
@@ -4178,38 +4215,24 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
                 showNextDialogue();
             }
         };
-                
     
-        // Ajout des bons event listeners
-        newNextButton.addEventListener("click", showNextDialogue);
-        
-        /*
-        // J'ai tenté d'ajouter des eventListener pour lire le dialogue suivant
-        // grâce à la touche action A, F et "espace"
-        // Cependant, face à un sprite, c'est aussi la touche qui permet d'intéragir avec ce dernier.
-        // Il faut trouver un moyen de bloquer cette interaction le temps du dialogue, puis remettre
-        // ce code.
-        // Juste mettre une variable globale "commandBlocking=false" qui passe en false pendant les
-        // dialogues et cinématiques. Vérifier en argument de bingButtons()
-
-        const buttonA = document.getElementById("buttonA");
-        if (buttonA) {
-            buttonA.addEventListener("click", showNextDialogue);
+        // S'assurer qu'aucun ancien écouteur n'est actif
+        if (activeKeyListener) {
+            document.removeEventListener("keydown", activeKeyListener);
         }
+        
+        // Stocker et ajouter le nouvel écouteur
+        activeKeyListener = keyListener;
+        
+        // Ajout des event listeners
+        newNextButton.addEventListener("click", showNextDialogue);
+        document.addEventListener("keydown", activeKeyListener);
     
-        // Event listener pour les touches clavier
-        const keyListener = (event) => {
-            if (event.code === "Space" || event.key.toLowerCase() === "f") {
-                event.preventDefault();
-                showNextDialogue();
-            }
-        };
-    
-        document.addEventListener("keydown", keyListener);
-        */
-
+        if (currentDialogue === 0) {
         // Affiche le premier dialogue immédiatement
         showNextDialogue();
+        }
+
     }
 
     
