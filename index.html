@@ -38,6 +38,18 @@ Gwendal L.R.
       image-rendering: pixelated;
     }
 
+    .pixel-frame-noBorder {
+      background-color: #200F09;
+      box-sizing: border-box;
+      
+      /* Configuration du cadre avec border-image */
+      border-style: solid;
+      border-image-source: url('assets/pixelFrameTransparent.png');
+      border-image-slice: 20; /* Valeur en pixels correspondant à l'épaisseur des coins */
+      border-image-repeat: repeat; /* Préserve l'aspect pixelisé */
+      image-rendering: pixelated;
+    }
+
     .pixel-frame-item {
       background-color: #200F09;
       box-sizing: border-box;
@@ -453,23 +465,26 @@ Gwendal L.R.
           </div> 
         </div>
 
-        <div id="mainMenuWindow" style="display: none;">
-          <div id="gameWindow" class="container pixel-frame">
-            <div class="menuCenter">
-              <H1>OASIS.JS</H1>
-              <br><!--changement des couleurs-->
-              <button id="newGameButton" class="menuButton pixel-frame" style="background-color: #582817;color: white;">New Game</button>
-              <br>
-              <button id="loadButton" class="menuButton  pixel-frame" style="background-color: #582817;color: white;" >Load save</button>
-              <br>
-              <button id="saveButton" class="menuButton pixel-frame " style="background-color: #582817;color: white;">Save game</button>
-              <br>
-              <button id="nextMapButton" class="menuButton pixel-frame " style="background-color: #582817;color: white;">DEV TEST<br>*Next Map*</button>
-              <br>
-              <button id="backMenuButton" class="menuButton  pixel-frame" style="background-color: #582817;color: white;">Back to Game</button>
-            </div>
-          </div>
-        </div>
+<div id="mainMenuWindow" style="display: none;">
+  <div id="gameWindow" class="container pixel-frame" style="display: flex; padding: 0; width: 905px;height: 630px;">
+    <!--xyz mznu-->    <img src="assets/menu.jpg" alt="" class="pixel-frame-noBorder" style="width: 515px;
+    height: 590px">
+    <div class="menuCenter" style="flex: 1; display: flex; flex-direction: column; justify-content: center; 
+    ">
+      <H1>OASIS.JS</H1>
+      <br><!--changement des couleurs-->
+      <button id="newGameButton" class="menuButton pixel-frame" style="background-color: #582817;color: white;">New Game</button>
+      <br>
+      <button id="loadButton" class="menuButton  pixel-frame" style="background-color: #582817;color: white;" >Load save</button>
+      <br>
+      <button id="saveButton" class="menuButton pixel-frame " style="background-color: #582817;color: white;">Save game</button>
+      <br>
+      <button id="nextMapButton" class="menuButton pixel-frame " style="background-color: #582817;color: white;">DEV TEST<br>*Next Map*</button>
+      <br>
+      <button id="backMenuButton" class="menuButton  pixel-frame" style="background-color: #582817;color: white;">Back to Game</button>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   </div>
@@ -624,7 +639,7 @@ Gwendal L.R.
   {
       mapID: 1,
       map: [[3,3,4,3,3,3,3,1,1,1,1,1,5,5,5,1,9,1,5,5,5,5,5,5],[3,0,0,0,3,3,3,1,1,1,5,5,5,0,0,0,0,0,0,0,5,5,5,5],[3,0,0,0,3,3,3,1,5,5,0,0,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,0,0,3,0,3,6,6,7,6,0,0,0,0,0,0,0,0,0,0,0,5,5],[3,0,0,0,3,0,3,6,0,0,7,0,0,0,0,0,0,0,0,0,0,0,5,5],[3,3,3,3,3,0,3,6,0,0,6,0,0,0,0,0,0,0,0,0,0,5,5,5],[3,3,3,0,0,0,3,6,6,0,6,7,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,0,0,0,0,3,6,0,0,0,6,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,3,3,3,3,3,6,0,0,0,8,0,0,0,0,0,0,0,0,0,5,5,5],[3,0,0,0,0,3,3,6,0,0,0,6,0,0,0,0,0,0,0,0,0,5,5,5],[3,3,0,0,0,3,3,6,6,7,6,7,0,0,0,0,0,0,0,0,0,0,5,5],[3,3,0,0,0,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[3,3,3,4,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[1,1,1,0,1,1,1,1,3,3,0,0,0,0,0,0,0,0,0,0,0,0,5,5],[1,1,0,0,0,1,1,1,3,3,0,0,0,0,0,0,0,0,0,0,0,0,5,5],[1,1,0,0,0,0,0,1,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,5],[1,1,0,0,0,1,0,1,1,1,3,0,0,0,0,0,0,0,0,0,0,0,3,3],[1,1,1,1,1,1,0,1,0,0,3,3,0,0,0,0,0,0,0,0,0,0,3,1],[1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,0,0,1,1,1,3,3,1],[2,2,2,2,0,0,0,0,0,0,0,1,0,0,1,2,4,2,1,0,0,1,1,1],[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[2,2,2,2,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
-      sprites: [[1,2,1,"EXIT",16],[2,1,2,1,12],[3,1,3,5,9],[4,3,3,"A",14,null,"Sprite 3,3",[],[],2,1],[5,18,3,1,13],[6,1,4,1,12],[7,13,4,1,13],[8,5,5,"A",14,null,"Sprite 5,5",[],[],2,1],[9,8,5,1,17],[10,9,5,1,17],[11,12,5,1,15],[12,14,7,1,13],[13,20,7,2,2,"facePlayer","Sprite 20,7",[["faceGuard","Gwen","Le plus dur ? C'est de se tenir à un objectif. Le developpement d'un jeux video est un défis qu'on sous-estime facilement."],["faceGuard","Gwen","Par chance, j'ai pu présenter mon projet au public, donc ça m'a encourage."],["faceGuard","Gwen","Finalement je l'ai présenté comme projet de fin d'étude.\nJ'arrive pas à croire que j'ai reussi."]]],[14,3,8,"A",14,null,"Sprite 3,8",[],[],2,1],[15,8,8,1,5],[16,12,8,3,1,"faceMerchant","Sprite 12,8",[],[3]],[17,17,8,1,13],[18,8,9,2,2,"facePlayer","Sprite 8,9",[["faceThief","Pnj aux cheveux bleux","On a réussi à faire fonctionner l'éditeur ?\nJ'arrive pas à y croire..."]]],[19,11,9,"DOOR",2],[20,2,10,"A",14,null,"Sprite 2,10",[],[],2,1],[21,8,10,1,17],[22,10,10,1,5],[23,18,10,1,15],[24,12,11,1,17],[25,19,11,1,6],[26,12,12,1,13],[27,18,13,1,13],[28,19,13,1,13],[29,15,14,1,1],[30,18,14,1,6],[31,2,15,1,5],[32,13,15,1,6],[33,11,16,1,13],[34,3,17,1,17],[35,4,17,1,17],[36,17,17,1,6],[37,21,17,1,13],[38,20,18,1,15],[39,4,20,1,12],[40,7,20,1,12],[41,12,20,1,16],[42,13,20,1,16],[43,16,20,"DOOR",2],[44,22,21,1,5],[45,4,22,1,12],[46,7,22,1,12],[47,12,22,1,16],[48,13,22,1,16],[49,15,22,1,12],[50,17,22,1,12],[51,19,22,1,5]],
+      sprites: [[1,2,1,"EXIT",16],[2,1,2,1,12],[3,1,3,5,9],[4,3,3,"A",14,null,"Sprite 3,3",[],[],2,1],[5,18,3,1,13],[6,1,4,1,12],[7,13,4,1,13],[8,5,5,"A",14,null,"Sprite 5,5",[],[],2,1],[9,8,5,1,17],[10,9,5,1,17],[11,12,5,1,15],[12,14,7,1,13],[13,20,7,2,2,"facePlayer","Sprite 20,7",[["faceGuard","Gwen","Le plus dur ? C'est de se tenir à un objectif. Le developpement d'un jeux video est un défis qu'on sous-estime facilement."],["faceGuard","Gwen","Par chance, j'ai pu présenter mon projet au public, donc ça m'a encourage."],["faceGuard","Gwen","Finalement je l'ai présenté comme projet de fin d'étude.\nJ'arrive pas à croire que j'ai reussi."]]],[14,3,8,"A",14,nulZl,"Sprite 3,8",[],[],2,1],[15,8,8,1,5],[16,12,8,3,1,"faceMerchant","Sprite 12,8",[],[3]],[17,17,8,1,13],[18,8,9,2,2,"facePlayer","Sprite 8,9",[["faceThief","Pnj aux cheveux bleux","On a réussi à faire fonctionner l'éditeur ?\nJ'arrive pas à y croire..."]]],[19,11,9,"DOOR",2],[20,2,10,"A",14,null,"Sprite 2,10",[],[],2,1],[21,8,10,1,17],[22,10,10,1,5],[23,18,10,1,15],[24,12,11,1,17],[25,19,11,1,6],[26,12,12,1,13],[27,18,13,1,13],[28,19,13,1,13],[29,15,14,1,1],[30,18,14,1,6],[31,2,15,1,5],[32,13,15,1,6],[33,11,16,1,13],[34,3,17,1,17],[35,4,17,1,17],[36,17,17,1,6],[37,21,17,1,13],[38,20,18,1,15],[39,4,20,1,12],[40,7,20,1,12],[41,12,20,1,16],[42,13,20,1,16],[43,16,20,"DOOR",2],[44,22,21,1,5],[45,4,22,1,12],[46,7,22,1,12],[47,12,22,1,16],[48,13,22,1,16],[49,15,22,1,12],[50,17,22,1,12],[51,19,22,1,5]],
       eventA: [[3,14,4.71238898038469,true,2,1,2,"Moving out..."]],
       eventB: [[3,12,4.71238898038469,true,1,2,1,"Moving in..."]],
       playerStart: {
@@ -1029,3 +1044,4 @@ Gwendal L.R.
 
 </div>
 </body>
+
