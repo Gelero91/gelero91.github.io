@@ -116,17 +116,69 @@ let ceilingRender = false;
 let floorTexture = 1;
 let ceilingTexture = 1;
 
-// Sprites : comment ça marche ?
-            // Il y a des types de sprites avec des comportements définis.
-            // 1 = objet/sans intéraction/bloquant, 10 = sprites décoratifs (ex : herbe)
-            // 2 = XXX , 3 = XXX, 4 = XXX, 5 = XXX
-            // "A" = ennemis, "DOOR" = porte intérieur/exterieur, "EXIT" = map suivante
-            // les variables sont organisées de la sorte:
-            // ID (ne peut être en double, sauf 0 qui ne marche que pour type 10)
-            // ID, x, y, type, texture (etc...)
+// Sprites : comment ça marche ? xyz
 
+// Sprites : Structure et fonctionnement
+
+            // Types de sprites avec comportements spécifiques :
+            // 0 = Décoration sans interaction (non bloquant)
+            // 1 = Décoration alternative (bloquant)
+            // 2 = PNJ avec dialogues
+            // 3 = Marchand (boutique avec items)
+            // 4 = Quest giver (donneur de quêtes - non implémenté)
+            // 5 = Quest end (fin de quête/interaction spéciale)
+            // 6 = Coffre au trésor (avec loot)
+            // 10 = Sprites décoratifs multiples (génère 2 sprites herbe aléatoires)
+            // "A" = Ennemi (combat, IA, loot)
+            // "DOOR" = Porte intérieur/extérieur (téléportation 2 cases)
+            // "EXIT" = Sortie vers carte suivante
+            
+            // Structure des données sprites : [ID, x, y, type, texture, face, name, dialogue, items, hp, dmg, lootClass]
+            // ID : Identifiant unique (0 réservé pour type 10 et sprite de combat)
+            // x, y : Position en coordonnées de grille
+            // type : Type de comportement (voir ci-dessus)
+            // texture : ID de texture (1-21) :
+            //   1=PNJ1, 2=PNJ2, 3=Garde, 4=Roche, 5=Tonneau, 6=Buisson, 7=Pancarte,
+            //   8=Imp, 9=Trésor, 10=Cadavre, 11=Statue, 12=Brasier, 13=Herbes,
+            //   14=Chauve-souris, 15=Arbre, 16=Colonne, 17=Sac, 18=Sac (var),
+            //   19=Animation slash, 20=Animation spark, 21=Coffre ouvert
+            // face : Face pour dialogues (ex: "faceGuard", "facePlayer")
+            // name : Nom du sprite
+            // dialogue : Tableaux de dialogues [[face, nom, texte], ...]
+            // items : Items vendus pour marchands [1,2,3,...]
+            // hp : Points de vie (défaut: 4 pour ennemis)
+            // dmg : Dégâts (défaut: 3 pour ennemis)
+            // lootClass : Classe de loot (lettres a-f ou nombre direct pour item)
+
+            // textures :
+            // Textures disponibles pour les sprites
+            /*
+                1  = PNJ1               // Personnage non-joueur 1
+                2  = PNJ2               // Personnage non-joueur 2
+                3  = Garde              // Garde
+                4  = Roche              // Roche
+                5  = Tonneau            // Tonneau
+                6  = Buisson            // Buisson
+                7  = Pancarte           // Pancarte
+                8  = Imp                // Imp (non animé)
+                9  = Trésor             // Coffre au trésor
+                10 = Cadavre            // Cadavre ("dead enemy skull")
+                11 = Statue             // Statue
+                12 = Brasier            // Brasier
+                13 = Herbes             // Herbes (weeds)
+                14 = Chauve-souris      // Chauve-souris (animé - 3 frames)
+                15 = Arbre              // Arbre
+                16 = Colonne            // Colonne
+                17 = Sac                // Sac
+                18 = Sac (variante)     // Sac (autre version)
+                19 = Animation slash    // Animation d'attaque slash
+                20 = Animation spark    // Animation d'étincelles/magie
+                21 = Coffre ouvert      // Coffre ouvert
+                */
+
+                
 var maps = [
-        {
+{
   "mapID": 1,
   "map": [
     [
@@ -517,7 +569,7 @@ var maps = [
       0,
       0,
       0,
-      1
+      9
     ],
     [
       5,
@@ -756,71 +808,450 @@ var maps = [
   ],
   "sprites": [
     [
-      1,
-      15,
-      16,
-      "DOOR",
-      "DOOR",
-      null,
-      "Décoration 1",
-      [],
-      [],
-      1,
-      0,
-      0
-    ],
-    [
-      2,
-      5,
-      13,
-      "DOOR",
-      "DOOR",
-      null,
-      "Décoration 2",
-      [],
-      [],
-      1,
-      0,
-      0
-    ],
-    [
-      3,
-      6,
-      7,
-      0,
-      "DOOR",
-      "DOOR",
-      "Décoration 3",
-      [],
-      [],
-      1,
-      0,
-      0
-    ],
-    [
-      4,
-      14,
-      7,
-      "DOOR",
-      "DOOR",
-      null,
-      "Décoration 4",
-      [],
-      [],
-      1,
-      0,
-      0
-    ],
-    [
-      5,
+      9,
       6,
       17,
       "DOOR",
-      "DOOR",
+      16,
       null,
-      "Décoration 5",
+      "Porte",
       [],
       [],
+      1,
+      0,
+      0
+    ],
+    [
+      10,
+      5,
+      13,
+      "DOOR",
+      16,
+      null,
+      "Porte",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      11,
+      6,
+      7,
+      "DOOR",
+      16,
+      null,
+      "Porte",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      12,
+      14,
+      7,
+      "DOOR",
+      16,
+      null,
+      "Porte",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      13,
+      23,
+      14,
+      "EXIT",
+      16,
+      null,
+      "Sortie du Niveau",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      14,
+      8,
+      9,
+      10,
+      13,
+      null,
+      "Hautes herbes",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      15,
+      12,
+      14,
+      10,
+      13,
+      null,
+      "Hautes herbes",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      16,
+      7,
+      15,
+      10,
+      13,
+      null,
+      "Hautes herbes",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      17,
+      13,
+      5,
+      10,
+      13,
+      null,
+      "Hautes herbes",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      18,
+      10,
+      17,
+      10,
+      13,
+      null,
+      "Hautes herbes",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      19,
+      12,
+      9,
+      0,
+      15,
+      null,
+      "Palmier",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      20,
+      8,
+      15,
+      0,
+      15,
+      null,
+      "Palmier",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      21,
+      6,
+      12,
+      1,
+      5,
+      null,
+      "Tonneau",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      22,
+      8,
+      7,
+      0,
+      17,
+      null,
+      "Sac",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      23,
+      13,
+      13,
+      1,
+      11,
+      null,
+      "Statue",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      24,
+      13,
+      19,
+      1,
+      11,
+      null,
+      "Statue",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      25,
+      15,
+      16,
+      "DOOR",
+      16,
+      null,
+      "Porte",
+      [],
+      [],
+      1,
+      0,
+      0
+    ],
+    [
+      26,
+      14,
+      10,
+      6,
+      9,
+      null,
+      "Coffre au Trésor commun",
+      [],
+      [],
+      1,
+      0,
+      "b"
+    ],
+    [
+      27,
+      15,
+      10,
+      6,
+      9,
+      null,
+      "Coffre au Trésor peu commun",
+      [],
+      [],
+      1,
+      0,
+      "c"
+    ],
+    [
+      28,
+      16,
+      10,
+      6,
+      9,
+      null,
+      "Coffre au Trésor rare",
+      [],
+      [],
+      1,
+      0,
+      "d"
+    ],
+    [
+      29,
+      17,
+      10,
+      6,
+      9,
+      null,
+      "Coffre au Trésor épique",
+      [],
+      [],
+      1,
+      0,
+      "e"
+    ],
+    [
+      30,
+      18,
+      10,
+      6,
+      9,
+      null,
+      "Coffre au Trésor incroyable",
+      [],
+      [],
+      1,
+      0,
+      "f"
+    ],
+    [
+      31,
+      2,
+      9,
+      "A",
+      8,
+      null,
+      "Gobelin",
+      [],
+      [],
+      5,
+      3,
+      "c"
+    ],
+    [
+      32,
+      2,
+      10,
+      "A",
+      14,
+      null,
+      "Chauve-souris",
+      [],
+      [],
+      2,
+      1,
+      "b"
+    ],
+    [
+      33,
+      2,
+      8,
+      "A",
+      8,
+      null,
+      "Imp",
+      [],
+      [],
+      3,
+      6,
+      "d"
+    ],
+    [
+      34,
+      14,
+      15,
+      2,
+      3,
+      "faceGuard",
+      "Garde du Temple",
+      [
+        [
+          "facePlayer",
+          "Aventurier",
+          "Bonjour, j'aimerais vous aider."
+        ],
+        [
+          "faceGuard",
+          "Garde du Temple",
+          "Salut aventurier ! Nous avons besoin d'aide dans le temple, les cryptes sont envahies par des créatures."
+        ],
+        [
+          "facePlayer",
+          "Aventurier",
+          "Merci pour l'info, je vais m'en occuper."
+        ]
+      ],
+      [],
+      10,
+      0,
+      0
+    ],
+    [
+      35,
+      14,
+      17,
+      2,
+      3,
+      "faceGuard",
+      "Garde du Temple",
+      [
+        [
+          "facePlayer",
+          "Aventurier",
+          "Bonjour, j'aimerais vous aider."
+        ],
+        [
+          "faceGuard",
+          "Garde du Temple",
+          "Salut aventurier ! Nous avons besoin d'aide dans le temple, les cryptes sont envahies par des créatures."
+        ],
+        [
+          "facePlayer",
+          "Aventurier",
+          "Merci pour l'info, je vais m'en occuper."
+        ]
+      ],
+      [],
+      10,
+      0,
+      0
+    ],
+    [
+      36,
+      13,
+      8,
+      3,
+      7,
+      "faceMerchant",
+      "Quill le Marchand",
+      [
+        [
+          "facePlayer",
+          "Aventurier",
+          "Salut !"
+        ],
+        [
+          "faceMerchant",
+          "Quill le Marchand",
+          "Hé mon pote ! Tu veux acheter quelque chose ?"
+        ],
+        [
+          "facePlayer",
+          "Aventurier",
+          "D'accord, peut-être plus tard."
+        ]
+      ],
+      [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
       1,
       0,
       0
@@ -7153,7 +7584,10 @@ class Raycaster {
         this.loadFloorCeilingImages();
     }
 
-    loadFloorCeilingImages() {
+// Dans la classe Raycaster, méthode loadFloorCeilingImages()
+// Voici la portion qui charge les textures des sprites :
+
+ loadFloorCeilingImages() {
         // Crée un canvas temporaire pour obtenir les pixels des images
         let canvas = document.createElement("canvas");
         canvas.width = this.textureSize * 2;
@@ -7171,8 +7605,6 @@ class Raycaster {
         let skyboximg = document.getElementById("skybox1");
         context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
         this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
-
-        // texture des sprites
 
         // Chargement des textures de sol
         const floorTextures = {
@@ -7205,7 +7637,7 @@ class Raycaster {
             "sprite1", "sprite2", "sprite3", "sprite4", "sprite5", "sprite6",
             "sprite7", "sprite14", "sprite9", "sprite10", "sprite11", "sprite12",
             "sprite13", "sprite8", "sprite15", "sprite16", "sprite17", "sprite18",
-            "sprite19", "sprite20", "sprite21"
+            "sprite19", "sprite20", "sprite21",
         ];
 
         spriteIds.forEach((spriteId, index) => {
@@ -7396,69 +7828,79 @@ class Raycaster {
     // fonction drawsprite : ou les textures des sprites sont gérées
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    drawSpriteStrip(rayHit) {
-        // ligne à supprimer si pas de bug dans la version > α0.6
-        // let sprite = rayHit.sprite
-        if (!rayHit.sprite.screenPosition) {
-            rayHit.sprite.screenPosition = this.spriteScreenPosition(rayHit.sprite);
-        }
-        let rc = rayHit.sprite.screenPosition;
+drawSpriteStrip(rayHit) {
+    if (!rayHit.sprite.screenPosition) {
+        rayHit.sprite.screenPosition = this.spriteScreenPosition(rayHit.sprite);
+    }
+    let rc = rayHit.sprite.screenPosition;
 
-        // sprite first strip is ahead of current strip
-        if (rc.x > rayHit.strip) {
-            return;
-        }
+    // sprite first strip is ahead of current strip
+    if (rc.x > rayHit.strip) {
+        return;
+    }
 
-        // sprite last strip is before current strip
-        if (rc.x + rc.w < rayHit.strip) {
-            return;
-        }
+    // sprite last strip is before current strip
+    if (rc.x + rc.w < rayHit.strip) {
+        return;
+    }
 
-        let diffX = Math.trunc(rayHit.strip - rc.x);
-        let dstX = rc.x + diffX; // skip left parts of sprite already drawn
-        let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
-        let srcW = 1;
+    let diffX = Math.trunc(rayHit.strip - rc.x);
+    let dstX = rc.x + diffX; // skip left parts of sprite already drawn
+    let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
+    let srcW = 1;
 
-        if (srcX >= 0 && srcX < this.textureSize) {
-            // Créez un objet (ou tableau) pour stocker les données associées à chaque spriteType
-            const spriteData = {
-                A: this.spriteImageData8, // NPC TEST ENEMY
-                1: this.spriteImageData1, // PNJ1
-                2: this.spriteImageData2, // PNJ2
-                3: this.spriteImageData3, // Garde
-                4: this.spriteImageData4, // Rock
-                5: this.spriteImageData5, // Tonneau
-                6: this.spriteImageData6, // buisson
-                7: this.spriteImageData7, // pancarte
-                8: this.spriteImageData14, // Imp (fight test NOT ANIMATED)
-                // 8: this.spriteImageData8,  // Imp (old data, switched with bat (n°8))
-                9: this.spriteImageData9, // Treasure !
-                10: this.spriteImageData10, // "dead enemy skull"
-                11: this.spriteImageData11, // Statue
-                12: this.spriteImageData12, // Brasier
-                13: this.spriteImageData13, // weeds
-                14: this.spriteImageData14, // bat (fight test ANIMATED)
-                15: this.spriteImageData15, // arbe
-                16: this.spriteImageData16, // colonne
-                17: this.spriteImageData17, // sac
-                18: this.spriteImageData18, // sac
-                19: this.spriteImageData19, // slashAnimation
-                20: this.spriteImageData20, // sparkAnimation
-                21: this.spriteImageData21, // openChest
-            };
-
-            // Utilisez la structure de données pour accéder aux données appropriées en fonction de spriteType
-            const spriteTexture = rayHit.sprite.spriteTexture;
-            const spriteFlash = rayHit.sprite.spriteFlash;
-
-            if (spriteData.hasOwnProperty(spriteTexture)) {
-                this.drawTexturedRect(spriteData[spriteTexture], srcX, 0, srcW,
-                    this.textureSize, dstX, rc.y, this.stripWidth, rc.h, spriteFlash
+    if (srcX >= 0 && srcX < this.textureSize) {
+        // Récupérer le numéro de texture du sprite
+        const spriteTexture = rayHit.sprite.spriteTexture;
+        const spriteFlash = rayHit.sprite.spriteFlash;
+        
+        // Nom de la propriété qui contient les données de texture
+        const spriteDataName = "spriteImageData" + spriteTexture;
+        
+        // Vérifier que les données de texture existent
+        if (this[spriteDataName]) {
+            this.drawTexturedRect(
+                this[spriteDataName], 
+                srcX, 
+                0, 
+                srcW,
+                this.textureSize, 
+                dstX, 
+                rc.y, 
+                this.stripWidth, 
+                rc.h, 
+                spriteFlash
+            );
+        } else {
+            // Log d'avertissement uniquement si on n'a pas déjà signalé cette texture manquante
+            if (!this.warnedMissingTextures) {
+                this.warnedMissingTextures = new Set();
+            }
+            
+            if (!this.warnedMissingTextures.has(spriteTexture)) {
+                console.warn(`⚠ Texture sprite${spriteTexture} non chargée pour sprite ID ${rayHit.sprite.id} (${rayHit.sprite.spriteName})`);
+                this.warnedMissingTextures.add(spriteTexture);
+            }
+            
+            // Optionnel : utiliser une texture par défaut ou dessiner un placeholder
+            // Si vous avez une texture par défaut (ex: sprite1), vous pouvez l'utiliser :
+            if (this.spriteImageData1) {
+                this.drawTexturedRect(
+                    this.spriteImageData1, // Texture par défaut
+                    srcX, 
+                    0, 
+                    srcW,
+                    this.textureSize, 
+                    dstX, 
+                    rc.y, 
+                    this.stripWidth, 
+                    rc.h, 
+                    spriteFlash
                 );
             }
         }
     }
-
+}
     //////////////////////////////////////////////////////////////////////
     // MURS
     //////////////////////////////////////////////////////////////////////
