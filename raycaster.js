@@ -7637,7 +7637,7 @@ class Raycaster {
             "sprite1", "sprite2", "sprite3", "sprite4", "sprite5", "sprite6",
             "sprite7", "sprite14", "sprite9", "sprite10", "sprite11", "sprite12",
             "sprite13", "sprite8", "sprite15", "sprite16", "sprite17", "sprite18",
-            "sprite19", "sprite20", "sprite21",
+            "sprite19", "sprite20", "sprite21", "sprite22", "sprite23",
         ];
 
         spriteIds.forEach((spriteId, index) => {
