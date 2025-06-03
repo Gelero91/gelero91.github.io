@@ -986,7 +986,7 @@ const maps = [
           21,
           15,
           0,
-          1,
+          16,
           null,
           "Décoration 38",
           [],
@@ -1000,7 +1000,7 @@ const maps = [
           21,
           19,
           0,
-          1,
+          16,
           null,
           "Décoration 39",
           [],
@@ -1014,7 +1014,7 @@ const maps = [
           21,
           17,
           0,
-          1,
+          16,
           null,
           "Décoration 40",
           [],
@@ -1037,12 +1037,13 @@ const maps = [
           0,
           "c"
         ],
+        // xyz
         [
           42,
           7,
           19,
           0,
-          1,
+          7,
           null,
           "Décoration 42",
           [],
@@ -2518,7 +2519,7 @@ const maps = [
       "playerStart": {
         "X": 3,
         "Y": 6,
-        "Orientation": 1.5707963267948966,
+        "Orientation": Math.PI*2,
         "ceilingRender": true,
         "ceilingHeight": 1,
         "ceilingTexture": 2,
@@ -8703,69 +8704,100 @@ class Raycaster {
 // Dans la classe Raycaster, méthode loadFloorCeilingImages()
 // Voici la portion qui charge les textures des sprites :
 
- loadFloorCeilingImages() {
-        // Crée un canvas temporaire pour obtenir les pixels des images
-        let canvas = document.createElement("canvas");
-        canvas.width = this.textureSize * 2;
-        canvas.height = this.textureSize * 24;
-        let context = canvas.getContext("2d");
+loadFloorCeilingImages() {
+    // Crée un canvas temporaire pour obtenir les pixels des images
+    let canvas = document.createElement("canvas");
+    canvas.width = this.textureSize * 2;
+    canvas.height = this.textureSize * 24;
+    let context = canvas.getContext("2d");
 
-        // Fonction générique pour charger les textures de sol et de plafond
-        const loadTexture = (imageId, textureType) => {
-            let img = document.getElementById(imageId);
-            context.drawImage(img, 0, 0, img.width, img.height);
-            return context.getImageData(0, 0, this.textureSize, this.textureSize);
-        };
+    // Fonction générique pour charger les textures de sol et de plafond
+    const loadTexture = (imageId, textureType) => {
+        let img = document.getElementById(imageId);
+        context.drawImage(img, 0, 0, img.width, img.height);
+        return context.getImageData(0, 0, this.textureSize, this.textureSize);
+    };
 
-        // Skybox
-        let skyboximg = document.getElementById("skybox1");
-        context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
-        this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
+    // Skybox
+    let skyboximg = document.getElementById("skybox1");
+    context.drawImage(skyboximg, 0, 0, skyboximg.width, skyboximg.height);
+    this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
 
-        // Chargement des textures de sol
-        const floorTextures = {
-            1: "floorimg1",
-            2: "floorimg2",
-            3: "floorimg3",
-            4: "floorimg4"
-        };
-        if (floorTextures[floorTexture]) {
-            this.floorImageData = loadTexture(floorTextures[floorTexture], 'floor');
-        }
+    // Chargement des textures de sol
+    const floorTextures = {
+        1: "floorimg1",
+        2: "floorimg2",
+        3: "floorimg3",
+        4: "floorimg4"
+    };
+    if (floorTextures[floorTexture]) {
+        this.floorImageData = loadTexture(floorTextures[floorTexture], 'floor');
+    }
 
-        // Chargement des textures de plafond
-        const ceilingTextures = {
-            1: "ceilingimg1",
-            2: "ceilingimg2",
-            3: "ceilingimg3"
-        };
-        if (ceilingTextures[ceilingTexture]) {
-            this.ceilingImageData = loadTexture(ceilingTextures[ceilingTexture], 'ceiling');
-        }
+    // Chargement des textures de plafond
+    const ceilingTextures = {
+        1: "ceilingimg1",
+        2: "ceilingimg2",
+        3: "ceilingimg3"
+    };
+    if (ceilingTextures[ceilingTexture]) {
+        this.ceilingImageData = loadTexture(ceilingTextures[ceilingTexture], 'ceiling');
+    }
 
-        // Chargement des textures de mur
-        let wallsImage = document.getElementById("wallsImage");
-        context.drawImage(wallsImage, 0, 0, wallsImage.width, wallsImage.height);
-        this.wallsImageData = context.getImageData(0, 0, wallsImage.width, wallsImage.height);
+    // Chargement des textures de mur
+    let wallsImage = document.getElementById("wallsImage");
+    context.drawImage(wallsImage, 0, 0, wallsImage.width, wallsImage.height);
+    this.wallsImageData = context.getImageData(0, 0, wallsImage.width, wallsImage.height);
 
-        // Chargement des sprites (partie déjà optimisée)
-        const spriteIds = [
-            "sprite1", "sprite2", "sprite3", "sprite4", "sprite5", "sprite6",
-            "sprite7", "sprite14", "sprite9", "sprite10", "sprite11", "sprite12",
-            "sprite13", "sprite8", "sprite15", "sprite16", "sprite17", "sprite18",
-            "sprite19", "sprite20", "sprite21", "sprite22", "sprite23",
-        ];
+    // ====================================================================
+    // CHARGEMENT DES SPRITES - MAPPING CORRIGÉ
+    // ====================================================================
+    
+    // OPTION 1: Tableau dans l'ordre séquentiel (RECOMMANDÉ)
+    const spriteIds = [
+        "sprite1",  // Index 0 → spriteImageData1  (PNJ1)
+        "sprite2",  // Index 1 → spriteImageData2  (PNJ2)
+        "sprite3",  // Index 2 → spriteImageData3  (Garde)
+        "sprite4",  // Index 3 → spriteImageData4  (Roche)
+        "sprite5",  // Index 4 → spriteImageData5  (Tonneau)
+        "sprite6",  // Index 5 → spriteImageData6  (Buisson)
+        "sprite7",  // Index 6 → spriteImageData7  (Pancarte)
+        "sprite8",  // Index 7 → spriteImageData8  (Imp) ✅ CORRIGÉ
+        "sprite9",  // Index 8 → spriteImageData9  (Trésor)
+        "sprite10", // Index 9 → spriteImageData10 (Cadavre)
+        "sprite11", // Index 10 → spriteImageData11 (Statue)
+        "sprite12", // Index 11 → spriteImageData12 (Brasier)
+        "sprite13", // Index 12 → spriteImageData13 (Herbes)
+        "sprite14", // Index 13 → spriteImageData14 (Chauve-souris) ✅ CORRIGÉ
+        "sprite15", // Index 14 → spriteImageData15 (Arbre)
+        "sprite16", // Index 15 → spriteImageData16 (Colonne)
+        "sprite17", // Index 16 → spriteImageData17 (Sac)
+        "sprite18", // Index 17 → spriteImageData18 (Sac variante)
+        "sprite19", // Index 18 → spriteImageData19 (Animation slash)
+        "sprite20", // Index 19 → spriteImageData20 (Animation spark)
+        "sprite21", // Index 20 → spriteImageData21 (Coffre ouvert)
+        "sprite22", // Index 21 → spriteImageData22 (Chauve-souris 2)
+        "sprite23", // Index 22 → spriteImageData23 (Liane vivante)
+    ];
 
-        spriteIds.forEach((spriteId, index) => {
-            let spriteImage = document.getElementById(spriteId);
+    spriteIds.forEach((spriteId, index) => {
+        let spriteImage = document.getElementById(spriteId);
+        if (spriteImage) {
             let canvas = document.createElement("canvas");
             let context = canvas.getContext("2d");
             canvas.width = spriteImage.width;
             canvas.height = spriteImage.height;
             context.drawImage(spriteImage, 0, 0, spriteImage.width, spriteImage.height);
             this["spriteImageData" + (index + 1)] = context.getImageData(0, 0, spriteImage.width, spriteImage.height);
-        });
-    }
+            console.log(`✅ Texture ${index + 1} (${spriteId}) chargée avec succès`);
+        } else {
+            console.warn(`⚠️ Élément DOM '${spriteId}' non trouvé pour la texture ${index + 1}`);
+        }
+    });
+
+    console.log(`🎯 Chargement des textures de sprites terminé`);
+}
+
 
 
 
@@ -8944,65 +8976,39 @@ class Raycaster {
     // fonction drawsprite : ou les textures des sprites sont gérées
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-drawSpriteStrip(rayHit) {
-    if (!rayHit.sprite.screenPosition) {
-        rayHit.sprite.screenPosition = this.spriteScreenPosition(rayHit.sprite);
-    }
-    let rc = rayHit.sprite.screenPosition;
+    drawSpriteStrip(rayHit) {
+        if (!rayHit.sprite.screenPosition) {
+            rayHit.sprite.screenPosition = this.spriteScreenPosition(rayHit.sprite);
+        }
+        let rc = rayHit.sprite.screenPosition;
 
-    // sprite first strip is ahead of current strip
-    if (rc.x > rayHit.strip) {
-        return;
-    }
+        // sprite first strip is ahead of current strip
+        if (rc.x > rayHit.strip) {
+            return;
+        }
 
-    // sprite last strip is before current strip
-    if (rc.x + rc.w < rayHit.strip) {
-        return;
-    }
+        // sprite last strip is before current strip
+        if (rc.x + rc.w < rayHit.strip) {
+            return;
+        }
 
-    let diffX = Math.trunc(rayHit.strip - rc.x);
-    let dstX = rc.x + diffX; // skip left parts of sprite already drawn
-    let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
-    let srcW = 1;
+        let diffX = Math.trunc(rayHit.strip - rc.x);
+        let dstX = rc.x + diffX; // skip left parts of sprite already drawn
+        let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
+        let srcW = 1;
 
-    if (srcX >= 0 && srcX < this.textureSize) {
-        // Récupérer le numéro de texture du sprite
-        const spriteTexture = rayHit.sprite.spriteTexture;
-        const spriteFlash = rayHit.sprite.spriteFlash;
-        
-        // Nom de la propriété qui contient les données de texture
-        const spriteDataName = "spriteImageData" + spriteTexture;
-        
-        // Vérifier que les données de texture existent
-        if (this[spriteDataName]) {
-            this.drawTexturedRect(
-                this[spriteDataName], 
-                srcX, 
-                0, 
-                srcW,
-                this.textureSize, 
-                dstX, 
-                rc.y, 
-                this.stripWidth, 
-                rc.h, 
-                spriteFlash
-            );
-        } else {
-            // Log d'avertissement uniquement si on n'a pas déjà signalé cette texture manquante
-            if (!this.warnedMissingTextures) {
-                this.warnedMissingTextures = new Set();
-            }
+        if (srcX >= 0 && srcX < this.textureSize) {
+            // Récupérer le numéro de texture du sprite
+            const spriteTexture = rayHit.sprite.spriteTexture;
+            const spriteFlash = rayHit.sprite.spriteFlash;
             
-            if (!this.warnedMissingTextures.has(spriteTexture)) {
-                console.warn(`⚠ Texture sprite${spriteTexture} non chargée pour sprite ID ${rayHit.sprite.id} (${rayHit.sprite.spriteName})`);
-                this.warnedMissingTextures.add(spriteTexture);
-            }
+            // Nom de la propriété qui contient les données de texture
+            const spriteDataName = "spriteImageData" + spriteTexture;
             
-            // Optionnel : utiliser une texture par défaut ou dessiner un placeholder
-            // Si vous avez une texture par défaut (ex: sprite1), vous pouvez l'utiliser :
-            if (this.spriteImageData1) {
+            // Vérifier que les données de texture existent
+            if (this[spriteDataName]) {
                 this.drawTexturedRect(
-                    this.spriteImageData1, // Texture par défaut
+                    this[spriteDataName], 
                     srcX, 
                     0, 
                     srcW,
@@ -9013,10 +9019,36 @@ drawSpriteStrip(rayHit) {
                     rc.h, 
                     spriteFlash
                 );
+            } else {
+                // Log d'avertissement uniquement si on n'a pas déjà signalé cette texture manquante
+                if (!this.warnedMissingTextures) {
+                    this.warnedMissingTextures = new Set();
+                }
+                
+                if (!this.warnedMissingTextures.has(spriteTexture)) {
+                    console.warn(`⚠ Texture sprite${spriteTexture} non chargée pour sprite ID ${rayHit.sprite.id} (${rayHit.sprite.spriteName})`);
+                    this.warnedMissingTextures.add(spriteTexture);
+                }
+                
+                // Optionnel : utiliser une texture par défaut (sprite1)
+                if (this.spriteImageData1) {
+                    this.drawTexturedRect(
+                        this.spriteImageData1, // Texture par défaut
+                        srcX, 
+                        0, 
+                        srcW,
+                        this.textureSize, 
+                        dstX, 
+                        rc.y, 
+                        this.stripWidth, 
+                        rc.h, 
+                        spriteFlash
+                    );
+                }
             }
         }
     }
-}
+
     //////////////////////////////////////////////////////////////////////
     // MURS
     //////////////////////////////////////////////////////////////////////
