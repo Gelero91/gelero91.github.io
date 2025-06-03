@@ -2519,7 +2519,7 @@ const maps = [
       "playerStart": {
         "X": 3,
         "Y": 6,
-        "Orientation": Math.PI*2,
+        "Orientation": 0,
         "ceilingRender": true,
         "ceilingHeight": 1,
         "ceilingTexture": 2,
