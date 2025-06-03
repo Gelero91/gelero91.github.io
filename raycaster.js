@@ -986,7 +986,7 @@ const maps = [
           21,
           15,
           0,
-          16,
+          1,
           null,
           "Décoration 38",
           [],
@@ -1000,7 +1000,7 @@ const maps = [
           21,
           19,
           0,
-          16,
+          1,
           null,
           "Décoration 39",
           [],
@@ -1014,7 +1014,7 @@ const maps = [
           21,
           17,
           0,
-          16,
+          1,
           null,
           "Décoration 40",
           [],
@@ -1042,7 +1042,7 @@ const maps = [
           7,
           19,
           0,
-          16,
+          1,
           null,
           "Décoration 42",
           [],
@@ -4671,7 +4671,7 @@ class Player {
                         // ultérieurement : quests[currentMap].complete();
                         console.log("chest !");
                         if (sprite.step != 1) {
-                            sprite.lootClass = 5;
+                            // sprite.lootClass = 5;
 
                             sprite.generateLoot(this);
 
@@ -8517,43 +8517,43 @@ class Raycaster {
 
     initSprites(spriteList) {
         this.clearSprites();
-    
+
         const tileSizeHalf = Math.floor(this.tileSize / 2);
         let spritePositions = spriteList;
         this.sprites = [];
-    
+
         let additionalDecoration = [];
         let additionalDecorationCount = 0;
         let additionalDecorationSpriteCount = 0;
-    
+
         for (let pos of spritePositions) {
             let id = pos[0];
             let x = pos[1] * this.tileSize + tileSizeHalf;
             let y = pos[2] * this.tileSize + tileSizeHalf;
-    
+
             let type = pos[3];
             let texture = pos[4];
             let face = pos[5];
             let name = pos[6];
             let dialogue = pos[7];
             let spriteSell = pos[8] || [];
-    
+
             // valeur par defaut des ennemis
             let hp = pos[9] || 4;
             let dmg = pos[10] || 3;
             let lootClass = pos[11] || null; // Nouveau paramètre pour la classe de loot
-    
+
             if (type === 10) {
                 for (let j = 0; j < 2; j++) {
                     let newX = x + (Math.random() * 2 - 1) * tileSizeHalf;
                     let newY = y + (Math.random() * 2 - 1) * tileSizeHalf;
-    
-                    let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 13, 13, false);
+
+                    let newDecoration = new Sprite(newX, newY, 0, this.tileSize, this.tileSize, 0, 0, 13, false, false, true, 1, 0, 0, "Décoration", null, [], [], 0, 0, null);
                     newDecoration.spriteTexture = 13;
                     newDecoration.spriteType = 1;
                     newDecoration.isBlocking = false;
                     newDecoration.id = 0;
-    
+
                     additionalDecoration.push(newDecoration);
                     additionalDecorationCount++;
                 }
@@ -8564,39 +8564,46 @@ class Raycaster {
                     continue;
                 }
 
+                // Déterminer la lootClass finale
+                let finalLootClass;
+                if (lootClass === null || lootClass === 0 || lootClass === undefined) {
+                    if (type === "A") {
+                        // Calcul automatique pour les ennemis
+                        const calculatedClass = Sprite.calculateLootClass(hp, dmg);
+                        const classLetters = ["a", "b", "c", "d", "e", "f"];
+                        finalLootClass = classLetters[calculatedClass];
+                        console.log(`Enemy lootClass calculated: ${finalLootClass} for ${name}`);
+                    } else if (type === 6) {
+                        // Classe par défaut pour les coffres si non spécifiée
+                        finalLootClass = "c"; // Coffre de classe moyenne par défaut
+                        console.log(`Chest default lootClass: ${finalLootClass} for ${name}`);
+                    } else {
+                        finalLootClass = null; // Pas de loot pour les autres sprites
+                    }
+                } else {
+                    finalLootClass = lootClass;
+                    console.log(`Sprite lootClass from data: ${finalLootClass} for ${name}`);
+                }
 
                 let isBlocking = true;
-                // Créer le sprite avec le paramètre lootClass
+                // Créer le sprite avec la lootClass finale
                 this.sprites.push(new Sprite(
                     x, y, 0, this.tileSize, this.tileSize, 0, type, texture, 
                     isBlocking, false, true, hp, dmg, 0, name, face, dialogue, 
-                    spriteSell, id, lootClass
+                    spriteSell, id, 0, finalLootClass  // lootClass en dernier paramètre
                 ));
-
-                // Si la classe de loot n'est pas définie et que c'est un ennemi (type "A"),
-                // la calculer automatiquement
-                if (lootClass === null || lootClass === 0) {
-                    if (type === "A") {
-                        lootClass = Sprite.calculateLootClass(hp, dmg);
-                        console.log(lootClass);
-                    } else {
-                        lootClass = 0; // 0 pour les sprites non-ennemis
-                    }
-                } else {
-                    lootClass = lootClass;
-                }
             }
-    
+
             if (!dialogue && !face && !name) {
                 type = 1;
             }
         }
-    
+
         for (let newDecoration of additionalDecoration) {
             newDecoration.id = 0; // ID pour les décorations
             this.sprites.push(newDecoration);
         }
-    
+
         // Définition du sprite de combat avec l'ID 0
         this.sprites.push(Sprite.combatAnimationSprite = new Sprite(
             tileSizeHalf, // x
@@ -8618,11 +8625,12 @@ class Raycaster {
             "", // spriteTalk
             [], // spriteSell
             0, // id
-            0  // lootClass (0 car ce n'est pas un ennemi à looter)
+            0, // step
+            null  // lootClass (null car ce n'est pas un ennemi à looter)
         ));
-    
+
         Sprite.combatAnimationSprite.spriteTexture = 19;
-    
+
         console.log(this.sprites.length + " sprites créés.");
         console.log(additionalDecorationCount + " sprites décoratifs générés pour " + additionalDecorationSpriteCount + " cases de décorations.");
     }
@@ -8743,9 +8751,9 @@ class Raycaster {
         // Chargement des sprites (partie déjà optimisée)
         const spriteIds = [
             "sprite1", "sprite2", "sprite3", "sprite4", "sprite5", "sprite6",
-            "sprite7", "sprite8", "sprite9", "sprite10", "sprite11", "sprite12", 
-            "sprite13", "sprite14", "sprite15", "sprite16", "sprite17", "sprite18",
-            "sprite19", "sprite20", "sprite21", "sprite22", "sprite23"
+            "sprite7", "sprite14", "sprite9", "sprite10", "sprite11", "sprite12",
+            "sprite13", "sprite8", "sprite15", "sprite16", "sprite17", "sprite18",
+            "sprite19", "sprite20", "sprite21", "sprite22", "sprite23",
         ];
 
         spriteIds.forEach((spriteId, index) => {
