@@ -1488,17 +1488,6 @@
         damage: 6,
         lootClass: "d"  // ← 25-60 or, 30% chance item
     },
-    test: {
-        type: 'A',
-        texture: 23,
-        name: "test",
-        face: null,
-        dialogues: [],
-        items: [],
-        hp: 3,
-        damage: 6,
-        lootClass: "d"  // ← 25-60 or, 30% chance item
-    },
 
     // LOOTS - Coffres avec loot aléatoire
     chestA: {
@@ -1661,7 +1650,7 @@
             // Catégories de sprites pour un meilleur regroupement
             const categories = {
                 'PNJ et Shop': ['guard', 'merchant'],
-                'Ennemis': ['slime', 'bat', 'gobelin', 'imp', 'test'],
+                'Ennemis': ['slime', 'bat', 'gobelin', 'imp'],
                 'Coffres': ['chestA', 'chestB', 'chestC', 'chestD', 'chestE'],
                 'Décoration': ['palm', 'weeds', 'barrel', 'bag', 'column', 'statue'],
                 'Système': ['door', 'exit']
@@ -1835,8 +1824,22 @@ const APP_STATE = {
 
         // Faces disponibles pour les dialogues
         const AVAILABLE_FACES = [
-            'facePlayer', 'faceGuard', 'faceMerchant', 'faceThief',
+            'facePlayer', 'faceGuard', 'faceMerchant', 'faceThief', 
+            'faceWizard', 'faceKing', 'faceQueen', 'faceVillager'
         ];
+
+        // Initialize the application
+        function init() {
+            initializeBorders();
+            createGrid();
+            createCoordinateLabels();
+            loadAllMaps();
+            createNewMap();
+            updateDisplay();
+            setupEventListeners();
+            validateCurrentMap();
+            updateToolDisplay();
+        }
 
         // Create coordinate labels
         function createCoordinateLabels() {
@@ -2507,7 +2510,7 @@ const APP_STATE = {
                     newSprite = createBaseSpriteAt(x, y, APP_STATE.baseSpriteMode);
                     // Ne pas réinitialiser baseSpriteMode pour permettre le placement répétitif
                     showStatus(`${newSprite.name} placé (mode répétitif actif)`, 'ok');
-
+                    
                 } else if (APP_STATE.customSpritePlacementMode && APP_STATE.customSpriteConfig) {
                     newSprite = createCustomSpriteAt(x, y, APP_STATE.customSpriteConfig);
                     APP_STATE.customSpritePlacementMode = false;

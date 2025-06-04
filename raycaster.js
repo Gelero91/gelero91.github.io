@@ -116,6 +116,7 @@ let ceilingRender = false;
 let floorTexture = 1;
 let ceilingTexture = 1;
 
+
 // Sprites : comment ça marche ? xyz
 
 // Sprites : Structure et fonctionnement
@@ -137,11 +138,12 @@ let ceilingTexture = 1;
             // ID : Identifiant unique (0 réservé pour type 10 et sprite de combat)
             // x, y : Position en coordonnées de grille
             // type : Type de comportement (voir ci-dessus)
-            // texture : ID de texture (1-21) :
+            // texture : ID de texture (1-23) :
             //   1=PNJ1, 2=PNJ2, 3=Garde, 4=Roche, 5=Tonneau, 6=Buisson, 7=Pancarte,
-            //   8=Imp, 9=Trésor, 10=Cadavre, 11=Statue, 12=Brasier, 13=Herbes,
-            //   14=Chauve-souris, 15=Arbre, 16=Colonne, 17=Sac, 18=Sac (var),
-            //   19=Animation slash, 20=Animation spark, 21=Coffre ouvert
+            //   8=Slime, 9=Trésor, 10=Cadavre, 11=Statue, 12=Brasier, 13=Herbes,
+            //   14=Gobelin, 15=Arbre, 16=Colonne, 17=Sac, 18=Sac (var),
+            //   19=Animation slash, 20=Animation spark, 21=Coffre ouvert, 
+            //   22=Chauve-souris, 23=liannes vivantes
             // face : Face pour dialogues (ex: "faceGuard", "facePlayer")
             // name : Nom du sprite
             // dialogue : Tableaux de dialogues [[face, nom, texte], ...]
@@ -153,20 +155,20 @@ let ceilingTexture = 1;
             // textures :
             // Textures disponibles pour les sprites
             /*
-                1  = PNJ1               // Personnage non-joueur 1
-                2  = garde              // Personnage non-joueur 2
+                1  = PNJ1               // voleur
+                2  = garde              // garde
                 3  = PNJ2               // marchant
                 4  = Roche              // Roche
                 5  = Tonneau            // Tonneau
                 6  = Buisson            // Buisson
                 7  = Pancarte           // Pancarte
-                8  = Imp                // Imp (non animé)
+                8  = Slime              // Slime
                 9  = Trésor             // Coffre au trésor
                 10 = Cadavre            // Cadavre ("dead enemy skull")
                 11 = Statue             // Statue
                 12 = Brasier            // Brasier
                 13 = Herbes             // Herbes (weeds)
-                14 = Chauve-souris      // Chauve-souris (animé - 3 frames)
+                14 = Gobelin            // Gobelin
                 15 = Arbre              // Arbre
                 16 = Colonne            // Colonne
                 17 = Sac                // Sac
@@ -3609,11 +3611,9 @@ class Player {
         // FONCTION DEATH
         if (this.hp > 0) {} else {
             if (gameOver === false) {
-                Raycaster.showGameOver();
+                Sprite.showGameOverCinematic();
                 gameOver = true;
             } else {
-                // rajouter player tun = false, vérifier l'ordre 
-                // pour éviter conflit avec le reste de la fonction
                 console.log("hey you're dead");
             }
         }
@@ -4285,10 +4285,11 @@ class Player {
                 
             case 20:
                 pause(500);
-                Raycaster.resetShowGameOver()
+                Raycaster.resetShowGameOver(); // Au cas où on vient d'un game over
                 Raycaster.showMainMenu();
                 break;
-                
+
+            // Bouton 21 - Back Menu
             case 21:
                 pause(500);
                 if (gameOver == false) {
@@ -4297,7 +4298,7 @@ class Player {
                     alert('dead, so nope');
                 }
                 break;
-                
+                            
             default:
                 console.log("Bouton non reconnu: " + buttonNumber);
         }
@@ -7364,7 +7365,149 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
 
     }
 
+    static showGameOver() {
+        const mainCanvas = document.getElementById("mainCanvas");
+        const gameOverWindow = document.getElementById("cinematicWindow").addEventListener;
+
+        mainCanvas.style = "display:none";
+        gameOverWindow.style = "display:block";
+    }
+
     
+    /// CINEMATIQUES 
+    // xyz
+// Fonction showCinematic simplifiée pour utiliser la balise img
+static showCinematic(cinematicSteps, onComplete = null) {
+    // Bloquer les commandes 
+    commandBlocking = true;
+    
+    const dialogue = document.getElementById("dialogue");
+    const faceOutput = document.getElementById("faceOutput");
+    const dialWindow = document.getElementById("dialogueWindow");
+    const outputElement = document.getElementById("output");
+    const nextButton = document.getElementById("nextButton");
+    const mainCanvas = document.getElementById("mainCanvas");
+    const cinematicWindow = document.getElementById("cinematicWindow");
+
+    // Cacher le canvas et montrer l'image cinématique
+    mainCanvas.style.display = "none";
+    cinematicWindow.style.display = "block";
+    outputElement.style.display = "none";
+    dialWindow.style.display = "block";
+    
+    let currentStep = 0;
+    let keyListener = null;
+    
+    const showNextStep = () => {
+        if (currentStep < cinematicSteps.length) {
+            const step = cinematicSteps[currentStep];
+            
+            // Changer l'image
+            if (step.image) {
+                cinematicWindow.src = step.image;
+            }
+            
+            // Afficher le dialogue
+            if (step.face && step.name && step.text) {
+                dialogue.innerHTML = `<font style="font-weight: bold;">${step.name} </font> :<font style="font-style: italic;"><br><br>${step.text}</font>`;
+                const imgElement = document.getElementById(step.face);
+                faceOutput.src = imgElement ? imgElement.src : '';
+            }
+            
+            currentStep++;
+        } else {
+            // Fin de la cinématique
+            document.removeEventListener("keydown", keyListener);
+            
+            if (onComplete && typeof onComplete === 'function') {
+                onComplete(); // Exécuter le callback
+            } else {
+                // Comportement par défaut : retour au jeu
+                mainCanvas.style.display = "block";
+                cinematicWindow.style.display = "none";
+                outputElement.style.display = "block";
+                dialWindow.style.display = "none";
+                commandBlocking = false;
+            }
+        }
+    };
+    
+    // Écouteur pour avancer
+    keyListener = (event) => {
+        if (event.code === "Space" || event.key.toLowerCase() === "f") {
+            event.preventDefault();
+            showNextStep();
+        }
+    };
+    
+    // Event listeners
+    const newNextButton = nextButton.cloneNode(true);
+    nextButton.parentNode.replaceChild(newNextButton, nextButton);
+    newNextButton.addEventListener("click", showNextStep);
+    document.addEventListener("keydown", keyListener);
+    
+    // Afficher la première étape
+    showNextStep();
+}
+
+// XYZ
+static showGameOverCinematic() {
+    commandBlocking = true;
+
+    const gameOverCinematic = [
+        {
+            image: 'assets/game over.png',
+            face: 'faceGuard',
+            name: 'Mort',
+            text: 'Ton voyage se termine ici...'
+        },
+        {
+            image: 'assets/game over.png',
+            face: 'faceGuard',
+            name: 'Mort',
+            text: 'Repose en paix.'
+        }
+    ];
+
+    // Utiliser showCinematic avec un callback pour retourner au menu
+    Sprite.showCinematic(gameOverCinematic, () => {
+        // À la fin de la cinématique, retourner au menu principal
+        Raycaster.showMainMenu();
+        commandBlocking = false;
+    });
+}
+
+// Pour un game over avec cinématique
+// Fonction showGameOver utilisant showCinematic
+
+
+// Exemple d'utilisation
+/*
+introCinematic = [
+    {
+        image: 'assets/temple_entrance.jpg',
+        face: 'faceKing',
+        name: 'Roi',
+        text: 'Le temple est envahi par les ténèbres...'
+    },
+    {
+        image: 'assets/dark_forces.jpg',
+        face: 'faceKing',
+        name: 'Roi',
+        text: 'Seul un héros peut nous sauver!'
+    },
+    {
+        image: 'assets/hero_ready.jpg',
+        face: 'facePlayer',
+        name: 'Héros',
+        text: 'Je suis prêt!'
+    }
+];
+
+showCinematic(introCinematic);
+*/
+
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Animation de combat
@@ -8102,42 +8245,38 @@ class Raycaster {
     // NEW GAME / MENU / GAMEOVER
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static showGameOver() {
-        const mainCanvas = document.getElementById("mainCanvas");
-        const gameOverWindow = document.getElementById("gameOverWindow");
+// Fonction resetShowGameOver corrigée
+static resetShowGameOver() {
+    const mainCanvas = document.getElementById("mainCanvas");
+    const cinematicWindow = document.getElementById("cinematicWindow");
 
-        mainCanvas.style = "display:none";
-        gameOverWindow.style = "display:block";
-    }
+    mainCanvas.style.display = "block";
+    cinematicWindow.style.display = "none";
+}
 
-    static resetShowGameOver() {
-        const mainCanvas = document.getElementById("mainCanvas");
-        const gameOverWindow = document.getElementById("gameOverWindow");
-        const mainMenuWindow = document.getElementById("mainMenuWindow");
+// Fonction showMainMenu corrigée
+static showMainMenu() {
+    const renderWindow = document.getElementById("renderWindow");
+    const cinematicWindow = document.getElementById("cinematicWindow");
+    const mainMenuWindow = document.getElementById("mainMenuWindow");
 
-        mainCanvas.style = "display:block";
-        gameOverWindow.style = "display:none";
-    }
+    renderWindow.style.display = "none";
+    cinematicWindow.style.display = "none";
+    mainMenuWindow.style.display = "block";
+}
 
-    static showMainMenu() {
-        const renderWindow = document.getElementById("renderWindow");
-        const gameOverWindow = document.getElementById("gameOverWindow");
-        const mainMenuWindow = document.getElementById("mainMenuWindow");
+// Fonction showRenderWindow corrigée
+static showRenderWindow() {
+    const renderWindow = document.getElementById("renderWindow");
+    const cinematicWindow = document.getElementById("cinematicWindow");
+    const mainMenuWindow = document.getElementById("mainMenuWindow");
+    const mainCanvas = document.getElementById("mainCanvas");
 
-        renderWindow.style = "display:none";
-        gameOverWindow.style = "display:none";
-        mainMenuWindow.style = "display:block";
-    }
-
-    static showRenderWindow() {
-        const renderWindow = document.getElementById("renderWindow");
-        const gameOverWindow = document.getElementById("gameOverWindow");
-        const mainMenuWindow = document.getElementById("mainMenuWindow");
-
-        renderWindow.style = "display:block";
-        gameOverWindow.style = "display:none";
-        mainMenuWindow.style = "display:none";
-    }
+    renderWindow.style.display = "block";
+    cinematicWindow.style.display = "none";
+    mainMenuWindow.style.display = "none";
+    mainCanvas.style.display = "block"; // S'assurer que le canvas est visible
+}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MAPS AND NEW GAME
@@ -8244,6 +8383,12 @@ class Raycaster {
         this.player.rot = mapData.playerStart.Orientation;
 
         gameOver = false;
+
+        // S'assurer que la cinématique est cachée
+        const cinematicWindow = document.getElementById("cinematicWindow");
+        if (cinematicWindow) {
+            cinematicWindow.style.display = "none";
+        }
 
         ceilingHeight = mapData.playerStart.ceilingHeight;
         ceilingRender = mapData.playerStart.ceilingRender;
