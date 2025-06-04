@@ -3525,6 +3525,95 @@ class Player {
     statsUpdate() {
         // tick a chaque cycle
         // intégrer changement d'icone d'arme équipé dans l'UI d'exploration
+        
+// Récupération des boutons avec leurs IDs originaux
+const buttonA = document.getElementById('buttonA');
+const button2 = document.getElementById('button2');
+const buttonB = document.getElementById('buttonB');
+const button4 = document.getElementById('button4');
+const button5 = document.getElementById('button5');
+const button6 = document.getElementById('button6');
+const button7 = document.getElementById('button7');
+const button8 = document.getElementById('button8');
+const button9 = document.getElementById('button9');
+
+if (this.turn === false || commandBlocking === true) {
+    console.log("test commandblocking = true");
+    
+    buttonA.style.opacity = '0.3';
+    buttonA.style.filter = 'grayscale(100%)';
+    buttonA.style.pointerEvents = 'none';
+    
+    button2.style.opacity = '0.3';
+    button2.style.filter = 'grayscale(100%)';
+    button2.style.pointerEvents = 'none';
+    
+    buttonB.style.opacity = '0.3';
+    buttonB.style.filter = 'grayscale(100%)';
+    buttonB.style.pointerEvents = 'none';
+    
+    button4.style.opacity = '0.3';
+    button4.style.filter = 'grayscale(100%)';
+    button4.style.pointerEvents = 'none';
+    
+    button5.style.opacity = '0.3';
+    button5.style.filter = 'grayscale(100%)';
+    button5.style.pointerEvents = 'none';
+    
+    button6.style.opacity = '0.3';
+    button6.style.filter = 'grayscale(100%)';
+    button6.style.pointerEvents = 'none';
+    
+    button7.style.opacity = '0.3';
+    button7.style.filter = 'grayscale(100%)';
+    button7.style.pointerEvents = 'none';
+    
+    button8.style.opacity = '0.3';
+    button8.style.filter = 'grayscale(100%)';
+    button8.style.pointerEvents = 'none';
+    
+    button9.style.opacity = '0.3';
+    button9.style.filter = 'grayscale(100%)';
+    button9.style.pointerEvents = 'none';
+
+} else {
+    buttonA.style.opacity = '1';
+    buttonA.style.filter = 'none';
+    buttonA.style.pointerEvents = 'auto';
+    
+    button2.style.opacity = '1';
+    button2.style.filter = 'none';
+    button2.style.pointerEvents = 'auto';
+    
+    buttonB.style.opacity = '1';
+    buttonB.style.filter = 'none';
+    buttonB.style.pointerEvents = 'auto';
+    
+    button4.style.opacity = '1';
+    button4.style.filter = 'none';
+    button4.style.pointerEvents = 'auto';
+    
+    button5.style.opacity = '1';
+    button5.style.filter = 'none';
+    button5.style.pointerEvents = 'auto';
+    
+    button6.style.opacity = '1';
+    button6.style.filter = 'none';
+    button6.style.pointerEvents = 'auto';
+    
+    button7.style.opacity = '1';
+    button7.style.filter = 'none';
+    button7.style.pointerEvents = 'auto';
+    
+    button8.style.opacity = '1';
+    button8.style.filter = 'none';
+    button8.style.pointerEvents = 'auto';
+    
+    button9.style.opacity = '1';
+    button9.style.filter = 'none';
+    button9.style.pointerEvents = 'auto';
+}
+         
 
         // Old Progress bar
         const playerHP = document.getElementById("PlayerHPoutput");
@@ -4545,6 +4634,7 @@ class Player {
     }
 
     // Modifions la méthode handleSpriteAction pour gérer le délai
+    // xyz
     async handleSpriteAction(action, sprites) {
         if (!action || !this || !this.turn) return;
     
