@@ -17,6 +17,10 @@ Les touches directionnelles vous permettront de vous déplacer.
 Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, marchander, observer, ouvrir un coffre & combattre.
 
 
+Encore plus nouveau - texture villaged de désert :
+
+![2025-06-04T12_57_35](https://github.com/user-attachments/assets/012255ac-1e5f-43da-8330-165f45b84f41)
+
 Nouveau ! Cadre en pixelArt et plein d'icônes créés par Dusk :
 
 ![2025-04-18T00_05_32](https://github.com/user-attachments/assets/9a097448-538c-41ee-945e-082d61815abd)
