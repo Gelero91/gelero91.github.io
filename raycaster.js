@@ -7567,35 +7567,64 @@ static showGameOverCinematic() {
     });
 }
 
-// Pour un game over avec cinématique
-// Fonction showGameOver utilisant showCinematic
+// XYZ
+static showIntroCinematic() {
+    commandBlocking = true;
 
+    const introCinematic = [
+        {
+            image: 'assets/intro/1.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "Je ne sais pas vraiment d'ou je viens... J'étais un orphelin, laissé pour mort dans le désert."
+        },
+        {
+            image: 'assets/intro/2.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "Par chance, j'ai été recueilli par un barde qui se reposait après une vie d'aventure."
+        },
+        {
+            image: 'assets/intro/3.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "Il m'a appris à lire et écrire, tout en me racontant ses incroyables aventures."
+        },
+        {
+            image: 'assets/intro/4.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "Il sentait que je ne resterai pas en place longtemps. Je voulais découvrir le monde, moi aussi."
+        },
+        {
+            image: 'assets/intro/5.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "Il m'a enseigné tout ce qu'il s'avait. Combat, Magie, roublardise... Tout ce qui fait un aventurier."
+        },
+        {
+            image: 'assets/intro/6.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "Me voilà adulte, prêt à tout perdre, car je ne savoir que je peux vivre par moi-même. Sans aide."
+        },
+        {
+            image: 'assets/intro/6.png',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "J'espère que mon caprice d'adolescence ne va pas me mener à la mort... Il n'y a qu'un moyen de le savoir."
+        }
+    ];
 
-// Exemple d'utilisation
-/*
-introCinematic = [
-    {
-        image: 'assets/temple_entrance.jpg',
-        face: 'faceKing',
-        name: 'Roi',
-        text: 'Le temple est envahi par les ténèbres...'
-    },
-    {
-        image: 'assets/dark_forces.jpg',
-        face: 'faceKing',
-        name: 'Roi',
-        text: 'Seul un héros peut nous sauver!'
-    },
-    {
-        image: 'assets/hero_ready.jpg',
-        face: 'facePlayer',
-        name: 'Héros',
-        text: 'Je suis prêt!'
-    }
-];
+    // Utiliser showCinematic avec un callback pour retourner au menu
+    Sprite.showCinematic(introCinematic, () => {
+        // À la fin de la cinématique, retourner au menu principal
+        // Raycaster.showMainMenu();
+        Raycaster.showRenderWindow();
+        commandBlocking = false;
+    });
+}
 
-showCinematic(introCinematic);
-*/
 
 
 
@@ -8490,6 +8519,15 @@ static showRenderWindow() {
         this.initSprites(mapData.sprites);
 
         Raycaster.showRenderWindow();
+
+        // xyz
+        const mainCanvas = document.getElementById("mainCanvas");
+
+        // Cacher le canvas et montrer l'image cinématique
+        mainCanvas.style.display = "none";
+        cinematicWindow.style.display = "block";
+        Sprite.showIntroCinematic()
+
 
         // Relier de nouveau les boutons et touches après avoir démarré une nouvelle partie
         this.player.bindKeysAndButtons();
