@@ -1878,6 +1878,7 @@ class Player {
                 }
             } else if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) < ATTACK_COOLDOWN)) {
                 // Informer le joueur qu'il n'est pas prêt à attaquer
+                
                 Sprite.terminalLog("Can't attack yet !");
             }
             
@@ -4233,7 +4234,7 @@ static showIntroCinematic() {
             text: "Me voilà adulte, prêt à tout perdre, car je ne savoir que je peux vivre par moi-même. Sans aide."
         },
         {
-            image: 'assets/intro/6.png',
+            image: 'assets/intro/7.jpg',
             face: 'facePlayer',
             name: 'Alakir',
             text: "J'espère que mon caprice d'adolescence ne va pas me mener à la mort... Il n'y a qu'un moyen de le savoir."
