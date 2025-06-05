@@ -4173,14 +4173,14 @@ static showGameOverCinematic() {
         {
             image: 'assets/game over.png',
             face: 'faceGuard',
-            name: 'Mort',
-            text: 'Ton voyage se termine ici...'
+            name: 'Death',
+            text: 'Your journey ends here...'
         },
         {
             image: 'assets/game over.png',
             face: 'faceGuard',
-            name: 'Mort',
-            text: 'Repose en paix.'
+            name: 'Death',
+            text: 'Rest in peace.'
         }
     ];
 
@@ -4201,43 +4201,43 @@ static showIntroCinematic() {
             image: 'assets/intro/1.jpg',
             face: 'facePlayer',
             name: 'Alakir',
-            text: "Je ne sais pas vraiment d'ou je viens... J'étais un orphelin, laissé pour mort dans le désert."
+            text: "I don't really know where I come from... I was an orphan, left for dead in the desert."
         },
         {
             image: 'assets/intro/2.jpg',
             face: 'facePlayer',
             name: 'Alakir',
-            text: "Par chance, j'ai été recueilli par un barde qui se reposait après une vie d'aventure."
+            text: "By chance, I was taken in by a bard who was resting after a life of adventure."
         },
         {
             image: 'assets/intro/3.jpg',
             face: 'facePlayer',
             name: 'Alakir',
-            text: "Il m'a appris à lire et écrire, tout en me racontant ses incroyables aventures."
+            text: "He taught me to read and write, while telling me about his incredible adventures."
         },
         {
             image: 'assets/intro/4.jpg',
             face: 'facePlayer',
             name: 'Alakir',
-            text: "Il sentait que je ne resterai pas en place longtemps. Je voulais découvrir le monde, moi aussi."
+            text: "He felt I wouldn't stay in one place for long. I wanted to discover the world too."
         },
         {
             image: 'assets/intro/5.jpg',
             face: 'facePlayer',
             name: 'Alakir',
-            text: "Il m'a enseigné tout ce qu'il s'avait. Combat, Magie, roublardise... Tout ce qui fait un aventurier."
+            text: "He taught me everything he knew. Combat, magic, trickery... Everything that makes an adventurer."
         },
         {
             image: 'assets/intro/6.jpg',
             face: 'facePlayer',
             name: 'Alakir',
-            text: "Me voilà adulte, prêt à tout perdre, car je ne savoir que je peux vivre par moi-même. Sans aide."
+            text: "Now I'm an adult, ready to risk everything, because I need to know I can live on my own. Without help."
         },
         {
             image: 'assets/intro/7.jpg',
             face: 'facePlayer',
             name: 'Alakir',
-            text: "J'espère que mon caprice d'adolescence ne va pas me mener à la mort... Il n'y a qu'un moyen de le savoir."
+            text: "I hope my youthful whim won't lead me to death... There's only one way to find out."
         }
     ];
 
