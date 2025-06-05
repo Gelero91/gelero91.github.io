@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // OASIS.JS
-// The RPG game engine using raycasting
+// The RPG game engine using raycasting - OPTIMIZED VERSION
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Created by Gwendal LE ROUX,
@@ -143,7 +143,7 @@ var mapData = getMapDataByID(currentMap);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Raycaster {
-        constructor(
+    constructor(
         mainCanvas,
         displayWidth = 330,
         displayHeight = 190,
@@ -168,7 +168,7 @@ class Raycaster {
         this.worldHeight = this.mapHeight * this.tileSize;
         this.textureSize = textureSize;
         this.fovRadians = (fovDegrees * Math.PI) / 180;
-        this.viewDist = this.displayWidth / 2 / Math.tan(this.fovRadians / 2);
+        this.viewDist = (this.displayWidth >> 1) / Math.tan(this.fovRadians / 2);
         this.rayAngles = null;
         this.viewDistances = null;
         this.backBuffer = null;
@@ -187,6 +187,19 @@ class Raycaster {
         // NOUVEAU : Marqueur pour savoir si le jeu est prêt
         this.gameReady = false;
         
+        // OPTIMISATION : Caches et tables de lookup
+        this.textureCache = new Map();
+        this.spriteSpatialIndex = new Map();
+        this.sinTable = null;
+        this.cosTable = null;
+        this.tanTable = null;
+        
+        // OPTIMISATION : Constantes pré-calculées
+        this.halfDisplayWidth = this.displayWidth >> 1;
+        this.halfDisplayHeight = this.displayHeight >> 1;
+        this.tileSizeSquared = this.tileSize * this.tileSize;
+        this.maxDistanceSquared = (this.worldWidth * this.worldWidth) + (this.worldHeight * this.worldHeight);
+        
         // Initialisation synchrone
         this.initPlayer();
         this.initSprites(mapData.sprites);
@@ -195,6 +208,7 @@ class Raycaster {
         this.drawMiniMap();
         this.createRayAngles();
         this.createViewDistances();
+        this.initTrigTables(); // NOUVEAU : Initialiser les tables trigonométriques
         this.past = Date.now();
         
         // NOUVEAU : Charger les ressources de manière asynchrone
@@ -218,6 +232,22 @@ class Raycaster {
         });
     }
 
+    // OPTIMISATION : Initialiser les tables trigonométriques
+    initTrigTables() {
+        this.sinTable = new Float32Array(this.rayCount);
+        this.cosTable = new Float32Array(this.rayCount);
+        this.tanTable = new Float32Array(this.rayCount);
+        
+        for (let i = 0; i < this.rayCount; i++) {
+            const angle = this.rayAngles[i];
+            this.sinTable[i] = Math.sin(angle);
+            this.cosTable[i] = Math.cos(angle);
+            this.tanTable[i] = Math.tan(angle);
+        }
+        
+        console.log("Tables trigonométriques initialisées");
+    }
+
     // NOUVELLE MÉTHODE : Initialisation asynchrone des ressources
     async initializeResources() {
         console.log("🔄 Début du chargement des ressources...");
@@ -238,12 +268,19 @@ class Raycaster {
             throw error; // Propager l'erreur pour la gérer dans le constructeur
         }
     }
+    
     static get TWO_PI() {
         return Math.PI * 2;
     }
 
     static get MINIMAP_SCALE() {
         return 8;
+    }
+    
+    // OPTIMISATION : Normalisation d'angle optimisée
+    static normalizeAngle(angle) {
+        // Version optimisée avec une seule opération modulo
+        return ((angle % Raycaster.TWO_PI) + Raycaster.TWO_PI) % Raycaster.TWO_PI;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -269,6 +306,9 @@ class Raycaster {
         const now = Date.now();
         let timeElapsed = now - this.past;
         this.past = now;
+        
+        // OPTIMISATION : Mettre à jour l'index spatial avant le mouvement
+        this.updateSpriteSpatialIndex();
         
         this.player.move(timeElapsed, this.map, this.mapEventA, this.mapEventB, this.sprites);
         this.updateMiniMap();
@@ -312,6 +352,22 @@ class Raycaster {
             this2.gameCycle();
         });
     }
+    
+    // OPTIMISATION : Mettre à jour l'index spatial des sprites
+    updateSpriteSpatialIndex() {
+        this.spriteSpatialIndex.clear();
+        
+        for (let sprite of this.sprites) {
+            const cellX = (sprite.x / this.tileSize) | 0;
+            const cellY = (sprite.y / this.tileSize) | 0;
+            const cellKey = `${cellX},${cellY}`;
+            
+            if (!this.spriteSpatialIndex.has(cellKey)) {
+                this.spriteSpatialIndex.set(cellKey, []);
+            }
+            this.spriteSpatialIndex.get(cellKey).push(sprite);
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Carte
@@ -334,12 +390,12 @@ class Raycaster {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     initPlayer() {
-        const tileSizeHalf = Math.floor(this.tileSize / 2);
+        const tileSizeHalf = this.tileSize >> 1;
 
         this.player = new Player(
             "Alakir",
-            mapData.playerStart.X * this.tileSize + this.tileSize / 2,
-            mapData.playerStart.Y * this.tileSize + this.tileSize / 2,
+            mapData.playerStart.X * this.tileSize + tileSizeHalf,
+            mapData.playerStart.Y * this.tileSize + tileSizeHalf,
             mapData.playerStart.Orientation,
             this // Passage de l'instance de Raycaster à Player
         );
@@ -371,38 +427,38 @@ class Raycaster {
     // NEW GAME / MENU / GAMEOVER
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Fonction resetShowGameOver corrigée
-static resetShowGameOver() {
-    const mainCanvas = document.getElementById("mainCanvas");
-    const cinematicWindow = document.getElementById("cinematicWindow");
+    // Fonction resetShowGameOver corrigée
+    static resetShowGameOver() {
+        const mainCanvas = document.getElementById("mainCanvas");
+        const cinematicWindow = document.getElementById("cinematicWindow");
 
-    mainCanvas.style.display = "block";
-    cinematicWindow.style.display = "none";
-}
+        mainCanvas.style.display = "block";
+        cinematicWindow.style.display = "none";
+    }
 
-// Fonction showMainMenu corrigée
-static showMainMenu() {
-    const renderWindow = document.getElementById("renderWindow");
-    const cinematicWindow = document.getElementById("cinematicWindow");
-    const mainMenuWindow = document.getElementById("mainMenuWindow");
+    // Fonction showMainMenu corrigée
+    static showMainMenu() {
+        const renderWindow = document.getElementById("renderWindow");
+        const cinematicWindow = document.getElementById("cinematicWindow");
+        const mainMenuWindow = document.getElementById("mainMenuWindow");
 
-    renderWindow.style.display = "none";
-    cinematicWindow.style.display = "none";
-    mainMenuWindow.style.display = "block";
-}
+        renderWindow.style.display = "none";
+        cinematicWindow.style.display = "none";
+        mainMenuWindow.style.display = "block";
+    }
 
-// Fonction showRenderWindow corrigée
-static showRenderWindow() {
-    const renderWindow = document.getElementById("renderWindow");
-    const cinematicWindow = document.getElementById("cinematicWindow");
-    const mainMenuWindow = document.getElementById("mainMenuWindow");
-    const mainCanvas = document.getElementById("mainCanvas");
+    // Fonction showRenderWindow corrigée
+    static showRenderWindow() {
+        const renderWindow = document.getElementById("renderWindow");
+        const cinematicWindow = document.getElementById("cinematicWindow");
+        const mainMenuWindow = document.getElementById("mainMenuWindow");
+        const mainCanvas = document.getElementById("mainCanvas");
 
-    renderWindow.style.display = "block";
-    cinematicWindow.style.display = "none";
-    mainMenuWindow.style.display = "none";
-    mainCanvas.style.display = "block"; // S'assurer que le canvas est visible
-}
+        renderWindow.style.display = "block";
+        cinematicWindow.style.display = "none";
+        mainMenuWindow.style.display = "none";
+        mainCanvas.style.display = "block"; // S'assurer que le canvas est visible
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MAPS AND NEW GAME
@@ -425,6 +481,10 @@ static showRenderWindow() {
         this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
         this.initSprites(mapData.sprites);
         this.loadMapSprites(currentMap);
+        
+        // OPTIMISATION : Réinitialiser les caches
+        this.textureCache.clear();
+        this.spriteSpatialIndex.clear();
 
         // Libérer le verrou après le chargement
         isChangingMap = false;
@@ -452,8 +512,8 @@ static showRenderWindow() {
         this.initMap(this.mapID, mapData.map, mapData.eventA, mapData.eventB);
         this.initSprites(mapData.sprites);
         this.loadMapSprites(this.mapID);
-        this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize / 2;
-        this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize / 2;
+        this.player.x = mapData.playerStart.X * this.tileSize + (this.tileSize >> 1);
+        this.player.y = mapData.playerStart.Y * this.tileSize + (this.tileSize >> 1);
         this.player.rot = mapData.playerStart.Orientation;
     }
 
@@ -479,8 +539,8 @@ static showRenderWindow() {
         console.log(this.player.y);
         console.log(this.player.rot);
 
-        this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize / 2;
-        this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize / 2;
+        this.player.x = mapData.playerStart.X * this.tileSize + (this.tileSize >> 1);
+        this.player.y = mapData.playerStart.Y * this.tileSize + (this.tileSize >> 1);
         this.player.rot = mapData.playerStart.Orientation;
 
         console.log("after nextMap():")
@@ -497,6 +557,10 @@ static showRenderWindow() {
         ceilingTexture = mapData.playerStart.ceilingTexture;
         floorTexture = mapData.playerStart.floorTexture;
         this.loadFloorCeilingImages();
+        
+        // OPTIMISATION : Réinitialiser les caches
+        this.textureCache.clear();
+        this.spriteSpatialIndex.clear();
     }
 
     newGame() {
@@ -504,8 +568,8 @@ static showRenderWindow() {
         mapData = getMapDataByID(currentMap);
 
         this.initPlayer();
-        this.player.x = mapData.playerStart.X * this.tileSize + this.tileSize / 2;
-        this.player.y = mapData.playerStart.Y * this.tileSize + this.tileSize / 2;
+        this.player.x = mapData.playerStart.X * this.tileSize + (this.tileSize >> 1);
+        this.player.y = mapData.playerStart.Y * this.tileSize + (this.tileSize >> 1);
         this.player.rot = mapData.playerStart.Orientation;
 
         gameOver = false;
@@ -524,6 +588,10 @@ static showRenderWindow() {
 
         this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
         this.initSprites(mapData.sprites);
+        
+        // OPTIMISATION : Réinitialiser les caches
+        this.textureCache.clear();
+        this.spriteSpatialIndex.clear();
 
         Raycaster.showRenderWindow();
 
@@ -799,7 +867,7 @@ static showRenderWindow() {
     initSprites(spriteList) {
         this.clearSprites();
 
-        const tileSizeHalf = Math.floor(this.tileSize / 2);
+        const tileSizeHalf = this.tileSize >> 1;
         let spritePositions = spriteList;
         this.sprites = [];
 
@@ -927,19 +995,16 @@ static showRenderWindow() {
         }
     }
 
+    // OPTIMISATION : Utilisation de l'index spatial pour la recherche de sprites
     findSpritesInCell(cellX, cellY, onlyNotHit = false) {
-        let spritesFound = [];
-        for (let sprite of this.sprites) {
-            if (onlyNotHit && sprite.hit) {
-                continue;
-            }
-            let spriteCellX = Math.floor(sprite.x / this.tileSize);
-            let spriteCellY = Math.floor(sprite.y / this.tileSize);
-            if (cellX == spriteCellX && cellY == spriteCellY) {
-                spritesFound.push(sprite);
-            }
+        const cellKey = `${cellX},${cellY}`;
+        const sprites = this.spriteSpatialIndex.get(cellKey) || [];
+        
+        if (onlyNotHit) {
+            return sprites.filter(sprite => !sprite.hit);
         }
-        return spritesFound;
+        
+        return sprites;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -951,17 +1016,17 @@ static showRenderWindow() {
      * https://stackoverflow.com/a/35690009/1645045
      */
     static setPixel(imageData, x, y, r, g, b, a) {
-        let index = (x + y * imageData.width) * 4;
-        imageData.data[index + 0] = r;
+        let index = (x + y * imageData.width) << 2;
+        imageData.data[index] = r;
         imageData.data[index + 1] = g;
         imageData.data[index + 2] = b;
         imageData.data[index + 3] = a;
     }
 
     static getPixel(imageData, x, y) {
-        let index = (x + y * imageData.width) * 4;
+        let index = (x + y * imageData.width) << 2;
         return {
-            r: imageData.data[index + 0],
+            r: imageData.data[index],
             g: imageData.data[index + 1],
             b: imageData.data[index + 2],
             a: imageData.data[index + 3],
@@ -1095,12 +1160,12 @@ async loadFloorCeilingImages() {
         dstH,
         spriteFlash
     ) {
-        srcX = Math.trunc(srcX);
-        srcY = Math.trunc(srcY);
-        dstX = Math.trunc(dstX);
-        dstY = Math.trunc(dstY);
-        const dstEndX = Math.trunc(dstX + dstW);
-        const dstEndY = Math.trunc(dstY + dstH);
+        srcX = srcX | 0;
+        srcY = srcY | 0;
+        dstX = dstX | 0;
+        dstY = dstY | 0;
+        const dstEndX = (dstX + dstW) | 0;
+        const dstEndY = (dstY + dstH) | 0;
         const dx = dstEndX - dstX;
         const dy = dstEndY - dstY;
 
@@ -1137,8 +1202,8 @@ async loadFloorCeilingImages() {
             for (
                 let texX = texStartX, screenX = screenStartX; screenX < dstEndX && screenX < this.displayWidth; screenX++, texX += texStepX
             ) {
-                let textureX = Math.trunc(texX);
-                let textureY = Math.trunc(texY);
+                let textureX = texX | 0;
+                let textureY = texY | 0;
 
                 // Récupère le temps actuel en millisecondes
                 let currentTime = performance.now();
@@ -1266,9 +1331,9 @@ async loadFloorCeilingImages() {
             return;
         }
 
-        let diffX = Math.trunc(rayHit.strip - rc.x);
+        let diffX = (rayHit.strip - rc.x) | 0;
         let dstX = rc.x + diffX; // skip left parts of sprite already drawn
-        let srcX = Math.trunc((diffX / rc.w) * this.textureSize);
+        let srcX = ((diffX / rc.w) * this.textureSize) | 0;
         let srcW = 1;
 
         if (srcX >= 0 && srcX < this.textureSize) {
@@ -1331,7 +1396,7 @@ async loadFloorCeilingImages() {
         let swidth = 4;
         let sheight = 64;
         let imgx = rayHit.strip * this.stripWidth;
-        let imgy = (this.displayHeight - wallScreenHeight) / 2;
+        let imgy = (this.displayHeight - wallScreenHeight) >> 1;
         let imgw = this.stripWidth;
         let imgh = wallScreenHeight;
         const TextureUnit = 64;
@@ -1407,7 +1472,7 @@ async loadFloorCeilingImages() {
 
         // Récupérer la configuration du mur en fonction de `textureY`
         // +1, car 0 vaut pour un vide
-        const wallType = Math.floor(textureY / TextureUnit) + 1; // Ajustement pour correspondre à un index 0-based
+        const wallType = ((textureY / TextureUnit) | 0) + 1; // Ajustement pour correspondre à un index 0-based
 
         // On suppose que textureY est un multiple de TextureUnit
         const config = wallConfig[wallType] || wallConfig[1]; // 3 correspond au "default"
@@ -1440,36 +1505,64 @@ async loadFloorCeilingImages() {
     //////////////////////////////////////////////////////////////////////
 
     drawSolidFloor() {
-        for (let y = this.displayHeight / 2; y < this.displayHeight; ++y) {
+        for (let y = this.halfDisplayHeight; y < this.displayHeight; ++y) {
             for (let x = 0; x < this.displayWidth; ++x) {
                 Raycaster.setPixel(this.backBuffer, x, y, 111, 71, 59, 255);
             }
         }
     }
 
+    // OPTIMISATION : Utilisation du cache de texture
+    getTextureCoord(worldX, worldY) {
+        const key = `${(worldX | 0)},${(worldY | 0)}`;
+        if (this.textureCache.has(key)) {
+            return this.textureCache.get(key);
+        }
+        
+        let textureX = (worldX | 0) % this.tileSize;
+        let textureY = (worldY | 0) % this.tileSize;
+        
+        if (this.tileSize != this.textureSize) {
+            textureX = ((textureX / this.tileSize) * this.textureSize) | 0;
+            textureY = ((textureY / this.tileSize) * this.textureSize) | 0;
+        }
+        
+        const result = { x: textureX, y: textureY };
+        
+        // Limiter la taille du cache
+        if (this.textureCache.size > 1000) {
+            this.textureCache.clear();
+        }
+        
+        this.textureCache.set(key, result);
+        return result;
+    }
+
     drawTexturedFloor(rayHits) {
+        const centerY = this.halfDisplayHeight;
+        const eyeHeight = (this.tileSize >> 1) + this.player.z;
+        
         for (let rayHit of rayHits) {
             const wallScreenHeight = this.stripScreenHeight(
                 this.viewDist,
                 rayHit.correctDistance,
                 this.tileSize
             );
-            const centerY = this.displayHeight / 2;
-            const eyeHeight = this.tileSize / 2 + this.player.z;
             const screenX = rayHit.strip * this.stripWidth;
             const currentViewDistance = this.viewDistances[rayHit.strip];
             const cosRayAngle = Math.cos(rayHit.rayAngle);
             const sinRayAngle = Math.sin(rayHit.rayAngle);
             let screenY = Math.max(
                 centerY,
-                Math.floor((this.displayHeight - wallScreenHeight) / 2) +
-                wallScreenHeight
-            );
+                ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight
+            ) | 0;
+            
             for (; screenY < this.displayHeight; screenY++) {
                 let dy = screenY - centerY;
                 let floorDistance = (currentViewDistance * eyeHeight) / dy;
                 let worldX = this.player.x + floorDistance * cosRayAngle;
                 let worldY = this.player.y + floorDistance * -sinRayAngle;
+                
                 if (
                     worldX < 0 ||
                     worldY < 0 ||
@@ -1478,16 +1571,14 @@ async loadFloorCeilingImages() {
                 ) {
                     continue;
                 }
-                let textureX = Math.floor(worldX) % this.tileSize;
-                let textureY = Math.floor(worldY) % this.tileSize;
-                if (this.tileSize != this.textureSize) {
-                    textureX = Math.floor((textureX / this.tileSize) * this.textureSize);
-                    textureY = Math.floor((textureY / this.tileSize) * this.textureSize);
-                }
+                
+                // OPTIMISATION : Utiliser le cache de texture
+                const texCoord = this.getTextureCoord(worldX, worldY);
+                
                 let srcPixel = Raycaster.getPixel(
                     this.floorImageData,
-                    textureX,
-                    textureY
+                    texCoord.x,
+                    texCoord.y
                 );
                 Raycaster.setPixel(
                     this.backBuffer,
@@ -1507,29 +1598,32 @@ async loadFloorCeilingImages() {
     //////////////////////////////////////////////////////////////////////
 
     drawTexturedCeiling(rayHits) {
+        const centerY = this.halfDisplayHeight;
+        const eyeHeight = (this.tileSize >> 1) + this.player.z;
+        const currentCeilingHeight = this.tileSize * this.ceilingHeight;
+        
         for (let rayHit of rayHits) {
             const wallScreenHeight = this.stripScreenHeight(
                 this.viewDist,
                 rayHit.correctDistance,
                 this.tileSize
             );
-            const centerY = this.displayHeight / 2;
-            const eyeHeight = this.tileSize / 2 + this.player.z;
             const screenX = rayHit.strip * this.stripWidth;
             const currentViewDistance = this.viewDistances[rayHit.strip];
             const cosRayAngle = Math.cos(rayHit.rayAngle);
             const sinRayAngle = Math.sin(rayHit.rayAngle);
-            const currentCeilingHeight = this.tileSize * this.ceilingHeight;
             let screenY = Math.min(
                 centerY - 1,
-                Math.floor((this.displayHeight - wallScreenHeight) / 2) - 1
-            );
+                ((this.displayHeight - wallScreenHeight) >> 1) - 1
+            ) | 0;
+            
             for (; screenY >= 0; screenY--) {
                 let dy = centerY - screenY;
                 let ceilingDistance =
                     (currentViewDistance * (currentCeilingHeight - eyeHeight)) / dy;
                 let worldX = this.player.x + ceilingDistance * cosRayAngle;
                 let worldY = this.player.y + ceilingDistance * -sinRayAngle;
+                
                 if (
                     worldX < 0 ||
                     worldY < 0 ||
@@ -1538,16 +1632,14 @@ async loadFloorCeilingImages() {
                 ) {
                     continue;
                 }
-                let textureX = Math.floor(worldX) % this.tileSize;
-                let textureY = Math.floor(worldY) % this.tileSize;
-                if (this.tileSize != this.textureSize) {
-                    textureX = Math.floor((textureX / this.tileSize) * this.textureSize);
-                    textureY = Math.floor((textureY / this.tileSize) * this.textureSize);
-                }
+                
+                // OPTIMISATION : Utiliser le cache de texture
+                const texCoord = this.getTextureCoord(worldX, worldY);
+                
                 let srcPixel = Raycaster.getPixel(
                     this.ceilingImageData,
-                    textureX,
-                    textureY
+                    texCoord.x,
+                    texCoord.y
                 );
                 Raycaster.setPixel(
                     this.backBuffer,
@@ -1562,9 +1654,7 @@ async loadFloorCeilingImages() {
         }
     }
 
-    // Paramètres de la skybox configurable
-    // Ces variables peuvent être définies comme des propriétés de la classe Raycaster
-    // ou conservées dans un objet de configuration séparé
+    // OPTIMISATION : Skybox optimisée
     drawSkybox() {
         // Variables d'ajustement de la skybox - modifiez ces valeurs pour ajuster le comportement
         const cloudSpeed = 0.05;          // Vitesse du mouvement autonome des nuages
@@ -1683,27 +1773,29 @@ async loadFloorCeilingImages() {
         this.mainCanvasContext.putImageData(this.backBuffer, 0, 0);
     }
 
+    // OPTIMISATION : Utilisation de Float32Array
     createRayAngles() {
         if (!this.rayAngles) {
-            this.rayAngles = [];
+            this.rayAngles = new Float32Array(this.rayCount);
             for (let i = 0; i < this.rayCount; i++) {
                 let screenX = (this.rayCount / 2 - i) * this.stripWidth;
                 let rayAngle = Math.atan(screenX / this.viewDist);
-                this.rayAngles.push(rayAngle);
+                this.rayAngles[i] = rayAngle;
             }
             console.log("No. of ray angles=" + this.rayAngles.length);
         }
     }
 
+    // OPTIMISATION : Utilisation de Float32Array
     createViewDistances() {
         if (!this.viewDistances) {
-            this.viewDistances = [];
+            this.viewDistances = new Float32Array(this.rayCount);
             for (let x = 0; x < this.rayCount; x++) {
                 let dx = (this.rayCount / 2 - x) * this.stripWidth;
                 let currentViewDistance = Math.sqrt(
                     dx * dx + this.viewDist * this.viewDist
                 );
-                this.viewDistances.push(currentViewDistance);
+                this.viewDistances[x] = currentViewDistance;
             }
             console.log("No. of view distances=" + this.viewDistances.length);
         }
@@ -1715,6 +1807,7 @@ async loadFloorCeilingImages() {
         });
     }
 
+    // OPTIMISATION : Utilisation des tables trigonométriques pré-calculées
     castRays(rayHits) {
         for (let i = 0; i < this.rayAngles.length; i++) {
             let rayAngle = this.rayAngles[i];
@@ -1722,6 +1815,7 @@ async loadFloorCeilingImages() {
         }
     }
 
+    // OPTIMISATION : Calcul de distance sans sqrt
     onCellHit(ray) {
         let vx = ray.vx,
             vy = ray.vy,
@@ -1738,7 +1832,7 @@ async loadFloorCeilingImages() {
         let rayAngle = ray.rayAngle;
         let rayHits = ray.rayHits;
 
-        // Check for sprites in cell
+        // Check for sprites in cell - OPTIMISÉ avec index spatial
         let spritesFound = this.findSpritesInCell(cellX, cellY, true);
         for (let sprite of spritesFound) {
             let spriteHit = RayHit.spriteRayHit(
@@ -1749,31 +1843,33 @@ async loadFloorCeilingImages() {
                 rayAngle
             );
             if (spriteHit.distance) {
-                // sprite.hit = true
                 rayHits.push(spriteHit);
             }
         }
 
-        // Handle cell walls
+        // Handle cell walls - OPTIMISÉ
         if (this.map[cellY][cellX] > 0) {
-            let distX = this.player.x - (horizontal ? hx : vx);
-            let distY = this.player.y - (horizontal ? hy : vy);
-            let squaredDistance = distX * distX + distY * distY;
+            // OPTIMISATION : Une seule vérification pour horizontal
+            const x = horizontal ? hx : vx;
+            const y = horizontal ? hy : vy;
+            const dx = this.player.x - x;
+            const dy = this.player.y - y;
+            const squaredDistance = dx * dx + dy * dy;
+            
             if (!wallHit.distance || squaredDistance < wallHit.distance) {
                 wallFound = true;
                 wallHit.distance = squaredDistance;
                 wallHit.horizontal = horizontal;
+                wallHit.x = x;
+                wallHit.y = y;
+                
                 if (horizontal) {
-                    wallHit.x = hx;
-                    wallHit.y = hy;
                     wallHit.tileX = hx % this.tileSize;
                     // Facing down, flip image
                     if (!up) {
                         wallHit.tileX = this.tileSize - wallHit.tileX;
                     }
                 } else {
-                    wallHit.x = vx;
-                    wallHit.y = vy;
                     wallHit.tileX = vy % this.tileSize;
                     // Facing left, flip image
                     if (!right) {
@@ -1803,8 +1899,8 @@ async loadFloorCeilingImages() {
     }
 
     castSingleRay(rayHits, rayAngle, stripIdx) {
-        rayAngle %= Raycaster.TWO_PI;
-        if (rayAngle < 0) rayAngle += Raycaster.TWO_PI;
+        // OPTIMISATION : Normalisation d'angle optimisée
+        rayAngle = Raycaster.normalizeAngle(rayAngle);
 
         //   2  |  1
         //  ----+----
@@ -1821,22 +1917,20 @@ async loadFloorCeilingImages() {
         ray.wallHit = new RayHit();
 
         // Process current player cell
-        ray.cellX = Math.trunc(this.player.x / this.tileSize);
-        ray.cellY = Math.trunc(this.player.y / this.tileSize);
+        ray.cellX = (this.player.x / this.tileSize) | 0;
+        ray.cellY = (this.player.y / this.tileSize) | 0;
         this.onCellHit(ray);
 
         // closest vertical line
         ray.vx = right ?
-            Math.trunc(this.player.x / this.tileSize) * this.tileSize +
-            this.tileSize :
-            Math.trunc(this.player.x / this.tileSize) * this.tileSize - 1;
+            ((this.player.x / this.tileSize) | 0) * this.tileSize + this.tileSize :
+            ((this.player.x / this.tileSize) | 0) * this.tileSize - 1;
         ray.vy = this.player.y + (this.player.x - ray.vx) * Math.tan(rayAngle);
 
         // closest horizontal line
         ray.hy = up ?
-            Math.trunc(this.player.y / this.tileSize) * this.tileSize - 1 :
-            Math.trunc(this.player.y / this.tileSize) * this.tileSize +
-            this.tileSize;
+            ((this.player.y / this.tileSize) | 0) * this.tileSize - 1 :
+            ((this.player.y / this.tileSize) | 0) * this.tileSize + this.tileSize;
         ray.hx = this.player.x + (this.player.y - ray.hy) / Math.tan(rayAngle);
 
         // vector for next vertical line
@@ -1869,8 +1963,8 @@ async loadFloorCeilingImages() {
             ray.vy >= 0 &&
             ray.vy < this.worldHeight
         ) {
-            ray.cellX = Math.trunc(ray.vx / this.tileSize);
-            ray.cellY = Math.trunc(ray.vy / this.tileSize);
+            ray.cellX = (ray.vx / this.tileSize) | 0;
+            ray.cellY = (ray.vy / this.tileSize) | 0;
             if (this.onCellHit(ray)) {
                 ray.vx += stepvx;
                 ray.vy += stepvy;
@@ -1888,8 +1982,8 @@ async loadFloorCeilingImages() {
             ray.hy >= 0 &&
             ray.hy < this.worldHeight
         ) {
-            ray.cellX = Math.trunc(ray.hx / this.tileSize);
-            ray.cellY = Math.trunc(ray.hy / this.tileSize);
+            ray.cellX = (ray.hx / this.tileSize) | 0;
+            ray.cellY = (ray.hy / this.tileSize) | 0;
             if (this.onCellHit(ray)) {
                 ray.hx += stephx;
                 ray.hy += stephy;
@@ -1935,9 +2029,9 @@ async loadFloorCeilingImages() {
         let spriteScreenHeight = spriteScreenWidth; // assume both width and height are the same
 
         rc.x =
-            this.displayWidth / 2 +
+            this.halfDisplayWidth +
             x - // get distance from left of screen
-            spriteScreenWidth / 2; // deduct half of sprite width because x is center of sprite
+            (spriteScreenWidth >> 1); // deduct half of sprite width because x is center of sprite
         rc.y = (this.displayHeight - spriteScreenWidth) / 2.0;
         rc.w = spriteScreenWidth;
         rc.h = spriteScreenHeight;
@@ -2102,3 +2196,4 @@ class RayState {
         this.horizontal = false;
     }
 }
+
