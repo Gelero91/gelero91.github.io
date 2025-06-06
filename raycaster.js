@@ -1734,7 +1734,7 @@ async loadFloorCeilingImages() {
 
 // Fonction 1 : Transition vers le noir
 static async fadeToBlack(duration = 150) {
-    const screen = document.getElementById('screen');
+    const screen = document.getElementById('mainCanvas');
     if (!screen) {
         console.error("screen element not found!");
         return;
@@ -1764,7 +1764,7 @@ static async fadeToBlack(duration = 150) {
 
 // Fonction 2 : Transition du noir vers normal
 static async fadeFromBlack(duration = 150) {
-    const screen = document.getElementById('screen');
+    const screen = document.getElementById('mainCanvas');
     if (!screen) {
         console.error("screen element not found!");
         return;
