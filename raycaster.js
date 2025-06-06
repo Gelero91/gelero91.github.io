@@ -677,6 +677,7 @@ class Raycaster {
         // OPTIMISATION : Réinitialiser les caches
         this.textureCache.clear();
         this.spriteSpatialIndex.clear();
+
     }
 
     newGame() {

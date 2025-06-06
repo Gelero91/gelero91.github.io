@@ -1119,15 +1119,22 @@ class Player {
                         }
                         break;
                     case "EXIT":
+                        commandBlocking = true;
+
+
+        
+                        await Raycaster.fadeToBlack(100);
                         Sprite.terminalLog('Level finished!')
                         this.raycaster.nextMap();
+                        await Raycaster.fadeFromBlack(200);
+                        commandBlocking= false;
                         break;
-case "DOOR":
+                    case "DOOR":
     // IMPORTANT: Traiter les portes de manière spéciale
     // Appeler door() mais NE PAS appeler handleTeleportation ensuite
     
     // Fondu vers le noir
-    await Raycaster.fadeToBlack(100);
+    
     
     // Attendre au noir
     //    await new Promise(resolve => setTimeout(resolve, 50));
