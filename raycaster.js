@@ -71,14 +71,14 @@ var orientationTarget;
 var moveTargetX;
 var moveTargetY;
 
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FOG SETTINGS - VARIABLES GLOBALES
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Variable globale pour activer/désactiver le brouillard
 let fogEnabled = false; 
-
-
 
 
 // Variables globales pour les distances
@@ -1730,6 +1730,67 @@ async loadFloorCeilingImages() {
             }
         }
     }
+// FADE TO BLACK
+
+// Fonction 1 : Transition vers le noir
+static async fadeToBlack(duration = 150) {
+    const screen = document.getElementById('screen');
+    if (!screen) {
+        console.error("screen element not found!");
+        return;
+    }
+    
+    return new Promise((resolve) => {
+        // Sauvegarder les styles originaux
+        const originalTransition = screen.style.transition;
+        const originalFilter = screen.style.filter;
+        
+        // Appliquer la transition
+        screen.style.transition = `filter ${duration}ms ease-in-out`;
+        
+        // Attendre un frame pour que la transition soit appliquée
+        requestAnimationFrame(() => {
+            // Fondu vers le noir
+            screen.style.filter = 'brightness(0)';
+            
+            setTimeout(() => {
+                // Restaurer la transition originale
+                screen.style.transition = originalTransition || '';
+                resolve();
+            }, duration);
+        });
+    });
+}
+
+// Fonction 2 : Transition du noir vers normal
+static async fadeFromBlack(duration = 150) {
+    const screen = document.getElementById('screen');
+    if (!screen) {
+        console.error("screen element not found!");
+        return;
+    }
+    
+    return new Promise((resolve) => {
+        // Sauvegarder les styles originaux
+        const originalTransition = screen.style.transition;
+        
+        // Appliquer la transition
+        screen.style.transition = `filter ${duration}ms ease-in-out`;
+        
+        // Attendre un frame pour que la transition soit appliquée
+        requestAnimationFrame(() => {
+            // Retour à la normale
+            screen.style.filter = '';
+            
+            setTimeout(() => {
+                // Restaurer la transition originale
+                screen.style.transition = originalTransition || '';
+                resolve();
+            }, duration);
+        });
+    });
+}
+
 
     //////////////////////////////////////////////////////////////////////
     // Plafond/SkyBox

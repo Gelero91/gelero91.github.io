@@ -1122,15 +1122,29 @@ class Player {
                         Sprite.terminalLog('Level finished!')
                         this.raycaster.nextMap();
                         break;
-                    case "DOOR":
-                        // IMPORTANT: Traiter les portes de manière spéciale
-                        // Appeler door() mais NE PAS appeler handleTeleportation ensuite
-                        
-                        sprite.door(this, null, this.raycaster);  // Passer this.raycaster
-                        Sprite.terminalLog('You enter/exit the area.');
-                        // Réinitialiser l'état de l'action pour éviter de lancer handleTeleportation après
-                        this.actionButtonClicked = false;
-                        return; // Sortir immédiatement pour éviter l'appel à handleTeleportation
+case "DOOR":
+    // IMPORTANT: Traiter les portes de manière spéciale
+    // Appeler door() mais NE PAS appeler handleTeleportation ensuite
+    
+    // Fondu vers le noir
+    await Raycaster.fadeToBlack(100);
+    
+    // Attendre au noir
+    //    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    // Appeler door pendant que l'écran est noir
+    await sprite.door(this, null);
+    await this.raycaster.loadFloorCeilingImages();
+    
+    // Fondu depuis le noir
+    await Raycaster.fadeFromBlack(100);
+    
+    Sprite.terminalLog('You enter/exit the area.');
+    
+    // Réinitialiser l'état de l'action pour éviter de lancer handleTeleportation après
+    this.actionButtonClicked = false;
+    
+    return; // Sortir immédiatement pour éviter l'appel à handleTeleportation
                     case 0:
                         console.log("Dialogue sprite detected");
 
