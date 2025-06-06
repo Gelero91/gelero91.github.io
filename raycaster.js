@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // OASIS.JS
-// The RPG game engine using raycasting - OPTIMIZED VERSION
+// The RPG game engine using raycasting - OPTIMIZED VERSION WITH GLOBAL FOG
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Created by Gwendal LE ROUX,
@@ -70,6 +70,110 @@ var orientationTarget;
 
 var moveTargetX;
 var moveTargetY;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FOG SETTINGS - VARIABLES GLOBALES
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Variable globale pour activer/désactiver le brouillard
+let fogEnabled = false; 
+
+
+
+
+// Variables globales pour les distances
+let fogMinDistance = 1280;  // Distance minimale (1 tuile)
+let fogMaxDistance = 8192;  // Distance maximale (6-7 tuiles)
+
+// Variables globales pour la couleur
+let fogColorR = 20;  // Rouge
+let fogColorG = 20;  // Vert
+let fogColorB = 30;  // Bleu
+
+// Variable globale pour la densité
+let fogDensity = 0.8;  // 0 = transparent, 1 = opaque
+
+// Fonction pour activer le brouillard
+function enableFog() {
+    fogEnabled = true;
+}
+
+// Fonction pour désactiver le brouillard
+function disableFog() {
+    fogEnabled = false;
+}
+
+// Fonction pour changer la couleur du brouillard
+function setFogColor(r, g, b) {
+    fogColorR = Math.max(0, Math.min(255, r));
+    fogColorG = Math.max(0, Math.min(255, g));
+    fogColorB = Math.max(0, Math.min(255, b));
+}
+
+// Fonction pour ajuster les distances
+function setFogDistance(min, max) {
+    fogMinDistance = Math.max(0, min);
+    fogMaxDistance = Math.max(fogMinDistance + 1, max);
+}
+
+// Fonction pour ajuster la densité
+function setFogDensity(density) {
+    fogDensity = Math.max(0, Math.min(1, density));
+}
+
+// Présets de brouillard
+function setFogPreset(preset) {
+    switch(preset) {
+        case 'night':
+            setFogColor(20, 20, 30);
+            setFogDensity(0.8);
+            break;
+        case 'mist':
+            setFogColor(128, 128, 128);
+            setFogDensity(0.6);
+            break;
+        case 'toxic':
+            setFogColor(30, 80, 30);
+            setFogDensity(0.7);
+            break;
+        case 'fire':
+            setFogColor(80, 20, 20);
+            setFogDensity(0.9);
+            break;
+        case 'underwater':
+            setFogColor(20, 40, 60);
+            setFogDensity(0.85);
+            break;
+        case 'clear':
+            disableFog();
+            break;
+    }
+}
+
+// Fonction pour calculer le facteur de brouillard
+function calculateFogFactor(distance) {
+    if (!fogEnabled) return 0;
+    
+    if (distance <= fogMinDistance) return 0;
+    if (distance >= fogMaxDistance) return fogDensity;
+    
+    // Interpolation linéaire entre minDistance et maxDistance
+    const range = fogMaxDistance - fogMinDistance;
+    const distFromMin = distance - fogMinDistance;
+    return (distFromMin / range) * fogDensity;
+}
+
+// Fonction pour appliquer le brouillard à une couleur
+function applyFog(r, g, b, distance) {
+    const fogFactor = calculateFogFactor(distance);
+    if (fogFactor === 0) return { r, g, b };
+    
+    return {
+        r: Math.round((1 - fogFactor) * r + fogFactor * fogColorR),
+        g: Math.round((1 - fogFactor) * g + fogFactor * fogColorG),
+        b: Math.round((1 - fogFactor) * b + fogFactor * fogColorB)
+    };
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FONCTIONS GLOBALES
@@ -345,6 +449,18 @@ class Raycaster {
             this.player.turn = true;
             timeSinceLastSecond -= oneSecond;
         }
+
+        // contrôle du fog
+        // Si en extérieur : pas de fog
+        // Si intérieur (plafond) : fog
+        if (ceilingRender == true) {
+            console.log("fogEnabled = true ")
+            enableFog();
+        } else {
+            console.log("fogEnabled = false ")
+            disableFog();
+        }
+
         
         // Rappel pour la prochaine frame
         let this2 = this;
@@ -1158,7 +1274,8 @@ async loadFloorCeilingImages() {
         dstY,
         dstW,
         dstH,
-        spriteFlash
+        spriteFlash,
+        distance // NOUVEAU : ajout du paramètre distance pour le brouillard
     ) {
         srcX = srcX | 0;
         srcY = srcY | 0;
@@ -1249,24 +1366,30 @@ async loadFloorCeilingImages() {
                             a: srcPixel.a, // Utilisez srcPixel.a pour la transparence
                         };
 
+                        // NOUVEAU : Appliquer le brouillard après le flash
+                        const foggedPixel = applyFog(flashedPixel.r, flashedPixel.g, flashedPixel.b, distance);
+
                         // Mettre à jour l'image en utilisant setPixel (sans modifier la fonction elle-même)
                         Raycaster.setPixel(
                             this.backBuffer,
                             screenX,
                             screenY,
-                            flashedPixel.r,
-                            flashedPixel.g,
-                            flashedPixel.b,
+                            foggedPixel.r,
+                            foggedPixel.g,
+                            foggedPixel.b,
                             255
                         );
                     } else if (srcPixel.a) {
+                        // NOUVEAU : Appliquer le brouillard
+                        const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, distance);
+                        
                         Raycaster.setPixel(
                             this.backBuffer,
                             screenX,
                             screenY,
-                            srcPixel.r,
-                            srcPixel.g,
-                            srcPixel.b,
+                            foggedPixel.r,
+                            foggedPixel.g,
+                            foggedPixel.b,
                             255
                         );
                     }
@@ -1285,24 +1408,30 @@ async loadFloorCeilingImages() {
                             a: srcPixel.a, // Utilisez srcPixel.a pour la transparence
                         };
 
+                        // NOUVEAU : Appliquer le brouillard après le flash
+                        const foggedPixel = applyFog(flashedPixel.r, flashedPixel.g, flashedPixel.b, distance);
+
                         // Mettre à jour l'image en utilisant setPixel (sans modifier la fonction elle-même)
                         Raycaster.setPixel(
                             this.backBuffer,
                             screenX,
                             screenY,
-                            flashedPixel.r,
-                            flashedPixel.g,
-                            flashedPixel.b,
+                            foggedPixel.r,
+                            foggedPixel.g,
+                            foggedPixel.b,
                             255
                         );
                     } else if (srcPixel.a) {
+                        // NOUVEAU : Appliquer le brouillard
+                        const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, distance);
+                        
                         Raycaster.setPixel(
                             this.backBuffer,
                             screenX,
                             screenY,
-                            srcPixel.r,
-                            srcPixel.g,
-                            srcPixel.b,
+                            foggedPixel.r,
+                            foggedPixel.g,
+                            foggedPixel.b,
                             255
                         );
                     }
@@ -1356,7 +1485,8 @@ async loadFloorCeilingImages() {
                     rc.y, 
                     this.stripWidth, 
                     rc.h, 
-                    spriteFlash
+                    spriteFlash,
+                    rayHit.distance // NOUVEAU : passer la distance pour le brouillard
                 );
             } else {
                 // Log d'avertissement uniquement si on n'a pas déjà signalé cette texture manquante
@@ -1381,7 +1511,8 @@ async loadFloorCeilingImages() {
                         rc.y, 
                         this.stripWidth, 
                         rc.h, 
-                        spriteFlash
+                        spriteFlash,
+                        rayHit.distance // NOUVEAU : passer la distance pour le brouillard
                     );
                 }
             }
@@ -1479,23 +1610,23 @@ async loadFloorCeilingImages() {
 
         if (this.ceilingHeight === 1) {
             // Utilisation de la texture spéciale pour un étage
-            this.drawTexturedRect(this.wallsImageData, textureX, config.singleFloorTexture, swidth, sheight, imgx, imgy, imgw, imgh);
+            this.drawTexturedRect(this.wallsImageData, textureX, config.singleFloorTexture, swidth, sheight, imgx, imgy, imgw, imgh, 0, rayHit.correctDistance);
         } else {
             // Dessiner le rez-de-chaussée (groundTexture)
-            this.drawTexturedRect(this.wallsImageData, textureX, config.groundTexture, swidth, sheight, imgx, imgy, imgw, imgh);
+            this.drawTexturedRect(this.wallsImageData, textureX, config.groundTexture, swidth, sheight, imgx, imgy, imgw, imgh, 0, rayHit.correctDistance);
 
             // Si plusieurs étages, dessiner les étages intermédiaires et le dernier étage
             for (let level = 1; level < this.ceilingHeight - 1; ++level) {
                 // Répéter la texture des étages intermédiaires
-                this.drawTexturedRect(this.wallsImageData, textureX, config.firstFloorTexture, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh);
+                this.drawTexturedRect(this.wallsImageData, textureX, config.firstFloorTexture, swidth, sheight, imgx, imgy - level * wallScreenHeight, imgw, imgh, 0, rayHit.correctDistance);
             }
 
             // Dernier étage (topFloorTexture)
-            this.drawTexturedRect(this.wallsImageData, textureX, config.topFloorTexture, swidth, sheight, imgx, imgy - (this.ceilingHeight - 1) * wallScreenHeight, imgw, imgh);
+            this.drawTexturedRect(this.wallsImageData, textureX, config.topFloorTexture, swidth, sheight, imgx, imgy - (this.ceilingHeight - 1) * wallScreenHeight, imgw, imgh, 0, rayHit.correctDistance);
 
             // Si un toit est configuré, on le dessine au-dessus du dernier étage
             if (config.roofTexture) {
-                this.drawTexturedRect(this.wallsImageData, textureX, config.roofTexture, swidth, sheight, imgx, imgy - this.ceilingHeight * wallScreenHeight, imgw, imgh);
+                this.drawTexturedRect(this.wallsImageData, textureX, config.roofTexture, swidth, sheight, imgx, imgy - this.ceilingHeight * wallScreenHeight, imgw, imgh, 0, rayHit.correctDistance);
             }
         }
     }
@@ -1507,7 +1638,10 @@ async loadFloorCeilingImages() {
     drawSolidFloor() {
         for (let y = this.halfDisplayHeight; y < this.displayHeight; ++y) {
             for (let x = 0; x < this.displayWidth; ++x) {
-                Raycaster.setPixel(this.backBuffer, x, y, 111, 71, 59, 255);
+                // NOUVEAU : Appliquer le brouillard au sol solide
+                const distance = (y - this.halfDisplayHeight) * 100; // Distance approximative
+                const foggedColor = applyFog(111, 71, 59, distance);
+                Raycaster.setPixel(this.backBuffer, x, y, foggedColor.r, foggedColor.g, foggedColor.b, 255);
             }
         }
     }
@@ -1580,13 +1714,17 @@ async loadFloorCeilingImages() {
                     texCoord.x,
                     texCoord.y
                 );
+                
+                // NOUVEAU : Appliquer le brouillard au sol texturé
+                const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, floorDistance);
+                
                 Raycaster.setPixel(
                     this.backBuffer,
                     screenX,
                     screenY,
-                    srcPixel.r,
-                    srcPixel.g,
-                    srcPixel.b,
+                    foggedPixel.r,
+                    foggedPixel.g,
+                    foggedPixel.b,
                     255
                 );
             }
@@ -1641,13 +1779,17 @@ async loadFloorCeilingImages() {
                     texCoord.x,
                     texCoord.y
                 );
+                
+                // NOUVEAU : Appliquer le brouillard au plafond
+                const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, ceilingDistance);
+                
                 Raycaster.setPixel(
                     this.backBuffer,
                     screenX,
                     screenY,
-                    srcPixel.r,
-                    srcPixel.g,
-                    srcPixel.b,
+                    foggedPixel.r,
+                    foggedPixel.g,
+                    foggedPixel.b,
                     255
                 );
             }

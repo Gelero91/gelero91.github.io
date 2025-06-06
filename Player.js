@@ -1126,9 +1126,7 @@ class Player {
                         // IMPORTANT: Traiter les portes de manière spéciale
                         // Appeler door() mais NE PAS appeler handleTeleportation ensuite
                         
-                    
-                        sprite.door(this, null);
-                        this.raycaster.loadFloorloadFloorCeilingImages();
+                        sprite.door(this, null, this.raycaster);  // Passer this.raycaster
                         Sprite.terminalLog('You enter/exit the area.');
                         // Réinitialiser l'état de l'action pour éviter de lancer handleTeleportation après
                         this.actionButtonClicked = false;
