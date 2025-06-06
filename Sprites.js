@@ -537,74 +537,90 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
 
     // Fonction principale de log du terminal
     // Fonction principale de log du terminal avec apparition en fondu
-    static terminalLog(entry, style = 0) {
-        const outputElement = document.getElementById("output");
+    // n'affiche pas les doublons si le style = 0
+static terminalLog(entry, style = 0) {
+    const outputElement = document.getElementById("output");
+    
+    // Si style = 0, vérifier les doublons
+    if (style === 0) {
+        // Récupérer toutes les lignes existantes
+        const existingLines = outputElement.querySelectorAll('.terminal-line');
         
-        // Définition des styles disponibles (couleurs contrastées sur fond #1F0E08)
-        const styles = {
-            0: { color: "#FFFFFF" },                  // Blanc (par défaut)
-            1: { color: "#77DD77" },                  // Vert clair
-            2: { color: "#FF6B6B" },                  // Rouge vif
-            3: { color: "#FFD166" },                  // Jaune doré
-            4: { color: "#79ADDC" },                  // Bleu ciel
-            5: { color: "#FF9E80" },                  // Orange corail
-            6: { color: "#CCCCFF" },                  // Lavande
-            7: { color: "#D4A5A5" },                  // Rose poussiéreux
-            8: { color: "#FFFFFF", fontWeight: "bold" },     // Blanc gras
-            9: { color: "#FFFFFF", fontStyle: "italic" },    // Blanc italique
-            10: { color: "#AAFFAA", fontWeight: "bold" },    // Vert clair gras
-            11: { color: "#FFAAAA", fontStyle: "italic" }    // Rouge clair italique
-        };
-        
-        // Obtenir le style sélectionné ou utiliser le style par défaut
-        const selectedStyle = styles[style] || styles[0];
-        
-        // Créer un conteneur pour chaque ligne du terminal
-        const logLine = document.createElement("div");
-        logLine.className = "terminal-line";
-        logLine.style.display = "flex";
-        logLine.style.fontFamily = "monospace"; // Police à chasse fixe
-        logLine.style.marginBottom = "2px";
-        
-        // Animation de fondu
-        logLine.style.opacity = "0";
-        logLine.style.transition = "opacity 0.3s ease-in";
-        
-        // Créer le symbole du terminal comme une colonne fixe
-        const promptColumn = document.createElement("div");
-        promptColumn.className = "terminal-prompt-column";
-        promptColumn.style.width = "25px"; // Largeur fixe
-        promptColumn.style.flexShrink = "0"; // Empêche la réduction
-        promptColumn.style.textAlign = "center"; // Centré dans sa colonne
-        promptColumn.innerHTML = '<span style="color:#aaa; font-weight:bold;">&gt;</span>';
-        
-        // Créer le contenu du message avec le style spécifié
-        const messageContent = document.createElement("div");
-        messageContent.className = "terminal-content";
-        messageContent.style.flexGrow = "1";
-        messageContent.style.color = selectedStyle.color || "";
-        messageContent.style.fontWeight = selectedStyle.fontWeight || "";
-        messageContent.style.fontStyle = selectedStyle.fontStyle || "";
-        messageContent.innerHTML = entry;
-        
-        // Assembler la ligne
-        logLine.appendChild(promptColumn);
-        logLine.appendChild(messageContent);
-        
-        // Ajouter la ligne au terminal
-        outputElement.appendChild(logLine);
-        
-        // Déclencher l'animation de fondu après un bref délai
-        setTimeout(() => {
-            logLine.style.opacity = "1";
-        }, 10);
-        
-        // Faire défiler vers le bas pour voir les nouveaux messages
-        outputElement.scrollTop = outputElement.scrollHeight;
-        
-        // Stocker la dernière entrée
-        lastEntry = entry;
+        // Vérifier si le message existe déjà
+        for (let line of existingLines) {
+            const contentDiv = line.querySelector('.terminal-content');
+            if (contentDiv && contentDiv.innerHTML === entry) {
+                // Message en doublon trouvé, ne pas l'ajouter
+                return;
+            }
+        }
     }
+    
+    // Définition des styles disponibles (couleurs contrastées sur fond #1F0E08)
+    const styles = {
+        0: { color: "#FFFFFF" },                  // Blanc (par défaut)
+        1: { color: "#77DD77" },                  // Vert clair
+        2: { color: "#FF6B6B" },                  // Rouge vif
+        3: { color: "#FFD166" },                  // Jaune doré
+        4: { color: "#79ADDC" },                  // Bleu ciel
+        5: { color: "#FF9E80" },                  // Orange corail
+        6: { color: "#CCCCFF" },                  // Lavande
+        7: { color: "#D4A5A5" },                  // Rose poussiéreux
+        8: { color: "#FFFFFF", fontWeight: "bold" },     // Blanc gras
+        9: { color: "#FFFFFF", fontStyle: "italic" },    // Blanc italique
+        10: { color: "#AAFFAA", fontWeight: "bold" },    // Vert clair gras
+        11: { color: "#FFAAAA", fontStyle: "italic" }    // Rouge clair italique
+    };
+    
+    // Obtenir le style sélectionné ou utiliser le style par défaut
+    const selectedStyle = styles[style] || styles[0];
+    
+    // Créer un conteneur pour chaque ligne du terminal
+    const logLine = document.createElement("div");
+    logLine.className = "terminal-line";
+    logLine.style.display = "flex";
+    logLine.style.fontFamily = "monospace"; // Police à chasse fixe
+    logLine.style.marginBottom = "2px";
+    
+    // Animation de fondu
+    logLine.style.opacity = "0";
+    logLine.style.transition = "opacity 0.3s ease-in";
+    
+    // Créer le symbole du terminal comme une colonne fixe
+    const promptColumn = document.createElement("div");
+    promptColumn.className = "terminal-prompt-column";
+    promptColumn.style.width = "25px"; // Largeur fixe
+    promptColumn.style.flexShrink = "0"; // Empêche la réduction
+    promptColumn.style.textAlign = "center"; // Centré dans sa colonne
+    promptColumn.innerHTML = '<span style="color:#aaa; font-weight:bold;">&gt;</span>';
+    
+    // Créer le contenu du message avec le style spécifié
+    const messageContent = document.createElement("div");
+    messageContent.className = "terminal-content";
+    messageContent.style.flexGrow = "1";
+    messageContent.style.color = selectedStyle.color || "";
+    messageContent.style.fontWeight = selectedStyle.fontWeight || "";
+    messageContent.style.fontStyle = selectedStyle.fontStyle || "";
+    messageContent.innerHTML = entry;
+    
+    // Assembler la ligne
+    logLine.appendChild(promptColumn);
+    logLine.appendChild(messageContent);
+    
+    // Ajouter la ligne au terminal
+    outputElement.appendChild(logLine);
+    
+    // Déclencher l'animation de fondu après un bref délai
+    setTimeout(() => {
+        logLine.style.opacity = "1";
+    }, 10);
+    
+    // Faire défiler vers le bas pour voir les nouveaux messages
+    outputElement.scrollTop = outputElement.scrollHeight;
+    
+    // Stocker la dernière entrée
+    lastEntry = entry;
+}
 
     // Fonction pour les animations de loot adaptée au nouveau format
     static displayLootAnimation(message, type = 'gold') {

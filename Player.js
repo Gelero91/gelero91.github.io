@@ -1133,8 +1133,8 @@ class Player {
     // IMPORTANT: Traiter les portes de manière spéciale
     // Appeler door() mais NE PAS appeler handleTeleportation ensuite
     
-    // Fondu vers le noir
-    
+    // Fondu vers l e noir
+    await Raycaster.fadeToBlack(100);
     
     // Attendre au noir
     //    await new Promise(resolve => setTimeout(resolve, 50));
