@@ -1654,7 +1654,9 @@ async loadFloorCeilingImages() {
         }
     }
 
-    // OPTIMISATION : Skybox optimisée
+    // Paramètres de la skybox configurable
+    // Ces variables peuvent être définies comme des propriétés de la classe Raycaster
+    // ou conservées dans un objet de configuration séparé
     drawSkybox() {
         // Variables d'ajustement de la skybox - modifiez ces valeurs pour ajuster le comportement
         const cloudSpeed = 0.05;          // Vitesse du mouvement autonome des nuages
@@ -2196,4 +2198,3 @@ class RayState {
         this.horizontal = false;
     }
 }
-
