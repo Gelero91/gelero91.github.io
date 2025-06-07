@@ -1,8 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Player - Version avec combat amélioré
+// Player
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 console.log("chargement de la classe Player.")
+
 
 class Player {
     constructor(name, x, y, rot, raycaster) {
@@ -50,13 +51,13 @@ class Player {
 
         this.playerGold = this.playerGold;
 
+        // Référence à la classe principale pour permettre au joueur d'interagir avec le moteur du jeu.
+        // Bien que cette approche fonctionne, elle introduit un couplage fort entre Player et la classe principale.
+        // Cela peut rendre le code moins flexible à long terme et plus difficile à maintenir ou à tester.
+        // Il serait préférable d'envisager des alternatives comme l'utilisation d'événements ou de services pour réduire ce couplage.
         this.raycaster = raycaster;
 
-        this.lastAttackTime = 0;
-        this.attackCooldown = 2000; // 2 secondes de cooldown
-        
-        // Nouveau: indicateur de combat en cours
-        this.inCombat = false;
+        this.lastAttackTime = 0; // Nouveau attribut pour suivre le temps de la dernière attaque
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +66,7 @@ class Player {
 
     statsUpdate() {
         // tick à chaque cycle
+        // intégrer changement d'icone d'arme équipée dans l'UI d'exploration
         
         // Liste de tous les boutons à gérer
         const allButtons = [
@@ -182,14 +184,6 @@ class Player {
         if (this.spells && this.spells[this.selectedSpell]) {
             document.getElementById("selectedSpell").textContent = this.spells[this.selectedSpell].name;
             document.getElementById("castSpell").src = this.spells[this.selectedSpell].icon;
-        }
-        
-        // Afficher le cooldown d'attaque si nécessaire
-        const currentTime = Date.now();
-        const timeSinceLastAttack = currentTime - this.lastAttackTime;
-        if (timeSinceLastAttack < this.attackCooldown) {
-            const remainingCooldown = ((this.attackCooldown - timeSinceLastAttack) / 1000).toFixed(1);
-            // Optionnel : afficher le cooldown quelque part dans l'UI
         }
     }
 
@@ -923,6 +917,12 @@ class Player {
         this.bindButton("buttonA", 1);
         this.bindButton("buttonB", 14);
         this.bindButton("characterButton", 3);
+/*
+        this.bindButton("buttonUp", 5);
+        this.bindButton("buttonLeft", 7);
+        this.bindButton("buttonDown", 8);
+        this.bindButton("buttonRight", 9);
+*/
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1063,22 +1063,29 @@ class Player {
         return { frontX, frontY };
     }
 
-    // Méthode améliorée pour le combat
-    canAttack() {
-        const currentTime = Date.now();
-        return currentTime - this.lastAttackTime >= this.attackCooldown;
-    }
-
+    // Modifions la méthode handleSpriteAction pour gérer le délai
+    // xyz
     async handleSpriteAction(action, sprites) {
         if (!action || !this || !this.turn) return;
     
         // Vérifier qu'aucune action n'est en cours
+        // n'est-ce pas un doublon de la vérification précédente ?
         if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
             console.log("Cannot perform action - player is busy");
             return;
         }
+    
+        // Vérifier si suffisamment de temps s'est écoulé depuis la dernière attaque
+        const currentTime = Date.now();
+        if (currentTime - this.lastAttackTime < 2000) {
+            Sprite.terminalLog("Vous n'êtes pas prêt à attaquer de nouveau.");
+            return;
+        }
 
-        const { frontX, frontY } = this.calculateFrontPosition();
+        const {
+            frontX,
+            frontY
+        } = this.calculateFrontPosition();
 
         console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
         console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
@@ -1088,92 +1095,139 @@ class Player {
             const spriteX = Math.floor(sprite.x / this.tileSize);
             const spriteY = Math.floor(sprite.y / this.tileSize);
             
+            //console.log(`Checking sprite at (${spriteX}, ${spriteY}), type: ${sprite.spriteType}`);
+            
             if (spriteX === frontX && spriteY === frontY) {
                 spriteFound = true;
                 console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
+                
+                // on passe "turn" en false 
+                // this.turn = false;
 
                 switch (sprite.spriteType) {
                     case "A":
                         console.log("Enemy detected, initiating combat!");
-                        
-                        // Vérifier le cooldown d'attaque
-                        if (!this.canAttack()) {
-                            const remainingTime = ((this.attackCooldown - (Date.now() - this.lastAttackTime)) / 1000).toFixed(1);
-                            Sprite.terminalLog(`Wait ${remainingTime}s before attacking again.`);
-                            return;
-                        }
-                        
-                        // Mettre à jour le temps de la dernière attaque
-                        this.lastAttackTime = Date.now();
+                        // Enregistrer le temps de cette attaque
+                        this.lastAttackTime = currentTime;
                         
                         if (this.combatSpell) {
                             console.log("Using combat spell");
-                            await sprite.combatSpell(this, sprite);
-                            this.combatSpell = false; // Réinitialiser après utilisation
+                            sprite.combatSpell(this, sprite);
                         } else {
                             console.log("Using normal attack");
-                            await sprite.combat(this.might, this.criti, this);
+                            sprite.combat(this.might, this.criti, this);
                         }
                         break;
                     case "EXIT":
+                        commandBlocking = true;
+
+
+        
+                        await Raycaster.fadeToBlack(300);
                         Sprite.terminalLog('Level finished!')
                         this.raycaster.nextMap();
+                        await Raycaster.fadeFromBlack(300);
+                        commandBlocking= false;
                         break;
                     case "DOOR":
-                        sprite.door(this, null);
-                        this.raycaster.loadFloorloadFloorCeilingImages();
-                        Sprite.terminalLog('You enter/exit the area.');
-                        this.actionButtonClicked = false;
-                        return;
+    // IMPORTANT: Traiter les portes de manière spéciale
+    // Appeler door() mais NE PAS appeler handleTeleportation ensuite
+    
+    // Fondu vers l e noir
+    await Raycaster.fadeToBlack(300);
+    
+    // Attendre au noir
+    //    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    // Appeler door pendant que l'écran est noir
+    await sprite.door(this, null);
+    await this.raycaster.loadFloorCeilingImages();
+    
+    // Fondu depuis le noir
+    await Raycaster.fadeFromBlack(300);
+    
+    Sprite.terminalLog('You enter/exit the area.');
+    
+    // Réinitialiser l'état de l'action pour éviter de lancer handleTeleportation après
+    this.actionButtonClicked = false;
+    
+    return; // Sortir immédiatement pour éviter l'appel à handleTeleportation
                     case 0:
                         console.log("Dialogue sprite detected");
+
                         sprite.talk();
+
+                        // Attendre 0.5 seconde puis débloquer les commandes
                         setTimeout(() => {
                             this.turn = false;
                         }, 500);
+
                         break;
                     case 1:
+                        // décoration, ne rien faire
                         console.log("Decoration sprite, no action");
                         this.turn = false;
                         break;
                     case 2:
                         console.log("Dialogue sprite type 2 detected");
+
                         sprite.talk();
+
+                        // Attendre 0.5 seconde puis débloquer les commandes
                         setTimeout(() => {
                             this.turn = false;
                         }, 500);
+
                         break;
                     case 3:
                         sprite.displayItemsForSale(this);
                         this.turn = false;
                         break;
                     case 4:
+                        // gestion des Quest Giver
                         console.log("Quest Giver sprite, not implemented yet");
                         this.turn = false;
                         break;
                     case 5:
+                        // valeur fixe de test
+                        // ultérieurement : quests[currentMap].complete();
                         console.log("Quest completion sprite");
                         if (this.quests[0].completed === false) {
                             this.quests[0].complete();
+
+                            // changement de texture temporaire
                             console.log("test changement de texture");
                             sprite.spriteTexture = 21;
+
                             Sprite.resetToggle();
                         } else {
                             Sprite.terminalLog("I've already looted that.")
                         }
+
                         this.turn = false;
+                        
                         break;
                     case 6:
+                        // valeur fixe de test
+                        // ultérieurement : quests[currentMap].complete();
                         console.log("chest !");
                         if (sprite.step != 1) {
+                            // sprite.lootClass = 5;
+
                             sprite.generateLoot(this);
+
+                            // changement de texture temporaire
                             sprite.spriteTexture = 21;
+
                             sprite.step = 1;
+
                             Sprite.resetToggle();
                         } else {
                             Sprite.terminalLog("I've already looted that.")
                         }
+
                         this.turn = false;
+
                         break;
                     default:
                         console.log(`Sprite type ${sprite.spriteType} has no specific action`);
@@ -1286,6 +1340,8 @@ class Player {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     isBlocking(x, y, map) {
+        // console.log('x:', x, 'y:', y, 'map:', map);
+
         // first make sure that we cannot move outside the boundaries of the level
         if (y < 0 || y >= map.mapHeight || x < 0 || x >= map.mapWidth)
             return true;
@@ -1297,7 +1353,7 @@ class Player {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    /// Gestion interaction joueur avec monde (Move/Action) - VERSION AMELIOREE
+    /// Gestion interaction joueur avec monde (Move/Action)
     ///////////////////////////////////////////////////////////////////////////////////////////////
     
     async move(timeElapsed, map, eventA, eventB, sprites) {
@@ -1310,12 +1366,13 @@ class Player {
         const BACKWARD_DURATION = 500;      // Durée de base pour reculer
         const CONTINUOUS_MOVE_SPEEDUP = 150; // Réduction de temps pour mouvements continus
         const WALL_IMPACT_DURATION = 250;   // Durée de l'animation d'impact sur un mur
-        const ENEMY_IMPACT_DURATION = 300;  // Durée réduite pour l'impact ennemi
+        const ENEMY_IMPACT_DURATION = 500;  // Durée de l'animation d'impact sur un ennemi
         
         // Distances et facteurs
         const PUSH_WALL_FACTOR = 0.2;      // % de la taille d'une case pour l'animation d'impact mur
-        const PUSH_ENEMY_FACTOR = 0.1;     // Réduit pour moins d'impact visuel
+        const PUSH_ENEMY_FACTOR = 0.15;    // % de la taille d'une case pour l'animation d'impact ennemi
         const MOVEMENT_THRESHOLD = 0.1;    // Précision de détection des angles cardinaux
+        const ATTACK_COOLDOWN = 2000;      // Temps minimum entre deux attaques (ms)
         const CONTINUOUS_MOVE_DELAY = 50;  // Délai entre mouvements continus (ms)
         
         // Facteurs d'easing pour les animations
@@ -1360,12 +1417,12 @@ class Player {
         this.turnRightButtonClicked = false;
         this.actionButtonClicked = false;
         
-        // Si les commandes sont bloquées ou si on est en combat, ignorer les déplacements
-        if (commandBlocking || this.inCombat) {
+        // Si les commandes sont bloquées, ignorer les déplacements
+        if (commandBlocking) {
             return;
         }
 
-        // pour éviter les doubles actions
+        // pour éviter les doubles actions (en test)
         if (!this.turn) {
             return;
         }
@@ -1525,16 +1582,16 @@ class Player {
             }
         }
         
-        // MODIFICATION: Collision avec ennemi = animation légère seulement
+        // Gestion spécifique pour les ennemis (type "A")
         if (collidesWithSprite && collidedSprite.spriteType === "A") {
             // Marquer le début du mouvement
             this.isMoving = true;
             
-            // Animation d'impact REDUITE contre l'ennemi
+            // Animation d'impact contre l'ennemi
             const startX = this.x;
             const startY = this.y;
             
-            // Distance de "poussée" REDUITE
+            // Distance de "poussée" vers l'ennemi
             const pushDistance = this.tileSize * PUSH_ENEMY_FACTOR;
             
             // Calculer la direction de la poussée
@@ -1542,6 +1599,7 @@ class Player {
             let pushY = 0;
             
             if (isDodging) {
+                // Direction pour l'esquive (même logique que le mouvement)
                 if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                     pushX = dodgeLeft ? -pushDistance : pushDistance;
                 } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
@@ -1552,61 +1610,105 @@ class Player {
                     pushY = dodgeLeft ? pushDistance : -pushDistance;
                 }
             } else if (isMovingBackward) {
+                // Inversion pour le mouvement arrière
                 if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                    pushY = pushDistance;
+                    pushY = pushDistance; // Sud (inverse du Nord)
                 } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                    pushX = -pushDistance;
+                    pushX = -pushDistance; // Ouest (inverse de l'Est)
                 } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                    pushY = -pushDistance;
+                    pushY = -pushDistance; // Nord (inverse du Sud)
                 } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                    pushX = pushDistance;
+                    pushX = pushDistance; // Est (inverse de l'Ouest)
                 }
             } else {
+                // Direction normale pour le mouvement avant
                 if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                    pushY = -pushDistance;
+                    pushY = -pushDistance; // Nord
                 } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                    pushX = pushDistance;
+                    pushX = pushDistance;  // Est
                 } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                    pushY = pushDistance;
+                    pushY = pushDistance;  // Sud
                 } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                    pushX = -pushDistance;
+                    pushX = -pushDistance; // Ouest
                 }
             }
             
-            // Animation simple de rebond
-            const startImpactTime = performance.now();
-            let animationComplete = false;
+            // Position cible maximale de la poussée
+            const maxPushX = startX + pushX;
+            const maxPushY = startY + pushY;
             
-            while (!animationComplete) {
+            // Phase 1: Poussée vers l'avant/arrière rapide
+            const startImpactTime = performance.now();
+            let impactPhase1Complete = false;
+            
+            while (!impactPhase1Complete) {
                 const currentTime = performance.now();
                 const elapsedTime = currentTime - startImpactTime;
                 
-                let t = Math.min(elapsedTime / ENEMY_IMPACT_DURATION, 1);
+                // Progression de la phase 1 (0 à 1)
+                let t = Math.min(elapsedTime / (ENEMY_IMPACT_DURATION / 2), 1);
                 
                 if (t >= 1) {
-                    animationComplete = true;
+                    impactPhase1Complete = true;
                     t = 1;
                 }
                 
-                // Animation simple: aller-retour
-                const progress = t < 0.5 ? t * 2 : 2 - t * 2;
-                const easedProgress = easeInOut(progress);
+                const easedT = easeInOut(t);
                 
-                this.x = startX + pushX * easedProgress;
-                this.y = startY + pushY * easedProgress;
+                this.x = startX + pushX * easedT;
+                this.y = startY + pushY * easedT;
                 
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
             
-            // Position finale
+            // Phase 2: Rebond rapide
+            const startReboundTime = performance.now();
+            let impactPhase2Complete = false;
+            
+            while (!impactPhase2Complete) {
+                const currentTime = performance.now();
+                const elapsedTime = currentTime - startReboundTime;
+                
+                // Progression de la phase 2 (0 à 1)
+                let t = Math.min(elapsedTime / (ENEMY_IMPACT_DURATION / 2), 1);
+                
+                if (t >= 1) {
+                    impactPhase2Complete = true;
+                    t = 1;
+                }
+                
+                const easedT = easeOutBack(t);
+                
+                this.x = maxPushX - pushX * easedT;
+                this.y = maxPushY - pushY * easedT;
+                
+                await new Promise(resolve => requestAnimationFrame(resolve));
+            }
+            
+            // Normalisation finale de la position
             this.x = startX;
             this.y = startY;
             this.z = 0;
             
-            // Marquer la fin du mouvement
+            // Marquer la fin du mouvement d'impact
             this.isMoving = false;
             
-            // PAS DE COMBAT AUTOMATIQUE - Le joueur doit utiliser l'action
+            // Vérifier le délai avant de déclencher le combat
+            const currentTime = Date.now();
+            if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) >= ATTACK_COOLDOWN)) {
+                try {
+                    this.lastAttackTime = currentTime; // Mettre à jour le temps de la dernière attaque
+                    await collidedSprite.combat(this.might, this.criti, this);
+                } catch (error) {
+                    console.error("Error:", error);
+                    this.turn = false;
+                }
+            } else if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) < ATTACK_COOLDOWN)) {
+                // Informer le joueur qu'il n'est pas prêt à attaquer
+                
+                Sprite.terminalLog("Can't attack yet !");
+            }
+            
             return;
         }
         

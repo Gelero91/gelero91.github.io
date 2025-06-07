@@ -1,6 +1,69 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Sprite Class - Version avec combat amélioré
+// Sprite Class
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Sprites : Structure et fonctionnement
+
+            // Types de sprites avec comportements spécifiques :
+            // 0 = Décoration sans interaction (non bloquant)
+            // 1 = Décoration alternative (bloquant)
+            // 2 = PNJ avec dialogues
+            // 3 = Marchand (boutique avec items)
+            // 4 = Quest giver (donneur de quêtes - non implémenté)
+            // 5 = Quest end (fin de quête/interaction spéciale)
+            // 6 = Coffre au trésor (avec loot)
+            // 10 = Sprites décoratifs multiples (génère 2 sprites herbe aléatoires)
+            // "A" = Ennemi (combat, IA, loot)
+            // "DOOR" = Porte intérieur/extérieur (téléportation 2 cases)
+            // "EXIT" = Sortie vers carte suivante
+            
+            // Structure des données sprites : [ID, x, y, type, texture, face, name, dialogue, items, hp, dmg, lootClass]
+            // ID : Identifiant unique (0 réservé pour type 10 et sprite de combat)
+            // x, y : Position en coordonnées de grille
+            // type : Type de comportement (voir ci-dessus)
+            // texture : ID de texture (1-23) :
+            //   1=PNJ1, 2=PNJ2, 3=Garde, 4=Roche, 5=Tonneau, 6=Buisson, 7=Pancarte,
+            //   8=Slime, 9=Trésor, 10=Cadavre, 11=Statue, 12=Brasier, 13=Herbes,
+            //   14=Gobelin, 15=Arbre, 16=Colonne, 17=Sac, 18=Sac (var),
+            //   19=Animation slash, 20=Animation spark, 21=Coffre ouvert, 
+            //   22=Chauve-souris, 23=liannes vivantes
+            // face : Face pour dialogues (ex: "faceGuard", "facePlayer")
+            // name : Nom du sprite
+            // dialogue : Tableaux de dialogues [[face, nom, texte], ...]
+            // items : Items vendus pour marchands [1,2,3,...]
+            // hp : Points de vie (défaut: 4 pour ennemis)
+            // dmg : Dégâts (défaut: 3 pour ennemis)
+            // lootClass : Classe de loot (lettres a-f ou nombre direct pour item)
+
+            // textures :
+            // Textures disponibles pour les sprites
+            /*
+                1  = PNJ1               // voleur
+                2  = garde              // garde
+                3  = PNJ2               // marchant
+                4  = Roche              // Roche
+                5  = Tonneau            // Tonneau
+                6  = Buisson            // Buisson
+                7  = Pancarte           // Pancarte
+                8  = Slime              // Slime
+                9  = Trésor             // Coffre au trésor
+                10 = Cadavre            // Cadavre ("dead enemy skull")
+                11 = Statue             // Statue
+                12 = Brasier            // Brasier
+                13 = Herbes             // Herbes (weeds)
+                14 = Gobelin            // Gobelin
+                15 = Arbre              // Arbre
+                16 = Colonne            // Colonne
+                17 = Sac                // Sac
+                18 = Sac (variante)     // Sac (autre version)
+                19 = Animation slash    // Animation d'attaque slash
+                20 = Animation spark    // Animation d'étincelles/magie
+                21 = Coffre ouvert      // Coffre ouvert
+                22 = chauve souris
+                23 = liane vivante               
+                */
+
 
 console.log("chargement de la classe Sprites.")
 
@@ -26,16 +89,17 @@ class Sprite {
         spriteSell = [],
         id = 0,
         step = 0,
-        lootClass = null
+        lootClass = null  // Nouvelle propriété: classe de loot
+        
     ) {
         this.x = x;
         this.y = y;
-        this.z = z;
+        this.z = z; // Correction de z pour éviter l'erreur de copier w
         this.w = w;
         this.h = h;
 
         this.hit = false;
-        this.screenPosition = null;
+        this.screenPosition = null; // calculated screen position
 
         this.spriteFlash = 0;
 
@@ -66,282 +130,326 @@ class Sprite {
         // Gestion de la classe de loot
         if (lootClass === null || lootClass === 0) {
             if (spriteType === "A") {
+                // calculateLootClass retourne un nombre de 1 à 5
                 const calculatedClass = Sprite.calculateLootClass(hp, dmg);
+                // Convertir le nombre en lettre correspondante
                 const classLetters = ["a", "b", "c", "d", "e", "f"];
                 this.lootClass = classLetters[calculatedClass];
                 console.log(`Enemy created: HP=${hp}, DMG=${dmg}, Calculated class=${calculatedClass}, Loot class=${this.lootClass}`);
             } else {
-                this.lootClass = null;
+                this.lootClass = null; // null pour les sprites non-ennemis
             }
         } else {
             this.lootClass = lootClass;
         }
 
-        this.lastAttackTime = null;
-        this.attackCooldown = 2000; // 2 secondes entre les attaques
+        this.lastAttackTime = null; // Pour suivre le timing des attaques
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // IA / Deplacements ennemis - VERSION AMELIOREE
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IA / Deplacements ennemis
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    async moveRandomlyOrChase(map, sprites, player) {
-        // Ne pas déplacer si le sprite n'est pas un ennemi ou s'il est mort ou déjà en mouvement
-        if (this.spriteType !== "A" || this.hp <= 0 || this.isMoving) {
-            return false;
-        }
-        
-        const tileSize = 1280;
-        const currentCellX = Math.floor(this.x / tileSize);
-        const currentCellY = Math.floor(this.y / tileSize);
-        const playerCellX = Math.floor(player.x / tileSize);
-        const playerCellY = Math.floor(player.y / tileSize);
-        
-        // Calculer la distance entre l'ennemi et le joueur (distance Manhattan)
-        const distanceToPlayer = Math.abs(currentCellX - playerCellX) + Math.abs(currentCellY - playerCellY);
-        
-        // MODIFICATION: Si on est en contact, attaquer uniquement si cooldown écoulé
-        if (distanceToPlayer <= 1) {
-            const currentTime = Date.now();
-            if (!this.lastAttackTime || (currentTime - this.lastAttackTime) >= this.attackCooldown) {
-                this.attackPlayer(player);
-                this.lastAttackTime = currentTime;
-            }
-            return false;
-        }
-        
-        // Zone de détection (ajustable)
-        const detectionRange = 5;
-        
-        // Déterminer le mode: poursuite ou aléatoire
-        const isChasing = distanceToPlayer <= detectionRange;
-        
-        // Chance de se déplacer
-        const moveChance = isChasing ? 0.8 : 0.4;
-        
-        if (Math.random() > moveChance) {
-            return false;
-        }
-        
-        let directionToMove = null;
-        
-        if (isChasing) {
-            // Mode poursuite: essayer de se rapprocher du joueur
-            const dx = playerCellX - currentCellX;
-            const dy = playerCellY - currentCellY;
+async moveRandomlyOrChase(map, sprites, player) {
+    // Ne pas déplacer si le sprite n'est pas un ennemi ou s'il est mort ou déjà en mouvement
+    if (this.spriteType !== "A" || this.hp <= 0 || this.isMoving) {
+        return false;
+    }
+    
+    const tileSize = 1280;
+    const currentCellX = Math.floor(this.x / tileSize);
+    const currentCellY = Math.floor(this.y / tileSize);
+    const playerCellX = Math.floor(player.x / tileSize);
+    const playerCellY = Math.floor(player.y / tileSize);
+    
+    // Calculer la distance entre l'ennemi et le joueur (distance Manhattan)
+    const distanceToPlayer = Math.abs(currentCellX - playerCellX) + Math.abs(currentCellY - playerCellY);
+    
+    // Si on est en contact avec le joueur, attaquer et planifier l'attaque suivante
+    if (distanceToPlayer <= 1) {
+        // Ne pas bouger, mais attaquer
+        if (!this.lastAttackTime || (Date.now() - this.lastAttackTime) >= 2000) {
+            this.attackPlayer(player);
             
-            // Choisir d'abord l'axe avec la plus grande différence
-            if (Math.abs(dx) >= Math.abs(dy)) {
-                directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
-                
-                if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
-                    directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
+            // Planifier une attaque supplémentaire dans 2 secondes
+            this.lastAttackTime = Date.now();
+            setTimeout(() => {
+                if (this.hp > 0 && player.hp > 0) {
+                    // Vérifier à nouveau la distance avant d'attaquer
+                    const newCurrentCellX = Math.floor(this.x / tileSize);
+                    const newCurrentCellY = Math.floor(this.y / tileSize);
+                    const newPlayerCellX = Math.floor(player.x / tileSize);
+                    const newPlayerCellY = Math.floor(player.y / tileSize);
+                    const newDistanceToPlayer = Math.abs(newCurrentCellX - newPlayerCellX) + 
+                                                Math.abs(newCurrentCellY - newPlayerCellY);
+                    
+                    if (newDistanceToPlayer <= 1) {
+                        this.attackPlayer(player);
+                    }
                 }
-            } else {
+            }, 2000);
+        }
+        return false;
+    }
+    
+    // Zone de détection (ajustable)
+    const detectionRange = 5; // Détecte le joueur à 5 cases ou moins
+    
+    // Déterminer le mode: poursuite ou aléatoire
+    const isChasing = distanceToPlayer <= detectionRange;
+    
+    // Chance de se déplacer (plus élevée en mode poursuite)
+    const moveChance = isChasing ? 0.8 : 0.4; // 80% en mode poursuite, 40% en mode aléatoire
+    
+    if (Math.random() > moveChance) {
+        return false;
+    }
+    
+    let directionToMove = null;
+    
+    if (isChasing) {
+        // Mode poursuite: essayer de se rapprocher du joueur
+        const dx = playerCellX - currentCellX;
+        const dy = playerCellY - currentCellY;
+        
+        // Choisir d'abord l'axe avec la plus grande différence
+        if (Math.abs(dx) >= Math.abs(dy)) {
+            // Se déplacer horizontalement en priorité
+            directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
+            
+            // Si bloqué horizontalement, essayer verticalement
+            if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
                 directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
-                
-                if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
-                    directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
-                }
-            }
-            
-            if (!directionToMove || !this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
-                return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
             }
         } else {
+            // Se déplacer verticalement en priorité
+            directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
+            
+            // Si bloqué verticalement, essayer horizontalement
+            if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+                directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
+            }
+        }
+        
+        // Si toujours bloqué, essayer une direction aléatoire
+        if (!directionToMove || !this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
             return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
         }
-        
-        if (directionToMove && this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
-            return this.executeMove(directionToMove, currentCellX, currentCellY, tileSize);
-        }
-        
-        return false;
+    } else {
+        // Mode aléatoire
+        return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
     }
+    
+    // Exécuter le mouvement si une direction valide a été trouvée
+    if (directionToMove && this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+        return this.executeMove(directionToMove, currentCellX, currentCellY, tileSize);
+    }
+    
+    return false;
+}
 
-    // Méthode d'attaque améliorée
-    attackPlayer(player) {
-        if (player.hp <= 0 || this.hp <= 0) return;
-        
-        // Marquer le début du combat
-        this.inCombat = true;
-        
-        // Animation de l'attaque
-        this.startAttackAnimation();
-        
-        const chanceEchec = Math.floor(Math.random() * 100);
-        
-        if (chanceEchec > player.dodge) {
-            // L'attaque réussit
-            if (player.armor >= this.dmg) {
-                Sprite.terminalLog("Your armor absorbs all the damages.", 1);
-            } else {
-                const damageDone = this.dmg - player.armor;
-                Sprite.displayCombatAnimation(`${this.spriteName || "The enemy"} attacks : ${damageDone} dmg !`, 2);
-                Raycaster.playerDamageFlash();
-                player.hp -= damageDone;
-                
-                if (player.hp <= 0) {
-                    Sprite.terminalLog("You're dead !");
-                }
-            }
+// Nouvelle méthode pour gérer l'attaque de l'ennemi
+attackPlayer(player) {
+    if (player.hp <= 0 || this.hp <= 0) return;
+    
+    // Animation de l'attaque
+    this.startAttackAnimation();
+    
+    const chanceEchec = Math.floor(Math.random() * 100);
+    
+    if (chanceEchec > player.dodge) {
+        // L'attaque réussit
+        if (player.armor >= this.dmg) {
+            Sprite.terminalLog("Your armor absorbs all the damages.", 1);
         } else {
-            // Le joueur esquive
-            Sprite.terminalLog(`You dodge ${this.spriteName || "the enemy"}'s attack !`, 2);
-            player.XPdexterity += 1;
-        }
-        
-        // Mise à jour des statistiques du joueur
-        player.statsUpdate(player);
-        
-        // Fin du combat
-        this.inCombat = false;
-    }
-
-    // Vérifier si un mouvement est valide
-    isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
-        if (!direction) return false;
-        
-        const tileSize = 1280;
-        const newCellX = currentCellX + direction.dx;
-        const newCellY = currentCellY + direction.dy;
-        
-        // Vérifier les limites de la carte
-        if (newCellX < 0 || newCellY < 0 || newCellX >= map[0].length || newCellY >= map.length) {
-            return false;
-        }
-        
-        // Vérifier si la case est vide (0 = traversable)
-        if (map[newCellY][newCellX] !== 0) {
-            return false;
-        }
-        
-        // Vérifier si le joueur est dans la case de destination
-        const playerCellX = Math.floor(player.x / tileSize);
-        const playerCellY = Math.floor(player.y / tileSize);
-        if (newCellX === playerCellX && newCellY === playerCellY) {
-            return false;
-        }
-        
-        // Vérifier s'il y a déjà un sprite sur cette case
-        for (const sprite of sprites) {
-            if (sprite !== this && sprite.isBlocking) {
-                const spriteCellX = Math.floor(sprite.x / tileSize);
-                const spriteCellY = Math.floor(sprite.y / tileSize);
-                
-                if (spriteCellX === newCellX && spriteCellY === newCellY) {
-                    return false;
-                }
+            const damageDone = this.dmg - player.armor;
+            Sprite.displayCombatAnimation(`${this.spriteName || "The ennemy"} attacks : ${damageDone} dmg !`, 2);
+            Raycaster.playerDamageFlash();
+            player.hp -= damageDone;
+            
+            // Vérifier si le joueur est mort
+            if (player.hp <= 0) {
+                Sprite.terminalLog("You're dead !");
+                // Logique de game over déjà gérée dans player.statsUpdate()
             }
         }
-        
-        return true;
+    } else {
+        // Le joueur esquive
+        Sprite.terminalLog(`You dodge ${this.spriteName || "the enemy"}'s attack !`, 2);
+        player.XPdexterity += 1;
     }
+    
+    // Mettre à jour les statistiques du joueur
+    player.statsUpdate(player);
+}
 
-    // Essayer un mouvement aléatoire
-    tryRandomMove(map, sprites, player, currentCellX, currentCellY) {
-        // Directions possibles: nord, est, sud, ouest
-        const directions = [
-            { dx: 0, dy: -1 }, // nord
-            { dx: 1, dy: 0 },  // est
-            { dx: 0, dy: 1 },  // sud
-            { dx: -1, dy: 0 }  // ouest
-        ];
-        
-        // Mélanger les directions pour un choix vraiment aléatoire
-        directions.sort(() => Math.random() - 0.5);
-        
-        // Essayer chaque direction jusqu'à en trouver une valide
-        for (const direction of directions) {
-            if (this.isValidMove(direction, map, sprites, player, currentCellX, currentCellY)) {
-                return this.executeMove(direction, currentCellX, currentCellY, 1280);
-            }
-        }
-        
+// Vérifier si un mouvement est valide
+isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
+    if (!direction) return false;
+    
+    const tileSize = 1280;
+    const newCellX = currentCellX + direction.dx;
+    const newCellY = currentCellY + direction.dy;
+    
+    // Vérifier les limites de la carte
+    if (newCellX < 0 || newCellY < 0 || newCellX >= map[0].length || newCellY >= map.length) {
         return false;
     }
-
-    // Exécuter le mouvement avec animation
-    async executeMove(direction, currentCellX, currentCellY, tileSize) {
-        const newCellX = currentCellX + direction.dx;
-        const newCellY = currentCellY + direction.dy;
-        
-        // Tout est OK, on peut déplacer l'ennemi avec animation
-        this.isMoving = true;
-        
-        // Positions initiale et finale
-        const startX = this.x;
-        const startY = this.y;
-        const targetX = newCellX * tileSize + tileSize / 2;
-        const targetY = newCellY * tileSize + tileSize / 2;
-        
-        // Durée de l'animation en ms
-        const animationDuration = 600;
-        
-        // Fonctions d'easing pour animation plus fluide
-        const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
-        
-        // Animation du déplacement
-        const startTime = performance.now();
-        let animationComplete = false;
-        
-        while (!animationComplete) {
-            const currentTime = performance.now();
-            const elapsedTime = currentTime - startTime;
+    
+    // Vérifier si la case est vide (0 = traversable)
+    if (map[newCellY][newCellX] !== 0) {
+        return false;
+    }
+    
+    // Vérifier si le joueur est dans la case de destination
+    const playerCellX = Math.floor(player.x / tileSize);
+    const playerCellY = Math.floor(player.y / tileSize);
+    if (newCellX === playerCellX && newCellY === playerCellY) {
+        return false;
+    }
+    
+    // Vérifier s'il y a déjà un sprite sur cette case
+    for (const sprite of sprites) {
+        if (sprite !== this && sprite.isBlocking) {
+            const spriteCellX = Math.floor(sprite.x / tileSize);
+            const spriteCellY = Math.floor(sprite.y / tileSize);
             
-            // Progression de l'animation (0 à 1)
-            let t = Math.min(elapsedTime / animationDuration, 1);
-            
-            if (t >= 1) {
-                animationComplete = true;
-                t = 1;
+            if (spriteCellX === newCellX && spriteCellY === newCellY) {
+                return false; // Case déjà occupée
             }
-            
-            // Appliquer l'easing pour un mouvement plus naturel
-            const easedT = easeInOutQuart(t);
-            
-            // Mettre à jour la position
-            this.x = startX + (targetX - startX) * easedT;
-            this.y = startY + (targetY - startY) * easedT;
-            
-            // Petit effet de rebond vertical
-            this.z = 5 * Math.sin(Math.PI * t);
-            
-            // Attendre la prochaine frame
-            await new Promise(resolve => requestAnimationFrame(resolve));
+        }
+    }
+    
+    return true;
+}
+
+// Essayer un mouvement aléatoire
+tryRandomMove(map, sprites, player, currentCellX, currentCellY) {
+    // Directions possibles: nord, est, sud, ouest
+    const directions = [
+        { dx: 0, dy: -1 }, // nord
+        { dx: 1, dy: 0 },  // est
+        { dx: 0, dy: 1 },  // sud
+        { dx: -1, dy: 0 }  // ouest
+    ];
+    
+    // Mélanger les directions pour un choix vraiment aléatoire
+    directions.sort(() => Math.random() - 0.5);
+    
+    // Essayer chaque direction jusqu'à en trouver une valide
+    for (const direction of directions) {
+        if (this.isValidMove(direction, map, sprites, player, currentCellX, currentCellY)) {
+            return this.executeMove(direction, currentCellX, currentCellY, 1280);
+        }
+    }
+    
+    return false; // Aucune direction valide
+}
+
+// Exécuter le mouvement avec animation
+async executeMove(direction, currentCellX, currentCellY, tileSize) {
+    const newCellX = currentCellX + direction.dx;
+    const newCellY = currentCellY + direction.dy;
+    
+    // Tout est OK, on peut déplacer l'ennemi avec animation
+    this.isMoving = true;
+    
+    // Positions initiale et finale
+    const startX = this.x;
+    const startY = this.y;
+    const targetX = newCellX * tileSize + tileSize / 2;
+    const targetY = newCellY * tileSize + tileSize / 2;
+    
+    // Durée de l'animation en ms (plus rapide en mode poursuite)
+    const animationDuration = 600; // 600ms = 0.6 seconde
+    
+    // Fonctions d'easing pour animation plus fluide
+    const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+    
+    // Animation du déplacement
+    const startTime = performance.now();
+    let animationComplete = false;
+    
+    while (!animationComplete) {
+        const currentTime = performance.now();
+        const elapsedTime = currentTime - startTime;
+        
+        // Progression de l'animation (0 à 1)
+        let t = Math.min(elapsedTime / animationDuration, 1);
+        
+        if (t >= 1) {
+            animationComplete = true;
+            t = 1;
         }
         
-        // S'assurer que la position finale est exacte
-        this.x = targetX;
-        this.y = targetY;
-        this.z = 0;
+        // Appliquer l'easing pour un mouvement plus naturel
+        const easedT = easeInOutQuart(t);
         
-        // Animation terminée
-        this.isMoving = false;
+        // Mettre à jour la position
+        this.x = startX + (targetX - startX) * easedT;
+        this.y = startY + (targetY - startY) * easedT;
         
-        return true;
+        // Petit effet de rebond vertical
+        this.z = 5 * Math.sin(Math.PI * t);
+        
+        // Attendre la prochaine frame
+        await new Promise(resolve => requestAnimationFrame(resolve));
     }
+    
+    // S'assurer que la position finale est exacte
+    this.x = targetX;
+    this.y = targetY;
+    this.z = 0;
+    
+    // Animation terminée
+    this.isMoving = false;
+    
+    return true;
+}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Looting
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Looting
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     // Tables de loot statiques pour la classe Sprite
+    // Format: Minimum gold, Maximum gold, Chances d'obtenir un objet, Tableau d'IDs d'items possibles
+    // Tables de loot optimisées pour le calcul automatique
     static lootTables = {
-        "a": { minGold: 0, maxGold: 0, itemChance: 0, possibleItems: [] },
-        "b": { minGold: 5, maxGold: 15, itemChance: 0.1, possibleItems: [1, 2] },
-        "c": { minGold: 10, maxGold: 30, itemChance: 0.2, possibleItems: [1, 2, 5] },
-        "d": { minGold: 25, maxGold: 60, itemChance: 0.3, possibleItems: [1, 2, 3, 5] },
-        "e": { minGold: 50, maxGold: 120, itemChance: 0.5, possibleItems: [2, 3, 4, 5] },
-        "f": { minGold: 100, maxGold: 250, itemChance: 0.7, possibleItems: [3, 4, 5] }
+        "a": { minGold: 0, maxGold: 0, itemChance: 0, possibleItems: [] }, // Pas de loot
+        "b": { minGold: 5, maxGold: 15, itemChance: 0.1, possibleItems: [1, 2] }, // Créatures très faibles (PV=2, DMG=1)
+        "c": { minGold: 10, maxGold: 30, itemChance: 0.2, possibleItems: [1, 2, 5] }, // Créatures faibles
+        "d": { minGold: 25, maxGold: 60, itemChance: 0.3, possibleItems: [1, 2, 3, 5] }, // Créatures moyennes
+        "e": { minGold: 50, maxGold: 120, itemChance: 0.5, possibleItems: [2, 3, 4, 5] }, // Créatures fortes
+        "f": { minGold: 100, maxGold: 250, itemChance: 0.7, possibleItems: [3, 4, 5] }  // Créatures très fortes ou boss
     };
 
+
+    /**
+     * Calcule automatiquement la classe de loot basée sur les statistiques de l'ennemi
+     * @param {number} hp - Points de vie de l'ennemi
+     * @param {number} dmg - Dégâts de l'ennemi
+     * @return {number} - Classe de loot calculée (1-5)
+     */
     static calculateLootClass(hp, dmg) {
+        // Formule simple basée sur les PV et les dégâts
+        // Math.floor(hp/dmg) comme suggéré, mais avec quelques ajustements
+        // pour s'assurer que les valeurs restent dans la plage 1-5
+        
+        // Si l'ennemi n'a pas de dégâts, on utilise 1 pour éviter une division par zéro
         const effectiveDmg = dmg || 1;
+        
+        // Calcul de base selon la formule hp/dmg
         let baseClass = Math.floor(hp / effectiveDmg);
+        
+        // Ajouter un petit bonus basé sur les dégâts
         baseClass += Math.floor(dmg / 2);
+        
+        // Limiter la classe entre 1 et 5
         return Math.max(1, Math.min(5, baseClass));
     }
+
+    // displayLootAnimation() était ici
 
     generateLoot(player) {
         // Si c'est un nombre, donner directement l'objet
@@ -376,33 +484,40 @@ class Sprite {
         
         // Déterminer si un objet est obtenu, avec une chance influencée par la difficulté de l'ennemi
         const baseItemChance = lootTable.itemChance;
-        const difficultyBonus = (this.hp * this.dmg) / 200;
-        const adjustedItemChance = Math.min(0.95, baseItemChance + difficultyBonus);
+        const difficultyBonus = (this.hp * this.dmg) / 200; // Bonus de 0.5% par point de "puissance"
+        const adjustedItemChance = Math.min(0.95, baseItemChance + difficultyBonus); // Plafond à 95%
         
         const getItem = Math.random() < adjustedItemChance;
         
         if (getItem && lootTable.possibleItems.length > 0) {
             // Choisir un objet aléatoire dans la liste des possibles
+            // Plus l'ennemi est fort, plus il y a de chances d'obtenir un meilleur objet
+            
+            // Trier les objets par "valeur" (prix ou puissance)
             const sortedItems = [...lootTable.possibleItems].sort((a, b) => {
                 const itemA = Item.getItemById(a);
                 const itemB = Item.getItemById(b);
                 
+                // Estimation simple de la valeur: prix ou somme des attributs
                 const valueA = itemA.price || (itemA.might + itemA.magic + itemA.armor + itemA.dodge);
                 const valueB = itemB.price || (itemB.might + itemB.magic + itemB.armor + itemB.dodge);
                 
                 return valueA - valueB;
             });
             
-            const powerRatio = Math.min(1, (this.hp * this.dmg) / 50);
+            // Calcul d'un index pondéré qui favorise les meilleurs objets pour les ennemis plus forts
+            const powerRatio = Math.min(1, (this.hp * this.dmg) / 50); // 0 à 1 selon la puissance
             const weightedIndex = Math.floor(Math.random() * (1 + powerRatio) * sortedItems.length);
             const clampedIndex = Math.min(weightedIndex, sortedItems.length - 1);
             
             const itemId = sortedItems[clampedIndex];
             
+            // Créer l'objet et l'ajouter à l'inventaire du joueur
             const lootItem = Item.getItemById(itemId);
             if (lootItem) {
                 lootItem.give(player);
                 
+                // Message différent selon la rareté de l'objet
                 let qualityDesc = "a";
                 if (clampedIndex >= sortedItems.length * 0.8) qualityDesc = "an exceptional";
                 else if (clampedIndex >= sortedItems.length * 0.6) qualityDesc = "a valuable";
@@ -420,89 +535,96 @@ class Sprite {
     // Contrôle UI & terminal log
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static terminalLog(entry, style = 0) {
-        const outputElement = document.getElementById("output");
+    // Fonction principale de log du terminal
+// Fonction principale de log du terminal
+    // Fonction principale de log du terminal avec apparition en fondu
+    // n'affiche pas les doublons consécutifs si le style = 0
+static terminalLog(entry, style = 0) {
+    const outputElement = document.getElementById("output");
+    
+    // Si style = 0, vérifier les doublons consécutifs
+    if (style === 0) {
+        // Récupérer toutes les lignes existantes
+        const existingLines = outputElement.querySelectorAll('.terminal-line');
         
-        // Si style = 0, vérifier les doublons
-        if (style === 0) {
-            // Récupérer toutes les lignes existantes
-            const existingLines = outputElement.querySelectorAll('.terminal-line');
-            
-            // Vérifier si le message existe déjà
-            for (let line of existingLines) {
-                const contentDiv = line.querySelector('.terminal-content');
-                if (contentDiv && contentDiv.innerHTML === entry) {
-                    // Message en doublon trouvé, ne pas l'ajouter
-                    return;
-                }
+        // Vérifier si le dernier message est identique (répétition consécutive)
+        if (existingLines.length > 0) {
+            const lastLine = existingLines[existingLines.length - 1];
+            const lastContentDiv = lastLine.querySelector('.terminal-content');
+            if (lastContentDiv && lastContentDiv.innerHTML === entry) {
+                // C'est une répétition consécutive, ne pas l'ajouter
+                return;
             }
         }
-        
-        // Définition des styles disponibles (couleurs contrastées sur fond #1F0E08)
-        const styles = {
-            0: { color: "#FFFFFF" },                  // Blanc (par défaut)
-            1: { color: "#77DD77" },                  // Vert clair
-            2: { color: "#FF6B6B" },                  // Rouge vif
-            3: { color: "#FFD166" },                  // Jaune doré
-            4: { color: "#79ADDC" },                  // Bleu ciel
-            5: { color: "#FF9E80" },                  // Orange corail
-            6: { color: "#CCCCFF" },                  // Lavande
-            7: { color: "#D4A5A5" },                  // Rose poussiéreux
-            8: { color: "#FFFFFF", fontWeight: "bold" },     // Blanc gras
-            9: { color: "#FFFFFF", fontStyle: "italic" },    // Blanc italique
-            10: { color: "#AAFFAA", fontWeight: "bold" },    // Vert clair gras
-            11: { color: "#FFAAAA", fontStyle: "italic" }    // Rouge clair italique
-        };
-        
-        // Obtenir le style sélectionné ou utiliser le style par défaut
-        const selectedStyle = styles[style] || styles[0];
-        
-        // Créer un conteneur pour chaque ligne du terminal
-        const logLine = document.createElement("div");
-        logLine.className = "terminal-line";
-        logLine.style.display = "flex";
-        logLine.style.fontFamily = "monospace"; // Police à chasse fixe
-        logLine.style.marginBottom = "2px";
-        
-        // Animation de fondu
-        logLine.style.opacity = "0";
-        logLine.style.transition = "opacity 0.3s ease-in";
-        
-        // Créer le symbole du terminal comme une colonne fixe
-        const promptColumn = document.createElement("div");
-        promptColumn.className = "terminal-prompt-column";
-        promptColumn.style.width = "25px"; // Largeur fixe
-        promptColumn.style.flexShrink = "0"; // Empêche la réduction
-        promptColumn.style.textAlign = "center"; // Centré dans sa colonne
-        promptColumn.innerHTML = '<span style="color:#aaa; font-weight:bold;">&gt;</span>';
-        
-        // Créer le contenu du message avec le style spécifié
-        const messageContent = document.createElement("div");
-        messageContent.className = "terminal-content";
-        messageContent.style.flexGrow = "1";
-        messageContent.style.color = selectedStyle.color || "";
-        messageContent.style.fontWeight = selectedStyle.fontWeight || "";
-        messageContent.style.fontStyle = selectedStyle.fontStyle || "";
-        messageContent.innerHTML = entry;
-        
-        // Assembler la ligne
-        logLine.appendChild(promptColumn);
-        logLine.appendChild(messageContent);
-        
-        // Ajouter la ligne au terminal
-        outputElement.appendChild(logLine);
-        
-        // Déclencher l'animation de fondu après un bref délai
-        setTimeout(() => {
-            logLine.style.opacity = "1";
-        }, 10);
-        
-        // Faire défiler vers le bas pour voir les nouveaux messages
-        outputElement.scrollTop = outputElement.scrollHeight;
-        
-        // Stocker la dernière entrée
-        lastEntry = entry;
     }
+    
+    // Définition des styles disponibles (couleurs contrastées sur fond #1F0E08)
+    const styles = {
+        0: { color: "#FFFFFF" },                  // Blanc (par défaut)
+        1: { color: "#77DD77" },                  // Vert clair
+        2: { color: "#FF6B6B" },                  // Rouge vif
+        3: { color: "#FFD166" },                  // Jaune doré
+        4: { color: "#79ADDC" },                  // Bleu ciel
+        5: { color: "#FF9E80" },                  // Orange corail
+        6: { color: "#CCCCFF" },                  // Lavande
+        7: { color: "#D4A5A5" },                  // Rose poussiéreux
+        8: { color: "#FFFFFF", fontWeight: "bold" },     // Blanc gras
+        9: { color: "#FFFFFF", fontStyle: "italic" },    // Blanc italique
+        10: { color: "#AAFFAA", fontWeight: "bold" },    // Vert clair gras
+        11: { color: "#FFAAAA", fontStyle: "italic" }    // Rouge clair italique
+    };
+    
+    // Obtenir le style sélectionné ou utiliser le style par défaut
+    const selectedStyle = styles[style] || styles[0];
+    
+    // Créer un conteneur pour chaque ligne du terminal
+    const logLine = document.createElement("div");
+    logLine.className = "terminal-line";
+    logLine.style.display = "flex";
+    logLine.style.fontFamily = "monospace"; // Police à chasse fixe
+    logLine.style.marginBottom = "2px";
+    logLine.setAttribute('data-repeat-count', '1'); // Initialiser le compteur
+    
+    // Animation de fondu
+    logLine.style.opacity = "0";
+    logLine.style.transition = "opacity 0.3s ease-in";
+    
+    // Créer le symbole du terminal comme une colonne fixe
+    const promptColumn = document.createElement("div");
+    promptColumn.className = "terminal-prompt-column";
+    promptColumn.style.width = "25px"; // Largeur fixe
+    promptColumn.style.flexShrink = "0"; // Empêche la réduction
+    promptColumn.style.textAlign = "center"; // Centré dans sa colonne
+    promptColumn.innerHTML = '<span style="color:#aaa; font-weight:bold;">&gt;</span>';
+    
+    // Créer le contenu du message avec le style spécifié
+    const messageContent = document.createElement("div");
+    messageContent.className = "terminal-content";
+    messageContent.style.flexGrow = "1";
+    messageContent.style.color = selectedStyle.color || "";
+    messageContent.style.fontWeight = selectedStyle.fontWeight || "";
+    messageContent.style.fontStyle = selectedStyle.fontStyle || "";
+    messageContent.innerHTML = entry;
+    messageContent.setAttribute('data-original-message', entry); // Stocker le message original
+    
+    // Assembler la ligne
+    logLine.appendChild(promptColumn);
+    logLine.appendChild(messageContent);
+    
+    // Ajouter la ligne au terminal
+    outputElement.appendChild(logLine);
+    
+    // Déclencher l'animation de fondu après un bref délai
+    setTimeout(() => {
+        logLine.style.opacity = "1";
+    }, 10);
+    
+    // Faire défiler vers le bas pour voir les nouveaux messages
+    outputElement.scrollTop = outputElement.scrollHeight;
+    
+    // Stocker la dernière entrée
+    lastEntry = entry;
+}
 
     // Fonction pour les animations de loot adaptée au nouveau format
     static displayLootAnimation(message, type = 'gold') {
@@ -691,7 +813,7 @@ class Sprite {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // boutique
+    // boutique, pas de prix pour le moment
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     displayItemsForSale(player) {
@@ -1147,9 +1269,21 @@ class Sprite {
         const sellDetails = document.getElementById('sell-details');
         if (!sellDetails) return;
         
+        // DEBUG: Vérifier l'état initial
+        console.log('=== showSellItemDetails - DÉBUT ===');
+        console.log('Item à vendre:', item);
+        console.log('Item ID:', item?.id);
+        console.log('Player inventory (avant vente):', player.inventory);
+        console.log('Index de l\'item dans l\'inventaire:', index);
+        console.log('Sprite spriteSell (avant vente):', this.spriteSell);
+        console.log('Type de this.spriteSell:', typeof this.spriteSell);
+        console.log('Marchand (this):', this);
+        
         // Déterminer l'icône en fonction du slot
         let itemIcon = item.icon;
         let itemId = item.id;
+        
+        console.log('Variable itemId extraite:', itemId);
                         
         // Type d'équipement
         let slotName = "";
@@ -1238,19 +1372,49 @@ class Sprite {
         
         // Ajouter l'écouteur d'événement pour le bouton de vente
         document.getElementById('sell-item-btn').addEventListener('click', () => {
+            console.log('\n--- BOUTON VENTE CLIQUÉ ---');
+            console.log('Tentative de vente de l\'item:', item);
+            console.log('Index de l\'item:', index);
+            console.log('Prix de vente:', sellPrice);
+            
             // Obtenir l'or de la vente
+            console.log('Or du joueur avant vente:', player.gold);
             player.gold += sellPrice;
+            console.log('Or du joueur après vente:', player.gold);
+            
+            // Vérifier l'état de spriteSell avant modification
+            console.log('spriteSell avant ajout:', this.spriteSell);
+            console.log('Type de spriteSell:', typeof this.spriteSell);
+            console.log('Est-ce un tableau?', Array.isArray(this.spriteSell));
             
             // Initialiser spriteSell si nécessaire
             if (!this.spriteSell) {
+                console.log('spriteSell est null/undefined, initialisation...');
                 this.spriteSell = [];
             }
             
             // Ajouter l'objet aux objets en vente du marchand
+            console.log('Ajout de l\'itemId à spriteSell:', itemId);
             this.spriteSell.push(itemId);
+            console.log('spriteSell après ajout:', this.spriteSell);
+            
+            // Vérifier l'inventaire avant suppression
+            console.log('Inventaire du joueur avant suppression:', player.inventory);
+            console.log('Item à l\'index', index, ':', player.inventory[index]);
             
             // Supprimer l'objet de l'inventaire
-            player.inventory.splice(index, 1);
+            const removedItem = player.inventory.splice(index, 1);
+            console.log('Item supprimé de l\'inventaire:', removedItem);
+            console.log('Inventaire du joueur après suppression:', player.inventory);
+            
+            // Vérifier si l'item existe encore dans le système global
+            console.log('Vérification de l\'existence de l\'item dans le système global...');
+            if (typeof Item !== 'undefined' && Item.getItemById) {
+                const globalItem = Item.getItemById(itemId);
+                console.log('Item trouvé dans le système global?', globalItem);
+            } else {
+                console.log('Item.getItemById n\'est pas disponible ou Item n\'est pas défini');
+            }
             
             // Message de confirmation
             Sprite.terminalLog(`You sold ${item.name} for ${sellPrice} gp.`);
@@ -1262,12 +1426,21 @@ class Sprite {
             }
             
             // Mettre à jour les statistiques du joueur
+            console.log('Mise à jour des statistiques du joueur...');
             player.statsUpdate(player);
+            
+            // Vérifier l'état final
+            console.log('\n--- ÉTAT FINAL ---');
+            console.log('spriteSell final:', this.spriteSell);
+            console.log('Inventaire final du joueur:', player.inventory);
+            console.log('Or final du joueur:', player.gold);
+            console.log('=== showSellItemDetails - FIN ===\n');
             
             // Recharger l'interface de vente
             this.displaySellInterface(player);
         });
     }
+
 
     addItemToInventory(item, player) {
         player.inventory.push(item);
@@ -1318,10 +1491,12 @@ class Sprite {
     // Gestion des dialogues
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // peut etre réduit
     countDialogues() {
         return this.spriteTalk.length;
     }
 
+    // XYZ
     talk() {
         Sprite.resetToggle();
     
@@ -1374,6 +1549,7 @@ class Sprite {
                     Sprite.terminalLog(`${name} :</br>${entry}</br>`, 4);
                 }
     
+
                 outputElement.style.display = "block";
                 dialWindow.style.display = "none";
 
@@ -1407,6 +1583,7 @@ class Sprite {
         // Affiche le premier dialogue immédiatement
         showNextDialogue();
         }
+
     }
 
     static showGameOver() {
@@ -1417,7 +1594,10 @@ class Sprite {
         gameOverWindow.style = "display:block";
     }
 
+    
     /// CINEMATIQUES 
+    // xyz
+// Fonction showCinematic simplifiée pour utiliser la balise img
 // Fonction showCinematic avec fade simple sur la fenêtre cinématique
 static async showCinematic(cinematicSteps, onComplete = null) {
     // Bloquer les commandes 
@@ -1520,87 +1700,91 @@ static async showCinematic(cinematicSteps, onComplete = null) {
     // Première étape
     showNextStep();
 }
-    static showGameOverCinematic() {
-        commandBlocking = true;
 
-        const gameOverCinematic = [
-            {
-                image: 'assets/game over.png',
-                face: 'faceGuard',
-                name: 'Death',
-                text: 'Your journey ends here...'
-            },
-            {
-                image: 'assets/game over.png',
-                face: 'faceGuard',
-                name: 'Death',
-                text: 'Rest in peace.'
-            }
-        ];
+// XYZ
+static showGameOverCinematic() {
+    commandBlocking = true;
 
-        // Utiliser showCinematic avec un callback pour retourner au menu
-        Sprite.showCinematic(gameOverCinematic, () => {
-            // À la fin de la cinématique, retourner au menu principal
-            Raycaster.showMainMenu();
-            commandBlocking = false;
-        });
-    }
+    const gameOverCinematic = [
+        {
+            image: 'assets/game over.png',
+            face: 'faceGuard',
+            name: 'Death',
+            text: 'Your journey ends here...'
+        },
+        {
+            image: 'assets/game over.png',
+            face: 'faceGuard',
+            name: 'Death',
+            text: 'Rest in peace.'
+        }
+    ];
 
-    static showIntroCinematic() {
-        commandBlocking = true;
+    // Utiliser showCinematic avec un callback pour retourner au menu
+    Sprite.showCinematic(gameOverCinematic, () => {
+        // À la fin de la cinématique, retourner au menu principal
+        Raycaster.showMainMenu();
+        commandBlocking = false;
+    });
+}
 
-        const introCinematic = [
-            {
-                image: 'assets/intro/1.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "I don't really know where I come from... I was an orphan, left for dead in the desert."
-            },
-            {
-                image: 'assets/intro/2.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "By chance, I was taken in by a bard who was resting after a life of adventure."
-            },
-            {
-                image: 'assets/intro/3.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "He taught me to read and write, while telling me about his incredible adventures."
-            },
-            {
-                image: 'assets/intro/4.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "He felt I wouldn't stay in one place for long. I wanted to discover the world too."
-            },
-            {
-                image: 'assets/intro/5.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "He taught me everything he knew. Combat, magic, trickery... Everything that makes an adventurer."
-            },
-            {
-                image: 'assets/intro/6.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "Now I'm an adult, ready to risk everything, because I need to know I can live on my own. Without help."
-            },
-            {
-                image: 'assets/intro/7.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "I hope my youthful whim won't lead me to death... There's only one way to find out."
-            }
-        ];
+// XYZ
+static showIntroCinematic() {
+    commandBlocking = true;
 
-        // Utiliser showCinematic avec un callback pour retourner au menu
-        Sprite.showCinematic(introCinematic, () => {
-            // À la fin de la cinématique, retourner au menu principal
-            Raycaster.showRenderWindow();
-            commandBlocking = false;
-        });
-    }
+    const introCinematic = [
+        {
+            image: 'assets/intro/1.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "I don't really know where I come from... I was an orphan, left for dead in the desert."
+        },
+        {
+            image: 'assets/intro/2.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "By chance, I was taken in by a bard who was resting after a life of adventure."
+        },
+        {
+            image: 'assets/intro/3.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "He taught me to read and write, while telling me about his incredible adventures."
+        },
+        {
+            image: 'assets/intro/4.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "He felt I wouldn't stay in one place for long. I wanted to discover the world too."
+        },
+        {
+            image: 'assets/intro/5.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "He taught me everything he knew. Combat, magic, trickery... Everything that makes an adventurer."
+        },
+        {
+            image: 'assets/intro/6.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "Now I'm an adult, ready to risk everything, because I need to know I can live on my own. Without help."
+        },
+        {
+            image: 'assets/intro/7.jpg',
+            face: 'facePlayer',
+            name: 'Alakir',
+            text: "I hope my youthful whim won't lead me to death... There's only one way to find out."
+        }
+    ];
+
+    // Utiliser showCinematic avec un callback pour retourner au menu
+    Sprite.showCinematic(introCinematic, () => {
+        // À la fin de la cinématique, retourner au menu principal
+        // Raycaster.showMainMenu();
+        Raycaster.showRenderWindow();
+        commandBlocking = false;
+    });
+}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Animation de combat
@@ -1742,6 +1926,7 @@ static async showCinematic(cinematicSteps, onComplete = null) {
     }
 
     // Méthode pour invoquer le sprite d'animation
+    // Delay est fixé à 150ms par défaut
     invokeAnimationSprite(player, usedTexture, delay = 300) {
         // Stocker la position initiale du sprite de combat
         const initialCombatSpritePosition = {
@@ -1922,7 +2107,7 @@ static async showCinematic(cinematicSteps, onComplete = null) {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Gestion Combat Sprite - VERSION AMELIOREE
+    // Gestion Combat Sprite
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     attack(target) {
@@ -1981,25 +2166,37 @@ static async showCinematic(cinematicSteps, onComplete = null) {
             ];
             this.isBlocking = false;
     
-            player.statsUpdate(player);
+            player.statsUpdate(player); // Mettre à jour l'affichage
+        } else {
+            const chanceEchec = Math.floor(Math.random() * 100);
+    
+            if (chanceEchec > player.dodge) {
+                setTimeout(() => this.attack(player), 500);
+            } else {
+
+                Sprite.terminalLog('You dodge the attack.', 1)
+
+                player.XPdexterity += 1;
+                console.log(player.XPdexterity + "pts dexterity experience.");
+            }
         }
-        
-        // PAS DE CONTRE-ATTAQUE AUTOMATIQUE
         Sprite.resetToggle();
     }
 
     async combat(damage, criti, player) {
+        
         // blocage des commandes pour éviter les interférences
+        // et feedback de l'action
         commandBlocking = true;
 
         if (player.turn == true) {
             player.turn = false;
-            
             this.playerAttack(damage, criti, player);
             
-            // Vérifier si l'ennemi est mort
+            // Au lieu d'appeler enemyAttackUpdate immédiatement, nous laissons
+            // le cycle d'attaque automatique s'en charger
             if (this.hp <= 0) {
-                let entry = "The enemy's dead !";
+                let entry = "The ennemy's dead !";
                 Sprite.terminalLog(entry, 3);
                 
                 // Générer le loot
@@ -2014,38 +2211,40 @@ static async showCinematic(cinematicSteps, onComplete = null) {
                 
                 player.statsUpdate(player);
             } else {
-                // Si l'ennemi est vivant, contre-attaque après un délai
-                const chanceEchec = Math.floor(Math.random() * 100);
-                
-                if (chanceEchec > player.dodge) {
-                    setTimeout(() => this.attack(player), 500);
-                } else {
-                    Sprite.terminalLog('You dodge the attack.', 1);
-                    player.XPdexterity += 1;
-                }
+                // Définir le moment de la dernière attaque pour synchroniser
+                // avec le système d'attaque au contact
+                this.lastAttackTime = Date.now();
             }
             
             Sprite.resetToggle();
-            player.turn = true;
+            player.turn = true; // Rendre le tour au joueur après son attaque
         } else {
             console.log('not your turn');
         }
 
-        // déblocage des commandes
+        // déblocage des commandes pour éviter les interférences
+        // et feedback de l'incantation
         commandBlocking = false;
+        
     }
 
     async combatSpell(player, target) {
+        
         // blocage des commandes pour éviter les interférences
+        // et feedback de l'incantation
         commandBlocking = true;
         
         if (player.turn == true) {
+            // console.log(player.spells[player.selectedSpell].name)
             player.spells[player.selectedSpell].cast(player, target);
+
 
             // Appeler la méthode pour invoquer le sprite d'animation
             this.invokeAnimationSprite(player, 20, 500);
             this.hitAnimation(player)
             this.enemyAttackUpdate(player);
+
+            // pas de generateLoot ?
 
             player.turn = false;
             player.combatSpell = false;
@@ -2053,88 +2252,91 @@ static async showCinematic(cinematicSteps, onComplete = null) {
             console.log('not your turn');
         }
         
-        // déblocage des commandes
+        // déblocage des commandes pour éviter les interférences
+        // et feedback de l'incantation
         commandBlocking = false;
     }
 
-    async door(player, textureSet, raycaster) {
-        // Vérifier qu'aucune autre action n'est en cours
-        if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
-            console.log("Cannot use door - player is busy");
-            return;
-        }
-        
-        // Marquer qu'une action de porte est en cours
-        player.isDooring = true;
-        
-        try {
-            // Store initial position for debugging
-            const initialX = player.x;
-            const initialY = player.y;
-            
-            // Determine floor texture to use
-            let floor;
-            if (textureSet === null) {
-                floor = 1;
-            } else if (textureSet) {
-                // If a texture set is provided, use it
-                floor = floorType;
-            }
-        
-            // Calculate new position based on player's facing direction
-            const tileSize = 1280;
-            const teleportDistance = 2 * tileSize;
-            
-            // Log current position and quadrant for debugging
-            console.log(`Before teleport: x=${player.x}, y=${player.y}, quadrant=${player.quadrant}`);
-            
-            // Apply teleportation based on direction
-            if (player.quadrant === "nord") {
-                player.y -= teleportDistance;
-            } else if (player.quadrant === "est") {
-                player.x += teleportDistance;
-            } else if (player.quadrant === "sud") {
-                player.y += teleportDistance;
-            } else if (player.quadrant === "ouest") {
-                player.x -= teleportDistance;
-            } else {
-                console.log("Invalid quadrant or diagonal movement not supported");
-                return;
-            }
-            
-            // Toggle ceiling rendering and update environment properties
-            if (ceilingRender === true) {
-                // Restore map default values
-                ceilingRender = mapData.playerStart.ceilingRender;
-                ceilingHeight = mapData.playerStart.ceilingHeight;
-                ceilingTexture = mapData.playerStart.ceilingTexture;
-                floorTexture = mapData.playerStart.floorTexture;
-                
-                console.log(`Ceiling render OFF: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
-            } else {
-                // Turn ceiling rendering on with specific values
-                ceilingRender = true;
-                ceilingHeight = 1;
-                ceilingTexture = 1;
-                floorTexture = floor || 1;
-                
-                console.log(`Ceiling render ON: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
-            }
-            
-            // Recharger les textures
-            if (raycaster) {
-                raycaster.loadFloorCeilingImages();
-            }
-            
-            // Pause courte pour permettre la mise à jour visuelle
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Log the new position for debugging
-            console.log(`After teleport: x=${player.x}, y=${player.y}, moved: x=${player.x - initialX}, y=${player.y - initialY}`);
-            
-        } finally {
-            // Toujours libérer le verrou, même en cas d'erreur
-            player.isDooring = false;
-        }
+async door(player, textureSet, raycaster) {  // Ajoutez raycaster comme paramètre
+    // Vérifier qu'aucune autre action n'est en cours
+    if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
+        console.log("Cannot use door - player is busy");
+        return;
     }
+    
+    // Marquer qu'une action de porte est en cours
+    player.isDooring = true;
+    
+    try {
+        // Store initial position for debugging
+        const initialX = player.x;
+        const initialY = player.y;
+        
+        // Determine floor texture to use
+        let floor;
+        if (textureSet === null) {
+            floor = 1;
+        } else if (textureSet) {
+            // If a texture set is provided, use it
+            floor = floorType;
+        }
+    
+        // Calculate new position based on player's facing direction
+        // The teleportation distance is 2 tiles (2 * tileSize)
+        const tileSize = 1280; // Make sure this matches the game's tileSize
+        const teleportDistance = 2 * tileSize;
+        
+        // Log current position and quadrant for debugging
+        console.log(`Before teleport: x=${player.x}, y=${player.y}, quadrant=${player.quadrant}`);
+        
+        // Apply teleportation based on direction
+        // Using more precise quadrant detection
+        if (player.quadrant === "nord") {
+            player.y -= teleportDistance;
+        } else if (player.quadrant === "est") {
+            player.x += teleportDistance;
+        } else if (player.quadrant === "sud") {
+            player.y += teleportDistance;
+        } else if (player.quadrant === "ouest") {
+            player.x -= teleportDistance;
+        } else {
+            console.log("Invalid quadrant or diagonal movement not supported");
+            return; // Exit without making any changes
+        }
+        
+        // Toggle ceiling rendering and update environment properties
+        if (ceilingRender === true) {
+            // Restore map default values
+            ceilingRender = mapData.playerStart.ceilingRender;
+            ceilingHeight = mapData.playerStart.ceilingHeight;
+            ceilingTexture = mapData.playerStart.ceilingTexture;
+            floorTexture = mapData.playerStart.floorTexture;
+            
+            console.log(`Ceiling render OFF: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
+        } else {
+            // Turn ceiling rendering on with specific values
+            ceilingRender = true;
+            ceilingHeight = 1;
+            ceilingTexture = 1;
+            floorTexture = floor || 1; // Use the determined floor or default to 2
+            
+            console.log(`Ceiling render ON: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
+        }
+        
+        // Recharger les textures - Utiliser l'instance raycaster passée en paramètre
+        if (raycaster) {
+            raycaster.loadFloorCeilingImages();  // Correction de la faute de frappe
+        }
+        
+        // Pause courte pour permettre la mise à jour visuelle
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Log the new position for debugging
+        console.log(`After teleport: x=${player.x}, y=${player.y}, moved: x=${player.x - initialX}, y=${player.y - initialY}`);
+        
+    } finally {
+        // Toujours libérer le verrou, même en cas d'erreur
+        player.isDooring = false;
+    }
+}
 }
