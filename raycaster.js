@@ -88,7 +88,7 @@ let fogMaxDistance = 8192;  // Distance maximale (6-7 tuiles)
 // Variables globales pour la couleur
 let fogColorR = 20;  // Rouge
 let fogColorG = 20;  // Vert
-let fogColorB = 30;  // Bleu
+let fogColorB = 20;  // Bleu
 
 // Variable globale pour la densité
 let fogDensity = 0.8;  // 0 = transparent, 1 = opaque
@@ -453,15 +453,18 @@ class Raycaster {
         // contrôle du fog
         // Si en extérieur : pas de fog
         // Si intérieur (plafond) : fog
-        if (ceilingRender == true) {
-            console.log("fogEnabled = true ")
-            enableFog();
-        } else {
-            console.log("fogEnabled = false ")
-            disableFog();
+        // Contrôle du fog - optimisé pour éviter les logs répétitifs
+        if (ceilingRender !== this.lastCeilingRender) {
+            this.lastCeilingRender = ceilingRender;
+            if (ceilingRender) {
+                console.log("Fog enabled");
+                enableFog();
+            } else {
+                console.log("Fog disabled");
+                disableFog();
+            }
         }
 
-        
         // Rappel pour la prochaine frame
         let this2 = this;
         window.requestAnimationFrame(function() {
@@ -1633,6 +1636,71 @@ async loadFloorCeilingImages() {
     }
 
     //////////////////////////////////////////////////////////////////////
+    // fades
+    //////////////////////////////////////////////////////////////////////
+
+    // FADE TO BLACK
+
+// Fonction 1 : Transition vers le noir
+static async fadeToBlack(duration) {
+    const screen = document.getElementById('mainCanvas');
+    if (!screen) {
+        console.error("screen element not found!");
+        return;
+    }
+    
+    return new Promise((resolve) => {
+        // Sauvegarder les styles originaux
+        const originalTransition = screen.style.transition;
+        const originalFilter = screen.style.filter;
+        
+        // Appliquer la transition
+        screen.style.transition = `filter ${duration}ms ease-in-out`;
+        
+        // Attendre un frame pour que la transition soit appliquée
+        requestAnimationFrame(() => {
+            // Fondu vers le noir
+            screen.style.filter = 'brightness(0)';
+            
+            setTimeout(() => {
+                // Restaurer la transition originale
+                screen.style.transition = originalTransition || '';
+                resolve();
+            }, duration);
+        });
+    });
+}
+
+// Fonction 2 : Transition du noir vers normal
+static async fadeFromBlack(duration) {
+    const screen = document.getElementById('mainCanvas');
+    if (!screen) {
+        console.error("screen element not found!");
+        return;
+    }
+    
+    return new Promise((resolve) => {
+        // Sauvegarder les styles originaux
+        const originalTransition = screen.style.transition;
+        
+        // Appliquer la transition
+        screen.style.transition = `filter ${duration}ms ease-in-out`;
+        
+        // Attendre un frame pour que la transition soit appliquée
+        requestAnimationFrame(() => {
+            // Retour à la normale
+            screen.style.filter = '';
+            
+            setTimeout(() => {
+                // Restaurer la transition originale
+                screen.style.transition = originalTransition || '';
+                resolve();
+            }, duration);
+        });
+    });
+}
+
+    //////////////////////////////////////////////////////////////////////
     // sol
     //////////////////////////////////////////////////////////////////////
 
@@ -1677,6 +1745,12 @@ async loadFloorCeilingImages() {
         const centerY = this.halfDisplayHeight;
         const eyeHeight = (this.tileSize >> 1) + this.player.z;
         
+        // Définir les seuils de distance pour le rendu adaptatif
+        const NEAR_DISTANCE = this.tileSize * 2;    // 2 tuiles
+        const MID_DISTANCE = this.tileSize * 4;     // 4 tuiles
+        const FAR_DISTANCE = this.tileSize * 6;     // 6 tuiles
+        const VERY_FAR_DISTANCE = this.tileSize * 8; // 8 tuiles
+        
         for (let rayHit of rayHits) {
             const wallScreenHeight = this.stripScreenHeight(
                 this.viewDist,
@@ -1687,121 +1761,120 @@ async loadFloorCeilingImages() {
             const currentViewDistance = this.viewDistances[rayHit.strip];
             const cosRayAngle = Math.cos(rayHit.rayAngle);
             const sinRayAngle = Math.sin(rayHit.rayAngle);
+            
             let screenY = Math.max(
                 centerY,
                 ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight
             ) | 0;
             
+            // Variables pour le rendu adaptatif
+            let lastPixel = null;
+            let pixelStep = 1;
+            
             for (; screenY < this.displayHeight; screenY++) {
                 let dy = screenY - centerY;
                 let floorDistance = (currentViewDistance * eyeHeight) / dy;
-                let worldX = this.player.x + floorDistance * cosRayAngle;
-                let worldY = this.player.y + floorDistance * -sinRayAngle;
                 
-                if (
-                    worldX < 0 ||
-                    worldY < 0 ||
-                    worldX >= this.worldWidth ||
-                    worldY >= this.worldHeight
-                ) {
-                    continue;
+                // Déterminer le pas de pixels selon la distance
+                if (floorDistance < NEAR_DISTANCE) {
+                    pixelStep = 1; // Qualité maximale
+                } else if (floorDistance < MID_DISTANCE) {
+                    pixelStep = 2; // 1 pixel sur 2
+                } else if (floorDistance < FAR_DISTANCE) {
+                    pixelStep = 4; // 1 pixel sur 4
+                } else if (floorDistance < VERY_FAR_DISTANCE) {
+                    pixelStep = 8; // 1 pixel sur 8
+                } else {
+                    pixelStep = 16; // 1 pixel sur 16 pour très loin
                 }
                 
-                // OPTIMISATION : Utiliser le cache de texture
-                const texCoord = this.getTextureCoord(worldX, worldY);
-                
-                let srcPixel = Raycaster.getPixel(
-                    this.floorImageData,
-                    texCoord.x,
-                    texCoord.y
-                );
-                
-                // NOUVEAU : Appliquer le brouillard au sol texturé
-                const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, floorDistance);
-                
-                Raycaster.setPixel(
-                    this.backBuffer,
-                    screenX,
-                    screenY,
-                    foggedPixel.r,
-                    foggedPixel.g,
-                    foggedPixel.b,
-                    255
-                );
+                // Calculer uniquement si on est sur un pixel à rendre
+                if ((screenY - Math.max(centerY, ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight)) % pixelStep === 0) {
+                    let worldX = this.player.x + floorDistance * cosRayAngle;
+                    let worldY = this.player.y + floorDistance * -sinRayAngle;
+                    
+                    if (
+                        worldX < 0 ||
+                        worldY < 0 ||
+                        worldX >= this.worldWidth ||
+                        worldY >= this.worldHeight
+                    ) {
+                        continue;
+                    }
+                    
+                    // Utiliser le cache de texture
+                    const texCoord = this.getTextureCoord(worldX, worldY);
+                    
+                    let srcPixel = Raycaster.getPixel(
+                        this.floorImageData,
+                        texCoord.x,
+                        texCoord.y
+                    );
+                    
+                    // Appliquer le brouillard
+                    const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, floorDistance);
+                    
+                    // Sauvegarder pour l'interpolation
+                    lastPixel = foggedPixel;
+                    
+                    // Dessiner le pixel principal
+                    Raycaster.setPixel(
+                        this.backBuffer,
+                        screenX,
+                        screenY,
+                        foggedPixel.r,
+                        foggedPixel.g,
+                        foggedPixel.b,
+                        255
+                    );
+                    
+                    // Remplir les pixels intermédiaires si nécessaire
+                    if (pixelStep > 1 && lastPixel) {
+                        for (let fillY = 1; fillY < pixelStep && screenY + fillY < this.displayHeight; fillY++) {
+                            Raycaster.setPixel(
+                                this.backBuffer,
+                                screenX,
+                                screenY + fillY,
+                                lastPixel.r,
+                                lastPixel.g,
+                                lastPixel.b,
+                                255
+                            );
+                        }
+                    }
+                } else if (lastPixel && pixelStep > 1) {
+                    // Utiliser le dernier pixel calculé pour les pixels intermédiaires
+                    Raycaster.setPixel(
+                        this.backBuffer,
+                        screenX,
+                        screenY,
+                        lastPixel.r,
+                        lastPixel.g,
+                        lastPixel.b,
+                        255
+                    );
+                }
             }
         }
     }
-// FADE TO BLACK
-
-// Fonction 1 : Transition vers le noir
-static async fadeToBlack(duration = 150) {
-    const screen = document.getElementById('mainCanvas');
-    if (!screen) {
-        console.error("screen element not found!");
-        return;
-    }
-    
-    return new Promise((resolve) => {
-        // Sauvegarder les styles originaux
-        const originalTransition = screen.style.transition;
-        const originalFilter = screen.style.filter;
-        
-        // Appliquer la transition
-        screen.style.transition = `filter ${duration}ms ease-in-out`;
-        
-        // Attendre un frame pour que la transition soit appliquée
-        requestAnimationFrame(() => {
-            // Fondu vers le noir
-            screen.style.filter = 'brightness(0)';
-            
-            setTimeout(() => {
-                // Restaurer la transition originale
-                screen.style.transition = originalTransition || '';
-                resolve();
-            }, duration);
-        });
-    });
-}
-
-// Fonction 2 : Transition du noir vers normal
-static async fadeFromBlack(duration = 150) {
-    const screen = document.getElementById('mainCanvas');
-    if (!screen) {
-        console.error("screen element not found!");
-        return;
-    }
-    
-    return new Promise((resolve) => {
-        // Sauvegarder les styles originaux
-        const originalTransition = screen.style.transition;
-        
-        // Appliquer la transition
-        screen.style.transition = `filter ${duration}ms ease-in-out`;
-        
-        // Attendre un frame pour que la transition soit appliquée
-        requestAnimationFrame(() => {
-            // Retour à la normale
-            screen.style.filter = '';
-            
-            setTimeout(() => {
-                // Restaurer la transition originale
-                screen.style.transition = originalTransition || '';
-                resolve();
-            }, duration);
-        });
-    });
-}
-
 
     //////////////////////////////////////////////////////////////////////
     // Plafond/SkyBox
     //////////////////////////////////////////////////////////////////////
+
+    // Remplacer les méthodes existantes dans la classe Raycaster
 
     drawTexturedCeiling(rayHits) {
         const centerY = this.halfDisplayHeight;
         const eyeHeight = (this.tileSize >> 1) + this.player.z;
         const currentCeilingHeight = this.tileSize * this.ceilingHeight;
         
+        // Définir les seuils de distance pour le rendu adaptatif
+        const NEAR_DISTANCE = this.tileSize * 2;    // 2 tuiles
+        const MID_DISTANCE = this.tileSize * 4;     // 4 tuiles
+        const FAR_DISTANCE = this.tileSize * 6;     // 6 tuiles
+        const VERY_FAR_DISTANCE = this.tileSize * 8; // 8 tuiles
+        
         for (let rayHit of rayHits) {
             const wallScreenHeight = this.stripScreenHeight(
                 this.viewDist,
@@ -1812,50 +1885,111 @@ static async fadeFromBlack(duration = 150) {
             const currentViewDistance = this.viewDistances[rayHit.strip];
             const cosRayAngle = Math.cos(rayHit.rayAngle);
             const sinRayAngle = Math.sin(rayHit.rayAngle);
+            
             let screenY = Math.min(
                 centerY - 1,
                 ((this.displayHeight - wallScreenHeight) >> 1) - 1
             ) | 0;
             
+            // Variables pour le rendu adaptatif
+            let lastPixel = null;
+            let pixelStep = 1;
+            
             for (; screenY >= 0; screenY--) {
                 let dy = centerY - screenY;
                 let ceilingDistance =
                     (currentViewDistance * (currentCeilingHeight - eyeHeight)) / dy;
-                let worldX = this.player.x + ceilingDistance * cosRayAngle;
-                let worldY = this.player.y + ceilingDistance * -sinRayAngle;
                 
-                if (
-                    worldX < 0 ||
-                    worldY < 0 ||
-                    worldX >= this.worldWidth ||
-                    worldY >= this.worldHeight
-                ) {
-                    continue;
+                // Déterminer le pas de pixels selon la distance
+                if (ceilingDistance < NEAR_DISTANCE) {
+                    pixelStep = 1; // Qualité maximale
+                } else if (ceilingDistance < MID_DISTANCE) {
+                    pixelStep = 2; // 1 pixel sur 2
+                } else if (ceilingDistance < FAR_DISTANCE) {
+                    pixelStep = 4; // 1 pixel sur 4
+                } else if (ceilingDistance < VERY_FAR_DISTANCE) {
+                    pixelStep = 8; // 1 pixel sur 8
+                } else {
+                    pixelStep = 16; // 1 pixel sur 16 pour très loin
                 }
                 
-                // OPTIMISATION : Utiliser le cache de texture
-                const texCoord = this.getTextureCoord(worldX, worldY);
-                
-                let srcPixel = Raycaster.getPixel(
-                    this.ceilingImageData,
-                    texCoord.x,
-                    texCoord.y
-                );
-                
-                // NOUVEAU : Appliquer le brouillard au plafond
-                const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, ceilingDistance);
-                
-                Raycaster.setPixel(
-                    this.backBuffer,
-                    screenX,
-                    screenY,
-                    foggedPixel.r,
-                    foggedPixel.g,
-                    foggedPixel.b,
-                    255
-                );
+                // Calculer uniquement si on est sur un pixel à rendre
+                let startY = Math.min(centerY - 1, ((this.displayHeight - wallScreenHeight) >> 1) - 1);
+                if ((startY - screenY) % pixelStep === 0) {
+                    let worldX = this.player.x + ceilingDistance * cosRayAngle;
+                    let worldY = this.player.y + ceilingDistance * -sinRayAngle;
+                    
+                    if (
+                        worldX < 0 ||
+                        worldY < 0 ||
+                        worldX >= this.worldWidth ||
+                        worldY >= this.worldHeight
+                    ) {
+                        continue;
+                    }
+                    
+                    // Utiliser le cache de texture
+                    const texCoord = this.getTextureCoord(worldX, worldY);
+                    
+                    let srcPixel = Raycaster.getPixel(
+                        this.ceilingImageData,
+                        texCoord.x,
+                        texCoord.y
+                    );
+                    
+                    // Appliquer le brouillard
+                    const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, ceilingDistance);
+                    
+                    // Sauvegarder pour l'interpolation
+                    lastPixel = foggedPixel;
+                    
+                    // Dessiner le pixel principal
+                    Raycaster.setPixel(
+                        this.backBuffer,
+                        screenX,
+                        screenY,
+                        foggedPixel.r,
+                        foggedPixel.g,
+                        foggedPixel.b,
+                        255
+                    );
+                    
+                    // Remplir les pixels intermédiaires si nécessaire
+                    if (pixelStep > 1 && lastPixel) {
+                        for (let fillY = 1; fillY < pixelStep && screenY - fillY >= 0; fillY++) {
+                            Raycaster.setPixel(
+                                this.backBuffer,
+                                screenX,
+                                screenY - fillY,
+                                lastPixel.r,
+                                lastPixel.g,
+                                lastPixel.b,
+                                255
+                            );
+                        }
+                    }
+                } else if (lastPixel && pixelStep > 1) {
+                    // Utiliser le dernier pixel calculé pour les pixels intermédiaires
+                    Raycaster.setPixel(
+                        this.backBuffer,
+                        screenX,
+                        screenY,
+                        lastPixel.r,
+                        lastPixel.g,
+                        lastPixel.b,
+                        255
+                    );
+                }
             }
         }
+    }
+
+    // Méthode optionnelle pour ajuster les seuils de distance dynamiquement
+    setAdaptiveRenderingThresholds(near, mid, far, veryFar) {
+        this.NEAR_DISTANCE = this.tileSize * near;
+        this.MID_DISTANCE = this.tileSize * mid;
+        this.FAR_DISTANCE = this.tileSize * far;
+        this.VERY_FAR_DISTANCE = this.tileSize * veryFar;
     }
 
     // Paramètres de la skybox configurable
