@@ -1123,10 +1123,10 @@ class Player {
 
 
         
-                        await Raycaster.fadeToBlack(100);
+                        await Raycaster.fadeToBlack(300);
                         Sprite.terminalLog('Level finished!')
                         this.raycaster.nextMap();
-                        await Raycaster.fadeFromBlack(200);
+                        await Raycaster.fadeFromBlack(300);
                         commandBlocking= false;
                         break;
                     case "DOOR":
@@ -1134,7 +1134,7 @@ class Player {
     // Appeler door() mais NE PAS appeler handleTeleportation ensuite
     
     // Fondu vers l e noir
-    await Raycaster.fadeToBlack(100);
+    await Raycaster.fadeToBlack(300);
     
     // Attendre au noir
     //    await new Promise(resolve => setTimeout(resolve, 50));
@@ -1144,7 +1144,7 @@ class Player {
     await this.raycaster.loadFloorCeilingImages();
     
     // Fondu depuis le noir
-    await Raycaster.fadeFromBlack(100);
+    await Raycaster.fadeFromBlack(300);
     
     Sprite.terminalLog('You enter/exit the area.');
     

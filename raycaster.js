@@ -884,39 +884,69 @@ class Raycaster {
     }
 
     // Mise à jour de l'état des sprites
-    updateSpritesState(loadedSpritesState) {
-        // Clear existing sprites before loading new ones
-        this.sprites = [];
+// Mise à jour de l'état des sprites
+updateSpritesState(loadedSpritesState) {
+    // Clear existing sprites before loading new ones
+    this.sprites = [];
 
-        // Load the saved state of the sprites
-        loadedSpritesState.forEach(state => {
-            const sprite = new Sprite(
-                state.x,
-                state.y,
-                state.z,
-                state.w,
-                state.h,
-                state.ang,
-                state.spriteType,
-                state.spriteTexture,
-                state.isBlocking,
-                state.attackable,
-                state.turn,
-                state.hp,
-                state.dmg,
-                state.animationProgress,
-                state.spriteName,
-                state.spriteFace,
-                state.spriteTalk,
-                state.spriteSell,
-                state.id,
-                state.lootClass  // Ajout de la classe de loot
-            );
-            this.sprites.push(sprite);
-        });
+    // Load the saved state of the sprites
+    loadedSpritesState.forEach(state => {
+        const sprite = new Sprite(
+            state.x,
+            state.y,
+            state.z,
+            state.w,
+            state.h,
+            state.ang,
+            state.spriteType,
+            state.spriteTexture,
+            state.isBlocking,
+            state.attackable,
+            state.turn,
+            state.hp,
+            state.dmg,
+            state.animationProgress,
+            state.spriteName,
+            state.spriteFace,
+            state.spriteTalk,
+            state.spriteSell,
+            state.id,
+            state.lootClass  // Ajout de la classe de loot
+        );
+        this.sprites.push(sprite);
+    });
 
-        console.log(this.sprites.length + " sprites loaded.");
-    }
+    // IMPORTANT: Recréer le sprite d'animation de combat
+    const tileSizeHalf = this.tileSize >> 1;
+    Sprite.combatAnimationSprite = new Sprite(
+        tileSizeHalf, // x
+        tileSizeHalf, // y
+        0, // z
+        640, // w
+        640, // h
+        0, // ang
+        2, // spriteType
+        19, // spriteTexture (animation slash par défaut)
+        false, // isBlocking
+        false, // attackable
+        true, // turn
+        0, // hp
+        0, // dmg
+        0, // animationProgress
+        "combatAnimationSprite", // spriteName
+        1, // spriteFace
+        "", // spriteTalk
+        [], // spriteSell
+        0, // id
+        0, // step
+        null  // lootClass
+    );
+    
+    // Ajouter le sprite d'animation aux sprites du jeu
+    this.sprites.push(Sprite.combatAnimationSprite);
+
+    console.log(this.sprites.length + " sprites loaded.");
+}
 
     // Chargement des sprites pour une carte spécifique
     loadMapSprites(mapID) {

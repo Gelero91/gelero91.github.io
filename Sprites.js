@@ -536,21 +536,23 @@ async executeMove(direction, currentCellX, currentCellY, tileSize) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Fonction principale de log du terminal
+// Fonction principale de log du terminal
     // Fonction principale de log du terminal avec apparition en fondu
-    // n'affiche pas les doublons si le style = 0
+    // n'affiche pas les doublons consécutifs si le style = 0
 static terminalLog(entry, style = 0) {
     const outputElement = document.getElementById("output");
     
-    // Si style = 0, vérifier les doublons
+    // Si style = 0, vérifier les doublons consécutifs
     if (style === 0) {
         // Récupérer toutes les lignes existantes
         const existingLines = outputElement.querySelectorAll('.terminal-line');
         
-        // Vérifier si le message existe déjà
-        for (let line of existingLines) {
-            const contentDiv = line.querySelector('.terminal-content');
-            if (contentDiv && contentDiv.innerHTML === entry) {
-                // Message en doublon trouvé, ne pas l'ajouter
+        // Vérifier si le dernier message est identique (répétition consécutive)
+        if (existingLines.length > 0) {
+            const lastLine = existingLines[existingLines.length - 1];
+            const lastContentDiv = lastLine.querySelector('.terminal-content');
+            if (lastContentDiv && lastContentDiv.innerHTML === entry) {
+                // C'est une répétition consécutive, ne pas l'ajouter
                 return;
             }
         }
@@ -581,6 +583,7 @@ static terminalLog(entry, style = 0) {
     logLine.style.display = "flex";
     logLine.style.fontFamily = "monospace"; // Police à chasse fixe
     logLine.style.marginBottom = "2px";
+    logLine.setAttribute('data-repeat-count', '1'); // Initialiser le compteur
     
     // Animation de fondu
     logLine.style.opacity = "0";
@@ -602,6 +605,7 @@ static terminalLog(entry, style = 0) {
     messageContent.style.fontWeight = selectedStyle.fontWeight || "";
     messageContent.style.fontStyle = selectedStyle.fontStyle || "";
     messageContent.innerHTML = entry;
+    messageContent.setAttribute('data-original-message', entry); // Stocker le message original
     
     // Assembler la ligne
     logLine.appendChild(promptColumn);
@@ -1594,7 +1598,8 @@ static terminalLog(entry, style = 0) {
     /// CINEMATIQUES 
     // xyz
 // Fonction showCinematic simplifiée pour utiliser la balise img
-static showCinematic(cinematicSteps, onComplete = null) {
+// Fonction showCinematic avec fade simple sur la fenêtre cinématique
+static async showCinematic(cinematicSteps, onComplete = null) {
     // Bloquer les commandes 
     commandBlocking = true;
     
@@ -1612,36 +1617,62 @@ static showCinematic(cinematicSteps, onComplete = null) {
     outputElement.style.display = "none";
     dialWindow.style.display = "block";
     
+    // Préparer la transition CSS
+    cinematicWindow.style.transition = "opacity 0.3s ease-in-out";
+    cinematicWindow.style.opacity = "0"; // Commencer invisible pour le fade in initial
+    
     let currentStep = 0;
     let keyListener = null;
+    let isTransitioning = false;
     
-    const showNextStep = () => {
+    const showNextStep = async () => {
+        if (isTransitioning) return;
+        
         if (currentStep < cinematicSteps.length) {
+            isTransitioning = true;
+            
+            // Fade out (sauf pour la première slide)
+            if (currentStep > 0) {
+                cinematicWindow.style.opacity = "0";
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+            
             const step = cinematicSteps[currentStep];
             
-            // Changer l'image
+            // Changer l'image et le dialogue
             if (step.image) {
-                // Nettoyer le chemin de l'image pour correspondre aux clés dans IMAGES
                 const imageKey = step.image.replace('assets/', '').replace('.png', '').replace('.jpg', '');
                 cinematicWindow.src = IMAGES[imageKey] || step.image;
             }
             
-            // Afficher le dialogue
             if (step.face && step.name && step.text) {
                 dialogue.innerHTML = `<font style="font-weight: bold;">${step.name} </font> :<font style="font-style: italic;"><br><br>${step.text}</font>`;
-                const imgElement = document.getElementById(step.face);
-                faceOutput.src = imgElement ? imgElement.src : '';
+                const faceKey = step.face.replace('assets/', '').replace('.png', '').replace('.jpg', '');
+                faceOutput.src = IMAGES[faceKey] || '';
             }
             
+            // Petit délai pour charger l'image
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            // Fade in
+            cinematicWindow.style.opacity = "1";
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
             currentStep++;
+            isTransitioning = false;
         } else {
-            // Fin de la cinématique
+            // Fin de la cinématique - fade out final
+            cinematicWindow.style.opacity = "0";
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
             document.removeEventListener("keydown", keyListener);
             
+            // Restaurer l'opacité pour la prochaine fois
+            cinematicWindow.style.opacity = "1";
+            
             if (onComplete && typeof onComplete === 'function') {
-                onComplete(); // Exécuter le callback
+                onComplete();
             } else {
-                // Comportement par défaut : retour au jeu
                 mainCanvas.style.display = "block";
                 cinematicWindow.style.display = "none";
                 outputElement.style.display = "block";
@@ -1651,21 +1682,22 @@ static showCinematic(cinematicSteps, onComplete = null) {
         }
     };
     
-    // Écouteur pour avancer
+    // Écouteurs d'événements
     keyListener = (event) => {
-        if (event.code === "Space" || event.key.toLowerCase() === "f") {
+        if (!isTransitioning && (event.code === "Space" || event.key.toLowerCase() === "f")) {
             event.preventDefault();
             showNextStep();
         }
     };
     
-    // Event listeners
     const newNextButton = nextButton.cloneNode(true);
     nextButton.parentNode.replaceChild(newNextButton, nextButton);
-    newNextButton.addEventListener("click", showNextStep);
+    newNextButton.addEventListener("click", () => {
+        if (!isTransitioning) showNextStep();
+    });
     document.addEventListener("keydown", keyListener);
     
-    // Afficher la première étape
+    // Première étape
     showNextStep();
 }
 
@@ -1753,9 +1785,6 @@ static showIntroCinematic() {
         commandBlocking = false;
     });
 }
-
-
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Animation de combat
