@@ -195,15 +195,14 @@ function updateProgressBar(id, value, max) {
 // initialisation du message d'intro du terminal
 // Movable in the Raycaster initialization but, whatever...
 document.addEventListener("DOMContentLoaded", function() {
-    Sprite.terminalLog("Welcome in Oasis.JS ! (version pre-Alpha)")
+    Sprite.terminalLog("Welcome in Oasis.JS ! (version BETA-06/25)")
     Sprite.terminalLog("")
     Sprite.terminalLog("HOW TO PLAY :")
-    Sprite.terminalLog("'← ↑ → ↓' or use the joystick to move.")
+    Sprite.terminalLog("'← ↑ → ↓' or walk, strafe and turn.")
     Sprite.terminalLog("'A' button or 'space' to interact/fight.")
-    Sprite.terminalLog("'B' button to access your gear/stats.")
+    Sprite.terminalLog("'CHARACTER' to access your gear/stats.")
     Sprite.terminalLog("")
-    Sprite.terminalLog("N.B. : the joystick is crappy, sorry ♥");
-    Sprite.terminalLog("")
+    Sprite.terminalLog("Go to 'MENU' to start a new game !");
     Sprite.terminalLog("=========================================")
     Sprite.resetToggle()
 });
