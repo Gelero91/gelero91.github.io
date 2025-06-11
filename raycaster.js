@@ -1,245 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// OASIS.JS
-// The RPG game engine using raycasting - OPTIMIZED VERSION WITH GLOBAL FOG
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Created by Gwendal LE ROUX,
-// Engine made from scratch with no dependencies !
-// Inspiration taken from Jacob Seidelin tutorial(ref : https://dev.opera.com/articles/3d-games-with-canvas-and-raycasting-part-1/)
-// and Andrew Lim's architecture (ref : https://github.com/andrew-lim/html5-raycast)
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// VARIABLES GLOBALES
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-console.log("chargement du moteur de jeux.")
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// SYSTEM
-
-const DESIRED_FPS = 60;
-const UPDATE_INTERVAL = Math.trunc(1000 / DESIRED_FPS);
-
-let consoleContent = "";
-
-let lastEntry = "";
-
-let commandBlocking = false; // Variable globale pour bloquer les commandes pendant dialogues/cinématiques
-
-var totalTimeElapsed = 0;
-var timeSinceLastSecond = 0;
-
-// animation referee : problème de gestion du temps, prends trop de ressource
-let spriteAnimationProgress = 0;
-let lastTime = new Date().getSeconds();
-
-let gameOver = false;
-
-// Variable globale pour empêcher les appels multiples
-// (pour temporiser chargement/sauvegarde de partie)
-let isLoading = false;
-let isChangingMap = false;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MOVE CONTROLS
-
-const KEY_UP = 38;
-const KEY_DOWN = 40;
-const KEY_LEFT = 37;
-const KEY_RIGHT = 39;
-
-const KEY_W = 90;
-const KEY_S = 83;
-const KEY_A = 81;
-const KEY_D = 68;
-
-const KEY_F = 70;
-const KEY_SPACE = 32;
-
-let joystickForwardClicked = false;
-let joystickBackwardClicked = false;
-let joystickLeftClicked = false;
-let joystickRightClicked = false;
-
-const nord = Math.PI / 2;
-const ouest = Math.PI;
-const sud = (3 * Math.PI) / 2;
-const est = 0;
-
-var orientationTarget;
-
-var moveTargetX;
-var moveTargetY;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// FOG SETTINGS - VARIABLES GLOBALES
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Variable globale pour activer/désactiver le brouillard
-let fogEnabled = false; 
-
-
-// Variables globales pour les distances
-let fogMinDistance = 1280;  // Distance minimale (1 tuile)
-let fogMaxDistance = 8192;  // Distance maximale (6-7 tuiles)
-
-// Variables globales pour la couleur
-let fogColorR = 20;  // Rouge
-let fogColorG = 20;  // Vert
-let fogColorB = 20;  // Bleu
-
-// Variable globale pour la densité
-let fogDensity = 0.8;  // 0 = transparent, 1 = opaque
-
-// Fonction pour activer le brouillard
-function enableFog() {
-    fogEnabled = true;
-}
-
-// Fonction pour désactiver le brouillard
-function disableFog() {
-    fogEnabled = false;
-}
-
-// Fonction pour changer la couleur du brouillard
-function setFogColor(r, g, b) {
-    fogColorR = Math.max(0, Math.min(255, r));
-    fogColorG = Math.max(0, Math.min(255, g));
-    fogColorB = Math.max(0, Math.min(255, b));
-}
-
-// Fonction pour ajuster les distances
-function setFogDistance(min, max) {
-    fogMinDistance = Math.max(0, min);
-    fogMaxDistance = Math.max(fogMinDistance + 1, max);
-}
-
-// Fonction pour ajuster la densité
-function setFogDensity(density) {
-    fogDensity = Math.max(0, Math.min(1, density));
-}
-
-// Présets de brouillard
-function setFogPreset(preset) {
-    switch(preset) {
-        case 'night':
-            setFogColor(20, 20, 30);
-            setFogDensity(0.8);
-            break;
-        case 'mist':
-            setFogColor(128, 128, 128);
-            setFogDensity(0.6);
-            break;
-        case 'toxic':
-            setFogColor(30, 80, 30);
-            setFogDensity(0.7);
-            break;
-        case 'fire':
-            setFogColor(80, 20, 20);
-            setFogDensity(0.9);
-            break;
-        case 'underwater':
-            setFogColor(20, 40, 60);
-            setFogDensity(0.85);
-            break;
-        case 'clear':
-            disableFog();
-            break;
-    }
-}
-
-// Fonction pour calculer le facteur de brouillard
-function calculateFogFactor(distance) {
-    if (!fogEnabled) return 0;
-    
-    if (distance <= fogMinDistance) return 0;
-    if (distance >= fogMaxDistance) return fogDensity;
-    
-    // Interpolation linéaire entre minDistance et maxDistance
-    const range = fogMaxDistance - fogMinDistance;
-    const distFromMin = distance - fogMinDistance;
-    return (distFromMin / range) * fogDensity;
-}
-
-// Fonction pour appliquer le brouillard à une couleur
-function applyFog(r, g, b, distance) {
-    const fogFactor = calculateFogFactor(distance);
-    if (fogFactor === 0) return { r, g, b };
-    
-    return {
-        r: Math.round((1 - fogFactor) * r + fogFactor * fogColorR),
-        g: Math.round((1 - fogFactor) * g + fogFactor * fogColorG),
-        b: Math.round((1 - fogFactor) * b + fogFactor * fogColorB)
-    };
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// FONCTIONS GLOBALES
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Ingame 1sec Pause Timer
-async function pause(ms) {
-    console.log("pause putain");
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function updateProgressBar(id, value, max) {
-    const progressBar = document.getElementById(id);
-    const progress = progressBar.querySelector(".progress");
-    const percentage = (value / max) * 100;
-    progress.style.width = `${percentage}%`;
-}
-
-// initialisation du message d'intro du terminal
-// Movable in the Raycaster initialization but, whatever...
-document.addEventListener("DOMContentLoaded", function() {
-    Sprite.terminalLog("Welcome in Oasis.JS ! (version BETA-06/25)")
-    Sprite.terminalLog("")
-    Sprite.terminalLog("HOW TO PLAY :")
-    Sprite.terminalLog("'← ↑ → ↓' or walk, strafe and turn.")
-    Sprite.terminalLog("'A' button or 'space' to interact/fight.")
-    Sprite.terminalLog("'CHARACTER' to access your gear/stats.")
-    Sprite.terminalLog("")
-    Sprite.terminalLog("Go to 'MENU' to start a new game !");
-    Sprite.terminalLog("=========================================")
-    Sprite.resetToggle()
-});
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MAP | ENVIRONMENT || Make a class out of it ? Whatever...
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-var currentMap = 1;
-
-// Valeur hauteur de plafond
-let ceilingHeight = 2;
-let ceilingRender = false;
-
-// Texture sol et plafond
-let floorTexture = 1;
-let ceilingTexture = 1;
-
-
-// Sprites : comment ça marche ? xyz
-
-/* 
-Plus besoin de ça, on charge "maps.js" dans le script principal sur la page index.html
-const maps = [];
-
-toutes les classes sont à présent des fichiers JS
-*/
-console.log("fichier de maps.js : " + maps);
-
-function getMapDataByID(mapID) {
-    return maps.find(map => map.mapID === mapID);
-}
-
-// Exemple d'utilisation
-var mapData = getMapDataByID(currentMap);
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // moteur de jeu
@@ -258,14 +16,23 @@ class Raycaster {
         this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
         
         // Propriétés de base
+        // Largeur des rayons, cependant, les sprites ont du mal à être déte
         this.stripWidth = 1;
+        this.rayCount = Math.ceil(displayWidth / this.stripWidth);
+
+
+
+
         this.ceilingHeight = 1;
         this.mainCanvas = mainCanvas;
         this.mapWidth = this.map[0].length;
         this.mapHeight = this.map.length;
         this.displayWidth = displayWidth;
         this.displayHeight = displayHeight;
-        this.rayCount = Math.ceil(displayWidth / this.stripWidth);
+
+
+
+
         this.tileSize = tileSize;
         this.worldWidth = this.mapWidth * this.tileSize;
         this.worldHeight = this.mapHeight * this.tileSize;
@@ -296,6 +63,11 @@ class Raycaster {
         this.sinTable = null;
         this.cosTable = null;
         this.tanTable = null;
+        // Après les propriétés existantes comme this.sinTable, this.cosTable, etc.
+        this.fogTable = null;
+        this.angleNormTable = null;
+        this.fishEyeTable = null;
+        this.textureCoordTable = null;
         
         // OPTIMISATION : Constantes pré-calculées
         this.halfDisplayWidth = this.displayWidth >> 1;
@@ -303,16 +75,26 @@ class Raycaster {
         this.tileSizeSquared = this.tileSize * this.tileSize;
         this.maxDistanceSquared = (this.worldWidth * this.worldWidth) + (this.worldHeight * this.worldHeight);
         
-        // Initialisation synchrone
-        this.initPlayer();
-        this.initSprites(mapData.sprites);
-        this.player.bindKeysAndButtons();
-        this.initScreen(); // Cette méthode appelle loadFloorCeilingImages()
-        this.drawMiniMap();
-        this.createRayAngles();
-        this.createViewDistances();
-        this.initTrigTables(); // NOUVEAU : Initialiser les tables trigonométriques
-        this.past = Date.now();
+// Initialisation synchrone
+this.initPlayer();
+this.initSprites(mapData.sprites);
+this.player.bindKeysAndButtons();
+this.initScreen(); // Cette méthode appelle loadFloorCeilingImages()
+this.drawMiniMap();
+
+// IMPORTANT : Ces deux méthodes DOIVENT être appelées en premier
+this.createRayAngles();      // Crée this.rayAngles
+this.createViewDistances();   // Crée this.viewDistances
+
+// ENSUITE initialiser les tables qui en dépendent
+this.initTrigTables();        // Utilise this.rayAngles
+this.initFogTable();          // Table de brouillard
+this.initAngleTable();        // Cache d'angles
+this.initFishEyeTable();      // Utilise this.rayAngles
+this.initTextureTable();      // Cache de textures
+this.initFloorCeilingOptimizations()
+
+this.past = Date.now();
         
         // NOUVEAU : Charger les ressources de manière asynchrone
         this.initializeResources().then(() => {
@@ -350,6 +132,197 @@ class Raycaster {
         
         console.log("Tables trigonométriques initialisées");
     }
+
+///// NOUVELLES OPTIS
+
+initTextureTable() {
+    console.log("Initialisation du cache de coordonnées de texture...");
+    
+    // Initialiser le cache
+    this.textureCoordCache = new Map();
+    this.textureCoordCacheLimit = 2000;
+    
+    // Table de modulo pour les puissances de 2 (optionnel)
+    this.moduloTable = new Uint16Array(256);
+    for (let i = 0; i < 256; i++) {
+        this.moduloTable[i] = i % this.textureSize;
+    }
+    
+    console.log("Cache de coordonnées de texture initialisé");
+}
+
+// Méthode à ajouter dans la classe Raycaster
+initFogTable() {
+    console.log("Initialisation de la table de brouillard...");
+    
+    // Configuration
+    const maxDistance = this.tileSize * 20; // Couvre jusqu'à 20 tuiles
+    const step = 50; // Résolution de la table (plus petit = plus précis mais plus de mémoire)
+    const tableSize = Math.ceil(maxDistance / step) + 1;
+    
+    this.fogTable = new Float32Array(tableSize);
+    this.fogTableStep = step;
+    
+    // Précalculer tous les facteurs de brouillard
+    for (let i = 0; i < tableSize; i++) {
+        const distance = i * step;
+        
+        // Utiliser la fonction globale calculateFogFactor de config.js
+        if (typeof calculateFogFactor === 'function') {
+            this.fogTable[i] = calculateFogFactor(distance);
+        } else {
+            // Fallback si la fonction n'est pas disponible
+            if (!fogEnabled) {
+                this.fogTable[i] = 0;
+            } else if (distance <= fogMinDistance) {
+                this.fogTable[i] = 0;
+            } else if (distance >= fogMaxDistance) {
+                this.fogTable[i] = fogDensity;
+            } else {
+                const range = fogMaxDistance - fogMinDistance;
+                const distFromMin = distance - fogMinDistance;
+                this.fogTable[i] = (distFromMin / range) * fogDensity;
+            }
+        }
+    }
+    
+    console.log(`Table de brouillard créée : ${tableSize} entrées`);
+}
+
+// Méthode helper pour obtenir rapidement un facteur de brouillard
+getFogFactorFast(distance) {
+    if (!fogEnabled) return 0;
+    
+    const index = (distance / this.fogTableStep) | 0;
+    
+    // Si hors limites, calculer normalement
+    if (index >= this.fogTable.length) {
+        return fogDensity;
+    }
+    
+    // Interpolation linéaire pour plus de précision
+    const remainder = distance - (index * this.fogTableStep);
+    const t = remainder / this.fogTableStep;
+    
+    if (index + 1 < this.fogTable.length) {
+        // Interpoler entre deux valeurs de la table
+        return this.fogTable[index] * (1 - t) + this.fogTable[index + 1] * t;
+    }
+    
+    return this.fogTable[index];
+}
+
+// Cache pour la normalisation d'angles
+initAngleTable() {
+    console.log("Initialisation du cache de normalisation d'angles...");
+    
+    // Utiliser un Map pour le cache avec une limite de taille
+    this.angleNormCache = new Map();
+    this.angleNormCacheLimit = 5000;
+    
+    // Vérifier que rayAngles existe
+    if (!this.rayAngles) {
+        console.warn("rayAngles non initialisé, skip précalcul");
+        return;
+    }
+    
+    // Précalculer les angles courants (angles des rayons)
+    for (let i = 0; i < this.rayCount; i++) {
+        const angle = this.rayAngles[i];
+        this.cacheNormalizedAngle(angle);
+        
+        // Précalculer aussi avec différentes rotations du joueur
+        for (let rot = 0; rot < Raycaster.TWO_PI; rot += Math.PI / 8) {
+            this.cacheNormalizedAngle(angle + rot);
+        }
+    }
+    
+    console.log(`Cache d'angles initialisé avec ${this.angleNormCache.size} entrées`);
+}
+
+// Helper pour mettre en cache un angle normalisé
+cacheNormalizedAngle(angle) {
+    const key = ((angle * 10000) | 0); // Précision à 4 décimales
+    
+    if (!this.angleNormCache.has(key)) {
+        const normalized = ((angle % Raycaster.TWO_PI) + Raycaster.TWO_PI) % Raycaster.TWO_PI;
+        
+        // Vérifier la limite du cache
+        if (this.angleNormCache.size >= this.angleNormCacheLimit) {
+            // Supprimer les entrées les plus anciennes (FIFO)
+            const firstKey = this.angleNormCache.keys().next().value;
+            this.angleNormCache.delete(firstKey);
+        }
+        
+        this.angleNormCache.set(key, normalized);
+    }
+}
+
+// Version optimisée de normalizeAngle
+static normalizeAngleFast(angle, raycaster) {
+    // Essayer le cache d'abord
+    if (raycaster && raycaster.angleNormCache) {
+        const key = ((angle * 10000) | 0);
+        const cached = raycaster.angleNormCache.get(key);
+        
+        if (cached !== undefined) {
+            return cached;
+        }
+        
+        // Si pas dans le cache, calculer et mettre en cache
+        const normalized = ((angle % Raycaster.TWO_PI) + Raycaster.TWO_PI) % Raycaster.TWO_PI;
+        if (raycaster.angleNormCache) {
+            raycaster.angleNormCache.set(key, normalized);
+        }
+        return normalized;
+    }
+    
+    // Fallback vers la méthode statique normale
+    return Raycaster.normalizeAngle(angle);
+}
+
+// Table pour la correction de l'effet fish-eye
+initFishEyeTable() {
+    console.log("Initialisation de la table de correction fish-eye...");
+    
+    this.fishEyeTable = new Float32Array(this.rayCount);
+    
+    // Précalculer le cosinus pour chaque angle de rayon
+    for (let i = 0; i < this.rayCount; i++) {
+        this.fishEyeTable[i] = Math.cos(this.rayAngles[i]);
+    }
+    
+    console.log(`Table fish-eye créée : ${this.rayCount} entrées`);
+}
+
+// Helper pour obtenir le facteur de correction
+getFishEyeCorrection(stripIdx) {
+    if (stripIdx >= 0 && stripIdx < this.fishEyeTable.length) {
+        return this.fishEyeTable[stripIdx];
+    }
+    // Fallback si index invalide
+    return Math.cos(this.rayAngles[stripIdx] || 0);
+}
+
+// 3. FONCTION HELPER : Initialisation des tables d'optimisation
+// À appeler dans le constructeur ou après changement de configuration
+initFloorCeilingOptimizations() {
+    // Forcer la recréation des caches de distance
+    this.floorDistanceCache = null;
+    this.ceilingDistanceCache = null;
+    
+    // Pré-calculer les masques bit à bit
+    this.tileSizeMask = this.tileSize - 1;
+    
+    // Vérifier que les tables trigonométriques sont initialisées
+    if (!this.cosTable || !this.sinTable) {
+        console.warn("Tables trigonométriques non initialisées pour l'optimisation sol/plafond");
+    }
+    
+    console.log("Optimisations sol/plafond initialisées");
+}
+
+/////// FIN NOUVELLES
 
     // NOUVELLE MÉTHODE : Initialisation asynchrone des ressources
     async initializeResources() {
@@ -425,7 +398,6 @@ class Raycaster {
         // IA / Deplacements ennemis
         this.enemyMoveCounter = (this.enemyMoveCounter || 0) + timeElapsed;
         const baseInterval = 1500;
-
         if (this.enemyMoveCounter >= baseInterval) {
             this.enemyMoveCounter = 0;
             
@@ -435,23 +407,19 @@ class Raycaster {
                 }
             }
         }
-
+        
         // Mise à jour des stats du joueur
         this.player.statsUpdate(this.player);
-
+        
         // Gestion du temps
         totalTimeElapsed += timeElapsed;
         const oneSecond = 1000;
         timeSinceLastSecond += timeElapsed;
-
         if (timeSinceLastSecond >= oneSecond) {
             this.player.turn = true;
             timeSinceLastSecond -= oneSecond;
         }
-
-        // contrôle du fog
-        // Si en extérieur : pas de fog
-        // Si intérieur (plafond) : fog
+        
         // Contrôle du fog - optimisé pour éviter les logs répétitifs
         if (ceilingRender !== this.lastCeilingRender) {
             this.lastCeilingRender = ceilingRender;
@@ -463,14 +431,66 @@ class Raycaster {
                 disableFog();
             }
         }
+        
+        // ====== COMPTEUR FPS CORRIGÉ ======
+        if (!this.fpsCounter) {
+            this.fpsCounter = { frames: 0, lastTime: performance.now() };
+        }
+        
+        this.fpsCounter.frames++;
+        const nowPerf = performance.now();
+        
+        // opti
+
+        if (nowPerf - this.fpsCounter.lastTime >= 1000) {  // Correction ici !
+            console.log(`FPS: ${this.fpsCounter.frames}`);
+            this.fpsCounter.frames = 0;
+            this.fpsCounter.lastTime = nowPerf;
+        }
+
+        // Ajouter après le compteur FPS
+        if (!this.perfTested && this.fpsCounter && this.fpsCounter.frames > 100) {
+            console.log("=== Test de performance des optimisations ===");
+            
+            const iterations = 10000;
+            
+            // Test brouillard
+            const fogStart = performance.now();
+            for (let i = 0; i < iterations; i++) {
+                this.getFogFactorFast(Math.random() * 10000);
+            }
+            console.log(`Fog lookup: ${(performance.now() - fogStart).toFixed(2)}ms pour ${iterations} appels`);
+            
+            // Test angles
+            const angleStart = performance.now();
+            for (let i = 0; i < iterations; i++) {
+                Raycaster.normalizeAngleFast(Math.random() * Math.PI * 4, this);
+            }
+            console.log(`Angle normalization: ${(performance.now() - angleStart).toFixed(2)}ms pour ${iterations} appels`);
+            
+            this.perfTested = true;
+        }
+        
+        // FIN OPTI
 
         // Rappel pour la prochaine frame
         let this2 = this;
         window.requestAnimationFrame(function() {
             this2.gameCycle();
         });
+
+        // Debug temporaire au début de gameCycle
+        if (!this.tablesChecked) {
+            console.log("Vérification des tables de lookup:");
+            console.log("- fogTable:", this.fogTable ? "OK" : "MANQUANT");
+            console.log("- angleNormCache:", this.angleNormCache ? "OK" : "MANQUANT");
+            console.log("- fishEyeTable:", this.fishEyeTable ? "OK" : "MANQUANT");
+            console.log("- textureCoordCache:", this.textureCoordCache ? "OK" : "MANQUANT");
+            console.log("- getTextureCoordFast:", typeof this.getTextureCoordFast === 'function' ? "OK" : "MANQUANT");
+            this.tablesChecked = true;
+        }
     }
-    
+        
     // OPTIMISATION : Mettre à jour l'index spatial des sprites
     updateSpriteSpatialIndex() {
         this.spriteSpatialIndex.clear();
@@ -883,69 +903,68 @@ class Raycaster {
     }
 
     // Mise à jour de l'état des sprites
-// Mise à jour de l'état des sprites
-updateSpritesState(loadedSpritesState) {
-    // Clear existing sprites before loading new ones
-    this.sprites = [];
+    updateSpritesState(loadedSpritesState) {
+        // Clear existing sprites before loading new ones
+        this.sprites = [];
 
-    // Load the saved state of the sprites
-    loadedSpritesState.forEach(state => {
-        const sprite = new Sprite(
-            state.x,
-            state.y,
-            state.z,
-            state.w,
-            state.h,
-            state.ang,
-            state.spriteType,
-            state.spriteTexture,
-            state.isBlocking,
-            state.attackable,
-            state.turn,
-            state.hp,
-            state.dmg,
-            state.animationProgress,
-            state.spriteName,
-            state.spriteFace,
-            state.spriteTalk,
-            state.spriteSell,
-            state.id,
-            state.lootClass  // Ajout de la classe de loot
+        // Load the saved state of the sprites
+        loadedSpritesState.forEach(state => {
+            const sprite = new Sprite(
+                state.x,
+                state.y,
+                state.z,
+                state.w,
+                state.h,
+                state.ang,
+                state.spriteType,
+                state.spriteTexture,
+                state.isBlocking,
+                state.attackable,
+                state.turn,
+                state.hp,
+                state.dmg,
+                state.animationProgress,
+                state.spriteName,
+                state.spriteFace,
+                state.spriteTalk,
+                state.spriteSell,
+                state.id,
+                state.lootClass  // Ajout de la classe de loot
+            );
+            this.sprites.push(sprite);
+        });
+
+        // IMPORTANT: Recréer le sprite d'animation de combat
+        const tileSizeHalf = this.tileSize >> 1;
+        Sprite.combatAnimationSprite = new Sprite(
+            tileSizeHalf, // x
+            tileSizeHalf, // y
+            0, // z
+            640, // w
+            640, // h
+            0, // ang
+            2, // spriteType
+            19, // spriteTexture (animation slash par défaut)
+            false, // isBlocking
+            false, // attackable
+            true, // turn
+            0, // hp
+            0, // dmg
+            0, // animationProgress
+            "combatAnimationSprite", // spriteName
+            1, // spriteFace
+            "", // spriteTalk
+            [], // spriteSell
+            0, // id
+            0, // step
+            null  // lootClass
         );
-        this.sprites.push(sprite);
-    });
+        
+        // Ajouter le sprite d'animation aux sprites du jeu
+        this.sprites.push(Sprite.combatAnimationSprite);
 
-    // IMPORTANT: Recréer le sprite d'animation de combat
-    const tileSizeHalf = this.tileSize >> 1;
-    Sprite.combatAnimationSprite = new Sprite(
-        tileSizeHalf, // x
-        tileSizeHalf, // y
-        0, // z
-        640, // w
-        640, // h
-        0, // ang
-        2, // spriteType
-        19, // spriteTexture (animation slash par défaut)
-        false, // isBlocking
-        false, // attackable
-        true, // turn
-        0, // hp
-        0, // dmg
-        0, // animationProgress
-        "combatAnimationSprite", // spriteName
-        1, // spriteFace
-        "", // spriteTalk
-        [], // spriteSell
-        0, // id
-        0, // step
-        null  // lootClass
-    );
-    
-    // Ajouter le sprite d'animation aux sprites du jeu
-    this.sprites.push(Sprite.combatAnimationSprite);
-
-    console.log(this.sprites.length + " sprites loaded.");
-}
+        console.log(this.sprites.length + " sprites loaded.");
+    }
 
     // Chargement des sprites pour une carte spécifique
     loadMapSprites(mapID) {
@@ -1195,98 +1214,96 @@ updateSpritesState(loadedSpritesState) {
         this.loadFloorCeilingImages();
     }
 
-// Dans la classe Raycaster, méthode loadFloorCeilingImages()
-// Voici la portion qui charge les textures des sprites :
+    // Dans la classe Raycaster, méthode loadFloorCeilingImages()
+    // Voici la portion qui charge les textures des sprites :
 
-async loadFloorCeilingImages() {
-    // Fonction pour charger une image depuis base64
-    const loadImageFromBase64 = (base64String) => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = reject;
-            img.src = base64String;
-        });
-    };
-
-    // Crée un canvas temporaire pour obtenir les pixels des images
-    let canvas = document.createElement("canvas");
-    canvas.width = this.textureSize * 2;
-    canvas.height = this.textureSize * 24;
-    let context = canvas.getContext("2d");
-
-    try {
-        // Skybox
-        if (IMAGES.skybox1) {
-            const skyboxImg = await loadImageFromBase64(IMAGES.skybox1);
-            context.drawImage(skyboxImg, 0, 0, skyboxImg.width, skyboxImg.height);
-            this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
-        }
-
-        // Chargement des textures de sol
-        const floorTextures = {
-            1: "floorimg1",
-            2: "floorimg2", 
-            3: "floorimg3",
-            4: "floorimg4"
+    async loadFloorCeilingImages() {
+        // Fonction pour charger une image depuis base64
+        const loadImageFromBase64 = (base64String) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = base64String;
+            });
         };
-        
-        if (floorTextures[floorTexture] && IMAGES[floorTextures[floorTexture]]) {
-            const floorImg = await loadImageFromBase64(IMAGES[floorTextures[floorTexture]]);
-            context.drawImage(floorImg, 0, 0, floorImg.width, floorImg.height);
-            this.floorImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
-        }
 
-        // Chargement des textures de plafond
-        const ceilingTextures = {
-            1: "ceilingimg1",
-            2: "ceilingimg2",
-            3: "ceilingimg3"
-        };
-        
-        if (ceilingTextures[ceilingTexture] && IMAGES[ceilingTextures[ceilingTexture]]) {
-            const ceilingImg = await loadImageFromBase64(IMAGES[ceilingTextures[ceilingTexture]]);
-            context.drawImage(ceilingImg, 0, 0, ceilingImg.width, ceilingImg.height);
-            this.ceilingImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
-        }
+        // Crée un canvas temporaire pour obtenir les pixels des images
+        let canvas = document.createElement("canvas");
+        canvas.width = this.textureSize * 2;
+        canvas.height = this.textureSize * 24;
+        let context = canvas.getContext("2d");
 
-        // Chargement des textures de mur
-        if (IMAGES.wallsImage) {
-            const wallsImage = await loadImageFromBase64(IMAGES.wallsImage);
-            context.drawImage(wallsImage, 0, 0, wallsImage.width, wallsImage.height);
-            this.wallsImageData = context.getImageData(0, 0, wallsImage.width, wallsImage.height);
-        }
-
-        // Chargement des sprites
-        const spriteIds = [
-            "sprite1", "sprite2", "sprite3", "sprite4", "sprite5",
-            "sprite6", "sprite7", "sprite8", "sprite9", "sprite10",
-            "sprite11", "sprite12", "sprite13", "sprite14", "sprite15",
-            "sprite16", "sprite17", "sprite18", "sprite19", "sprite20",
-            "sprite21", "sprite22", "sprite23"
-        ];
-
-        for (let i = 0; i < spriteIds.length; i++) {
-            const spriteId = spriteIds[i];
-            if (IMAGES[spriteId]) {
-                const spriteImage = await loadImageFromBase64(IMAGES[spriteId]);
-                let spriteCanvas = document.createElement("canvas");
-                let spriteContext = spriteCanvas.getContext("2d");
-                spriteCanvas.width = spriteImage.width;
-                spriteCanvas.height = spriteImage.height;
-                spriteContext.drawImage(spriteImage, 0, 0, spriteImage.width, spriteImage.height);
-                this["spriteImageData" + (i + 1)] = spriteContext.getImageData(0, 0, spriteImage.width, spriteImage.height);
-                console.log(`✅ Texture ${i + 1} (${spriteId}) chargée avec succès`);
+        try {
+            // Skybox
+            if (IMAGES.skybox1) {
+                const skyboxImg = await loadImageFromBase64(IMAGES.skybox1);
+                context.drawImage(skyboxImg, 0, 0, skyboxImg.width, skyboxImg.height);
+                this.skyboxImageData = context.getImageData(0, 0, this.textureSize * 2, this.textureSize * 3);
             }
+
+            // Chargement des textures de sol
+            const floorTextures = {
+                1: "floorimg1",
+                2: "floorimg2", 
+                3: "floorimg3",
+                4: "floorimg4"
+            };
+            
+            if (floorTextures[floorTexture] && IMAGES[floorTextures[floorTexture]]) {
+                const floorImg = await loadImageFromBase64(IMAGES[floorTextures[floorTexture]]);
+                context.drawImage(floorImg, 0, 0, floorImg.width, floorImg.height);
+                this.floorImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
+            }
+
+            // Chargement des textures de plafond
+            const ceilingTextures = {
+                1: "ceilingimg1",
+                2: "ceilingimg2",
+                3: "ceilingimg3"
+            };
+            
+            if (ceilingTextures[ceilingTexture] && IMAGES[ceilingTextures[ceilingTexture]]) {
+                const ceilingImg = await loadImageFromBase64(IMAGES[ceilingTextures[ceilingTexture]]);
+                context.drawImage(ceilingImg, 0, 0, ceilingImg.width, ceilingImg.height);
+                this.ceilingImageData = context.getImageData(0, 0, this.textureSize, this.textureSize);
+            }
+
+            // Chargement des textures de mur
+            if (IMAGES.wallsImage) {
+                const wallsImage = await loadImageFromBase64(IMAGES.wallsImage);
+                context.drawImage(wallsImage, 0, 0, wallsImage.width, wallsImage.height);
+                this.wallsImageData = context.getImageData(0, 0, wallsImage.width, wallsImage.height);
+            }
+
+            // Chargement des sprites
+            const spriteIds = [
+                "sprite1", "sprite2", "sprite3", "sprite4", "sprite5",
+                "sprite6", "sprite7", "sprite8", "sprite9", "sprite10",
+                "sprite11", "sprite12", "sprite13", "sprite14", "sprite15",
+                "sprite16", "sprite17", "sprite18", "sprite19", "sprite20",
+                "sprite21", "sprite22", "sprite23"
+            ];
+
+            for (let i = 0; i < spriteIds.length; i++) {
+                const spriteId = spriteIds[i];
+                if (IMAGES[spriteId]) {
+                    const spriteImage = await loadImageFromBase64(IMAGES[spriteId]);
+                    let spriteCanvas = document.createElement("canvas");
+                    let spriteContext = spriteCanvas.getContext("2d");
+                    spriteCanvas.width = spriteImage.width;
+                    spriteCanvas.height = spriteImage.height;
+                    spriteContext.drawImage(spriteImage, 0, 0, spriteImage.width, spriteImage.height);
+                    this["spriteImageData" + (i + 1)] = spriteContext.getImageData(0, 0, spriteImage.width, spriteImage.height);
+                    console.log(`✅ Texture ${i + 1} (${spriteId}) chargée avec succès`);
+                }
+            }
+
+            console.log(`🎯 Chargement des textures terminé`);
+        } catch (error) {
+            console.error("Erreur lors du chargement des textures:", error);
         }
-
-        console.log(`🎯 Chargement des textures terminé`);
-    } catch (error) {
-        console.error("Erreur lors du chargement des textures:", error);
     }
-}
-
-
 
 
     stripScreenHeight(screenDistance, correctDistance, heightInGame) {
@@ -1770,119 +1787,172 @@ static async fadeFromBlack(duration) {
         return result;
     }
 
+    // 1. VERSION OPTIMISÉE de drawTexturedFloor
     drawTexturedFloor(rayHits) {
         const centerY = this.halfDisplayHeight;
         const eyeHeight = (this.tileSize >> 1) + this.player.z;
         
-        // Définir les seuils de distance pour le rendu adaptatif
-        const NEAR_DISTANCE = this.tileSize * 2;    // 2 tuiles
-        const MID_DISTANCE = this.tileSize * 4;     // 4 tuiles
-        const FAR_DISTANCE = this.tileSize * 6;     // 6 tuiles
-        const VERY_FAR_DISTANCE = this.tileSize * 8; // 8 tuiles
+        // OPTIMISATION 1: Pré-calculer les distances une fois par frame
+        if (!this.floorDistanceCache || this.floorDistanceCacheHeight !== eyeHeight) {
+            this.floorDistanceCache = new Float32Array(this.displayHeight);
+            this.floorDistanceCacheHeight = eyeHeight;
+            
+            for (let y = centerY; y < this.displayHeight; y++) {
+                const dy = y - centerY;
+                if (dy > 0) {
+                    this.floorDistanceCache[y] = eyeHeight / dy;
+                }
+            }
+        }
         
-        for (let rayHit of rayHits) {
+        // OPTIMISATION 2: Créer une lookup table pour les coordonnées de texture
+        const textureSizeReciprocal = 1 / this.tileSize;
+        const textureScale = this.textureSize * textureSizeReciprocal;
+        
+        // OPTIMISATION 3: Pré-calculer les constantes de distance
+        const NEAR_DISTANCE = this.tileSize << 2;    // * 4
+        const MID_DISTANCE = this.tileSize * 6;
+        const FAR_DISTANCE = this.tileSize << 3;     // * 8
+        const VERY_FAR_DISTANCE = this.tileSize * 10;
+        
+        // OPTIMISATION 4: Buffer temporaire pour stocker les pixels d'une colonne
+        const columnBuffer = new Uint8Array(this.displayHeight * 4);
+        
+        for (let i = 0; i < rayHits.length; i++) {
+            const rayHit = rayHits[i];
             const wallScreenHeight = this.stripScreenHeight(
                 this.viewDist,
                 rayHit.correctDistance,
                 this.tileSize
             );
+            
             const screenX = rayHit.strip * this.stripWidth;
             const currentViewDistance = this.viewDistances[rayHit.strip];
-            const cosRayAngle = Math.cos(rayHit.rayAngle);
-            const sinRayAngle = Math.sin(rayHit.rayAngle);
+            
+            // OPTIMISATION 5: Utiliser les tables trigonométriques si disponibles
+            const stripIdx = rayHit.strip;
+            const rayAngle = this.player.rot + this.rayAngles[stripIdx];
+            const cosRayAngle = Math.cos(rayAngle);
+            const sinRayAngle = Math.sin(rayAngle);
+            
+            // OPTIMISATION 6: Pré-calculer les facteurs de direction (sans la distance!)
+            const xFactor = cosRayAngle;
+            const yFactor = -sinRayAngle;
             
             let screenY = Math.max(
                 centerY,
                 ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight
             ) | 0;
             
-            // Variables pour le rendu adaptatif
             let lastPixel = null;
-            let pixelStep = 1;
+            let lastPixelStep = 1;
+            let bufferIdx = 0;
             
-            for (; screenY < this.displayHeight; screenY++) {
-                let dy = screenY - centerY;
-                let floorDistance = (currentViewDistance * eyeHeight) / dy;
+            // OPTIMISATION 7: Dérouler partiellement la boucle pour les cas courants
+            while (screenY < this.displayHeight) {
+                const baseDistance = this.floorDistanceCache[screenY];
+                const floorDistance = baseDistance * currentViewDistance;
                 
-                // Déterminer le pas de pixels selon la distance
+                // OPTIMISATION 8: Détermination rapide du pixelStep
+                let pixelStep;
                 if (floorDistance < NEAR_DISTANCE) {
-                    pixelStep = 1; // Qualité maximale
+                    pixelStep = 1;
                 } else if (floorDistance < MID_DISTANCE) {
-                    pixelStep = 2; // 1 pixel sur 2
+                    pixelStep = 2;
                 } else if (floorDistance < FAR_DISTANCE) {
-                    pixelStep = 4; // 1 pixel sur 4
+                    pixelStep = 4;
                 } else if (floorDistance < VERY_FAR_DISTANCE) {
-                    pixelStep = 8; // 1 pixel sur 8
+                    pixelStep = 8;
                 } else {
-                    pixelStep = 16; // 1 pixel sur 16 pour très loin
+                    pixelStep = 16;
                 }
                 
-                // Calculer uniquement si on est sur un pixel à rendre
-                if ((screenY - Math.max(centerY, ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight)) % pixelStep === 0) {
-                    let worldX = this.player.x + floorDistance * cosRayAngle;
-                    let worldY = this.player.y + floorDistance * -sinRayAngle;
+                // OPTIMISATION 9: Éviter le modulo coûteux
+                const shouldCalculate = (pixelStep === 1) || 
+                                        ((screenY & (pixelStep - 1)) === 0);
+                
+                if (shouldCalculate) {
+                    const worldX = this.player.x + floorDistance * xFactor;
+                    const worldY = this.player.y + floorDistance * yFactor;
                     
-                    if (
-                        worldX < 0 ||
-                        worldY < 0 ||
-                        worldX >= this.worldWidth ||
-                        worldY >= this.worldHeight
-                    ) {
-                        continue;
-                    }
-                    
-                    // Utiliser le cache de texture
-                    const texCoord = this.getTextureCoord(worldX, worldY);
-                    
-                    let srcPixel = Raycaster.getPixel(
-                        this.floorImageData,
-                        texCoord.x,
-                        texCoord.y
-                    );
-                    
-                    // Appliquer le brouillard
-                    const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, floorDistance);
-                    
-                    // Sauvegarder pour l'interpolation
-                    lastPixel = foggedPixel;
-                    
-                    // Dessiner le pixel principal
-                    Raycaster.setPixel(
-                        this.backBuffer,
-                        screenX,
-                        screenY,
-                        foggedPixel.r,
-                        foggedPixel.g,
-                        foggedPixel.b,
-                        255
-                    );
-                    
-                    // Remplir les pixels intermédiaires si nécessaire
-                    if (pixelStep > 1 && lastPixel) {
-                        for (let fillY = 1; fillY < pixelStep && screenY + fillY < this.displayHeight; fillY++) {
-                            Raycaster.setPixel(
-                                this.backBuffer,
-                                screenX,
-                                screenY + fillY,
-                                lastPixel.r,
-                                lastPixel.g,
-                                lastPixel.b,
-                                255
-                            );
+                    if (worldX >= 0 && worldY >= 0 && 
+                        worldX < this.worldWidth && worldY < this.worldHeight) {
+                        
+                        // OPTIMISATION 10: Calcul direct des coordonnées de texture
+                        // Gérer les valeurs négatives du modulo
+                        let texX = ((worldX | 0) % this.tileSize);
+                        let texY = ((worldY | 0) % this.tileSize);
+                        if (texX < 0) texX += this.tileSize;
+                        if (texY < 0) texY += this.tileSize;
+                        texX = (texX * textureScale) | 0;
+                        texY = (texY * textureScale) | 0;
+                        
+                        // OPTIMISATION 11: Accès direct aux données de texture
+                        const srcIdx = (texY * this.textureSize + texX) << 2;
+                        
+                        let r = this.floorImageData.data[srcIdx];
+                        let g = this.floorImageData.data[srcIdx + 1];
+                        let b = this.floorImageData.data[srcIdx + 2];
+                        
+                        // OPTIMISATION 12: Brouillard simplifié
+                        const fogFactor = this.getFogFactorFast(floorDistance);
+                        if (fogFactor > 0) {
+                            const invFog = 1 - fogFactor;
+                            r = (r * invFog + fogColorR * fogFactor) | 0;
+                            g = (g * invFog + fogColorG * fogFactor) | 0;
+                            b = (b * invFog + fogColorB * fogFactor) | 0;
                         }
+                        
+                        // Stocker dans le buffer temporaire
+                        columnBuffer[bufferIdx] = r;
+                        columnBuffer[bufferIdx + 1] = g;
+                        columnBuffer[bufferIdx + 2] = b;
+                        columnBuffer[bufferIdx + 3] = 255;
+                        
+                        lastPixel = bufferIdx;
+                        lastPixelStep = pixelStep;
                     }
-                } else if (lastPixel && pixelStep > 1) {
-                    // Utiliser le dernier pixel calculé pour les pixels intermédiaires
-                    Raycaster.setPixel(
-                        this.backBuffer,
-                        screenX,
-                        screenY,
-                        lastPixel.r,
-                        lastPixel.g,
-                        lastPixel.b,
-                        255
-                    );
+                } else if (lastPixel !== null) {
+                    // Réutiliser le dernier pixel calculé
+                    columnBuffer[bufferIdx] = columnBuffer[lastPixel];
+                    columnBuffer[bufferIdx + 1] = columnBuffer[lastPixel + 1];
+                    columnBuffer[bufferIdx + 2] = columnBuffer[lastPixel + 2];
+                    columnBuffer[bufferIdx + 3] = 255;
                 }
+                
+                bufferIdx += 4;
+                screenY++;
+                
+                // OPTIMISATION 13: Remplissage rapide pour les grandes distances
+                if (pixelStep > 1 && lastPixel !== null) {
+                    const fillEnd = Math.min(screenY + pixelStep - 1, this.displayHeight);
+                    const lastR = columnBuffer[lastPixel];
+                    const lastG = columnBuffer[lastPixel + 1];
+                    const lastB = columnBuffer[lastPixel + 2];
+                    
+                    while (screenY < fillEnd) {
+                        columnBuffer[bufferIdx] = lastR;
+                        columnBuffer[bufferIdx + 1] = lastG;
+                        columnBuffer[bufferIdx + 2] = lastB;
+                        columnBuffer[bufferIdx + 3] = 255;
+                        bufferIdx += 4;
+                        screenY++;
+                    }
+                }
+            }
+            
+            // OPTIMISATION 14: Copie en bloc vers le backbuffer
+            const startY = Math.max(
+                centerY,
+                ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight
+            ) | 0;
+            
+            for (let y = startY, srcIdx = 0; y < this.displayHeight; y++, srcIdx += 4) {
+                const dstIdx = (y * this.displayWidth + screenX) << 2;
+                this.backBuffer.data[dstIdx] = columnBuffer[srcIdx];
+                this.backBuffer.data[dstIdx + 1] = columnBuffer[srcIdx + 1];
+                this.backBuffer.data[dstIdx + 2] = columnBuffer[srcIdx + 2];
+                this.backBuffer.data[dstIdx + 3] = 255;
             }
         }
     }
@@ -1891,128 +1961,204 @@ static async fadeFromBlack(duration) {
     // Plafond/SkyBox
     //////////////////////////////////////////////////////////////////////
 
+    // Version simplifiée sans le cache pour commencer
+    getTextureCoordFast(worldX, worldY) {
+        // Initialisation de secours si le cache n'existe pas
+        if (!this.textureCoordCache) {
+            console.warn("textureCoordCache non initialisé, création...");
+            this.textureCoordCache = new Map();
+            this.textureCoordCacheLimit = 2000;
+        }
+        
+        const key = `${(worldX | 0)},${(worldY | 0)}`;
+        
+        // Vérifier le cache
+        const cached = this.textureCoordCache.get(key);
+        if (cached) {
+            return cached;
+        }
+        
+        // Calculer les coordonnées
+        let textureX = (worldX | 0) % this.tileSize;
+        let textureY = (worldY | 0) % this.tileSize;
+        
+        if (this.tileSize != this.textureSize) {
+            textureX = ((textureX / this.tileSize) * this.textureSize) | 0;
+            textureY = ((textureY / this.tileSize) * this.textureSize) | 0;
+        }
+        
+        const result = { x: textureX, y: textureY };
+        
+        // Gérer la limite du cache
+        if (this.textureCoordCache.size >= this.textureCoordCacheLimit) {
+            // Supprimer la première entrée (FIFO)
+            const firstKey = this.textureCoordCache.keys().next().value;
+            this.textureCoordCache.delete(firstKey);
+        }
+        
+        this.textureCoordCache.set(key, result);
+        return result;
+    }
+
     // Remplacer les méthodes existantes dans la classe Raycaster
 
+    // 2. VERSION OPTIMISÉE de drawTexturedCeiling
     drawTexturedCeiling(rayHits) {
-        const centerY = this.halfDisplayHeight;
-        const eyeHeight = (this.tileSize >> 1) + this.player.z;
-        const currentCeilingHeight = this.tileSize * this.ceilingHeight;
+    const centerY = this.halfDisplayHeight;
+    const eyeHeight = (this.tileSize >> 1) + this.player.z;
+    const currentCeilingHeight = this.tileSize * this.ceilingHeight;
+    const ceilingDelta = currentCeilingHeight - eyeHeight;
+    
+    // Pré-calculer les distances pour le plafond
+    if (!this.ceilingDistanceCache || 
+        this.ceilingDistanceCacheHeight !== ceilingDelta) {
+        this.ceilingDistanceCache = new Float32Array(this.displayHeight);
+        this.ceilingDistanceCacheHeight = ceilingDelta;
         
-        // Définir les seuils de distance pour le rendu adaptatif
-        const NEAR_DISTANCE = this.tileSize * 2;    // 2 tuiles
-        const MID_DISTANCE = this.tileSize * 4;     // 4 tuiles
-        const FAR_DISTANCE = this.tileSize * 6;     // 6 tuiles
-        const VERY_FAR_DISTANCE = this.tileSize * 8; // 8 tuiles
-        
-        for (let rayHit of rayHits) {
-            const wallScreenHeight = this.stripScreenHeight(
-                this.viewDist,
-                rayHit.correctDistance,
-                this.tileSize
-            );
-            const screenX = rayHit.strip * this.stripWidth;
-            const currentViewDistance = this.viewDistances[rayHit.strip];
-            const cosRayAngle = Math.cos(rayHit.rayAngle);
-            const sinRayAngle = Math.sin(rayHit.rayAngle);
-            
-            let screenY = Math.min(
-                centerY - 1,
-                ((this.displayHeight - wallScreenHeight) >> 1) - 1
-            ) | 0;
-            
-            // Variables pour le rendu adaptatif
-            let lastPixel = null;
-            let pixelStep = 1;
-            
-            for (; screenY >= 0; screenY--) {
-                let dy = centerY - screenY;
-                let ceilingDistance =
-                    (currentViewDistance * (currentCeilingHeight - eyeHeight)) / dy;
-                
-                // Déterminer le pas de pixels selon la distance
-                if (ceilingDistance < NEAR_DISTANCE) {
-                    pixelStep = 1; // Qualité maximale
-                } else if (ceilingDistance < MID_DISTANCE) {
-                    pixelStep = 2; // 1 pixel sur 2
-                } else if (ceilingDistance < FAR_DISTANCE) {
-                    pixelStep = 4; // 1 pixel sur 4
-                } else if (ceilingDistance < VERY_FAR_DISTANCE) {
-                    pixelStep = 8; // 1 pixel sur 8
-                } else {
-                    pixelStep = 16; // 1 pixel sur 16 pour très loin
-                }
-                
-                // Calculer uniquement si on est sur un pixel à rendre
-                let startY = Math.min(centerY - 1, ((this.displayHeight - wallScreenHeight) >> 1) - 1);
-                if ((startY - screenY) % pixelStep === 0) {
-                    let worldX = this.player.x + ceilingDistance * cosRayAngle;
-                    let worldY = this.player.y + ceilingDistance * -sinRayAngle;
-                    
-                    if (
-                        worldX < 0 ||
-                        worldY < 0 ||
-                        worldX >= this.worldWidth ||
-                        worldY >= this.worldHeight
-                    ) {
-                        continue;
-                    }
-                    
-                    // Utiliser le cache de texture
-                    const texCoord = this.getTextureCoord(worldX, worldY);
-                    
-                    let srcPixel = Raycaster.getPixel(
-                        this.ceilingImageData,
-                        texCoord.x,
-                        texCoord.y
-                    );
-                    
-                    // Appliquer le brouillard
-                    const foggedPixel = applyFog(srcPixel.r, srcPixel.g, srcPixel.b, ceilingDistance);
-                    
-                    // Sauvegarder pour l'interpolation
-                    lastPixel = foggedPixel;
-                    
-                    // Dessiner le pixel principal
-                    Raycaster.setPixel(
-                        this.backBuffer,
-                        screenX,
-                        screenY,
-                        foggedPixel.r,
-                        foggedPixel.g,
-                        foggedPixel.b,
-                        255
-                    );
-                    
-                    // Remplir les pixels intermédiaires si nécessaire
-                    if (pixelStep > 1 && lastPixel) {
-                        for (let fillY = 1; fillY < pixelStep && screenY - fillY >= 0; fillY++) {
-                            Raycaster.setPixel(
-                                this.backBuffer,
-                                screenX,
-                                screenY - fillY,
-                                lastPixel.r,
-                                lastPixel.g,
-                                lastPixel.b,
-                                255
-                            );
-                        }
-                    }
-                } else if (lastPixel && pixelStep > 1) {
-                    // Utiliser le dernier pixel calculé pour les pixels intermédiaires
-                    Raycaster.setPixel(
-                        this.backBuffer,
-                        screenX,
-                        screenY,
-                        lastPixel.r,
-                        lastPixel.g,
-                        lastPixel.b,
-                        255
-                    );
-                }
+        for (let y = 0; y < centerY; y++) {
+            const dy = centerY - y;
+            if (dy > 0) {
+                this.ceilingDistanceCache[y] = ceilingDelta / dy;
             }
         }
     }
-
+    
+    const textureSizeReciprocal = 1 / this.tileSize;
+    const textureScale = this.textureSize * textureSizeReciprocal;
+    
+    const NEAR_DISTANCE = this.tileSize << 1;    // * 2
+    const MID_DISTANCE = this.tileSize << 2;     // * 4
+    const FAR_DISTANCE = this.tileSize * 6;
+    const VERY_FAR_DISTANCE = this.tileSize << 3; // * 8
+    
+    const columnBuffer = new Uint8Array(centerY * 4);
+    
+    for (let i = 0; i < rayHits.length; i++) {
+        const rayHit = rayHits[i];
+        const wallScreenHeight = this.stripScreenHeight(
+            this.viewDist,
+            rayHit.correctDistance,
+            this.tileSize
+        );
+        
+        const screenX = rayHit.strip * this.stripWidth;
+        const currentViewDistance = this.viewDistances[rayHit.strip];
+        
+        const stripIdx = rayHit.strip;
+        const rayAngle = this.player.rot + this.rayAngles[stripIdx];
+        const cosRayAngle = Math.cos(rayAngle);
+        const sinRayAngle = Math.sin(rayAngle);
+        
+        const xFactor = cosRayAngle;
+        const yFactor = -sinRayAngle;
+        
+        let screenY = Math.min(
+            centerY - 1,
+            ((this.displayHeight - wallScreenHeight) >> 1) - 1
+        ) | 0;
+        
+        let lastPixel = null;
+        let bufferIdx = screenY * 4;
+        
+        // Boucle inversée pour le plafond
+        while (screenY >= 0) {
+            const baseDistance = this.ceilingDistanceCache[screenY];
+            const ceilingDistance = baseDistance * currentViewDistance;
+            
+            let pixelStep;
+            if (ceilingDistance < NEAR_DISTANCE) {
+                pixelStep = 1;
+            } else if (ceilingDistance < MID_DISTANCE) {
+                pixelStep = 2;
+            } else if (ceilingDistance < FAR_DISTANCE) {
+                pixelStep = 4;
+            } else if (ceilingDistance < VERY_FAR_DISTANCE) {
+                pixelStep = 8;
+            } else {
+                pixelStep = 16;
+            }
+            
+            const shouldCalculate = (pixelStep === 1) || 
+                                    ((screenY & (pixelStep - 1)) === 0);
+            
+            if (shouldCalculate) {
+                const worldX = this.player.x + ceilingDistance * xFactor;
+                const worldY = this.player.y + ceilingDistance * yFactor;
+                
+                if (worldX >= 0 && worldY >= 0 && 
+                    worldX < this.worldWidth && worldY < this.worldHeight) {
+                    
+                    let texX = ((worldX | 0) % this.tileSize);
+                    let texY = ((worldY | 0) % this.tileSize);
+                    if (texX < 0) texX += this.tileSize;
+                    if (texY < 0) texY += this.tileSize;
+                    texX = (texX * textureScale) | 0;
+                    texY = (texY * textureScale) | 0;
+                    
+                    const srcIdx = (texY * this.textureSize + texX) << 2;
+                    
+                    let r = this.ceilingImageData.data[srcIdx];
+                    let g = this.ceilingImageData.data[srcIdx + 1];
+                    let b = this.ceilingImageData.data[srcIdx + 2];
+                    
+                    const fogFactor = this.getFogFactorFast(ceilingDistance);
+                    if (fogFactor > 0) {
+                        const invFog = 1 - fogFactor;
+                        r = (r * invFog + fogColorR * fogFactor) | 0;
+                        g = (g * invFog + fogColorG * fogFactor) | 0;
+                        b = (b * invFog + fogColorB * fogFactor) | 0;
+                    }
+                    
+                    columnBuffer[bufferIdx] = r;
+                    columnBuffer[bufferIdx + 1] = g;
+                    columnBuffer[bufferIdx + 2] = b;
+                    columnBuffer[bufferIdx + 3] = 255;
+                    
+                    lastPixel = bufferIdx;
+                }
+            } else if (lastPixel !== null) {
+                columnBuffer[bufferIdx] = columnBuffer[lastPixel];
+                columnBuffer[bufferIdx + 1] = columnBuffer[lastPixel + 1];
+                columnBuffer[bufferIdx + 2] = columnBuffer[lastPixel + 2];
+                columnBuffer[bufferIdx + 3] = 255;
+            }
+            
+            screenY--;
+            bufferIdx -= 4;
+            
+            // Remplissage rapide pour le plafond
+            if (pixelStep > 1 && lastPixel !== null && screenY >= 0) {
+                const fillEnd = Math.max(screenY - pixelStep + 1, 0);
+                const lastR = columnBuffer[lastPixel];
+                const lastG = columnBuffer[lastPixel + 1];
+                const lastB = columnBuffer[lastPixel + 2];
+                
+                while (screenY > fillEnd) {
+                    columnBuffer[bufferIdx] = lastR;
+                    columnBuffer[bufferIdx + 1] = lastG;
+                    columnBuffer[bufferIdx + 2] = lastB;
+                    columnBuffer[bufferIdx + 3] = 255;
+                    screenY--;
+                    bufferIdx -= 4;
+                }
+            }
+        }
+        
+        // Copie en bloc vers le backbuffer
+        const endY = Math.min(
+            centerY - 1,
+            ((this.displayHeight - wallScreenHeight) >> 1) - 1
+        ) | 0;
+        
+        for (let y = 0, srcIdx = 0; y <= endY; y++, srcIdx += 4) {
+            const dstIdx = (y * this.displayWidth + screenX) << 2;
+            this.backBuffer.data[dstIdx] = columnBuffer[srcIdx];
+            this.backBuffer.data[dstIdx + 1] = columnBuffer[srcIdx + 1];
+            this.backBuffer.data[dstIdx + 2] = columnBuffer[srcIdx + 2];
+            this.backBuffer.data[dstIdx + 3] = 255;
+        }
+    }
+}
     // Méthode optionnelle pour ajuster les seuils de distance dynamiquement
     setAdaptiveRenderingThresholds(near, mid, far, veryFar) {
         this.NEAR_DISTANCE = this.tileSize * near;
@@ -2258,8 +2404,8 @@ static async fadeFromBlack(duration) {
         let wallHit = ray.wallHit;
         if (wallHit.distance) {
             wallHit.distance = Math.sqrt(wallHit.distance);
-            wallHit.correctDistance =
-                wallHit.distance * Math.cos(this.player.rot - rayAngle);
+            // OPTI NEEEW
+            wallHit.correctDistance = wallHit.distance * this.getFishEyeCorrection(ray.strip);
             wallHit.strip = stripIdx;
             wallHit.rayAngle = rayAngle;
             this.drawRay(wallHit.x, wallHit.y);
@@ -2269,7 +2415,7 @@ static async fadeFromBlack(duration) {
 
     castSingleRay(rayHits, rayAngle, stripIdx) {
         // OPTIMISATION : Normalisation d'angle optimisée
-        rayAngle = Raycaster.normalizeAngle(rayAngle);
+        rayAngle = Raycaster.normalizeAngleFast(rayAngle, this);
 
         //   2  |  1
         //  ----+----
