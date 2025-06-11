@@ -146,6 +146,127 @@ class Sprite {
         this.lastAttackTime = null; // Pour suivre le timing des attaques
     }
 
+
+// ==============================================
+// AMÉLIORATIONS DES FEEDBACKS DE COMBAT
+// ==============================================
+
+// Dans Sprite.js, ajouter ces méthodes pour de nouveaux effets visuels :
+
+// Effet de tremblement d'écran lors des impacts
+static screenShake(intensity = 10, duration = 300) {
+    const gameWindow = document.getElementById("gameWindow");
+    const startTime = performance.now();
+    
+    const shakeAnimation = () => {
+        const elapsed = performance.now() - startTime;
+        const progress = elapsed / duration;
+        
+        if (progress < 1) {
+            // Diminuer l'intensité au fil du temps
+            const currentIntensity = intensity * (1 - progress);
+            
+            // Générer des offsets aléatoires
+            const offsetX = (Math.random() - 0.5) * currentIntensity;
+            const offsetY = (Math.random() - 0.5) * currentIntensity;
+            
+            gameWindow.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+            
+            requestAnimationFrame(shakeAnimation);
+        } else {
+            // Réinitialiser la position
+            gameWindow.style.transform = '';
+        }
+    };
+    
+    requestAnimationFrame(shakeAnimation);
+}
+
+// Effet de zoom lors des coups critiques
+static criticalHitZoom(duration = 400) {
+    const mainCanvas = document.getElementById("mainCanvas");
+    const startTime = performance.now();
+    
+    // Sauvegarder le style original
+    const originalTransform = mainCanvas.style.transform || '';
+    mainCanvas.style.transition = 'none';
+    
+    const zoomAnimation = () => {
+        const elapsed = performance.now() - startTime;
+        const progress = elapsed / duration;
+        
+        if (progress < 1) {
+            let scale;
+            if (progress < 0.2) {
+                // Zoom in rapide
+                scale = 1 + (progress / 0.2) * 0.15;
+            } else {
+                // Retour progressif
+                scale = 1.15 - ((progress - 0.2) / 0.8) * 0.15;
+            }
+            
+            mainCanvas.style.transform = `scale(${scale})`;
+            requestAnimationFrame(zoomAnimation);
+        } else {
+            mainCanvas.style.transform = originalTransform;
+        }
+    };
+    
+    requestAnimationFrame(zoomAnimation);
+}
+
+// Indicateur de dégâts flottant
+static showDamageNumber(damage, x, y, isCritical = false) {
+    const outputElement = document.getElementById("output");
+    
+    // Créer l'élément de dégâts
+    const damageDiv = document.createElement('div');
+    damageDiv.style.cssText = `
+        position: absolute;
+        left: 50%;
+        top: 30%;
+        transform: translateX(-50%);
+        font-size: ${isCritical ? '28px' : '20px'};
+        font-weight: bold;
+        color: ${isCritical ? '#ff3333' : '#ffaa00'};
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        pointer-events: none;
+        z-index: 1000;
+        font-family: monospace;
+    `;
+    
+    damageDiv.textContent = isCritical ? `${damage}!` : damage;
+    outputElement.appendChild(damageDiv);
+    
+    // Animation
+    const startTime = performance.now();
+    const duration = 1500;
+    const startY = 30;
+    
+    const animateDamage = () => {
+        const elapsed = performance.now() - startTime;
+        const progress = elapsed / duration;
+        
+        if (progress < 1) {
+            // Monter et fade out
+            const yOffset = startY - (progress * 50);
+            const opacity = 1 - (progress * 0.8);
+            const scale = 1 + (progress * 0.3);
+            
+            damageDiv.style.top = `${yOffset}%`;
+            damageDiv.style.opacity = opacity;
+            damageDiv.style.transform = `translateX(-50%) scale(${scale})`;
+            
+            requestAnimationFrame(animateDamage);
+        } else {
+            damageDiv.remove();
+        }
+    };
+    
+    requestAnimationFrame(animateDamage);
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IA / Deplacements ennemis
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,6 +370,7 @@ async moveRandomlyOrChase(map, sprites, player) {
 }
 
 // Nouvelle méthode pour gérer l'attaque de l'ennemi
+// Améliorer la méthode attackPlayer dans Sprite.js :
 attackPlayer(player) {
     if (player.hp <= 0 || this.hp <= 0) return;
     
@@ -261,27 +383,42 @@ attackPlayer(player) {
         // L'attaque réussit
         if (player.armor >= this.dmg) {
             Sprite.terminalLog("Your armor absorbs all the damages.", 1);
+            
+            // NOUVEAU : Effet visuel pour absorption totale
+            Raycaster.armorAbsorbFlash();
         } else {
             const damageDone = this.dmg - player.armor;
-            Sprite.displayCombatAnimation(`${this.spriteName || "The ennemy"} attacks : ${damageDone} dmg !`, 2);
+            
+            // NOUVEAU : Afficher les dégâts subis
+            Sprite.showDamageNumber(damageDone, player.x, player.y, false);
+            
+            Sprite.displayCombatAnimation(`${this.spriteName || "The enemy"} attacks : ${damageDone} dmg !`, 2);
+            
+            // NOUVEAU : Tremblement proportionnel aux dégâts
+            const shakeIntensity = Math.min(20, 5 + damageDone * 2);
+            Sprite.screenShake(shakeIntensity, 300);
+            
             Raycaster.playerDamageFlash();
             player.hp -= damageDone;
             
-            // Vérifier si le joueur est mort
             if (player.hp <= 0) {
                 Sprite.terminalLog("You're dead !");
-                // Logique de game over déjà gérée dans player.statsUpdate()
+                // NOUVEAU : Effet dramatique pour la mort
+                Sprite.deathEffect();
             }
         }
     } else {
         // Le joueur esquive
         Sprite.terminalLog(`You dodge ${this.spriteName || "the enemy"}'s attack !`, 2);
         player.XPdexterity += 1;
+        
+        // NOUVEAU : Effet visuel pour l'esquive
+        Raycaster.dodgeEffect();
     }
     
-    // Mettre à jour les statistiques du joueur
     player.statsUpdate(player);
 }
+
 
 // Vérifier si un mouvement est valide
 isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
@@ -2125,31 +2262,44 @@ static showIntroCinematic() {
         }
     }
 
-    playerAttack(damage, criti, player) {
-        const chanceCriti = Math.floor(Math.random() * 100);
-        var factor = 1;
-
-        if (chanceCriti < criti) {
-            factor = 2
-            Sprite.terminalLog('Critical hit !', 5);
-            player.XPdexterity += 1;
-        }
-
-        this.hp -= damage * factor;
-
-        this.invokeAnimationSprite(player, 19);
-        this.hitAnimation(player)
-        this.startSpriteFlash();
-
-        player.XPstrength += 1;
-
-        var entry =
-            'You attack :' +
-            damage * factor +
-            " dmg";
-
-        Sprite.displayCombatAnimation(entry, 1);
+// Améliorer la méthode playerAttack dans Sprite.js :
+playerAttack(damage, criti, player) {
+    const chanceCriti = Math.floor(Math.random() * 100);
+    var factor = 1;
+    
+    if (chanceCriti < criti) {
+        factor = 2;
+        
+        // NOUVEAU : Effets visuels pour coup critique
+        Sprite.criticalHitZoom();
+        Sprite.screenShake(15, 400);
+        Sprite.terminalLog('Critical hit !', 5);
+        
+        player.XPdexterity += 1;
     }
+    
+    const finalDamage = damage * factor;
+    this.hp -= finalDamage;
+    
+    // NOUVEAU : Afficher les dégâts
+    Sprite.showDamageNumber(finalDamage, this.x, this.y, factor > 1);
+    
+    // Effets existants
+    this.invokeAnimationSprite(player, 19);
+    this.hitAnimation(player);
+    this.startSpriteFlash();
+    
+    // NOUVEAU : Léger tremblement pour les hits normaux
+    if (factor === 1) {
+        Sprite.screenShake(5, 200);
+    }
+    
+    player.XPstrength += 1;
+    
+    var entry = 'You attack :' + finalDamage + " dmg";
+    Sprite.displayCombatAnimation(entry, 1);
+}
+
 
     enemyAttackUpdate(player) {
         if (this.hp <= 0) {

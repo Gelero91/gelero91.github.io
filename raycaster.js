@@ -133,6 +133,94 @@ this.past = Date.now();
         console.log("Tables trigonométriques initialisées");
     }
 
+
+///// EFFETS VISUELS
+
+// Effet pour l'absorption par l'armure
+static armorAbsorbFlash() {
+    var element = document.getElementById("gameWindow");
+    element.style.transition = "filter 0.3s";
+    element.style.filter = "brightness(1.5) contrast(1.2)";
+    
+    setTimeout(function() {
+        element.style.filter = "";
+    }, 150);
+}
+
+// Effet pour l'esquive
+static dodgeEffect() {
+    var element = document.getElementById("mainCanvas");
+    element.style.transition = "transform 0.3s ease-out";
+    element.style.transform = "translateX(20px)";
+    
+    setTimeout(function() {
+        element.style.transform = "translateX(-20px)";
+        setTimeout(function() {
+            element.style.transform = "";
+        }, 150);
+    }, 150);
+}
+
+// Dans Sprite.js, ajouter l'effet de mort :
+// Dans Sprite.js, modifier la méthode deathEffect pour sauvegarder l'état initial :
+static deathEffect() {
+    const gameWindow = document.getElementById("gameWindow");
+    const mainCanvas = document.getElementById("mainCanvas");
+    
+    // Sauvegarder les styles originaux si pas déjà fait
+    if (!window.originalCanvasStyles) {
+        window.originalCanvasStyles = {
+            transform: mainCanvas.style.transform || '',
+            opacity: mainCanvas.style.opacity || '1',
+            transition: mainCanvas.style.transition || ''
+        };
+    }
+    
+    // Effet de rotation et fade
+    mainCanvas.style.transition = "transform 2s ease-in, opacity 2s ease-in";
+    mainCanvas.style.transform = "rotate(15deg) scale(0.8)";
+    mainCanvas.style.opacity = "0.3";
+    
+    // Pulsation rouge
+    let pulseCount = 0;
+    const pulseInterval = setInterval(() => {
+        if (pulseCount >= 3) {
+            clearInterval(pulseInterval);
+            return;
+        }
+        
+        gameWindow.style.backgroundColor = "rgba(100, 0, 0, 0.5)";
+        setTimeout(() => {
+            gameWindow.style.backgroundColor = "";
+        }, 200);
+        
+        pulseCount++;
+    }, 400);
+}
+
+// Dans Raycaster.js, ajouter une méthode pour réinitialiser les effets visuels :
+static resetVisualEffects() {
+    const gameWindow = document.getElementById("gameWindow");
+    const mainCanvas = document.getElementById("mainCanvas");
+    
+    // Réinitialiser le gameWindow
+    gameWindow.style.backgroundColor = "";
+    gameWindow.style.transform = "";
+    gameWindow.style.filter = "";
+    
+    // Réinitialiser le canvas en utilisant les styles sauvegardés
+    if (window.originalCanvasStyles) {
+        mainCanvas.style.transform = window.originalCanvasStyles.transform;
+        mainCanvas.style.opacity = window.originalCanvasStyles.opacity;
+        mainCanvas.style.transition = window.originalCanvasStyles.transition;
+    } else {
+        // Valeurs par défaut si pas de sauvegarde
+        mainCanvas.style.transform = "";
+        mainCanvas.style.opacity = "1";
+        mainCanvas.style.transition = "";
+    }
+}
+
 ///// NOUVELLES OPTIS
 
 initTextureTable() {
@@ -703,6 +791,9 @@ initFloorCeilingOptimizations() {
     }
 
     newGame() {
+
+        Raycaster.resetVisualEffects()
+
         currentMap = 1;
         mapData = getMapDataByID(currentMap);
 

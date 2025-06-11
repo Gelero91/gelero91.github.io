@@ -139,7 +139,8 @@ class Player {
 
         // Vérification de l'état de mort
         if (this.hp <= 0 && gameOver === false) {
-            Sprite.showGameOverCinematic();
+            Raycaster.deathEffect()
+            // Sprite.showGameOverCinematic();
             gameOver = true;
         }
 
@@ -773,6 +774,7 @@ class Player {
             case 17:
                 pause(500);
                 this.raycaster.loadGameState(this);
+                Raycaster.resetVisualEffects();
                 Raycaster.showRenderWindow()
                 Sprite.resetTerminal();
                 Sprite.terminalLog("Save loaded !");
