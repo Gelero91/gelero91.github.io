@@ -1858,15 +1858,15 @@ static async fadeFromBlack(duration) {
                 if (floorDistance < NEAR_DISTANCE) {
                     pixelStep = 1;
                 } else if (floorDistance < MID_DISTANCE) {
-                    pixelStep = 2;
+                    pixelStep = 1;
                 } else if (floorDistance < FAR_DISTANCE) {
-                    pixelStep = 4;
+                    pixelStep = 2;
                 } else if (floorDistance < VERY_FAR_DISTANCE) {
-                    pixelStep = 8;
+                    pixelStep = 2;
                 } else {
-                    pixelStep = 16;
+                    pixelStep = 4;
                 }
-                
+                 
                 // OPTIMISATION 9: Éviter le modulo coûteux
                 const shouldCalculate = (pixelStep === 1) || 
                                         ((screenY & (pixelStep - 1)) === 0);
@@ -2069,13 +2069,13 @@ static async fadeFromBlack(duration) {
             if (ceilingDistance < NEAR_DISTANCE) {
                 pixelStep = 1;
             } else if (ceilingDistance < MID_DISTANCE) {
-                pixelStep = 2;
+                pixelStep = 1;
             } else if (ceilingDistance < FAR_DISTANCE) {
-                pixelStep = 4;
+                pixelStep = 2;
             } else if (ceilingDistance < VERY_FAR_DISTANCE) {
-                pixelStep = 8;
+                pixelStep = 2;
             } else {
-                pixelStep = 16;
+                pixelStep = 4;
             }
             
             const shouldCalculate = (pixelStep === 1) || 
