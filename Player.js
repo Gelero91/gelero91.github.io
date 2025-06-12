@@ -1,73 +1,251 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Player
+// PLAYER.JS - SYSTÈME DE JOUEUR POUR MOTEUR RAYCASTING 2.5D
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// TABLE DES MATIÈRES
+//
+// 1. CLASSE PRINCIPALE ET INITIALISATION
+//    1.1 Constructeur et propriétés de base
+//    1.2 Initialisation des statistiques
+//    1.3 Références et dépendances
+//
+// 2. SYSTÈME DE STATISTIQUES ET PROGRESSION
+//    2.1 Mise à jour des statistiques (statsUpdate)
+//    2.2 Calculs de progression et level up
+//    2.3 Gestion des barres de progression
+//    2.4 Interface utilisateur dynamique
+//
+// 3. SYSTÈME DE SORTS
+//    3.1 Sélection de sorts
+//    3.2 Navigation dans le grimoire
+//    3.3 Interface de sorts
+//
+// 4. SYSTÈME D'INVENTAIRE ET ÉQUIPEMENT
+//    4.1 Affichage de l'inventaire
+//    4.2 Détails des objets
+//    4.3 Équipement et déséquipement
+//    4.4 Interface d'équipement
+//
+// 5. SYSTÈME DE QUÊTES
+//    5.1 Affichage des quêtes
+//    5.2 Interface de journal de quêtes
+//
+// 6. CONTRÔLES ET INTERFACE UTILISATEUR
+//    6.1 Gestion des boutons et navigation
+//    6.2 Liaison des événements
+//    6.3 Gestionnaire de boutons centralisé
+//
+// 7. SYSTÈME DE MOUVEMENT ET DÉPLACEMENT
+//    7.1 Calculs géométriques
+//    7.2 Gestion des collisions
+//    7.3 Animations de mouvement
+//    7.4 Téléportation et événements
+//    7.5 Méthode move() principale
+//
+// 8. SYSTÈME D'ACTIONS ET INTERACTIONS
+//    8.1 Actions avec sprites
+//    8.2 Gestion des portes et téléporteurs
+//    8.3 Combat et sorts
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 console.log("chargement de la classe Player.")
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 1. CLASSE PRINCIPALE ET INITIALISATION
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 1.1 Constructeur et propriétés de base
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Player {
     constructor(name, x, y, rot, raycaster) {
+        // Informations de base
         this.name = name;
         this.x = x;
         this.y = y;
-        this.z = 0,
-        this.dir = 0,
-        this.rot = rot,
-        this.quadrant = "",
-        this.speed = 0,
+        this.z = 0;
+        this.dir = 0;
+        this.rot = rot;
+        this.quadrant = "";
+        this.speed = 0;
 
-        this.tileSize = 1280,
-        this.moveSpeed = Math.round(1280 / ((DESIRED_FPS / 60.0) * 16)),
-        this.rotSpeed = (1.5 * Math.PI) / 180,
+        // Propriétés de mouvement
+        this.tileSize = 1280;
+        this.moveSpeed = Math.round(1280 / ((DESIRED_FPS / 60.0) * 16));
+        this.rotSpeed = (1.5 * Math.PI) / 180;
 
+        // États de mouvement et actions
+        this.isMoving = false;
+        this.isRotating = false;
+        this.isTeleporting = false;
+        this.isDooring = false;
+        this.turn = true;
+
+        // Historique de mouvement pour optimisations
+        this.lastMoveWasForward = false;
+        this.lastMoveWasBackward = false;
+        this.continuousUpPressed = false;
+        this.continuousDownPressed = false;
+        this.continuousJoystickUp = false;
+        this.continuousJoystickDown = false;
+
+        // États des boutons
+        this.button4Clicked = false;
+        this.button5Clicked = false;
+        this.button6Clicked = false;
+        this.button7Clicked = false;
+        this.button8Clicked = false;
+        this.button9Clicked = false;
+        this.buttonAClicked = false;
+        this.actionButtonClicked = false;
+        this.turnLeftButtonClicked = false;
+        this.turnRightButtonClicked = false;
+        this.LeftLeftButtonClicked = false;
+        this.RightRightButtonClicked = false;
+
+        // Initialisation des statistiques
+        this.initStats();
+        this.initInventoryAndSpells();
+        this.initCombatStats();
+
+        // Références système
+        this.raycaster = raycaster;
+        this.joystick = true;
+        this.inventoryMenuShowed = false;
+        this.lastAttackTime = 0;
+
+        // Initialisation des anciens stats pour comparaison
+        this.oldStrength = this.strength;
+        this.oldIntellect = this.intellect;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 1.2 Initialisation des statistiques
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    initStats() {
+        // Statistiques de vie et mana
         this.hp = 10;
         this.mp = 10;
         this.hpMax = 10;
         this.mpMax = 10;
-        this.turn = true;
 
+        // Caractéristiques de base
         this.strength = 5;
         this.dexterity = 5;
         this.intellect = 5;
 
+        // Expérience des caractéristiques
         this.XPstrength = 0;
         this.XPdexterity = 0;
         this.XPintellect = 0;
 
-        this.might = 1;
-        this.dodge = 1;
-        this.magic = 1;
-        this.armor = 0;
+        // Or du joueur
+        this.gold = 100;
+    }
 
+    initInventoryAndSpells() {
+        // Collections du joueur
         this.hands = [];
         this.torso = [];
         this.inventory = [];
         this.spells = [];
         this.quests = [];
 
-        this.joystick = true;
+        // Sélection de sort
         this.selectedSpell = 0;
         this.combatSpell = false;
-
-        this.playerGold = this.playerGold;
-
-        // Référence à la classe principale pour permettre au joueur d'interagir avec le moteur du jeu.
-        // Bien que cette approche fonctionne, elle introduit un couplage fort entre Player et la classe principale.
-        // Cela peut rendre le code moins flexible à long terme et plus difficile à maintenir ou à tester.
-        // Il serait préférable d'envisager des alternatives comme l'utilisation d'événements ou de services pour réduire ce couplage.
-        this.raycaster = raycaster;
-
-        this.lastAttackTime = 0; // Nouveau attribut pour suivre le temps de la dernière attaque
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // fonction update des stats du joueurs (intégré au gamecycle)
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    initCombatStats() {
+        // Statistiques de combat
+        this.might = 1;
+        this.dodge = 1;
+        this.magic = 1;
+        this.armor = 0;
+        this.criti = 0;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 1.3 Références et dépendances
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Liaison des contrôles - appelée lors de l'initialisation
+    bindKeysAndButtons() {
+        this.keysDown = [];
+        let this2 = this;
+
+        // Liaison des touches
+        document.onkeydown = function(e) {
+            e = e || window.event;
+            this2.keysDown[e.keyCode] = true;
+        };
+        document.onkeyup = function(e) {
+            e = e || window.event;
+            this2.keysDown[e.keyCode] = false;
+        };
+
+        // Contrôles joystick
+        this.initJoystickControls();
+        
+        // Liaison des boutons avec événements
+        this.bindAllButtons();
+    }
+
+    initJoystickControls() {
+        document.addEventListener("joystickchange", function(event) {
+            const { up, down, left, right } = event.detail;
+            joystickForwardClicked = up;
+            joystickBackwardClicked = down;
+            joystickLeftClicked = left;
+            joystickRightClicked = right;
+        });
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 2. SYSTÈME DE STATISTIQUES ET PROGRESSION
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 2.1 Mise à jour des statistiques (statsUpdate)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     statsUpdate() {
-        // tick à chaque cycle
-        // intégrer changement d'icone d'arme équipée dans l'UI d'exploration
+        // Gestion de l'état des boutons
+        this.updateButtonStates();
         
+        // Mise à jour des valeurs affichées
+        this.updateDisplayedValues();
+        
+        // Gestion du level up des caractéristiques
+        this.handleLevelUps();
+        
+        // Régénération de mana
+        this.handleManaRegeneration();
+        
+        // Calcul des stats max et limites
+        this.updateMaxStats();
+        
+        // Vérification de l'état de mort
+        this.checkDeathState();
+        
+        // Mise à jour des stats de combat
+        this.updateCombatStats();
+        
+        // Mise à jour des barres de progression
+        this.updateProgressBars();
+        
+        // Mise à jour de l'interface des sorts
+        this.updateSpellInterface();
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 2.2 Calculs de progression et level up
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    updateButtonStates() {
         // Liste de tous les boutons à gérer
         const allButtons = [
             'buttonA', 'button2', 'buttonB', 'button4', 'button5', 
@@ -93,8 +271,10 @@ class Player {
                 button.style.pointerEvents = 'none';
             }
         });
+    }
 
-        // Mise à jour des valeurs affichées
+    updateDisplayedValues() {
+        // Mise à jour des valeurs numériques
         document.getElementById("PlayerHPoutput").textContent = this.hp;
         document.getElementById("PlayerMPoutput").textContent = this.mp;
         document.getElementById("PlayerGoldOutput").textContent = this.gold;
@@ -105,8 +285,9 @@ class Player {
         // Mise à jour de l'icône de l'arme équipée
         const weaponIcon = document.getElementById("weaponIcon");
         weaponIcon.src = this.hands[0] ? this.hands[0].icon : "assets/icons/a.png";
+    }
 
-        // Gestion du level up des caractéristiques
+    handleLevelUps() {
         if (this.XPstrength >= 10) {
             this.XPstrength = 0;
             this.strength += 1;
@@ -124,26 +305,33 @@ class Player {
             this.intellect += 1;
             console.log("Intellect leveled up!");
         }
+    }
 
+    handleManaRegeneration() {
         // Régénération de mana
         if (this.mp < this.mpMax) {
             this.mp = Math.min(this.mp + (this.intellect / 50), this.mpMax);
         }
+    }
 
+    updateMaxStats() {
         // HP et MP max basés sur les caractéristiques
         this.hpMax = 10 + (this.strength - 5);
         this.mpMax = 10 + (this.intellect - 5);
 
         // Limiter HP au maximum
         this.hp = Math.min(this.hp, this.hpMax);
+    }
 
+    checkDeathState() {
         // Vérification de l'état de mort
         if (this.hp <= 0 && gameOver === false) {
-            Raycaster.deathEffect()
-            // Sprite.showGameOverCinematic();
+            Raycaster.deathEffect();
             gameOver = true;
         }
+    }
 
+    updateCombatStats() {
         // Mise à jour might et magic si les stats ont changé
         if (this.strength !== this.oldStrength) {
             this.might += (this.strength - 5);
@@ -173,14 +361,26 @@ class Player {
         document.getElementById("PlayerMagicOutput").textContent = this.magic;
         document.getElementById("PlayerArmorOutput").textContent = this.armor;
         document.getElementById("PlayerCritiOutput").textContent = this.criti;
+    }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 2.3 Gestion des barres de progression
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    updateProgressBars() {
         // Mise à jour des barres de progression
         updateProgressBar("hpBar", this.hp, this.hpMax);
         updateProgressBar("mpBar", this.mp, this.mpMax);
         updateProgressBar("strengthBar", this.XPstrength, 10);
         updateProgressBar("dexterityBar", this.XPdexterity, 10);
         updateProgressBar("intellectBar", this.XPintellect, 10);
+    }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 2.4 Interface utilisateur dynamique
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    updateSpellInterface() {
         // Mise à jour du sort sélectionné
         if (this.spells && this.spells[this.selectedSpell]) {
             document.getElementById("selectedSpell").textContent = this.spells[this.selectedSpell].name;
@@ -188,20 +388,20 @@ class Player {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // sélection et lancement de sort
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 3. SYSTÈME DE SORTS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 3.1 Sélection de sorts
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     nextSpell() {
         this.selectedSpell++;
         if (this.selectedSpell >= this.spells.length) {
             this.selectedSpell = 0;
         }
-        const currentSpellIcon = document.getElementById("castSpell");
-        currentSpellIcon.src = this.spells[this.selectedSpell].icon;
-
-        const currentSpellName = document.getElementById("selectedSpell");
-        currentSpellName.textContent = this.spells[this.selectedSpell].name;
+        this.updateSpellDisplay();
     }
 
     previousSpell() {
@@ -209,16 +409,34 @@ class Player {
         if (this.selectedSpell < 0) {
             this.selectedSpell = this.spells.length - 1;
         }
+        this.updateSpellDisplay();
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 3.2 Navigation dans le grimoire
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    updateSpellDisplay() {
         const currentSpellIcon = document.getElementById("castSpell");
         currentSpellIcon.src = this.spells[this.selectedSpell].icon;
 
-        const currentSpell = document.getElementById("selectedSpell");
-        currentSpell.textContent = this.spells[this.selectedSpell].name;
+        const currentSpellName = document.getElementById("selectedSpell");
+        currentSpellName.textContent = this.spells[this.selectedSpell].name;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // EQUIPEMENT INVENTAIRE
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 3.3 Interface de sorts
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // L'interface des sorts est gérée dans updateSpellInterface() section 2.4
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 4. SYSTÈME D'INVENTAIRE ET ÉQUIPEMENT
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 4.1 Affichage de l'inventaire
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     displayInventory() {
         // Mettre à jour l'affichage de l'or
@@ -236,99 +454,128 @@ class Player {
         inventoryList.innerHTML = "";
         
         if (this.inventory && this.inventory.length > 0) {
-            // Générer la liste des objets
-            this.inventory.forEach((item, index) => {
-                const equippedMark = item.equipped ? "✓" : "";
-                
-                // Déterminer l'icône en fonction du slot
-                var itemIcon = this.inventory[index].icon;
-                
-                const isEquipped = item.equipped;
-                const bgColor = isEquipped ? "rgba(0, 60, 0, 0.7)" : "#140c1c";
-                
-                const itemElement = document.createElement("div");
-                itemElement.className = "item-entry";
-                itemElement.setAttribute("data-index", index);
-                itemElement.style.cssText = `
-                    display: flex; 
-                    align-items: center; 
-                    padding: 4px; 
-                    margin-top: 3px;
-                    margin-bottom: 3px: 
-                    cursor: pointer; 
-                    background-color: ${bgColor}; 
-                    border: 1px solid #663300;
-                    
-                `;
-                
-                itemElement.innerHTML = `
-                    <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
-                    <span style="flex-grow: 1; font-size: 13px; color: ${isEquipped ? '#aaffaa' : '#cccccc'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
-                    <span style="color: #66ff66; font-weight: bold;">${equippedMark}</span>
-                `;
-                
-                itemElement.addEventListener('click', () => {
-                    // Désélectionner tous les autres éléments
-                    document.querySelectorAll('.item-entry').forEach(e => {
-                        e.style.borderColor = '#663300';
-                        e.style.backgroundColor = e.classList.contains('equipped') ? 'rgba(0, 60, 0, 0.7)' : '#140c1c';
-                    });
-                    
-                    // Mettre en évidence l'élément sélectionné
-                    itemElement.style.borderColor = '#ffaa00';
-                    itemElement.style.backgroundColor = isEquipped ? 'rgba(20, 80, 20, 0.9)' : '#331a0c';
-                    
-                    // Afficher les détails
-                    this.showItemDetails(index);
-                    
-                    // Cacher le placeholder
-                    if (itemDetailsPlaceholder) {
-                        itemDetailsPlaceholder.style.display = 'none';
-                    }
-                });
-                
-                // Marquer comme équipé pour le style
-                if (isEquipped) {
-                    itemElement.classList.add('equipped');
-                }
-                
-                inventoryList.appendChild(itemElement);
-            });
-            
-            // Sélectionner automatiquement le premier élément
-            const firstItem = inventoryList.querySelector('.item-entry');
-            if (firstItem) {
-                firstItem.click();
-            }
+            this.generateInventoryList(inventoryList, itemDetailsPlaceholder);
         } else {
-            inventoryList.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c; width: 100%;">No items</div>';
-            
-            // S'assurer que le placeholder est visible
-            if (itemDetailsPlaceholder) {
-                itemDetailsPlaceholder.style.display = 'flex';
-            }
+            this.showEmptyInventory(inventoryList, itemDetailsPlaceholder);
         }
     }
-    
-    // Méthode pour afficher les détails d'un objet
+
+    generateInventoryList(inventoryList, itemDetailsPlaceholder) {
+        // Générer la liste des objets
+        this.inventory.forEach((item, index) => {
+            const equippedMark = item.equipped ? "✓" : "";
+            var itemIcon = this.inventory[index].icon;
+            
+            const isEquipped = item.equipped;
+            const bgColor = isEquipped ? "rgba(0, 60, 0, 0.7)" : "#140c1c";
+            
+            const itemElement = this.createInventoryItemElement(item, index, itemIcon, isEquipped, bgColor, equippedMark);
+            
+            this.bindInventoryItemEvents(itemElement, index, isEquipped, itemDetailsPlaceholder);
+            
+            // Marquer comme équipé pour le style
+            if (isEquipped) {
+                itemElement.classList.add('equipped');
+            }
+            
+            inventoryList.appendChild(itemElement);
+        });
+        
+        // Sélectionner automatiquement le premier élément
+        const firstItem = inventoryList.querySelector('.item-entry');
+        if (firstItem) {
+            firstItem.click();
+        }
+    }
+
+    createInventoryItemElement(item, index, itemIcon, isEquipped, bgColor, equippedMark) {
+        const itemElement = document.createElement("div");
+        itemElement.className = "item-entry";
+        itemElement.setAttribute("data-index", index);
+        itemElement.style.cssText = `
+            display: flex; 
+            align-items: center; 
+            padding: 4px; 
+            margin-top: 3px;
+            margin-bottom: 3px: 
+            cursor: pointer; 
+            background-color: ${bgColor}; 
+            border: 1px solid #663300;
+        `;
+        
+        itemElement.innerHTML = `
+            <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
+            <span style="flex-grow: 1; font-size: 13px; color: ${isEquipped ? '#aaffaa' : '#cccccc'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
+            <span style="color: #66ff66; font-weight: bold;">${equippedMark}</span>
+        `;
+        
+        return itemElement;
+    }
+
+    bindInventoryItemEvents(itemElement, index, isEquipped, itemDetailsPlaceholder) {
+        itemElement.addEventListener('click', () => {
+            // Désélectionner tous les autres éléments
+            document.querySelectorAll('.item-entry').forEach(e => {
+                e.style.borderColor = '#663300';
+                e.style.backgroundColor = e.classList.contains('equipped') ? 'rgba(0, 60, 0, 0.7)' : '#140c1c';
+            });
+            
+            // Mettre en évidence l'élément sélectionné
+            itemElement.style.borderColor = '#ffaa00';
+            itemElement.style.backgroundColor = isEquipped ? 'rgba(20, 80, 20, 0.9)' : '#331a0c';
+            
+            // Afficher les détails
+            this.showItemDetails(index);
+            
+            // Cacher le placeholder
+            if (itemDetailsPlaceholder) {
+                itemDetailsPlaceholder.style.display = 'none';
+            }
+        });
+    }
+
+    showEmptyInventory(inventoryList, itemDetailsPlaceholder) {
+        inventoryList.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c; width: 100%;">No items</div>';
+        
+        // S'assurer que le placeholder est visible
+        if (itemDetailsPlaceholder) {
+            itemDetailsPlaceholder.style.display = 'flex';
+        }
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 4.2 Détails des objets
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     showItemDetails(index) {
         const item = this.inventory[index];
         const itemDetails = document.getElementById('item-details');
         
         if (!item || !itemDetails) return;
         
-        // Déterminer l'icône en fonction du slot
+        // Déterminer l'icône et le type d'équipement
         let itemIcon = item.icon;
-        
-        // Type d'équipement
-        let slotName = "";
-        switch(item.slot) {
-            case 1: slotName = "Weapon"; break;
-            case 2: slotName = "Armor"; break;
-            default: slotName = "Item"; break;
-        }
+        let slotName = this.getSlotName(item.slot);
         
         // Construire la chaîne HTML des statistiques
+        let statsHTML = this.buildStatsHTML(item);
+        
+        // Construire le HTML complet des détails
+        itemDetails.innerHTML = this.buildItemDetailsHTML(item, itemIcon, slotName, statsHTML);
+        
+        // Ajouter l'écouteur d'événement pour le bouton d'action
+        this.bindItemActionButton(item);
+    }
+
+    getSlotName(slot) {
+        switch(slot) {
+            case 1: return "Weapon";
+            case 2: return "Armor";
+            default: return "Item";
+        }
+    }
+
+    buildStatsHTML(item) {
         let statsHTML = "";
         
         // Fonction helper pour ajouter une stat avec la bonne couleur
@@ -359,8 +606,11 @@ class Player {
             statsHTML = "<div style='color: #8a7b6c;'>No stats available</div>";
         }
         
-        // Construire le HTML complet des détails
-        itemDetails.innerHTML = `
+        return statsHTML;
+    }
+
+    buildItemDetailsHTML(item, itemIcon, slotName, statsHTML) {
+        return `
             <div style="display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #553311; padding-bottom: 5px; width: 100%;">
                 <img src="${itemIcon}" style="width: 28px; height: 28px; margin : 5px;">
                 <div style="width: calc(100% - 38px); overflow: hidden;">
@@ -390,8 +640,9 @@ class Player {
                 </button>
             </div>
         `;
-        
-        // Ajouter l'écouteur d'événement pour le bouton d'action
+    }
+
+    bindItemActionButton(item) {
         document.getElementById('item-action-btn').addEventListener('click', () => {
             if (item.equipped) {
                 item.unequip(this);
@@ -404,420 +655,434 @@ class Player {
             this.equipmentDisplay();
         });
     }
-    
-    // Garde la fonction existante pour la compatibilité
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 4.3 Équipement et déséquipement
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     equipmentDisplay() {
         const handsContent = document.getElementById("handsContent");
         const torsoContent = document.getElementById("torsoContent");
-    
-        // Vérifiez si hands est défini et non vide
+
+        // Vérifier si hands est défini et non vide
         if (this.hands && this.hands.length > 0) {
             handsContent.innerHTML = `<button class="equipped-item" style="color:black;" data-item="${this.hands[0].name}">${this.hands[0].name}</button>`;
         } else {
             handsContent.innerHTML = "EMPTY";
         }
-    
-        // Vérifiez si torso est défini et non vide
+
+        // Vérifier si torso est défini et non vide
         if (this.torso && this.torso.length > 0) {
             torsoContent.innerHTML = `<button class="equipped-item" style="color:black;" data-item="${this.torso[0].name}">${this.torso[0].name}</button>`;
         } else {
             torsoContent.innerHTML = "EMPTY";
         }
-    
+
         // Ajouter des gestionnaires d'événements aux boutons
-        document
-            .querySelectorAll(".equipped-item")
-            .forEach((itemButton) => {
-                itemButton.addEventListener("click", (event) => {
-                    const itemName = itemButton.getAttribute("data-item");
-                    const clickedItem = this.inventory.find((item) => item.name === itemName);
-    
-                    if (clickedItem && clickedItem.equipped) {
-                        clickedItem.unequip(this);
-                        
-                        // Mettre à jour l'affichage
-                        this.displayInventory();
-                        this.equipmentDisplay();
-                    }
-                });
-            });
+        this.bindEquippedItemButtons();
     }
-    
+
+    bindEquippedItemButtons() {
+        document.querySelectorAll(".equipped-item").forEach((itemButton) => {
+            itemButton.addEventListener("click", (event) => {
+                const itemName = itemButton.getAttribute("data-item");
+                const clickedItem = this.inventory.find((item) => item.name === itemName);
+
+                if (clickedItem && clickedItem.equipped) {
+                    clickedItem.unequip(this);
+                    
+                    // Mettre à jour l'affichage
+                    this.displayInventory();
+                    this.equipmentDisplay();
+                }
+            });
+        });
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 4.4 Interface d'équipement
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     toggleEquipment() {
         // AFFICHER INVENTAIRE
         this.displayInventory();
         this.equipmentDisplay();
-    
+
+        this.showEquipmentInterface();
+        this.hideOtherInterfaces();
+        this.configureEquipmentControls();
+    }
+
+    showEquipmentInterface() {
         var info = document.getElementById("info");
         var stats = document.getElementById("stats");
         var equipment = document.getElementById("equipment");
-    
         var items = document.getElementById("items");
+
+        info.style.display = "none";
+        equipment.style.display = "block";
+        stats.style.display = "none";
+        items.style.display = "block";
+    }
+
+    hideOtherInterfaces() {
         var output = document.getElementById("output");
         var dialWindow = document.getElementById("dialogueWindow");
-    
+
+        output.style.display = "none";
+        dialWindow.style.display = "none";
+    }
+
+    configureEquipmentControls() {
         var actionButton = document.getElementById('actionButtons');
-    
-        // joystick adds
+
+        // Joystick configuration
         if (typeof joystick !== 'undefined' && joystick) {
             document.getElementById("joystick-container").style.display = "none";
             document.getElementById("joystickBackButtonContainer").style.display = "block";
-    
             this.inventoryMenuShowed = true;
         }
-    
+
         if (actionButton) {
             actionButton.style.display = "none";
         }
         
         document.getElementById("joystickBackButtonContainer").style.display = "block";
         this.inventoryMenuShowed = true;
-    
-        info.style.display = "none";
-        equipment.style.display = "block";
-        stats.style.display = "none";
-    
-        items.style.display = "block";
-        output.style.display = "none";
-        dialWindow.style.display = "none";
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Quêtes
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 5. SYSTÈME DE QUÊTES
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 5.1 Affichage des quêtes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     displayQuests() {
         const questContent = document.getElementById("questContent");
         
         // Mettre à jour le compteur de quêtes
+        this.updateQuestCounter();
+    
+        if (this.quests && this.quests.length > 0) {
+            this.generateQuestInterface(questContent);
+        } else {
+            this.showEmptyQuests(questContent);
+        }
+    }
+
+    updateQuestCounter() {
         const questCount = document.getElementById("quest-count");
         if (questCount) {
             const completedCount = this.quests.filter(quest => quest.completed).length;
             questCount.textContent = `${completedCount}/${this.quests.length}`;
         }
-    
-        if (this.quests && this.quests.length > 0) {
-            // Structure à deux colonnes comme pour l'inventaire et la boutique
-            let html = `<div style="display: flex; height: 170px; width: 100%;">
-                <!-- Liste des quêtes (40% de la largeur) -->
-                <div id="quest-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto;">
-                    <!-- Les quêtes seront listées ici -->
+    }
+
+    generateQuestInterface(questContent) {
+        // Structure à deux colonnes comme pour l'inventaire et la boutique
+        let html = `<div style="display: flex; height: 170px; width: 100%;">
+            <!-- Liste des quêtes (40% de la largeur) -->
+            <div id="quest-list" style="width: 40%; height: 100%; border-right: 1px solid #663300; overflow-y: auto;">
+                <!-- Les quêtes seront listées ici -->
+            </div>
+            
+            <!-- Détails de la quête sélectionnée (60% de la largeur) -->
+            <div id="quest-details" style="margin-top: 5px; width: 60%; height: 100%; display: flex; flex-direction: column;">
+                <!-- Les détails seront affichés ici -->
+                <div id="quest-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
+                    <div>Select a quest</div>
+                    <div>to view details</div>
                 </div>
-                
-                <!-- Détails de la quête sélectionnée (60% de la largeur) -->
-                <div id="quest-details" style="margin-top: 5px; width: 60%; height: 100%; display: flex; flex-direction: column;">
-                    <!-- Les détails seront affichés ici -->
-                    <div id="quest-details-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: #8a7b6c;">
-                        <div>Select a quest</div>
-                        <div>to view details</div>
-                    </div>
-                </div>
-            </div>`;
-            
-            questContent.innerHTML = html;
-            
-            const questList = document.getElementById("quest-list");
-            
-            // Générer la liste des quêtes
-            this.quests.forEach((quest, index) => {
-                const isCompleted = quest.completed;
-                const bgColor = isCompleted ? "rgba(0, 60, 0, 0.7)" : "#140c1c";
-                const statusIcon = isCompleted ? "✓" : "⋯";
-                
-                const questElement = document.createElement("div");
-                questElement.className = `quest-item-entry ${isCompleted ? 'completed' : ''}`;
-                questElement.setAttribute("data-index", index);
-                questElement.style.cssText = `
-                    display: flex; 
-                    align-items: center; 
-                    padding: 4px; 
-                    margin-top: 3px;
-                    margin-bottom: 3px: 
-                    cursor: pointer; 
-                    background-color: ${bgColor}; 
-                    border: 1px solid #663300;
-                    width: 99%;
-                `;
-                
-                questElement.innerHTML = `
-                    <span style="margin-left: 5px; margin-top:5px; flex-grow: 1; font-size: 13px; color: ${isCompleted ? '#aaffaa' : '#cccccc'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</span>
-                    <span style="margin-left: 5px; color: ${isCompleted ? '#66ff66' : '#aaaaaa'}; font-weight: bold;">${statusIcon}</span>
-                `;
-                
-                questElement.addEventListener('click', () => {
-                    // Désélectionner tous les autres éléments
-                    document.querySelectorAll('.quest-item-entry').forEach(e => {
-                        e.style.borderColor = '#663300';
-                        e.style.backgroundColor = e.classList.contains('completed') ? 'rgba(0, 60, 0, 0.7)' : '#140c1c';
-                    });
-                    
-                    // Mettre en évidence l'élément sélectionné
-                    questElement.style.borderColor = '#ffaa00';
-                    questElement.style.backgroundColor = isCompleted ? 'rgba(20, 80, 20, 0.9)' : '#331a0c';
-                    
-                    // Afficher les détails
-                    showQuestDetails(quest);
-                    
-                    // Cacher le placeholder
-                    const placeholder = document.getElementById('quest-details-placeholder');
-                    if (placeholder) {
-                        placeholder.style.display = 'none';
-                    }
-                });
-                
-                questList.appendChild(questElement);
-            });
-            
-            // Fonction pour afficher les détails d'une quête
-            const showQuestDetails = (quest) => {
-                const questDetails = document.getElementById('quest-details');
-                if (!questDetails) return;
-                
-                // État de la quête
-                const questStatus = quest.completed ? "Completed" : "In progress";
-                const statusColor = quest.completed ? "#66ff66" : "#ffcc66";
-                
-                // Construire le HTML des détails
-                questDetails.innerHTML = `
-                    <div style="border-bottom: 1px solid #553311; padding-bottom: 5px; width: 110%;">
-                        <div style="margin-left: 5px;font-size: 16px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</div>
-                        <div style="margin-left: 5px;font-size: 12px; color: ${statusColor};">${questStatus}</div>
-                    </div>
-                    
-                    <div style="margin-left: 5px; flex-grow: 1; font-size: 13px; overflow-y: auto; width: 101%; max-height: calc(100% - 60px);">
-                        <p style="margin-bottom: 10px;">${quest.description}</p>
-                        
-                        ${quest.reward ? 
-                            `<div style="margin-top: 15px;">
-                                <div style="margin-left: 5px; font-weight: bold; color: #e8d5a9;">Reward:</div>
-                                <div style="margin-left: 5px;color: #ffcc00;">${quest.reward}</div>
-                            </div>` 
-                            : ''}
-                    </div>
-                `;
-            };
-            
-            // Sélectionner automatiquement la première quête
-            const firstQuest = questList.querySelector('.quest-item-entry');
-            if (firstQuest) {
-                firstQuest.click();
-            }
-        } else {
-            questContent.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c;">No quests in progress</div>';
+            </div>
+        </div>`;
+        
+        questContent.innerHTML = html;
+        
+        this.populateQuestList();
+    }
+
+    populateQuestList() {
+        const questList = document.getElementById("quest-list");
+        
+        // Générer la liste des quêtes
+        this.quests.forEach((quest, index) => {
+            const questElement = this.createQuestElement(quest, index);
+            this.bindQuestElementEvents(questElement, quest);
+            questList.appendChild(questElement);
+        });
+        
+        // Sélectionner automatiquement la première quête
+        const firstQuest = questList.querySelector('.quest-item-entry');
+        if (firstQuest) {
+            firstQuest.click();
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Contrôle UI
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    createQuestElement(quest, index) {
+        const isCompleted = quest.completed;
+        const bgColor = isCompleted ? "rgba(0, 60, 0, 0.7)" : "#140c1c";
+        const statusIcon = isCompleted ? "✓" : "⋯";
+        
+        const questElement = document.createElement("div");
+        questElement.className = `quest-item-entry ${isCompleted ? 'completed' : ''}`;
+        questElement.setAttribute("data-index", index);
+        questElement.style.cssText = `
+            display: flex; 
+            align-items: center; 
+            padding: 4px; 
+            margin-top: 3px;
+            margin-bottom: 3px: 
+            cursor: pointer; 
+            background-color: ${bgColor}; 
+            border: 1px solid #663300;
+            width: 99%;
+        `;
+        
+        questElement.innerHTML = `
+            <span style="margin-left: 5px; margin-top:5px; flex-grow: 1; font-size: 13px; color: ${isCompleted ? '#aaffaa' : '#cccccc'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</span>
+            <span style="margin-left: 5px; color: ${isCompleted ? '#66ff66' : '#aaaaaa'}; font-weight: bold;">${statusIcon}</span>
+        `;
+        
+        return questElement;
+    }
+
+    bindQuestElementEvents(questElement, quest) {
+        questElement.addEventListener('click', () => {
+            // Désélectionner tous les autres éléments
+            document.querySelectorAll('.quest-item-entry').forEach(e => {
+                e.style.borderColor = '#663300';
+                e.style.backgroundColor = e.classList.contains('completed') ? 'rgba(0, 60, 0, 0.7)' : '#140c1c';
+            });
+            
+            // Mettre en évidence l'élément sélectionné
+            questElement.style.borderColor = '#ffaa00';
+            questElement.style.backgroundColor = quest.completed ? 'rgba(20, 80, 20, 0.9)' : '#331a0c';
+            
+            // Afficher les détails
+            this.showQuestDetails(quest);
+            
+            // Cacher le placeholder
+            const placeholder = document.getElementById('quest-details-placeholder');
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+        });
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 5.2 Interface de journal de quêtes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    showQuestDetails(quest) {
+        const questDetails = document.getElementById('quest-details');
+        if (!questDetails) return;
+        
+        // État de la quête
+        const questStatus = quest.completed ? "Completed" : "In progress";
+        const statusColor = quest.completed ? "#66ff66" : "#ffcc66";
+        
+        // Construire le HTML des détails
+        questDetails.innerHTML = `
+            <div style="border-bottom: 1px solid #553311; padding-bottom: 5px; width: 110%;">
+                <div style="margin-left: 5px;font-size: 16px; font-weight: bold; color: #e8d5a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${quest.title}</div>
+                <div style="margin-left: 5px;font-size: 12px; color: ${statusColor};">${questStatus}</div>
+            </div>
+            
+            <div style="margin-left: 5px; flex-grow: 1; font-size: 13px; overflow-y: auto; width: 101%; max-height: calc(100% - 60px);">
+                <p style="margin-bottom: 10px;">${quest.description}</p>
+                
+                ${quest.reward ? 
+                    `<div style="margin-top: 15px;">
+                        <div style="margin-left: 5px; font-weight: bold; color: #e8d5a9;">Reward:</div>
+                        <div style="margin-left: 5px;color: #ffcc00;">${quest.reward}</div>
+                    </div>` 
+                    : ''}
+            </div>
+        `;
+    }
+
+    showEmptyQuests(questContent) {
+        questContent.innerHTML = '<div style="padding: 10px; text-align: center; color: #8a7b6c;">No quests in progress</div>';
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 6. CONTRÔLES ET INTERFACE UTILISATEUR
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 6.1 Gestion des boutons et navigation
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     joystickBackButton() {
+        this.resetInterfaceToDefault();
+        this.resetControlsToDefault();
+        this.resetInventoryState();
+    }
+
+    resetInterfaceToDefault() {
         document.getElementById("stats").style.display = "none";
         document.getElementById("info").style.display = "block";
         document.getElementById("equipment").style.display = "none";
-
         document.getElementById("items").style.display = "none";
         document.getElementById("quests").style.display = "none";
         document.getElementById("output").style.display = "block";
         document.getElementById("dialogueWindow").style.display = "none";
+    }
 
+    resetControlsToDefault() {
         document.getElementById("joystick-container").style.display = "block";
         document.getElementById("QuestButton").style.display = "block";
         document.getElementById("InventoryButton").style.display = "none";
         document.getElementById("joystickBackButtonContainer").style.display = "none";
-
-        // Dungeon Crawler controls
         document.getElementById("actionButtons").style.display = "block";
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-    /// CONTROLES - liaisons des boutons à un événement
-    //////////////////////////////////////////////////////////////////////////////
+    resetInventoryState() {
+        this.inventoryMenuShowed = false;
+    }
 
-    // Case selon type de bouton appuyée, les ID sont liées à un nombre dans "bindKeysAndButtons"
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 6.2 Liaison des événements
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bindAllButtons() {
+        let canClickSave = true;
+        let canClickLoad = true;
+        let canClickNextMap = true;
+        const debounceDelay = 500;
+
+        // Boutons avec debounce (anti double clic)
+        this.bindButtonWithDebounce("saveButton", 16, canClickSave, debounceDelay);
+        this.bindButtonWithDebounce("loadButton", 17, canClickLoad, debounceDelay);
+        this.bindButtonWithDebounce("nextMapButton", 18, canClickNextMap, debounceDelay);
+
+        // Autres boutons sans debounce
+        this.bindRegularButtons();
+    }
+
+    bindButtonWithDebounce(buttonId, buttonNumber, canClick, debounceDelay) {
+        this.bindButton(buttonId, buttonNumber, () => {
+            if (canClick) {
+                canClick = false;
+                setTimeout(() => canClick = true, debounceDelay);
+            }
+        });
+    }
+
+    bindRegularButtons() {
+        const buttonMappings = [
+            ["button1", 1], ["button2", 2], ["button3", 3], ["button4", 4],
+            ["button5", 5], ["button6", 6], ["button7", 7], ["button8", 8],
+            ["button9", 9], ["joystickBackButton", 10], ["QuestButton", 11],
+            ["InventoryButton", 12], ["previousSpell", 13], ["nextSpell", 15],
+            ["newGameButton", 19], ["mainMenuButton", 20], ["backMenuButton", 21],
+            ["buttonA", 1], ["buttonB", 14], ["characterButton", 3]
+        ];
+
+        buttonMappings.forEach(([buttonId, buttonNumber]) => {
+            this.bindButton(buttonId, buttonNumber);
+        });
+    }
+
+    bindButton(buttonId, buttonNumber, additionalCallback = null) {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.addEventListener("click", () => {
+                if (additionalCallback) additionalCallback();
+                this.handleButtonClick(buttonNumber);
+            });
+        }
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 6.3 Gestionnaire de boutons centralisé
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     handleButtonClick(buttonNumber) {
         switch (buttonNumber) {
             case 1: // ACTION (Bouton A)
-                Sprite.resetToggle();
-                if (this.turn == true) {
-                    console.log('Action/Dialogue');
-                    this.buttonAClicked = true;
-                    this.actionButtonClicked = true;
-                }
+                this.handleActionButton();
                 break;
             
             case 2: // Non utilisé
                 break;
                 
             case 3: // EQUIPEMENT (Bouton B)
-                console.log("Bouton Equipement");
-                if (this.inventoryMenuShowed == false) {
-                    Sprite.resetToggle();
-                    this.inventoryMenuShowed = true;
-                    this.toggleEquipment();
-                    console.log("false");
-                } else {
-                    this.inventoryMenuShowed = false;
-                    Sprite.resetToggle();
-                    console.log("true");
-                }
+                this.handleEquipmentButton();
                 break;
               
             case 4: // TOURNER A GAUCHE (flèche gauche)
-                console.log("turnLeft");
-                if (!this.isMoving && !this.isRotating && this.turn) {
-                    this.button7Clicked = true;
-                    this.turnLeftButtonClicked = true;
-                }
+                this.handleTurnLeft();
                 break;  
 
             case 5: // AVANCER (flèche haut)
-                console.log("forward");
-                if (!this.isMoving && !this.isRotating && this.turn) {
-                    this.button5Clicked = true;
-                }
+                this.handleMoveForward();
                 break;
             
             case 6: // TOURNER A DROITE (flèche droite)
-                console.log("turnRight");
-                if (!this.isMoving && !this.isRotating && this.turn) {
-                    this.button9Clicked = true;
-                    this.turnRightButtonClicked = true;
-                }
+                this.handleTurnRight();
                 break;
 
             case 7: // ESQUIVE A GAUCHE (flèche gauche)
-                console.log("LeftLeft");
-                if (!this.isMoving && !this.isRotating && this.turn) {
-                    this.button7Clicked = true;
-                    this.LeftLeftButtonClicked = true;
-                }
+                this.handleDodgeLeft();
                 break;
                 
             case 8: // RECULER (flèche bas)
-                console.log("backward");
-                if (!this.isMoving && !this.isRotating && this.turn) {
-                    this.button8Clicked = true;
-                }
+                this.handleMoveBackward();
                 break;
                 
-            case 9: // TOURNER A DROITE (flèche droite)
-                console.log("RightRight");
-                if (!this.isMoving && !this.isRotating && this.turn) {
-                    this.button9Clicked = true;
-                    this.RightRightButtonClicked = true;
-                }
+            case 9: // ESQUIVE A DROITE (flèche droite)
+                this.handleDodgeRight();
                 break;
                 
-            case 10:
-                // console.log('strifeRight');
-                this.joystickBackButton();
-                // correction nécéssitée double clic après reset toggle
-                this.inventoryMenuShowed = false;
-                console.log("joystickBackButton");
+            case 10: // Bouton retour
+                this.handleBackButton();
                 break;
                 
-            case 11:
-                console.log("quest button");
-                document.getElementById("QuestButton").style.display = "none";
-                document.getElementById("InventoryButton").style.display = "block";
-    
-                this.displayQuests();
-    
-                document.getElementById("items").style.display = "none";
-                document.getElementById("quests").style.display = "block";
+            case 11: // Bouton quêtes
+                this.handleQuestButton();
                 break;
                 
-            case 12:
-                console.log("inventory button");
-                document.getElementById("QuestButton").style.display = "block";
-                document.getElementById("InventoryButton").style.display = "none";
-    
-                document.getElementById("items").style.display = "block";
-                document.getElementById("quests").style.display = "none";
+            case 12: // Bouton inventaire
+                this.handleInventoryButton();
                 break;
                 
-            case 13:
+            case 13: // Sort précédent
                 this.previousSpell();
                 break;
                 
-            case 14:
-                if (this.spells[this.selectedSpell].selfCast == true) {
-                    console.log("self cast !")
-                    this.spells[this.selectedSpell].cast(this, this);
-                } else {
-                    console.log("not a selfCast")
-                    console.log("magic combat = true")
-                    if (this.turn == true) {
-                        console.log('Attack spell casted')
-    
-                        this.actionButtonClicked = true;
-                        this.combatSpell = true;
-                    }
-                }
+            case 14: // Lancer sort / Bouton B
+                this.handleSpellCast();
                 break;
                 
-            case 15:
+            case 15: // Sort suivant
                 this.nextSpell();
                 break;
                 
-            case 16:
-                if (gameOver == false) {
-                    this.raycaster.saveGameState();
-                    Sprite.terminalLog("Player state saved!");
-                    Raycaster.showRenderWindow()
-                } else {
-                    alert("You can't save if you're dead.");
-                }
+            case 16: // Sauvegarder
+                this.handleSaveGame();
                 break;
                 
-            case 17:
-                pause(500);
-                this.raycaster.loadGameState(this);
-                Raycaster.resetVisualEffects();
-                Raycaster.showRenderWindow()
-                Sprite.resetTerminal();
-                Sprite.terminalLog("Save loaded !");
+            case 17: // Charger
+                this.handleLoadGame();
                 break;
                 
-            case 18:
-                Raycaster.showRenderWindow();
-                if (gameOver == false) {
-                    if (confirm("Voulez-vous vraiment charger la prochaine carte ?")) {
-                        this.raycaster.nextMap(this);
-                        console.log("nextMapButton");
-                        Sprite.resetTerminal();
-                        Sprite.terminalLog("Next map loaded !");
-                    } else {
-                        console.log("Changement de carte annulé.");
-                    }
-                } else {
-                    alert("You're dead...");
-                }
-                
+            case 18: // Carte suivante
+                this.handleNextMap();
                 break;
                 
-            case 19:
-                pause(500);
-                this.raycaster.newGame();
-                Sprite.resetTerminal();
-                Sprite.terminalLog("New game !");
+            case 19: // Nouvelle partie
+                this.handleNewGame();
                 break;
                 
-            case 20:
-                pause(500);
-                Raycaster.resetShowGameOver(); // Au cas où on vient d'un game over
-                Raycaster.showMainMenu();
+            case 20: // Menu principal
+                this.handleMainMenu();
                 break;
 
-            // Bouton 21 - Back Menu
-            case 21:
-                pause(500);
-                if (gameOver == false) {
-                    Raycaster.showRenderWindow();
-                } else {
-                    alert('dead, so nope');
-                }
+            case 21: // Retour menu
+                this.handleBackToGame();
                 break;
                             
             default:
@@ -825,112 +1090,182 @@ class Player {
         }
     }
 
-    // Méthode améliorée pour éviter les redites et tout centraliser
-    bindButton(buttonId, buttonNumber) {
-        document.getElementById(buttonId).addEventListener("click", () => {
-            this.handleButtonClick(buttonNumber);
-        });
+    // Méthodes de gestion des boutons individuels
+    handleActionButton() {
+        Sprite.resetToggle();
+        if (this.turn == true) {
+            console.log('Action/Dialogue');
+            this.buttonAClicked = true;
+            this.actionButtonClicked = true;
+        }
     }
 
-    // méthode d'interface, permet de centraliser les commandes et eventlistener
-    bindKeysAndButtons() {
-        this.keysDown = [];
-        let this2 = this;
-
-        // Liaison des touches
-        document.onkeydown = function(e) {
-            e = e || window.event;
-            this2.keysDown[e.keyCode] = true;
-        };
-        document.onkeyup = function(e) {
-            e = e || window.event;
-            this2.keysDown[e.keyCode] = false;
-        };
-
-        /////////////////////////////////////////////////////////
-        //  CONTROLES - JOYSTICK
-        /////////////////////////////////////////////////////////
-
-        document.addEventListener("joystickchange", function(event) {
-            const {
-                up,
-                down,
-                left,
-                right
-            } = event.detail;
-            joystickForwardClicked = up;
-            joystickBackwardClicked = down;
-            joystickLeftClicked = left;
-            joystickRightClicked = right;
-        });
-
-        /////////////////////////////////////////////////////////
-        // Liaison des boutons avec événement
-        /////////////////////////////////////////////////////////
-
-        let canClickSave = true;
-        let canClickLoad = true;
-        let canClickNextMap = true;
-        const debounceDelay = 500; // Délai pour éviter les clics multiples (500ms ici)
-
-        // Boutons avec debounce (anti double clic)
-        this.bindButton("saveButton", 16, () => {
-            if (canClickSave) {
-                canClickSave = false;
-                setTimeout(() => canClickSave = true, debounceDelay);
-            }
-        });
-
-        this.bindButton("loadButton", 17, () => {
-            if (canClickLoad) {
-                canClickLoad = false;
-                setTimeout(() => canClickLoad = true, debounceDelay);
-            }
-        });
-
-        this.bindButton("nextMapButton", 18, () => {
-            if (canClickNextMap) {
-                canClickNextMap = false;
-                setTimeout(() => canClickNextMap = true, debounceDelay);
-            }
-        });
-
-        // Autres boutons sans debounce
-        this.bindButton("button1", 1);
-        this.bindButton("button2", 2);
-        this.bindButton("button3", 3);
-        this.bindButton("button4", 4);
-        this.bindButton("button5", 5);
-        this.bindButton("button6", 6);
-        this.bindButton("button7", 7);
-        this.bindButton("button8", 8);
-        this.bindButton("button9", 9);
-        this.bindButton("joystickBackButton", 10);
-        this.bindButton("QuestButton", 11);
-        this.bindButton("InventoryButton", 12);
-        this.bindButton("previousSpell", 13);
-        // this.bindButton("castSpell", 14);
-        this.bindButton("nextSpell", 15);
-        this.bindButton("newGameButton", 19);
-        this.bindButton("mainMenuButton", 20);
-        this.bindButton("backMenuButton", 21);
-
-        // Dungeon Crawler UI
-        this.bindButton("buttonA", 1);
-        this.bindButton("buttonB", 14);
-        this.bindButton("characterButton", 3);
-/*
-        this.bindButton("buttonUp", 5);
-        this.bindButton("buttonLeft", 7);
-        this.bindButton("buttonDown", 8);
-        this.bindButton("buttonRight", 9);
-*/
+    handleEquipmentButton() {
+        console.log("Bouton Equipement");
+        if (this.inventoryMenuShowed == false) {
+            Sprite.resetToggle();
+            this.inventoryMenuShowed = true;
+            this.toggleEquipment();
+            console.log("false");
+        } else {
+            this.inventoryMenuShowed = false;
+            Sprite.resetToggle();
+            console.log("true");
+        }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // méthode calcul quadrant et stockage de la valeur dans Player
-    // refactorisation de la méthode Move(), subdivisée en sous-méthodes
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    handleTurnLeft() {
+        console.log("turnLeft");
+        if (!this.isMoving && !this.isRotating && this.turn) {
+            this.button7Clicked = true;
+            this.turnLeftButtonClicked = true;
+        }
+    }
+
+    handleMoveForward() {
+        console.log("forward");
+        if (!this.isMoving && !this.isRotating && this.turn) {
+            this.button5Clicked = true;
+        }
+    }
+
+    handleTurnRight() {
+        console.log("turnRight");
+        if (!this.isMoving && !this.isRotating && this.turn) {
+            this.button9Clicked = true;
+            this.turnRightButtonClicked = true;
+        }
+    }
+
+    handleDodgeLeft() {
+        console.log("LeftLeft");
+        if (!this.isMoving && !this.isRotating && this.turn) {
+            this.button7Clicked = true;
+            this.LeftLeftButtonClicked = true;
+        }
+    }
+
+    handleMoveBackward() {
+        console.log("backward");
+        if (!this.isMoving && !this.isRotating && this.turn) {
+            this.button8Clicked = true;
+        }
+    }
+
+    handleDodgeRight() {
+        console.log("RightRight");
+        if (!this.isMoving && !this.isRotating && this.turn) {
+            this.button9Clicked = true;
+            this.RightRightButtonClicked = true;
+        }
+    }
+
+    handleBackButton() {
+        this.joystickBackButton();
+        this.inventoryMenuShowed = false;
+        console.log("joystickBackButton");
+    }
+
+    handleQuestButton() {
+        console.log("quest button");
+        document.getElementById("QuestButton").style.display = "none";
+        document.getElementById("InventoryButton").style.display = "block";
+
+        this.displayQuests();
+
+        document.getElementById("items").style.display = "none";
+        document.getElementById("quests").style.display = "block";
+    }
+
+    handleInventoryButton() {
+        console.log("inventory button");
+        document.getElementById("QuestButton").style.display = "block";
+        document.getElementById("InventoryButton").style.display = "none";
+
+        document.getElementById("items").style.display = "block";
+        document.getElementById("quests").style.display = "none";
+    }
+
+    handleSpellCast() {
+        if (this.spells[this.selectedSpell].selfCast == true) {
+            console.log("self cast !")
+            this.spells[this.selectedSpell].cast(this, this);
+        } else {
+            console.log("not a selfCast")
+            console.log("magic combat = true")
+            if (this.turn == true) {
+                console.log('Attack spell casted')
+
+                this.actionButtonClicked = true;
+                this.combatSpell = true;
+            }
+        }
+    }
+
+    handleSaveGame() {
+        if (gameOver == false) {
+            this.raycaster.saveGameState();
+            Sprite.terminalLog("Player state saved!");
+            Raycaster.showRenderWindow()
+        } else {
+            alert("You can't save if you're dead.");
+        }
+    }
+
+    handleLoadGame() {
+        pause(500);
+        this.raycaster.loadGameState(this);
+        Raycaster.resetVisualEffects();
+        Raycaster.showRenderWindow()
+        Sprite.resetTerminal();
+        Sprite.terminalLog("Save loaded !");
+    }
+
+    handleNextMap() {
+        Raycaster.showRenderWindow();
+        if (gameOver == false) {
+            if (confirm("Voulez-vous vraiment charger la prochaine carte ?")) {
+                this.raycaster.nextMap(this);
+                console.log("nextMapButton");
+                Sprite.resetTerminal();
+                Sprite.terminalLog("Next map loaded !");
+            } else {
+                console.log("Changement de carte annulé.");
+            }
+        } else {
+            alert("You're dead...");
+        }
+    }
+
+    handleNewGame() {
+        pause(500);
+        this.raycaster.newGame();
+        Sprite.resetTerminal();
+        Sprite.terminalLog("New game !");
+    }
+
+    handleMainMenu() {
+        pause(500);
+        Raycaster.resetShowGameOver();
+        Raycaster.showMainMenu();
+    }
+
+    handleBackToGame() {
+        pause(500);
+        if (gameOver == false) {
+            Raycaster.showRenderWindow();
+        } else {
+            alert('dead, so nope');
+        }
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 7. SYSTÈME DE MOUVEMENT ET DÉPLACEMENT
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 7.1 Calculs géométriques
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     playerQuadrant(player) {
         if (!player) {
@@ -959,50 +1294,63 @@ class Player {
         }
     }
 
-    handleSlidingCollision(player, map) {
+    calculateFrontPosition() {
+        // S'assurer que la propriété quadrant est définie
+        if (!this.quadrant) {
+            this.playerQuadrant(this);
+            
+            if (!this.quadrant) {
+                const rotDeg = (this.rot * 180 / Math.PI + 360) % 360;
+                
+                if (rotDeg >= 45 && rotDeg < 135) {
+                    this.quadrant = "nord";
+                } else if (rotDeg >= 135 && rotDeg < 225) {
+                    this.quadrant = "ouest";
+                } else if (rotDeg >= 225 && rotDeg < 315) {
+                    this.quadrant = "sud";
+                } else {
+                    this.quadrant = "est";
+                }
+                
+                console.log(`Quadrant fallback used: ${this.quadrant} based on rotation ${rotDeg.toFixed(2)}°`);
+            }
+        }
+    
+        // Simplifions avec seulement les 4 directions cardinales
+        const frontOffsets = {
+            "nord": { x: 0, y: -1 },
+            "est": { x: 1, y: 0 },
+            "sud": { x: 0, y: 1 },
+            "ouest": { x: -1, y: 0 }
+        };
+    
+        const offset = frontOffsets[this.quadrant] || { x: 0, y: 0 };
+        
+        const frontX = Math.floor((this.x / this.tileSize) + offset.x);
+        const frontY = Math.floor((this.y / this.tileSize) + offset.y);
+    
+        return { frontX, frontY };
+    }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 7.2 Gestion des collisions
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    handleSlidingCollision(player, map) {
         if (!player) {
             console.error("Player is undefined.");
             return;
         }
 
-        const {
-            x,
-            y,
-            quadrant
-        } = player;
+        const { x, y, quadrant } = player;
         const tileSize = this.tileSize;
         const actualMap = map;
 
         const slidingMovements = {
-            "sud-ouest": [{
-                y: 30,
-                x: 0
-            }, {
-                y: 0,
-                x: 30
-            }],
-            "sud-est": [{
-                y: 30,
-                x: 0
-            }, {
-                y: 0,
-                x: -30
-            }],
-            "nord-ouest": [{
-                y: -30,
-                x: 0
-            }, {
-                y: 0,
-                x: 30
-            }],
-            "nord-est": [{
-                y: -30,
-                x: 0
-            }, {
-                y: 0,
-                x: -30
-            }]
+            "sud-ouest": [{ y: 30, x: 0 }, { y: 0, x: 30 }],
+            "sud-est": [{ y: 30, x: 0 }, { y: 0, x: -30 }],
+            "nord-ouest": [{ y: -30, x: 0 }, { y: 0, x: 30 }],
+            "nord-est": [{ y: -30, x: 0 }, { y: 0, x: -30 }]
         };
 
         const movements = slidingMovements[quadrant] || [];
@@ -1021,231 +1369,15 @@ class Player {
         }
     }
 
-    calculateFrontPosition() {
-        // S'assurer que la propriété quadrant est définie
-        if (!this.quadrant) {
-            // Calcul d'urgence du quadrant
-            this.playerQuadrant(this);
-            
-            // Si toujours indéfini après tentative de calcul, utiliser une valeur par défaut
-            if (!this.quadrant) {
-                // La rotation en radians nous permettra de déterminer un quadrant par défaut
-                const rotDeg = (this.rot * 180 / Math.PI + 360) % 360;
-                
-                // Déterminer un quadrant basé sur la rotation (seulement les 4 directions cardinales)
-                if (rotDeg >= 45 && rotDeg < 135) {
-                    this.quadrant = "nord";
-                } else if (rotDeg >= 135 && rotDeg < 225) {
-                    this.quadrant = "ouest";
-                } else if (rotDeg >= 225 && rotDeg < 315) {
-                    this.quadrant = "sud";
-                } else {
-                    this.quadrant = "est";
-                }
-                
-                console.log(`Quadrant fallback used: ${this.quadrant} based on rotation ${rotDeg.toFixed(2)}°`);
-            }
-        }
-    
-        // Simplifions avec seulement les 4 directions cardinales
-        const frontOffsets = {
-            "nord": { x: 0, y: -1 },
-            "est": { x: 1, y: 0 },  // Correction ici: Est devrait être +1 en X
-            "sud": { x: 0, y: 1 },
-            "ouest": { x: -1, y: 0 }  // Correction ici: Ouest devrait être -1 en X
-        };
-    
-        // Récupérer l'offset basé sur le quadrant, avec une valeur par défaut
-        const offset = frontOffsets[this.quadrant] || { x: 0, y: 0 };
-        
-        // Calculer la position frontale
-        const frontX = Math.floor((this.x / this.tileSize) + offset.x);
-        const frontY = Math.floor((this.y / this.tileSize) + offset.y);
-    
-        return { frontX, frontY };
-    }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 7.3 Animations de mouvement
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Modifions la méthode handleSpriteAction pour gérer le délai
-    // xyz
-    async handleSpriteAction(action, sprites) {
-        if (!action || !this || !this.turn) return;
-    
-        // Vérifier qu'aucune action n'est en cours
-        // n'est-ce pas un doublon de la vérification précédente ?
-        if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
-            console.log("Cannot perform action - player is busy");
-            return;
-        }
-    
-        // Vérifier si suffisamment de temps s'est écoulé depuis la dernière attaque
-        const currentTime = Date.now();
-        if (currentTime - this.lastAttackTime < 2000) {
-            Sprite.terminalLog("Vous n'êtes pas prêt à attaquer de nouveau.");
-            return;
-        }
+    // Les animations de mouvement sont intégrées dans la méthode move() principale
 
-        const {
-            frontX,
-            frontY
-        } = this.calculateFrontPosition();
-
-        console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
-        console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
-
-        let spriteFound = false;
-        for (const sprite of sprites) {
-            const spriteX = Math.floor(sprite.x / this.tileSize);
-            const spriteY = Math.floor(sprite.y / this.tileSize);
-            
-            //console.log(`Checking sprite at (${spriteX}, ${spriteY}), type: ${sprite.spriteType}`);
-            
-            if (spriteX === frontX && spriteY === frontY) {
-                spriteFound = true;
-                console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
-                
-                // on passe "turn" en false 
-                // this.turn = false;
-
-                switch (sprite.spriteType) {
-                    case "A":
-                        console.log("Enemy detected, initiating combat!");
-                        // Enregistrer le temps de cette attaque
-                        this.lastAttackTime = currentTime;
-                        
-                        if (this.combatSpell) {
-                            console.log("Using combat spell");
-                            sprite.combatSpell(this, sprite);
-                        } else {
-                            console.log("Using normal attack");
-                            sprite.combat(this.might, this.criti, this);
-                        }
-                        break;
-                    case "EXIT":
-                        commandBlocking = true;
-
-
-        
-                        await Raycaster.fadeToBlack(300);
-                        Sprite.terminalLog('Level finished!')
-                        this.raycaster.nextMap();
-                        await Raycaster.fadeFromBlack(300);
-                        commandBlocking= false;
-                        break;
-                    case "DOOR":
-    // IMPORTANT: Traiter les portes de manière spéciale
-    // Appeler door() mais NE PAS appeler handleTeleportation ensuite
-    
-    // Fondu vers l e noir
-    await Raycaster.fadeToBlack(300);
-    
-    // Attendre au noir
-    //    await new Promise(resolve => setTimeout(resolve, 50));
-    
-    // Appeler door pendant que l'écran est noir
-    await sprite.door(this, null);
-    await this.raycaster.loadFloorCeilingImages();
-    
-    // Fondu depuis le noir
-    await Raycaster.fadeFromBlack(300);
-    
-    Sprite.terminalLog('You enter/exit the area.');
-    
-    // Réinitialiser l'état de l'action pour éviter de lancer handleTeleportation après
-    this.actionButtonClicked = false;
-    
-    return; // Sortir immédiatement pour éviter l'appel à handleTeleportation
-                    case 0:
-                        console.log("Dialogue sprite detected");
-
-                        sprite.talk();
-
-                        // Attendre 0.5 seconde puis débloquer les commandes
-                        setTimeout(() => {
-                            this.turn = false;
-                        }, 500);
-
-                        break;
-                    case 1:
-                        // décoration, ne rien faire
-                        console.log("Decoration sprite, no action");
-                        this.turn = false;
-                        break;
-                    case 2:
-                        console.log("Dialogue sprite type 2 detected");
-
-                        sprite.talk();
-
-                        // Attendre 0.5 seconde puis débloquer les commandes
-                        setTimeout(() => {
-                            this.turn = false;
-                        }, 500);
-
-                        break;
-                    case 3:
-                        sprite.displayItemsForSale(this);
-                        this.turn = false;
-                        break;
-                    case 4:
-                        // gestion des Quest Giver
-                        console.log("Quest Giver sprite, not implemented yet");
-                        this.turn = false;
-                        break;
-                    case 5:
-                        // valeur fixe de test
-                        // ultérieurement : quests[currentMap].complete();
-                        console.log("Quest completion sprite");
-                        if (this.quests[0].completed === false) {
-                            this.quests[0].complete();
-
-                            // changement de texture temporaire
-                            console.log("test changement de texture");
-                            sprite.spriteTexture = 21;
-
-                            Sprite.resetToggle();
-                        } else {
-                            Sprite.terminalLog("I've already looted that.")
-                        }
-
-                        this.turn = false;
-                        
-                        break;
-                    case 6:
-                        // valeur fixe de test
-                        // ultérieurement : quests[currentMap].complete();
-                        console.log("chest !");
-                        if (sprite.step != 1) {
-                            // sprite.lootClass = 5;
-
-                            sprite.generateLoot(this);
-
-                            // changement de texture temporaire
-                            sprite.spriteTexture = 21;
-
-                            sprite.step = 1;
-
-                            Sprite.resetToggle();
-                        } else {
-                            Sprite.terminalLog("I've already looted that.")
-                        }
-
-                        this.turn = false;
-
-                        break;
-                    default:
-                        console.log(`Sprite type ${sprite.spriteType} has no specific action`);
-                        Sprite.resetToggle();
-                        break;
-                }
-            }
-        }
-        
-        if (!spriteFound) {
-            console.log("No sprite found at front position");
-        }
-        
-        // Réinitialisation de la touche d'action après utilisation
-        this.actionButtonClicked = false;
-    }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 7.4 Téléportation et événements
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
         // Vérifier qu'aucune autre action n'est en cours
@@ -1266,69 +1398,15 @@ class Player {
                 const oppositeOrientationB = (mapEventB[i][2] + Math.PI) % (2 * Math.PI);
     
                 // Vérification pour la téléportation depuis A vers B
-                if (
-                    Math.floor(newX / tileSize) === mapEventA[i][0] &&
-                    Math.floor(newY / tileSize) === mapEventA[i][1] &&
-                    (player.rot >= oppositeOrientationA - tolerance && player.rot <= oppositeOrientationA + tolerance)
-                ) {
-                    // Téléportation aux coordonnées données dans l'Event
-                    newX = mapEventB[i][0] * tileSize + 640;
-                    newY = mapEventB[i][1] * tileSize + 640;
-                    player.rot = mapEventB[i][2];
-    
-                    // Variable de modification d'environnement
-                    ceilingRender = mapEventB[i][3];
-                    ceilingTexture = mapEventB[i][4];
-                    ceilingHeight = mapEventB[i][5];
-                    // Variable de modification des textures (vers le type '1' = terre)
-                    floorTexture = mapEventB[i][6];
-    
-                    // On recharge toutes les textures, sinon le canvas ne sera pas modifié
-                    this.raycaster.loadFloorCeilingImages();
-    
-                    console.log(mapEventB[i][7]);
-    
-                    // Évite les doubles téléportations
-                    await new Promise(resolve => setTimeout(resolve, 250));
-                    
-                    // Set new position
-                    player.x = newX;
-                    player.y = newY;
-    
-                    break; // Sortir de la boucle une fois la téléportation effectuée
+                if (this.checkTeleportConditionAtoB(newX, newY, tileSize, mapEventA[i], oppositeOrientationA, tolerance)) {
+                    await this.executeTeleportation(mapEventB[i], tileSize, player);
+                    break;
                 }
     
                 // Vérification pour la téléportation depuis B vers A
-                if (
-                    Math.floor(newX / tileSize) === mapEventB[i][0] &&
-                    Math.floor(newY / tileSize) === mapEventB[i][1] &&
-                    (player.rot >= oppositeOrientationB - tolerance && player.rot <= oppositeOrientationB + tolerance)
-                ) {
-                    // Téléportation aux coordonnées données dans l'Event
-                    newX = mapEventA[i][0] * tileSize + 640;
-                    newY = mapEventA[i][1] * tileSize + 640;
-                    player.rot = mapEventA[i][2];
-    
-                    // Variable de modification d'environnement
-                    ceilingRender = mapEventA[i][3];
-                    ceilingTexture = mapEventA[i][4];
-                    ceilingHeight = mapEventA[i][5];
-                    // Variable de modification des textures (vers le type '1' = terre)
-                    floorTexture = mapEventA[i][6];
-    
-                    // On recharge toutes les textures, sinon le canvas ne sera pas modifié
-                    this.raycaster.loadFloorCeilingImages();
-    
-                    console.log(mapEventA[i][7]);
-    
-                    // Évite les doubles téléportations
-                    await new Promise(resolve => setTimeout(resolve, 250));
-                    
-                    // Set new position
-                    player.x = newX;
-                    player.y = newY;
-    
-                    break; // Sortir de la boucle une fois la téléportation effectuée
+                if (this.checkTeleportConditionBtoA(newX, newY, tileSize, mapEventB[i], oppositeOrientationB, tolerance)) {
+                    await this.executeTeleportation(mapEventA[i], tileSize, player);
+                    break;
                 }
             }
         } finally {
@@ -1336,63 +1414,107 @@ class Player {
             player.isTeleporting = false;
         }
     }
-    
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Logique de blocage
-    ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    isBlocking(x, y, map) {
-        // console.log('x:', x, 'y:', y, 'map:', map);
+    checkTeleportConditionAtoB(newX, newY, tileSize, eventA, oppositeOrientationA, tolerance) {
+        return Math.floor(newX / tileSize) === eventA[0] &&
+               Math.floor(newY / tileSize) === eventA[1] &&
+               (this.rot >= oppositeOrientationA - tolerance && this.rot <= oppositeOrientationA + tolerance);
+    }
 
-        // first make sure that we cannot move outside the boundaries of the level
-        if (y < 0 || y >= map.mapHeight || x < 0 || x >= map.mapWidth)
-            return true;
+    checkTeleportConditionBtoA(newX, newY, tileSize, eventB, oppositeOrientationB, tolerance) {
+        return Math.floor(newX / tileSize) === eventB[0] &&
+               Math.floor(newY / tileSize) === eventB[1] &&
+               (this.rot >= oppositeOrientationB - tolerance && this.rot <= oppositeOrientationB + tolerance);
+    }
 
-        // return true if the map block is not 0, ie. if there is a blocking wall.
-        if (map[Math.floor(y)][Math.floor(x)] != 0) {
-            return true
+    async executeTeleportation(targetEvent, tileSize, player) {
+        // Téléportation aux coordonnées données dans l'Event
+        const newX = targetEvent[0] * tileSize + 640;
+        const newY = targetEvent[1] * tileSize + 640;
+        player.rot = targetEvent[2];
+
+        // Variable de modification d'environnement
+        ceilingRender = targetEvent[3];
+        ceilingTexture = targetEvent[4];
+        ceilingHeight = targetEvent[5];
+        floorTexture = targetEvent[6];
+
+        // On recharge toutes les textures
+        this.raycaster.loadFloorCeilingImages();
+
+        console.log(targetEvent[7]);
+
+        // Évite les doubles téléportations
+        await new Promise(resolve => setTimeout(resolve, 250));
+        
+        // Set new position
+        player.x = newX;
+        player.y = newY;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 7.5 Méthode move() principale
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    async move(timeElapsed, map, eventA, eventB, sprites) {
+        // PARAMÈTRES AJUSTABLES DE MOUVEMENT
+        const movementConfig = this.getMovementConfig();
+        
+        // Récupération des entrées utilisateur
+        const inputs = this.getUserInputs();
+        
+        // Réinitialiser les états des boutons
+        this.resetButtonStates();
+        
+        // Si les commandes sont bloquées, ignorer les déplacements
+        if (commandBlocking || !this.turn) {
+            return;
+        }
+        
+        // Éviter les mouvements multiples pendant une animation
+        if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
+            return;
+        }
+        
+        // Traitement des rotations
+        if (inputs.left || inputs.right) {
+            await this.handleRotation(inputs.left, inputs.right, movementConfig);
+            return;
+        }
+        
+        // Traitement des mouvements
+        const movement = this.calculateMovement(inputs);
+        if (movement.requested) {
+            await this.handleMovement(movement, map, sprites, movementConfig, timeElapsed, eventA, eventB);
+        }
+        
+        // Traitement des actions
+        if (inputs.action && this.turn) {
+            await this.handleSpriteAction(inputs.action, sprites);
+            if (inputs.action) {
+                await this.handleTeleportation(this, eventA, eventB, this.x, this.y, this.tileSize);
+            }
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    /// Gestion interaction joueur avec monde (Move/Action)
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    
-    async move(timeElapsed, map, eventA, eventB, sprites) {
-        // PARAMÈTRES AJUSTABLES DE MOUVEMENT
-        // ----------------------------------
-        // Durées d'animation (en millisecondes)
-        const ROTATION_DURATION = 500;      // Durée de rotation de 90 degrés
-        const DODGE_DURATION = 400;         // Durée d'une esquive latérale
-        const FORWARD_DURATION = 600;       // Durée de base pour avancer
-        const BACKWARD_DURATION = 500;      // Durée de base pour reculer
-        const CONTINUOUS_MOVE_SPEEDUP = 150; // Réduction de temps pour mouvements continus
-        const WALL_IMPACT_DURATION = 250;   // Durée de l'animation d'impact sur un mur
-        const ENEMY_IMPACT_DURATION = 500;  // Durée de l'animation d'impact sur un ennemi
-        
-        // Distances et facteurs
-        const PUSH_WALL_FACTOR = 0.2;      // % de la taille d'une case pour l'animation d'impact mur
-        const PUSH_ENEMY_FACTOR = 0.15;    // % de la taille d'une case pour l'animation d'impact ennemi
-        const MOVEMENT_THRESHOLD = 0.1;    // Précision de détection des angles cardinaux
-        const ATTACK_COOLDOWN = 2000;      // Temps minimum entre deux attaques (ms)
-        const CONTINUOUS_MOVE_DELAY = 50;  // Délai entre mouvements continus (ms)
-        
-        // Facteurs d'easing pour les animations
-        const easeInOut = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
-        const easeOutBack = (t) => {
-            const c1 = 1.70158;
-            const c3 = c1 + 1;
-            return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    getMovementConfig() {
+        return {
+            ROTATION_DURATION: 500,
+            DODGE_DURATION: 400,
+            FORWARD_DURATION: 600,
+            BACKWARD_DURATION: 500,
+            CONTINUOUS_MOVE_SPEEDUP: 150,
+            WALL_IMPACT_DURATION: 250,
+            ENEMY_IMPACT_DURATION: 500,
+            PUSH_WALL_FACTOR: 0.2,
+            PUSH_ENEMY_FACTOR: 0.15,
+            MOVEMENT_THRESHOLD: 0.1,
+            ATTACK_COOLDOWN: 2000,
+            CONTINUOUS_MOVE_DELAY: 50
         };
-        
-        // Définir les angles cardinaux précis (en radians)
-        const NORTH = Math.PI / 2;
-        const EAST = 0;
-        const SOUTH = 3 * Math.PI / 2;
-        const WEST = Math.PI;
-        
-        // Récupération des entrées utilisateur - combinaison du clavier et des contrôles UI
+    }
+
+    getUserInputs() {
         let up = this.keysDown[KEY_UP] || this.keysDown[KEY_W] || this.joystickForwardClicked || this.button5Clicked;
         let down = this.keysDown[KEY_DOWN] || this.keysDown[KEY_S] || this.joystickBackwardClicked || this.button8Clicked;
         let left = this.keysDown[KEY_LEFT] || this.keysDown[KEY_A] || this.joystickLeftClicked || this.turnLeftButtonClicked;
@@ -1407,7 +1529,10 @@ class Player {
         this.continuousJoystickUp = this.joystickForwardClicked;
         this.continuousJoystickDown = this.joystickBackwardClicked;
         
-        // Réinitialiser les états des boutons après leur détection
+        return { up, down, left, right, dodgeLeft, dodgeRight, action };
+    }
+
+    resetButtonStates() {
         this.button4Clicked = false;
         this.button5Clicked = false;
         this.button6Clicked = false;
@@ -1418,100 +1543,97 @@ class Player {
         this.turnLeftButtonClicked = false;
         this.turnRightButtonClicked = false;
         this.actionButtonClicked = false;
-        
-        // Si les commandes sont bloquées, ignorer les déplacements
-        if (commandBlocking) {
-            return;
-        }
+    }
 
-        // pour éviter les doubles actions (en test)
-        if (!this.turn) {
-            return;
+    async handleRotation(left, right, config) {
+        // Définir les angles cardinaux précis (en radians)
+        const NORTH = Math.PI / 2;
+        const EAST = 0;
+        const SOUTH = 3 * Math.PI / 2;
+        const WEST = Math.PI;
+        
+        this.isRotating = true;
+        
+        // Déterminer la rotation cible
+        let targetRot = this.calculateTargetRotation(left, right, NORTH, EAST, SOUTH, WEST, config);
+        
+        // Animation de rotation
+        await this.animateRotation(targetRot, config.ROTATION_DURATION);
+        
+        // Mise à jour du quadrant après rotation
+        this.playerQuadrant(this);
+        this.isRotating = false;
+    }
+
+    calculateTargetRotation(left, right, NORTH, EAST, SOUTH, WEST, config) {
+        let targetRot;
+        
+        if (left) {
+            if (Math.abs(this.rot - NORTH) < config.MOVEMENT_THRESHOLD) targetRot = WEST;
+            else if (Math.abs(this.rot - EAST) < config.MOVEMENT_THRESHOLD) targetRot = NORTH;
+            else if (Math.abs(this.rot - SOUTH) < config.MOVEMENT_THRESHOLD) targetRot = EAST;
+            else if (Math.abs(this.rot - WEST) < config.MOVEMENT_THRESHOLD) targetRot = SOUTH;
+        } else if (right) {
+            if (Math.abs(this.rot - NORTH) < config.MOVEMENT_THRESHOLD) targetRot = EAST;
+            else if (Math.abs(this.rot - EAST) < config.MOVEMENT_THRESHOLD) targetRot = SOUTH;
+            else if (Math.abs(this.rot - SOUTH) < config.MOVEMENT_THRESHOLD) targetRot = WEST;
+            else if (Math.abs(this.rot - WEST) < config.MOVEMENT_THRESHOLD) targetRot = NORTH;
         }
         
-        // Éviter les mouvements multiples pendant une téléportation ou utilisation porte
-        if (this.isTeleporting || this.isDooring) return;
+        return targetRot;
+    }
 
-        // Éviter les mouvements multiples pendant une animation ou une action
-        if (this.isMoving || this.isRotating) return;
+    async animateRotation(targetRot, duration) {
+        const startRot = this.rot;
         
-        // Traitement des rotations (par incréments de 90 degrés)
-        if (left || right) {
-            // Marquer le début de la rotation
-            this.isRotating = true;
+        // Calculer la différence d'angle en prenant le chemin le plus court
+        let angleDiff = targetRot - startRot;
+        if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+        if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+        
+        const startTime = performance.now();
+        let rotationComplete = false;
+        
+        // Fonction d'easing pour rotation fluide
+        const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+        
+        while (!rotationComplete) {
+            const currentTime = performance.now();
+            const elapsedTime = currentTime - startTime;
             
-            // Déterminer la rotation cible
-            let targetRot;
-            if (left) {
-                // Rotation de 90 degrés dans le sens horaire
-                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) targetRot = WEST;
-                else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) targetRot = NORTH;
-                else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) targetRot = EAST;
-                else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) targetRot = SOUTH;
-            } else if (right) {
-                // Rotation de 90 degrés dans le sens anti-horaire
-                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) targetRot = EAST;
-                else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) targetRot = SOUTH;
-                else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) targetRot = WEST;
-                else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) targetRot = NORTH;
+            let t = Math.min(elapsedTime / duration, 1);
+            
+            if (t >= 1) {
+                rotationComplete = true;
+                t = 1;
             }
             
-            // Animation de rotation avec durée minimale garantie
-            const startRot = this.rot;
-            const minRotationDuration = ROTATION_DURATION;
+            const easedT = easeInOutQuart(t);
+            this.rot = startRot + angleDiff * easedT;
             
-            // Calculer la différence d'angle en prenant le chemin le plus court
-            let angleDiff = targetRot - startRot;
-            if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-            if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-            
-            const startTime = performance.now();
-            let rotationComplete = false;
-            
-            while (!rotationComplete) {
-                const currentTime = performance.now();
-                const elapsedTime = currentTime - startTime;
-                
-                // Calculer la progression de la rotation (entre 0 et 1)
-                let t = Math.min(elapsedTime / minRotationDuration, 1);
-                
-                // Si la rotation est terminée
-                if (t >= 1) {
-                    rotationComplete = true;
-                    t = 1;
-                }
-                
-                // Appliquer l'easing
-                const easedT = easeInOutQuart(t);
-                
-                // Mettre à jour la rotation
-                this.rot = startRot + angleDiff * easedT;
-                
-                // Rendre la frame
-                await new Promise(resolve => requestAnimationFrame(resolve));
-            }
-            
-            // Normaliser à la fin pour éviter les erreurs d'arrondi
-            this.rot = targetRot;
-            
-            // Mise à jour du quadrant après rotation
-            this.playerQuadrant(this);
-            
-            // Réinitialiser l'état de rotation
-            this.isRotating = false;
-            return;
+            await new Promise(resolve => requestAnimationFrame(resolve));
         }
         
-        // Calcul de la case de destination selon le mouvement
+        // Normaliser à la fin pour éviter les erreurs d'arrondi
+        this.rot = targetRot;
+    }
+
+    calculateMovement(inputs) {
+        // Définir les angles cardinaux
+        const NORTH = Math.PI / 2;
+        const EAST = 0;
+        const SOUTH = 3 * Math.PI / 2;
+        const WEST = Math.PI;
+        const MOVEMENT_THRESHOLD = 0.1;
+        
         let destX = Math.floor(this.x / this.tileSize);
         let destY = Math.floor(this.y / this.tileSize);
         
-        // Variable pour suivre si un mouvement est demandé
         let movementRequested = false;
         let isMovingBackward = false;
         let isDodging = false;
         
-        if (up) {
+        if (inputs.up) {
             // Avancer d'une case dans la direction actuelle
             if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                 destY -= 1; // Nord
@@ -1523,7 +1645,7 @@ class Player {
                 destX -= 1; // Ouest
             }
             movementRequested = true;
-        } else if (down) {
+        } else if (inputs.down) {
             // Reculer d'une case (direction opposée)
             if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
                 destY += 1; // Sud (opposé du Nord)
@@ -1536,36 +1658,46 @@ class Player {
             }
             movementRequested = true;
             isMovingBackward = true;
-        } else if (dodgeLeft || dodgeRight) {
+        } else if (inputs.dodgeLeft || inputs.dodgeRight) {
             // Esquive latérale (déplacement perpendiculaire à la direction)
             if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                // Face au nord, esquive à gauche = ouest, esquive à droite = est
-                destX += dodgeLeft ? -1 : 1;
+                destX += inputs.dodgeLeft ? -1 : 1;
             } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                // Face à l'est, esquive à gauche = nord, esquive à droite = sud
-                destY += dodgeLeft ? -1 : 1;
+                destY += inputs.dodgeLeft ? -1 : 1;
             } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                // Face au sud, esquive à gauche = est, esquive à droite = ouest
-                destX += dodgeLeft ? 1 : -1;
+                destX += inputs.dodgeLeft ? 1 : -1;
             } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                // Face à l'ouest, esquive à gauche = sud, esquive à droite = nord
-                destY += dodgeLeft ? 1 : -1;
+                destY += inputs.dodgeLeft ? 1 : -1;
             }
             movementRequested = true;
             isDodging = true;
-        } else if (action && this.turn) {
-            // Gestion des actions
-            await this.handleSpriteAction(action, sprites);
-            
-            if (action) {
-                await this.handleTeleportation(this, eventA, eventB, this.x, this.y, this.tileSize);
-            }
-            return;
         }
         
-        // Si aucun mouvement n'est demandé, sortir
-        if (!movementRequested) return;
+        return { 
+            requested: movementRequested, 
+            destX, 
+            destY, 
+            isMovingBackward, 
+            isDodging, 
+            isForward: inputs.up,
+            isBackward: inputs.down,
+            isDodgeLeft: inputs.dodgeLeft,
+            isDodgeRight: inputs.dodgeRight
+        };
+    }
+
+    async handleMovement(movement, map, sprites, config, timeElapsed, eventA, eventB) {
+        // Vérification des collisions
+        const collisionResult = this.checkCollisions(movement.destX, movement.destY, map, sprites);
         
+        if (collisionResult.hasCollision) {
+            await this.handleCollisionMovement(collisionResult, movement, config);
+        } else {
+            await this.handleSuccessfulMovement(movement, config, timeElapsed);
+        }
+    }
+
+    checkCollisions(destX, destY, map, sprites) {
         // Vérification de collision avec mur ou limite de carte
         let collidesWithWall = destX < 0 || destY < 0 || destX >= map[0].length || destY >= map.length || map[destY][destX] !== 0;
         
@@ -1584,313 +1716,195 @@ class Player {
             }
         }
         
-        // Gestion spécifique pour les ennemis (type "A")
-        if (collidesWithSprite && collidedSprite.spriteType === "A") {
-            // Marquer le début du mouvement
-            this.isMoving = true;
-            
-            // Animation d'impact contre l'ennemi
-            const startX = this.x;
-            const startY = this.y;
-            
-            // Distance de "poussée" vers l'ennemi
-            const pushDistance = this.tileSize * PUSH_ENEMY_FACTOR;
-            
-            // Calculer la direction de la poussée
-            let pushX = 0;
-            let pushY = 0;
-            
-            if (isDodging) {
-                // Direction pour l'esquive (même logique que le mouvement)
-                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                    pushX = dodgeLeft ? -pushDistance : pushDistance;
-                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                    pushY = dodgeLeft ? -pushDistance : pushDistance;
-                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                    pushX = dodgeLeft ? pushDistance : -pushDistance;
-                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                    pushY = dodgeLeft ? pushDistance : -pushDistance;
-                }
-            } else if (isMovingBackward) {
-                // Inversion pour le mouvement arrière
-                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                    pushY = pushDistance; // Sud (inverse du Nord)
-                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                    pushX = -pushDistance; // Ouest (inverse de l'Est)
-                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                    pushY = -pushDistance; // Nord (inverse du Sud)
-                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                    pushX = pushDistance; // Est (inverse de l'Ouest)
-                }
-            } else {
-                // Direction normale pour le mouvement avant
-                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                    pushY = -pushDistance; // Nord
-                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                    pushX = pushDistance;  // Est
-                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                    pushY = pushDistance;  // Sud
-                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                    pushX = -pushDistance; // Ouest
-                }
-            }
-            
-            // Position cible maximale de la poussée
-            const maxPushX = startX + pushX;
-            const maxPushY = startY + pushY;
-            
-            // Phase 1: Poussée vers l'avant/arrière rapide
-            const startImpactTime = performance.now();
-            let impactPhase1Complete = false;
-            
-            while (!impactPhase1Complete) {
-                const currentTime = performance.now();
-                const elapsedTime = currentTime - startImpactTime;
-                
-                // Progression de la phase 1 (0 à 1)
-                let t = Math.min(elapsedTime / (ENEMY_IMPACT_DURATION / 2), 1);
-                
-                if (t >= 1) {
-                    impactPhase1Complete = true;
-                    t = 1;
-                }
-                
-                const easedT = easeInOut(t);
-                
-                this.x = startX + pushX * easedT;
-                this.y = startY + pushY * easedT;
-                
-                await new Promise(resolve => requestAnimationFrame(resolve));
-            }
-            
-            // Phase 2: Rebond rapide
-            const startReboundTime = performance.now();
-            let impactPhase2Complete = false;
-            
-            while (!impactPhase2Complete) {
-                const currentTime = performance.now();
-                const elapsedTime = currentTime - startReboundTime;
-                
-                // Progression de la phase 2 (0 à 1)
-                let t = Math.min(elapsedTime / (ENEMY_IMPACT_DURATION / 2), 1);
-                
-                if (t >= 1) {
-                    impactPhase2Complete = true;
-                    t = 1;
-                }
-                
-                const easedT = easeOutBack(t);
-                
-                this.x = maxPushX - pushX * easedT;
-                this.y = maxPushY - pushY * easedT;
-                
-                await new Promise(resolve => requestAnimationFrame(resolve));
-            }
-            
-            // Normalisation finale de la position
-            this.x = startX;
-            this.y = startY;
-            this.z = 0;
-            
-            // Marquer la fin du mouvement d'impact
-            this.isMoving = false;
-            
-            // Vérifier le délai avant de déclencher le combat
-            const currentTime = Date.now();
-            if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) >= ATTACK_COOLDOWN)) {
-                try {
-                    this.lastAttackTime = currentTime; // Mettre à jour le temps de la dernière attaque
-                    await collidedSprite.combat(this.might, this.criti, this);
-                } catch (error) {
-                    console.error("Error:", error);
-                    this.turn = false;
-                }
-            } else if (this.turn && !isDodging && (currentTime - (this.lastAttackTime || 0) < ATTACK_COOLDOWN)) {
-                // Informer le joueur qu'il n'est pas prêt à attaquer
-                
-                Sprite.terminalLog("Can't attack yet !");
-            }
-            
-            return;
-        }
-        
-        // Animation d'impact en cas de collision avec un mur ou un sprite non-ennemi
-        if (collidesWithWall || collidesWithSprite) {
-            // Marquer le début du mouvement
-            this.isMoving = true;
-            
-            // Animation d'impact sur obstacle
-            const startX = this.x;
-            const startY = this.y;
-            
-            // Déterminer la distance maximale de "poussée" vers l'obstacle
-            const pushDistance = this.tileSize * PUSH_WALL_FACTOR;
-            
-            // Calculer la direction de la poussée
-            let pushX = 0;
-            let pushY = 0;
-            
-            if (isDodging) {
-                // Direction pour l'esquive (même logique que le mouvement)
-                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                    pushX = dodgeLeft ? -pushDistance : pushDistance;
-                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                    pushY = dodgeLeft ? -pushDistance : pushDistance;
-                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                    pushX = dodgeLeft ? pushDistance : -pushDistance;
-                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                    pushY = dodgeLeft ? pushDistance : -pushDistance;
-                }
-            } else if (isMovingBackward) {
-                // Inversion de la direction pour le mouvement arrière
-                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                    pushY = pushDistance; // Sud (inverse du Nord)
-                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                    pushX = -pushDistance; // Ouest (inverse de l'Est)
-                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                    pushY = -pushDistance; // Nord (inverse du Sud)
-                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                    pushX = pushDistance; // Est (inverse de l'Ouest)
-                }
-            } else {
-                // Direction normale pour le mouvement avant
-                if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
-                    pushY = -pushDistance; // Nord
-                } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
-                    pushX = pushDistance;  // Est
-                } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
-                    pushY = pushDistance;  // Sud
-                } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
-                    pushX = -pushDistance; // Ouest
-                }
-            }
-            
-            // Position cible maximale de la poussée
-            const maxPushX = startX + pushX;
-            const maxPushY = startY + pushY;
-            
-            // Phase 1: Poussée vers l'avant/arrière
-            const startImpactTime = performance.now();
-            let impactPhase1Complete = false;
-            
-            while (!impactPhase1Complete) {
-                const currentTime = performance.now();
-                const elapsedTime = currentTime - startImpactTime;
-                
-                // Progression de la phase 1 (0 à 1)
-                let t = Math.min(elapsedTime / (WALL_IMPACT_DURATION / 2), 1);
-                
-                if (t >= 1) {
-                    impactPhase1Complete = true;
-                    t = 1;
-                }
-                
-                const easedT = easeInOut(t);
-                
-                this.x = startX + pushX * easedT;
-                this.y = startY + pushY * easedT;
-                
-                await new Promise(resolve => requestAnimationFrame(resolve));
-            }
-            
-            // Phase 2: Rebond
-            const startReboundTime = performance.now();
-            let impactPhase2Complete = false;
-            
-            while (!impactPhase2Complete) {
-                const currentTime = performance.now();
-                const elapsedTime = currentTime - startReboundTime;
-                
-                // Progression de la phase 2 (0 à 1)
-                let t = Math.min(elapsedTime / (WALL_IMPACT_DURATION / 2), 1);
-                
-                if (t >= 1) {
-                    impactPhase2Complete = true;
-                    t = 1;
-                }
-                
-                const easedT = easeOutBack(t); // Effet de rebond
-                
-                this.x = maxPushX - pushX * easedT;
-                this.y = maxPushY - pushY * easedT;
-                
-                await new Promise(resolve => requestAnimationFrame(resolve));
-            }
-            
-            // Normalisation finale de la position
-            this.x = startX;
-            this.y = startY;
-            this.z = 0;
-            
-            // Marquer la fin du mouvement
-            this.isMoving = false;
-            return;
-        }
-        
-        // Si nous arrivons ici, le mouvement est possible
-        // Marquer le début du mouvement
+        return {
+            hasCollision: collidesWithWall || collidesWithSprite,
+            withWall: collidesWithWall,
+            withSprite: collidesWithSprite,
+            sprite: collidedSprite
+        };
+    }
+
+    async handleCollisionMovement(collisionResult, movement, config) {
         this.isMoving = true;
         
-        // Animation de déplacement améliorée
-        const startX = this.x;
-        const startY = this.y;
-        const targetX = destX * this.tileSize + this.tileSize / 2; // Centre de la case
-        const targetY = destY * this.tileSize + this.tileSize / 2; // Centre de la case
-        
-        // Durée minimale du mouvement en ms - réduite pour les mouvements continus
-        let minMovementDuration;
-        if (isDodging) {
-            minMovementDuration = DODGE_DURATION;
+        if (collisionResult.withSprite && collisionResult.sprite.spriteType === "A") {
+            await this.handleEnemyCollision(collisionResult.sprite, movement, config);
         } else {
-            // Accélérer les mouvements continus (après le premier)
-            const isContinuousMovement = (up && this.lastMoveWasForward) || (down && this.lastMoveWasBackward);
-            minMovementDuration = isMovingBackward ? 
-                                  (isContinuousMovement ? BACKWARD_DURATION - CONTINUOUS_MOVE_SPEEDUP : BACKWARD_DURATION) : 
-                                  (isContinuousMovement ? FORWARD_DURATION - CONTINUOUS_MOVE_SPEEDUP : FORWARD_DURATION);
+            await this.handleWallCollision(movement, config);
         }
         
-        // Mémoriser la direction du mouvement actuel pour le prochain cycle
-        this.lastMoveWasForward = up;
-        this.lastMoveWasBackward = down;
+        this.isMoving = false;
+    }
+
+    async handleEnemyCollision(enemy, movement, config) {
+        // Animation d'impact contre l'ennemi
+        const impactAnimation = this.createImpactAnimation(movement, config.PUSH_ENEMY_FACTOR);
+        await this.executeImpactAnimation(impactAnimation, config.ENEMY_IMPACT_DURATION);
         
-        // Ajustement de vitesse avec le sort Speed (conservé)
-        if (this.spells && this.spells.length > 0 && this.spells[this.selectedSpell].name === "Speed") 
-            minMovementDuration -= 50;
+        // Vérifier le délai avant de déclencher le combat
+        const currentTime = Date.now();
+        if (this.turn && !movement.isDodging && (currentTime - (this.lastAttackTime || 0) >= config.ATTACK_COOLDOWN)) {
+            try {
+                this.lastAttackTime = currentTime;
+                await enemy.combat(this.might, this.criti, this);
+            } catch (error) {
+                console.error("Error:", error);
+                this.turn = false;
+            }
+        } else if (this.turn && !movement.isDodging && (currentTime - (this.lastAttackTime || 0) < config.ATTACK_COOLDOWN)) {
+            Sprite.terminalLog("Can't attack yet !");
+        }
+    }
+
+    async handleWallCollision(movement, config) {
+        // Animation d'impact sur obstacle
+        const impactAnimation = this.createImpactAnimation(movement, config.PUSH_WALL_FACTOR);
+        await this.executeImpactAnimation(impactAnimation, config.WALL_IMPACT_DURATION);
+    }
+
+    createImpactAnimation(movement, pushFactor) {
+        const startX = this.x;
+        const startY = this.y;
+        const pushDistance = this.tileSize * pushFactor;
         
-        // Bornes min/max pour la durée
-        minMovementDuration = Math.max(Math.min(minMovementDuration, 800), 200);
+        let pushX = 0;
+        let pushY = 0;
         
-        // Animation principale avec durée minimale garantie
-        const startMovementTime = performance.now();
-        let movementComplete = false;
+        // Calculer la direction de la poussée selon le type de mouvement
+        const NORTH = Math.PI / 2;
+        const EAST = 0;
+        const SOUTH = 3 * Math.PI / 2;
+        const WEST = Math.PI;
+        const MOVEMENT_THRESHOLD = 0.1;
         
-        while (!movementComplete) {
+        if (movement.isDodging) {
+            this.calculateDodgePush(pushDistance, movement.isDodgeLeft, NORTH, EAST, SOUTH, WEST, MOVEMENT_THRESHOLD);
+        } else if (movement.isMovingBackward) {
+            this.calculateBackwardPush(pushDistance, NORTH, EAST, SOUTH, WEST, MOVEMENT_THRESHOLD);
+        } else {
+            this.calculateForwardPush(pushDistance, NORTH, EAST, SOUTH, WEST, MOVEMENT_THRESHOLD);
+        }
+        
+        return {
+            startX,
+            startY,
+            pushX: this.tempPushX || 0,
+            pushY: this.tempPushY || 0,
+            maxPushX: startX + (this.tempPushX || 0),
+            maxPushY: startY + (this.tempPushY || 0)
+        };
+    }
+
+    calculateDodgePush(pushDistance, isDodgeLeft, NORTH, EAST, SOUTH, WEST, MOVEMENT_THRESHOLD) {
+        if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = isDodgeLeft ? -pushDistance : pushDistance;
+            this.tempPushY = 0;
+        } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = 0;
+            this.tempPushY = isDodgeLeft ? -pushDistance : pushDistance;
+        } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = isDodgeLeft ? pushDistance : -pushDistance;
+            this.tempPushY = 0;
+        } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = 0;
+            this.tempPushY = isDodgeLeft ? pushDistance : -pushDistance;
+        }
+    }
+
+    calculateBackwardPush(pushDistance, NORTH, EAST, SOUTH, WEST, MOVEMENT_THRESHOLD) {
+        if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = 0;
+            this.tempPushY = pushDistance; // Sud (inverse du Nord)
+        } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = -pushDistance; // Ouest (inverse de l'Est)
+            this.tempPushY = 0;
+        } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = 0;
+            this.tempPushY = -pushDistance; // Nord (inverse du Sud)
+        } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = pushDistance; // Est (inverse de l'Ouest)
+            this.tempPushY = 0;
+        }
+    }
+
+    calculateForwardPush(pushDistance, NORTH, EAST, SOUTH, WEST, MOVEMENT_THRESHOLD) {
+        if (Math.abs(this.rot - NORTH) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = 0;
+            this.tempPushY = -pushDistance; // Nord
+        } else if (Math.abs(this.rot - EAST) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = pushDistance; // Est
+            this.tempPushY = 0;
+        } else if (Math.abs(this.rot - SOUTH) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = 0;
+            this.tempPushY = pushDistance; // Sud
+        } else if (Math.abs(this.rot - WEST) < MOVEMENT_THRESHOLD) {
+            this.tempPushX = -pushDistance; // Ouest
+            this.tempPushY = 0;
+        }
+    }
+
+    async executeImpactAnimation(animation, duration) {
+        // Fonctions d'easing
+        const easeInOut = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const easeOutBack = (t) => {
+            const c1 = 1.70158;
+            const c3 = c1 + 1;
+            return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+        };
+        
+        // Phase 1: Poussée vers l'avant/arrière
+        await this.animatePhase(animation, duration / 2, easeInOut, true);
+        
+        // Phase 2: Rebond
+        await this.animatePhase(animation, duration / 2, easeOutBack, false);
+        
+        // Normalisation finale de la position
+        this.x = animation.startX;
+        this.y = animation.startY;
+        this.z = 0;
+    }
+
+    async animatePhase(animation, duration, easingFunction, isForwardPhase) {
+        const startTime = performance.now();
+        let phaseComplete = false;
+        
+        while (!phaseComplete) {
             const currentTime = performance.now();
-            const elapsedTime = currentTime - startMovementTime;
+            const elapsedTime = currentTime - startTime;
             
-            // Progression du mouvement (0 à 1)
-            let t = Math.min(elapsedTime / minMovementDuration, 1);
+            let t = Math.min(elapsedTime / duration, 1);
             
             if (t >= 1) {
-                movementComplete = true;
+                phaseComplete = true;
                 t = 1;
             }
             
-            // Appliquer l'easing
-            const easedT = easeInOutQuart(t);
+            const easedT = easingFunction(t);
             
-            // Position horizontale avec easing
-            this.x = startX + (targetX - startX) * easedT;
-            this.y = startY + (targetY - startY) * easedT;
+            if (isForwardPhase) {
+                this.x = animation.startX + animation.pushX * easedT;
+                this.y = animation.startY + animation.pushY * easedT;
+            } else {
+                this.x = animation.maxPushX - animation.pushX * easedT;
+                this.y = animation.maxPushY - animation.pushY * easedT;
+            }
             
-            // Rendre la frame
             await new Promise(resolve => requestAnimationFrame(resolve));
         }
+    }
+
+    async handleSuccessfulMovement(movement, config, timeElapsed) {
+        this.isMoving = true;
         
-        // Normalisation finale de la position
-        this.x = targetX;
-        this.y = targetY;
-        this.z = 0; // Réinitialiser la hauteur
+        // Animation de déplacement améliorée
+        const targetX = movement.destX * this.tileSize + this.tileSize / 2;
+        const targetY = movement.destY * this.tileSize + this.tileSize / 2;
+        
+        // Durée du mouvement
+        let movementDuration = this.calculateMovementDuration(movement, config);
+        
+        // Animation principale
+        await this.animateMovement(targetX, targetY, movementDuration);
         
         // Gestion des réinitialisations d'interface
         if (this.turn) {
@@ -1898,21 +1912,273 @@ class Player {
             this.inventoryMenuShowed = false;
         }
         
-        // Marquer la fin du mouvement
         this.isMoving = false;
         
+        // Gestion des mouvements continus
+        await this.handleContinuousMovement(movement, config, timeElapsed);
+    }
+
+    calculateMovementDuration(movement, config) {
+        let duration;
+        
+        if (movement.isDodging) {
+            duration = config.DODGE_DURATION;
+        } else {
+            const isContinuousMovement = (movement.isForward && this.lastMoveWasForward) || 
+                                       (movement.isBackward && this.lastMoveWasBackward);
+            duration = movement.isMovingBackward ? 
+                      (isContinuousMovement ? config.BACKWARD_DURATION - config.CONTINUOUS_MOVE_SPEEDUP : config.BACKWARD_DURATION) : 
+                      (isContinuousMovement ? config.FORWARD_DURATION - config.CONTINUOUS_MOVE_SPEEDUP : config.FORWARD_DURATION);
+        }
+        
+        // Mémoriser la direction du mouvement actuel
+        this.lastMoveWasForward = movement.isForward;
+        this.lastMoveWasBackward = movement.isBackward;
+        
+        // Ajustement de vitesse avec le sort Speed
+        if (this.spells && this.spells.length > 0 && this.spells[this.selectedSpell].name === "Speed") {
+            duration -= 50;
+        }
+        
+        // Bornes min/max pour la durée
+        return Math.max(Math.min(duration, 800), 200);
+    }
+
+    async animateMovement(targetX, targetY, duration) {
+        const startX = this.x;
+        const startY = this.y;
+        
+        const startTime = performance.now();
+        let movementComplete = false;
+        
+        // Fonction d'easing
+        const easeInOutQuart = (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+        
+        while (!movementComplete) {
+            const currentTime = performance.now();
+            const elapsedTime = currentTime - startTime;
+            
+            let t = Math.min(elapsedTime / duration, 1);
+            
+            if (t >= 1) {
+                movementComplete = true;
+                t = 1;
+            }
+            
+            const easedT = easeInOutQuart(t);
+            
+            this.x = startX + (targetX - startX) * easedT;
+            this.y = startY + (targetY - startY) * easedT;
+            
+            await new Promise(resolve => requestAnimationFrame(resolve));
+        }
+        
+        // Normalisation finale de la position
+        this.x = targetX;
+        this.y = targetY;
+        this.z = 0;
+    }
+
+    async handleContinuousMovement(movement, config, timeElapsed) {
         // Déclencher immédiatement un nouveau mouvement si le bouton est toujours enfoncé
-        // Cela permet des déplacements continus sans avoir à relâcher et réappuyer le bouton
         if (this.continuousUpPressed || this.continuousJoystickUp) {
-            // Créer un léger délai pour éviter les mouvements trop rapides
-            await new Promise(resolve => setTimeout(resolve, CONTINUOUS_MOVE_DELAY));
-            this.button5Clicked = true;  // Simuler un nouveau clic sur le bouton d'avance
-            this.move(timeElapsed, map, eventA, eventB, sprites);
+            await new Promise(resolve => setTimeout(resolve, config.CONTINUOUS_MOVE_DELAY));
+            this.button5Clicked = true;
+            this.move(timeElapsed, arguments[1], arguments[2], arguments[3], arguments[4]);
         } else if (this.continuousDownPressed || this.continuousJoystickDown) {
-            await new Promise(resolve => setTimeout(resolve, CONTINUOUS_MOVE_DELAY));
-            this.button8Clicked = true;  // Simuler un nouveau clic sur le bouton de recul
-            this.move(timeElapsed, map, eventA, eventB, sprites);
+            await new Promise(resolve => setTimeout(resolve, config.CONTINUOUS_MOVE_DELAY));
+            this.button8Clicked = true;
+            this.move(timeElapsed, arguments[1], arguments[2], arguments[3], arguments[4]);
         }
     }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 8. SYSTÈME D'ACTIONS ET INTERACTIONS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 8.1 Actions avec sprites
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    async handleSpriteAction(action, sprites) {
+        if (!action || !this || !this.turn) return;
     
+        // Vérifier qu'aucune action n'est en cours
+        if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
+            console.log("Cannot perform action - player is busy");
+            return;
+        }
+    
+        // Vérifier si suffisamment de temps s'est écoulé depuis la dernière attaque
+        const currentTime = Date.now();
+        if (currentTime - this.lastAttackTime < 2000) {
+            Sprite.terminalLog("Vous n'êtes pas prêt à attaquer de nouveau.");
+            return;
+        }
+
+        const { frontX, frontY } = this.calculateFrontPosition();
+
+        console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
+        console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
+
+        let spriteFound = false;
+        for (const sprite of sprites) {
+            const spriteX = Math.floor(sprite.x / this.tileSize);
+            const spriteY = Math.floor(sprite.y / this.tileSize);
+            
+            if (spriteX === frontX && spriteY === frontY) {
+                spriteFound = true;
+                console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
+                
+                await this.executeSpriteAction(sprite, currentTime);
+                break;
+            }
+        }
+        
+        if (!spriteFound) {
+            console.log("No sprite found at front position");
+        }
+        
+        // Réinitialisation de la touche d'action après utilisation
+        this.actionButtonClicked = false;
+    }
+
+    async executeSpriteAction(sprite, currentTime) {
+        switch (sprite.spriteType) {
+            case "A":
+                await this.handleEnemyAction(sprite, currentTime);
+                break;
+            case "EXIT":
+                await this.handleExitAction();
+                break;
+            case "DOOR":
+                await this.handleDoorAction(sprite);
+                return; // Important: sortir immédiatement pour éviter handleTeleportation
+            case 0:
+            case 2:
+                await this.handleDialogueAction(sprite);
+                break;
+            case 1:
+                console.log("Decoration sprite, no action");
+                this.turn = false;
+                break;
+            case 3:
+                await this.handleShopAction(sprite);
+                break;
+            case 4:
+                console.log("Quest Giver sprite, not implemented yet");
+                this.turn = false;
+                break;
+            case 5:
+                await this.handleQuestCompletionAction(sprite);
+                break;
+            case 6:
+                await this.handleChestAction(sprite);
+                break;
+            default:
+                console.log(`Sprite type ${sprite.spriteType} has no specific action`);
+                Sprite.resetToggle();
+                break;
+        }
+    }
+
+    async handleEnemyAction(sprite, currentTime) {
+        console.log("Enemy detected, initiating combat!");
+        this.lastAttackTime = currentTime;
+        
+        if (this.combatSpell) {
+            console.log("Using combat spell");
+            sprite.combatSpell(this, sprite);
+        } else {
+            console.log("Using normal attack");
+            sprite.combat(this.might, this.criti, this);
+        }
+    }
+
+    async handleExitAction() {
+        commandBlocking = true;
+        
+        await Raycaster.fadeToBlack(300);
+        Sprite.terminalLog('Level finished!')
+        this.raycaster.nextMap();
+        await Raycaster.fadeFromBlack(300);
+        commandBlocking = false;
+    }
+
+    async handleDialogueAction(sprite) {
+        console.log("Dialogue sprite detected");
+        sprite.talk();
+        
+        setTimeout(() => {
+            this.turn = false;
+        }, 500);
+    }
+
+    async handleShopAction(sprite) {
+        sprite.displayItemsForSale(this);
+        this.turn = false;
+    }
+
+    async handleQuestCompletionAction(sprite) {
+        console.log("Quest completion sprite");
+        if (this.quests[0].completed === false) {
+            this.quests[0].complete();
+            console.log("test changement de texture");
+            sprite.spriteTexture = 21;
+            Sprite.resetToggle();
+        } else {
+            Sprite.terminalLog("I've already looted that.")
+        }
+        this.turn = false;
+    }
+
+    async handleChestAction(sprite) {
+        console.log("chest !");
+        if (sprite.step != 1) {
+            sprite.generateLoot(this);
+            sprite.spriteTexture = 21;
+            sprite.step = 1;
+            Sprite.resetToggle();
+        } else {
+            Sprite.terminalLog("I've already looted that.")
+        }
+        this.turn = false;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 8.2 Gestion des portes et téléporteurs
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    async handleDoorAction(sprite) {
+        // Fondu vers le noir
+        await Raycaster.fadeToBlack(300);
+        
+        // Appeler door pendant que l'écran est noir
+        await sprite.door(this, null, this.raycaster);
+        await this.raycaster.loadFloorCeilingImages();
+        
+        // Fondu depuis le noir
+        await Raycaster.fadeFromBlack(300);
+        
+        Sprite.terminalLog('You enter/exit the area.');
+        
+        // Réinitialiser l'état de l'action
+        this.actionButtonClicked = false;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 8.3 Combat et sorts
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Les méthodes de combat et sorts sont gérées par les sprites et le système de sorts
+    // Les interactions sont coordonnées via handleSpriteAction
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FIN DE LA CLASSE PLAYER
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FIN DU FICHIER PLAYER.JS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
