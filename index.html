@@ -513,13 +513,15 @@ Gwendal L.R.
 </div>
 
 
-<div id="createCharacterWindow" class="container pixel-frame" style="display: flex; padding: 0; width: 905px;height: 630px; display : none;">
-  <div style="width: 100%; padding: 20px;">
-    <h2 style="text-align: center; color: #e8d5a9; margin-bottom: 20px; font-family: 'Press Start 2P', cursive; font-size: 16px;">CREATE CHARACTER</h2>
-    
-    <img src="assets/separatorLarge.png" alt="" class="separator" style="display: block; margin: 0 auto;">
-    
-    <form id="characterCreationForm" style="color: #e8d5a9;">
+<div id="createCharacterWindow"  style="display : none;">
+  <div style=" padding: 0; width: 905px;height: 100%;" class="pixel-frame">
+    <div style="height: min-content;">
+    <h2 style="text-align: center; color: #e8d5a9; font-family: 'Press Start 2P', cursive; font-size: 16px;">CREATE CHARACTER</h2>
+  <br>
+   <img src="assets/separatorLarge.png" alt="" class="separator" style="border: 40px; margin-left: 40%;"></img>  
+  </div>
+                   
+    <div>
       <!-- Nom -->
       <div style="margin-bottom: 15px;">
         <label style="display: block; margin-bottom: 5px; font-size: 12px;">NAME:</label>
@@ -589,15 +591,15 @@ Gwendal L.R.
           </div>
         </div>
       </div>
-      
-      <img src="assets/separatorLarge.png" alt="" class="separator" style="display: block; margin: 0 auto;">
-
+        <div >
+              <img src="assets/separatorLarge.png" alt="" class="separator" style="border: 40px; margin-left: 40%;"></img>  
+        </div>
       <!-- Boutons -->
       <div style="display: flex; justify-content: space-between;">
-        <button type="button" id="cancelCreation" class="pixel-frame" style="background-color: #582817; color: white; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer;">CANCEL</button>
-        <button type="button" id="createCharacter" class="pixel-frame" style="background-color: #582817; color: white; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer;">CREATE</button>
+        <button type="button" id="cancelCreation" class="pixel-frame" style="background-color: #582817; color: white; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer; margin: 20px;">CANCEL</button>
+        <button type="button" id="createCharacter" class="pixel-frame" style="background-color: #582817; color: white; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer; margin: 20px;">CREATE</button>
       </div>
-    </form>
+    </div>  
   </div>
 </div>
 
