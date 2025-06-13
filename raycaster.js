@@ -527,11 +527,13 @@ class Raycaster {
         this.fpsCounter.frames++;
         const nowPerf = performance.now();
         
+        /*
         if (nowPerf - this.fpsCounter.lastTime >= 1000) {
             console.log(`FPS: ${this.fpsCounter.frames}`);
             this.fpsCounter.frames = 0;
             this.fpsCounter.lastTime = nowPerf;
         }
+        */
 
         // Test de performance des optimisations
         if (!this.perfTested && this.fpsCounter && this.fpsCounter.frames > 100) {
@@ -678,6 +680,9 @@ class Raycaster {
         this.spriteSpatialIndex.clear();
     }
 
+
+    // xyz
+
     newGame() {
         Raycaster.resetVisualEffects()
 
@@ -751,6 +756,27 @@ class Raycaster {
 
         // Initialiser l'or du joueur
         this.player.gold = 100;
+    }
+
+    createNewCharacter(characterData) {
+        // Réinitialiser le joueur avec les nouvelles données
+        this.player.name = characterData.name;
+        this.player.face = characterData.face;
+        this.player.specialization = characterData.specialization;
+        
+        // Vider l'inventaire et ajouter les nouveaux items
+        this.player.inventory = [];
+        Item.giveItem(this.player, characterData.weapon);
+        Item.giveItem(this.player, characterData.armor);
+        
+        // Donner les sorts sélectionnés
+        this.player.spells = [];
+        characterData.spells.forEach(spellId => {
+            Spell.giveSpell(this.player, spellId);
+        });
+        
+        // Réinitialiser les stats selon la spécialisation
+        this.player.initStats(characterData);
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

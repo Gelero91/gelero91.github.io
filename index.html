@@ -511,6 +511,98 @@ Gwendal L.R.
     </div>
   </div>
 </div>
+
+
+<div id="createCharacterWindow" class="container pixel-frame" style="display: flex; padding: 0; width: 905px;height: 630px; display : none;">
+  <div style="width: 100%; padding: 20px;">
+    <h2 style="text-align: center; color: #e8d5a9; margin-bottom: 20px; font-family: 'Press Start 2P', cursive; font-size: 16px;">CREATE CHARACTER</h2>
+    
+    <img src="assets/separatorLarge.png" alt="" class="separator" style="display: block; margin: 0 auto;">
+    
+    <form id="characterCreationForm" style="color: #e8d5a9;">
+      <!-- Nom -->
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 12px;">NAME:</label>
+        <input type="text" id="characterName" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;" value="Alakir">
+      </div>
+      
+      <!-- Image visage -->
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 12px;">FACE:</label>
+        <select id="characterFace" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
+          <option value="PlayerFace">Default</option>
+          <option value="PlayerFace2">Warrior</option>
+          <option value="PlayerFace3">Mage</option>
+          <option value="PlayerFace4">Rogue</option>
+        </select>
+      </div>
+      
+      <!-- Spécialité -->
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 12px;">SPECIALIZATION:</label>
+        <select id="characterSpecialization" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
+          <option value="none">Balanced (+1 all)</option>
+          <option value="strength">Strength (+3 Might)</option>
+          <option value="dexterity">Dexterity (+10% Dodge/Crit)</option>
+          <option value="magic">Magic (+3 Magic)</option>
+        </select>
+      </div>
+      
+      <!-- Arme -->
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING WEAPON:</label>
+        <select id="characterWeapon" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
+          <option value="5">Club (+1 Might)</option>
+          <option value="6">Staff (+1 Magic)</option>
+          <option value="8">Dagger (+10% Dodge/Crit)</option>
+        </select>
+      </div>
+      
+      <!-- Armure -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING ARMOR:</label>
+        <select id="characterArmor" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
+          <option value="2">Cape (+1 Armor)</option>
+          <option value="4">Tunic (+1 Armor)</option>
+          <option value="7">Armor (+3 Armor, -1 Dex)</option>
+        </select>
+      </div>
+      
+      <!-- Sorts -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING SPELLS (Choose 2):</label>
+        <div style="padding: 10px; background-color: #331a0e; border: 1px solid #663300;">
+          <div style="margin-bottom: 10px;">
+            <label style="cursor: pointer; display: flex; align-items: center; font-size: 10px;">
+              <input type="checkbox" id="spell1" value="1" style="margin-right: 5px; cursor: pointer;">
+              <span>Heal I - Restore 10+ HP (8 MP)</span>
+            </label>
+          </div>
+          <div>
+            <label style="cursor: pointer; display: flex; align-items: center; font-size: 10px;">
+              <input type="checkbox" id="spell2" value="2" style="margin-right: 5px; cursor: pointer;">
+              <span>Sparks - Electric damage (2 MP)</span>
+            </label>
+          </div>
+          <div id="spellError" style="color: #ff6666; font-size: 9px; margin-top: 5px; display: none;">
+            Please select exactly 2 spells
+          </div>
+        </div>
+      </div>
+      
+      <img src="assets/separatorLarge.png" alt="" class="separator" style="display: block; margin: 0 auto;">
+
+      <!-- Boutons -->
+      <div style="display: flex; justify-content: space-between;">
+        <button type="button" id="cancelCreation" class="pixel-frame" style="background-color: #582817; color: white; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer;">CANCEL</button>
+        <button type="button" id="createCharacter" class="pixel-frame" style="background-color: #582817; color: white; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer;">CREATE</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
       </div>
     </div>
   </div>
@@ -651,7 +743,7 @@ Gwendal L.R.
               right
           }
       });
-      console.log(joystickEvent);
+      // console.log(joystickEvent);
       document.dispatchEvent(joystickEvent);
   }
 

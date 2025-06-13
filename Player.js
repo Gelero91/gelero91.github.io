@@ -125,25 +125,41 @@ class Player {
 // 1.2 Initialisation des statistiques
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    initStats() {
-        // Statistiques de vie et mana
+    initStats(characterData) {
+        // Statistiques de base
         this.hp = 10;
         this.mp = 10;
         this.hpMax = 10;
         this.mpMax = 10;
-
-        // Caractéristiques de base
         this.strength = 5;
         this.dexterity = 5;
         this.intellect = 5;
-
-        // Expérience des caractéristiques
         this.XPstrength = 0;
         this.XPdexterity = 0;
         this.XPintellect = 0;
-
-        // Or du joueur
         this.gold = 100;
+
+        // Appliquer les bonus de spécialisation si fournis
+        if (characterData && characterData.specialization) {
+            switch(characterData.specialization) {
+                case 'strength':
+                    this.strength += 3;
+                    break;
+                case 'dexterity':
+                    this.dexterity += 1;
+                    this.dodge += 10;
+                    this.criti += 10;
+                    break;
+                case 'magic':
+                    this.intellect += 3;
+                    break;
+                case 'none':
+                    this.strength += 1;
+                    this.dexterity += 1;
+                    this.intellect += 1;
+                    break;
+            }
+        }
     }
 
     initInventoryAndSpells() {
@@ -978,7 +994,7 @@ class Player {
             ["button9", 9], ["joystickBackButton", 10], ["QuestButton", 11],
             ["InventoryButton", 12], ["previousSpell", 13], ["nextSpell", 15],
             ["newGameButton", 19], ["mainMenuButton", 20], ["backMenuButton", 21],
-            ["buttonA", 1], ["buttonB", 14], ["characterButton", 3]
+            ["buttonA", 1], ["buttonB", 14], ["characterButton", 3], ["cancelCreation", 22], ["createCharacter", 23]
         ];
 
         buttonMappings.forEach(([buttonId, buttonNumber]) => {
@@ -1083,6 +1099,14 @@ class Player {
 
             case 21: // Retour menu
                 this.handleBackToGame();
+                break;
+
+            case 22: // cancel create caracter
+                this.handleMainMenu();
+                break;
+            case 23: // création du personnage
+                console.log("create character :");
+                this.handleCreateCharacter(); // Ajouter l'appel à la méthode
                 break;
                             
             default:
@@ -1237,15 +1261,61 @@ class Player {
         }
     }
 
+    // xyz
     handleNewGame() {
         pause(500);
-        this.raycaster.newGame();
-        Sprite.resetTerminal();
-        Sprite.terminalLog("New game !");
+        
+        console.log("caracter creation !")
+
+        document.getElementById("mainMenuWindow").style.display = "none";
+        document.getElementById("createCharacterWindow").style.display = "block";
     }
 
-    handleMainMenu() {
-        pause(500);
+    // récupération des infos de la fiche de jeux
+    getCharacterData() {
+        // Vérifier que les éléments existent
+        console.log('Name input:', document.getElementById('characterName'));
+        console.log('Face select:', document.getElementById('characterFace'));
+        
+        return {
+            name: document.getElementById('characterName')?.value || 'Erreur',
+            face: document.getElementById('characterFace')?.value || 'Erreur',
+            specialization: document.getElementById('characterSpecialization')?.value || 'none',
+            weapon: parseInt(document.getElementById('characterWeapon')?.value || 1),
+            armor: parseInt(document.getElementById('characterArmor')?.value || 2),
+            spells: [
+                document.getElementById('spell1')?.checked ? 1 : null,
+                document.getElementById('spell2')?.checked ? 2 : null
+            ].filter(s => s !== null)
+        };
+    }
+
+    // XYZ
+    async handleCreateCharacter() {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Récupérer les données AVANT de lancer newGame
+        const characterData = this.getCharacterData();
+        console.log(characterData);
+        
+        // Lancer une nouvelle partie
+        this.raycaster.newGame();
+        
+        // Appliquer les données du personnage
+        this.raycaster.createNewCharacter(characterData);
+        
+        // Mettre à jour l'interface
+        document.getElementById("mainMenuWindow").style.display = "none";
+        document.getElementById("createCharacterWindow").style.display = "none";
+        
+        Sprite.resetTerminal();
+        Sprite.terminalLog("New game !");
+        console.log("new game AND character !")
+    }
+
+    async handleMainMenu() {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        document.getElementById('createCharacterWindow').style.display = 'none';
         Raycaster.resetShowGameOver();
         Raycaster.showMainMenu();
     }
