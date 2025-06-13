@@ -746,6 +746,11 @@ class Raycaster {
         // Test de la méthode statique giveSpell
         Spell.giveSpell(this.player, 1);
         Spell.giveSpell(this.player, 2);
+                Spell.giveSpell(this.player, 3);
+        Spell.giveSpell(this.player, 4);
+                Spell.giveSpell(this.player, 5);
+                        Spell.giveSpell(this.player, 6
+                        );
         console.log(this.player.spells);
 
         // Donner la quête prédéfinie au joueur

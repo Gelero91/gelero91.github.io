@@ -770,6 +770,7 @@ body {
 /* Media queries pour la responsivité */
 @media screen and (orientation: portrait) {
   #renderWindow,
+  #createCharacterWindow,
   #mainMenuWindow {
     display: none;
   }
@@ -781,6 +782,7 @@ body {
 
 @media screen and (orientation: landscape) {
   #renderWindow,
+  #createCharacterWindow,
   #mainMenuWindow {
     display: flex;
     box-sizing: border-box;
@@ -791,6 +793,7 @@ body {
   }
 
   #renderWindow > *,
+  #createCharacterWindow >*,
   #mainMenuWindow > * {
     transform: scale(0.45);
     transform-origin: center;
@@ -799,11 +802,13 @@ body {
 
 @media screen and (min-width: 1024px) {
   #renderWindow > *,
+  #createCharacterWindow > *,
   #mainMenuWindow > * {
     transform: scale(1);
   }
 
   #renderWindow,
+  #createCharacterWindow,
   #mainMenuWindow {
     max-width: 100%;
   }

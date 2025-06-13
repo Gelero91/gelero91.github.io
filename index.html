@@ -513,8 +513,8 @@ Gwendal L.R.
 </div>
 
 
-<div id="createCharacterWindow"  style="display : none;">
-  <div style=" padding: 0; width: 905px;height: 100%;" class="pixel-frame">
+<div id="createCharacterWindow" style="display: none;">
+  <div style="padding: 0; width: 905px;height: 100%;" class="pixel-frame">
     <div style="height: min-content;">
     <h2 style="text-align: center; color: #e8d5a9; font-family: 'Press Start 2P', cursive; font-size: 16px;">CREATE CHARACTER</h2>
   <br>
@@ -575,19 +575,31 @@ Gwendal L.R.
         <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING SPELLS (Choose 2):</label>
         <div style="padding: 10px; background-color: #331a0e; border: 1px solid #663300;">
           <div style="margin-bottom: 10px;">
-            <label style="cursor: pointer; display: flex; align-items: center; font-size: 10px;">
-              <input type="checkbox" id="spell1" value="1" style="margin-right: 5px; cursor: pointer;">
-              <span>Heal I - Restore 10+ HP (8 MP)</span>
-            </label>
+            <label style="display: block; margin-bottom: 5px; font-size: 10px;">First spell:</label>
+            <select id="spell1" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
+              <option value="">-- Choose a spell --</option>
+              <option value="1">Heal I - Restore 10+ HP (8 MP)</option>
+              <option value="2">Sparks - Electric damage (2 MP)</option>
+              <option value="3">Strength - +3-5 STR for 30s (10 MP)</option>
+              <option value="4">Speed - Move faster for 20s (8 MP)</option>
+              <option value="5">Shield - +5-7 armor for 45s (15 MP)</option>
+              <option value="6">Regeneration - +2-3 HP/sec (12 MP)</option>
+            </select>
           </div>
           <div>
-            <label style="cursor: pointer; display: flex; align-items: center; font-size: 10px;">
-              <input type="checkbox" id="spell2" value="2" style="margin-right: 5px; cursor: pointer;">
-              <span>Sparks - Electric damage (2 MP)</span>
-            </label>
+            <label style="display: block; margin-bottom: 5px; font-size: 10px;">Second spell:</label>
+            <select id="spell2" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
+              <option value="">-- Choose a spell --</option>
+              <option value="1">Heal I - Restore 10+ HP (8 MP)</option>
+              <option value="2">Sparks - Electric damage (2 MP)</option>
+              <option value="3">Strength - +3-5 STR for 30s (10 MP)</option>
+              <option value="4">Speed - Move faster for 20s (8 MP)</option>
+              <option value="5">Shield - +5-7 armor for 45s (15 MP)</option>
+              <option value="6">Regeneration - +2-3 HP/sec (12 MP)</option>
+            </select>
           </div>
           <div id="spellError" style="color: #ff6666; font-size: 9px; margin-top: 5px; display: none;">
-            Please select exactly 2 spells
+            Please select two different spells
           </div>
         </div>
       </div>
@@ -602,7 +614,6 @@ Gwendal L.R.
     </div>  
   </div>
 </div>
-
 
 
       </div>

@@ -73,6 +73,132 @@ class Spell {
         console.log(`${player.name} learned spell: ${this.name}`);
     }
 
+// Effet de buff de force
+static strengthBuffEffect(caster, target) {
+    Raycaster.playerHealFlash();
+    
+    // Sauvegarder la force originale si pas déjà fait
+    if (!target.originalStrength) {
+        target.originalStrength = target.strength;
+    }
+    
+    // Appliquer le buff
+    const buffAmount = 3 + Math.floor(caster.magic / 2);
+    target.strength += buffAmount;
+    target.buffedStats = target.buffedStats || {};
+    target.buffedStats.strength = true;
+    
+    // Durée du buff (en millisecondes)
+    const duration = 30000; // 30 secondes
+    
+    // Annuler un buff précédent s'il existe
+    if (target.strengthBuffTimeout) {
+        clearTimeout(target.strengthBuffTimeout);
+    }
+    
+    // Programmer la fin du buff
+    target.strengthBuffTimeout = setTimeout(() => {
+        target.strength = target.originalStrength;
+        delete target.buffedStats.strength;
+        delete target.originalStrength;
+        Sprite.displayCombatAnimation(`${target.name}'s strength returns to normal.`, 4);
+        target.statsUpdate(target);
+    }, duration);
+    
+    caster.XPintellect += 2;
+    Sprite.displayCombatAnimation(`${target.name} gains +${buffAmount} strength for 30 seconds!`, 4);
+    target.statsUpdate(target);
+}
+
+// Effet de buff de vitesse (déjà mentionné dans votre code)
+static speedBuffEffect(caster, target) {
+    Raycaster.playerHealFlash();
+    
+    // Le buff de vitesse est déjà géré dans calculateMovementDuration
+    // On ajoute juste un timer visuel
+    target.speedBuffActive = true;
+    
+    const duration = 20000; // 20 secondes
+    
+    if (target.speedBuffTimeout) {
+        clearTimeout(target.speedBuffTimeout);
+    }
+    
+    target.speedBuffTimeout = setTimeout(() => {
+        target.speedBuffActive = false;
+        Sprite.displayCombatAnimation(`${target.name}'s speed returns to normal.`, 4);
+    }, duration);
+    
+    caster.XPintellect += 1;
+    Sprite.displayCombatAnimation(`${target.name} moves faster for 20 seconds!`, 4);
+}
+
+// Effet de buff de protection (armure temporaire)
+static shieldBuffEffect(caster, target) {
+    Raycaster.armorAbsorbFlash();
+    
+    if (!target.originalArmor) {
+        target.originalArmor = target.armor;
+    }
+    
+    const buffAmount = 5 + Math.floor(caster.magic / 3);
+    target.armor += buffAmount;
+    target.buffedStats = target.buffedStats || {};
+    target.buffedStats.armor = true;
+    
+    const duration = 45000; // 45 secondes
+    
+    if (target.armorBuffTimeout) {
+        clearTimeout(target.armorBuffTimeout);
+    }
+    
+    target.armorBuffTimeout = setTimeout(() => {
+        target.armor = target.originalArmor;
+        delete target.buffedStats.armor;
+        delete target.originalArmor;
+        Sprite.displayCombatAnimation(`${target.name}'s magical shield fades.`, 4);
+        target.statsUpdate(target);
+    }, duration);
+    
+    caster.XPintellect += 2;
+    Sprite.displayCombatAnimation(`${target.name} is protected by a magical shield (+${buffAmount} armor)!`, 4);
+    target.statsUpdate(target);
+}
+
+// Effet de buff de régénération
+static regenerationBuffEffect(caster, target) {
+    Raycaster.playerHealFlash();
+    
+    // Annuler la régénération précédente si elle existe
+    if (target.regenInterval) {
+        clearInterval(target.regenInterval);
+    }
+    
+    const healPerTick = 2 + Math.floor(caster.magic / 5);
+    const duration = 15000; // 15 secondes
+    const tickRate = 1000; // Soigne toutes les secondes
+    
+    let ticksRemaining = duration / tickRate;
+    
+    target.regenInterval = setInterval(() => {
+        if (ticksRemaining <= 0 || target.hp <= 0) {
+            clearInterval(target.regenInterval);
+            delete target.regenInterval;
+            Sprite.displayCombatAnimation(`${target.name}'s regeneration ends.`, 4);
+            return;
+        }
+        
+        target.hp = Math.min(target.hp + healPerTick, target.hpMax);
+        Sprite.displayCombatAnimation(`${target.name} regenerates ${healPerTick} HP.`, 4);
+        target.statsUpdate(target);
+        ticksRemaining--;
+    }, tickRate);
+    
+    caster.XPintellect += 2;
+    Sprite.displayCombatAnimation(`${target.name} starts regenerating health!`, 4);
+}
+
+
     static getSpellById(spellId) {
         const spellData = Spell.spellList.find(spell => spell.id === spellId);
         if (spellData) {
@@ -117,5 +243,40 @@ Spell.spellList = [{
         effect: Spell.damageEffect,
         selfCast: false,
         icon: "assets/icons/sparks.png"
-    }
+    },{
+    id: 3,
+    name: "Strength",
+    manaCost: 10,
+    description: "Increase strength by 3-5 for 30 seconds.",
+    effect: Spell.strengthBuffEffect,
+    selfCast: true,
+    icon: "assets/icons/strength.png"
+},
+{
+    id: 4,
+    name: "Speed",
+    manaCost: 8,
+    description: "Move faster for 20 seconds.",
+    effect: Spell.speedBuffEffect,
+    selfCast: true,
+    icon: "assets/icons/speed.png"
+},
+{
+    id: 5,
+    name: "Shield",
+    manaCost: 10,
+    description: "Magical protection (+5-7 armor) for 45 seconds.",
+    effect: Spell.shieldBuffEffect,
+    selfCast: true,
+    icon: "assets/icons/shield.png"
+},
+{
+    id: 6,
+    name: "Regeneration",
+    manaCost: 10,
+    description: "Regenerate 2-3 HP per second for 15 seconds.",
+    effect: Spell.regenerationBuffEffect,
+    selfCast: true,
+    icon: "assets/icons/regen.png"
+}
 ];

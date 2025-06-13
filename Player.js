@@ -255,6 +255,27 @@ class Player {
         
         // Mise à jour de l'interface des sorts
         this.updateSpellInterface();
+
+        if (this.buffedStats) {
+            // Changer la couleur des stats buffées
+            if (this.buffedStats.strength) {
+                document.getElementById("PlayerStrOutput").style.color = "#66ff66";
+            } else {
+                document.getElementById("PlayerStrOutput").style.color = "";
+            }
+            
+            if (this.buffedStats.armor) {
+                document.getElementById("PlayerArmorOutput").style.color = "#66ff66";
+            } else {
+                document.getElementById("PlayerArmorOutput").style.color = "";
+            }
+        }
+            // Indicateur de vitesse
+            if (this.speedBuffActive) {
+                document.getElementById("button5").style.filter = "hue-rotate(120deg)";
+            } else {
+                document.getElementById("button5").style.filter = "";
+            }
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1272,24 +1293,23 @@ class Player {
     }
 
     // récupération des infos de la fiche de jeux
-    getCharacterData() {
-        // Vérifier que les éléments existent
-        console.log('Name input:', document.getElementById('characterName'));
-        console.log('Face select:', document.getElementById('characterFace'));
-        
-        return {
-            name: document.getElementById('characterName')?.value || 'Erreur',
-            face: document.getElementById('characterFace')?.value || 'Erreur',
-            specialization: document.getElementById('characterSpecialization')?.value || 'none',
-            weapon: parseInt(document.getElementById('characterWeapon')?.value || 1),
-            armor: parseInt(document.getElementById('characterArmor')?.value || 2),
-            spells: [
-                document.getElementById('spell1')?.checked ? 1 : null,
-                document.getElementById('spell2')?.checked ? 2 : null
-            ].filter(s => s !== null)
-        };
-    }
-
+getCharacterData() {
+    // Vérifier que les éléments existent
+    console.log('Name input:', document.getElementById('characterName'));
+    console.log('Face select:', document.getElementById('characterFace'));
+    
+    return {
+        name: document.getElementById('characterName')?.value || 'Erreur',
+        face: document.getElementById('characterFace')?.value || 'Erreur',
+        specialization: document.getElementById('characterSpecialization')?.value || 'none',
+        weapon: parseInt(document.getElementById('characterWeapon')?.value || 1),
+        armor: parseInt(document.getElementById('characterArmor')?.value || 2),
+        spells: [
+            parseInt(document.getElementById('spell1')?.value) || null,
+            parseInt(document.getElementById('spell2')?.value) || null
+        ].filter(s => s !== null && s !== 0)
+    };
+}
     // XYZ
     async handleCreateCharacter() {
         await new Promise(resolve => setTimeout(resolve, 500));
