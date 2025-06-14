@@ -514,35 +514,38 @@ Gwendal L.R.
 
 
 <div id="createCharacterWindow" style="display: none;">
-  <div style="padding: 0; width: 905px;height: 100%;" class="pixel-frame">
+  <div style="padding: 0; width: 905px; height: 120%;" class="pixel-frame">
     <div style="height: min-content;">
-    <h2 style="text-align: center; color: #e8d5a9; font-family: 'Press Start 2P', cursive; font-size: 16px;">CREATE CHARACTER</h2>
-  <br>
-   <img src="assets/separatorLarge.png" alt="" class="separator" style="border: 40px; margin-left: 40%;"></img>  
-  </div>
+      <h2 style="text-align: center; color: #e8d5a9; font-family: 'Press Start 2P', cursive; font-size: 16px;margin-top: 8px;">CREATE CHARACTER</h2>
+      <br>
+      <img src="assets/separatorLarge.png" alt="" class="separator" style="border: 40px; margin-left: 40%;"></img>  
+    </div>
                    
-    <div>
-      <!-- Nom -->
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; font-size: 12px;">NAME:</label>
-        <input type="text" id="characterName" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;" value="Alakir">
+    <div style="padding: 0 20px;">
+      <!-- Nom et Visage sur la même ligne -->
+      <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+        <!-- Nom -->
+        <div style="flex: 1;">
+          <label style="display: block; margin-bottom: 5px; font-size: 12px;">NAME:</label>
+          <input type="text" id="characterName" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 12px;" value="Alakir">
+        </div>
+        
+        <!-- Image visage -->
+        <div style="flex: 1;">
+          <label style="display: block; margin-bottom: 5px; font-size: 12px;">FACE:</label>
+          <select id="characterFace" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 12px;">
+            <option value="PlayerFace">Default</option>
+            <option value="PlayerFace2">Warrior</option>
+            <option value="PlayerFace3">Mage</option>
+            <option value="PlayerFace4">Rogue</option>
+          </select>
+        </div>
       </div>
       
-      <!-- Image visage -->
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; font-size: 12px;">FACE:</label>
-        <select id="characterFace" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
-          <option value="PlayerFace">Default</option>
-          <option value="PlayerFace2">Warrior</option>
-          <option value="PlayerFace3">Mage</option>
-          <option value="PlayerFace4">Rogue</option>
-        </select>
-      </div>
-      
-      <!-- Spécialité -->
+      <!-- Spécialité sur toute la largeur -->
       <div style="margin-bottom: 15px;">
         <label style="display: block; margin-bottom: 5px; font-size: 12px;">SPECIALIZATION:</label>
-        <select id="characterSpecialization" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
+        <select id="characterSpecialization" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 12px;">
           <option value="none">Balanced (+1 all)</option>
           <option value="strength">Strength (+3 Might)</option>
           <option value="dexterity">Dexterity (+10% Dodge/Crit)</option>
@@ -550,61 +553,69 @@ Gwendal L.R.
         </select>
       </div>
       
-      <!-- Arme -->
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING WEAPON:</label>
-        <select id="characterWeapon" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
-          <option value="5">Club (+1 Might)</option>
-          <option value="6">Staff (+1 Magic)</option>
-          <option value="8">Dagger (+10% Dodge/Crit)</option>
-        </select>
-      </div>
-      
-      <!-- Armure -->
-      <div style="margin-bottom: 20px;">
-        <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING ARMOR:</label>
-        <select id="characterArmor" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
-          <option value="2">Cape (+1 Armor)</option>
-          <option value="4">Tunic (+1 Armor)</option>
-          <option value="7">Armor (+3 Armor, -1 Dex)</option>
-        </select>
+      <!-- Arme et Armure sur la même ligne -->
+      <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+        <!-- Arme -->
+        <div style="flex: 1;">
+          <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING WEAPON:</label>
+          <select id="characterWeapon" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 12px;">
+            <option value="5">Club (+1 Might)</option>
+            <option value="6">Staff (+1 Magic)</option>
+            <option value="8">Dagger (+10% Dodge/Crit)</option>
+          </select>
+        </div>
+        
+        <!-- Armure -->
+        <div style="flex: 1;">
+          <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING ARMOR:</label>
+          <select id="characterArmor" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 12px;">
+            <option value="2">Cape (+1 Armor)</option>
+            <option value="4">Tunic (+1 Armor)</option>
+            <option value="7">Armor (+3 Armor, -1 Dex)</option>
+          </select>
+        </div>
       </div>
       
       <!-- Sorts -->
       <div style="margin-bottom: 20px;">
         <label style="display: block; margin-bottom: 5px; font-size: 12px;">STARTING SPELLS (Choose 2):</label>
         <div style="padding: 10px; background-color: #331a0e; border: 1px solid #663300;">
-          <div style="margin-bottom: 10px;">
-            <label style="display: block; margin-bottom: 5px; font-size: 10px;">First spell:</label>
-            <select id="spell1" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
-              <option value="">-- Choose a spell --</option>
-              <option value="1">Heal I - Restore 10+ HP (8 MP)</option>
-              <option value="2">Sparks - Electric damage (2 MP)</option>
-              <option value="3">Strength - +1/Magic STR for 30s (10 MP)</option>
-              <option value="4">Speed - Move faster for 20s (8 MP)</option>
-              <option value="5">Shield - ++1/Magic armor for 45s (15 MP)</option>
-              <option value="6">Regeneration - +1/Magic HP/sec (12 MP)</option>
-            </select>
-          </div>
-          <div>
-            <label style="display: block; margin-bottom: 5px; font-size: 10px;">Second spell:</label>
-            <select id="spell2" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 10px;">
-              <option value="">-- Choose a spell --</option>
-              <option value="1">Heal I - Restore 10+ HP (8 MP)</option>
-              <option value="2">Sparks - Electric damage (2 MP)</option>
-              <option value="3">Strength - +1/Magic STR for 30s (10 MP)</option>
-              <option value="5">Shield - +1/Magic armor for 45s (10 MP)</option>
-              <option value="6">Regeneration - +1/Magic HP/sec (10 MP)</option>
-            </select>
+          <!-- Sorts sur la même ligne -->
+          <div style="display: flex; gap: 20px;">
+            <div style="flex: 1;">
+              <label style="display: block; margin-bottom: 5px; font-size: 10px;">First spell:</label>
+              <select id="spell1" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 12px;">
+                <option value="">-- Choose a spell --</option>
+                <option value="1">Heal I - Restore 10+ HP (8 MP)</option>
+                <option value="2">Sparks - Electric damage (2 MP)</option>
+                <option value="3">Strength - +1/Magic STR for 30s (10 MP)</option>
+                <option value="4">Speed - Move faster for 20s (8 MP)</option>
+                <option value="5">Shield - ++1/Magic armor for 45s (15 MP)</option>
+                <option value="6">Regeneration - +1/Magic HP/sec (12 MP)</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <label style="display: block; margin-bottom: 5px; font-size: 10px;">Second spell:</label>
+              <select id="spell2" class="pixel-frame-item" style="width: 100%; padding: 8px; background-color: #331a0e; color: #e8d5a9; border: none; font-family: 'Press Start 2P', cursive; font-size: 12px;">
+                <option value="">-- Choose a spell --</option>
+                <option value="1">Heal I - Restore 10+ HP (8 MP)</option>
+                <option value="2">Sparks - Electric damage (2 MP)</option>
+                <option value="3">Strength - +1/Magic STR for 30s (10 MP)</option>
+                <option value="5">Shield - +1/Magic armor for 45s (10 MP)</option>
+                <option value="6">Regeneration - +1/Magic HP/sec (10 MP)</option>
+              </select>
+            </div>
           </div>
           <div id="spellError" style="color: #ff6666; font-size: 9px; margin-top: 5px; display: none;">
             Please select two different spells
           </div>
         </div>
       </div>
-        <div >
-              <img src="assets/separatorLarge.png" alt="" class="separator" style="border: 40px; margin-left: 40%;"></img>  
-        </div>
+      
+      <div>
+        <img src="assets/separatorLarge.png" alt="" class="separator" style="border: 40px; margin-left: 40%;"></img>  
+      </div>
+      
       <!-- Boutons -->
       <div style="display: flex; justify-content: space-between;">
         <button type="button" id="cancelCreation" class="pixel-frame" style="background-color: #582817; color: white; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 10px; cursor: pointer; margin: 20px;">CANCEL</button>

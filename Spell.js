@@ -40,7 +40,7 @@ class Spell {
 
         caster.XPintellect += 1;
 
-        var healEffect = 10 + caster.magic
+        var healEffect = 5 + caster.magic
 
         target.hp += healEffect;
 
@@ -83,7 +83,7 @@ static strengthBuffEffect(caster, target) {
     }
     
     // Appliquer le buff
-    const buffAmount = 1 + caster.magic;;
+    const buffAmount = caster.magic;
     target.strength += buffAmount;
     target.buffedStats = target.buffedStats || {};
     target.buffedStats.strength = true;
@@ -174,7 +174,7 @@ static regenerationBuffEffect(caster, target) {
         clearInterval(target.regenInterval);
     }
     
-    const healPerTick = 1 + caster.magic;;
+    const healPerTick = caster.magic;;
     const duration = 15000; // 15 secondes
     const tickRate = 1000; // Soigne toutes les secondes
     
@@ -230,7 +230,7 @@ Spell.spellList = [{
         id: 1,
         name: "Heal I",
         manaCost: 8,
-        description: "Heal the player for 10hp.",
+        description: "Heal the player for 5hp + 1/Magic.",
         effect: Spell.healEffect,
         selfCast: true,
         icon: "assets/icons/heal.png"
@@ -254,7 +254,7 @@ Spell.spellList = [{
 },
 {
     id: 4,
-    name: "Speed",
+    name: "OLD_Speed",
     manaCost: 8,
     description: "Move faster for 20 seconds.",
     effect: Spell.speedBuffEffect,

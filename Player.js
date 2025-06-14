@@ -241,6 +241,8 @@ class Player {
         // Régénération de mana
         this.handleManaRegeneration();
         
+        this.handleHealthRegeneration();
+
         // Calcul des stats max et limites
         this.updateMaxStats();
         
@@ -347,9 +349,16 @@ class Player {
     handleManaRegeneration() {
         // Régénération de mana
         if (this.mp < this.mpMax) {
-            this.mp = Math.min(this.mp + (this.intellect / 50), this.mpMax);
+            this.mp = Math.min(this.mp + (this.intellect / 200), this.mpMax);
         }
     }
+
+    handleHealthRegeneration() {
+        // Régénération de mana
+        if (this.hp < this.mpMax) {
+            this.hp = Math.min(this.hp + (this.strength / 200), this.hpMax);
+        }
+    } 
 
     updateMaxStats() {
         // HP et MP max basés sur les caractéristiques
