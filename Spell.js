@@ -83,7 +83,7 @@ static strengthBuffEffect(caster, target) {
     }
     
     // Appliquer le buff
-    const buffAmount = 3 + Math.floor(caster.magic / 2);
+    const buffAmount = 1 + caster.magic;;
     target.strength += buffAmount;
     target.buffedStats = target.buffedStats || {};
     target.buffedStats.strength = true;
@@ -141,7 +141,7 @@ static shieldBuffEffect(caster, target) {
         target.originalArmor = target.armor;
     }
     
-    const buffAmount = 5 + Math.floor(caster.magic / 3);
+    const buffAmount = 1 + caster.magic;
     target.armor += buffAmount;
     target.buffedStats = target.buffedStats || {};
     target.buffedStats.armor = true;
@@ -174,7 +174,7 @@ static regenerationBuffEffect(caster, target) {
         clearInterval(target.regenInterval);
     }
     
-    const healPerTick = 2 + Math.floor(caster.magic / 5);
+    const healPerTick = 1 + caster.magic;;
     const duration = 15000; // 15 secondes
     const tickRate = 1000; // Soigne toutes les secondes
     
@@ -247,7 +247,7 @@ Spell.spellList = [{
     id: 3,
     name: "Strength",
     manaCost: 10,
-    description: "Increase strength by 3-5 for 30 seconds.",
+    description: "Increase strength by 1 by Magic for 30 seconds.",
     effect: Spell.strengthBuffEffect,
     selfCast: true,
     icon: "assets/icons/strength.png"
@@ -263,18 +263,18 @@ Spell.spellList = [{
 },
 {
     id: 5,
-    name: "Shield",
+    name: "Mage Shield",
     manaCost: 10,
-    description: "Magical protection (+5-7 armor) for 45 seconds.",
+    description: "Magical protection (+1 armor/magic) for 45 seconds.",
     effect: Spell.shieldBuffEffect,
     selfCast: true,
-    icon: "assets/icons/shield.png"
+    icon: "assets/icons/mageShield.png"
 },
 {
     id: 6,
     name: "Regeneration",
     manaCost: 10,
-    description: "Regenerate 2-3 HP per second for 15 seconds.",
+    description: "Regenerate 1HP/Magic per second for 15 seconds.",
     effect: Spell.regenerationBuffEffect,
     selfCast: true,
     icon: "assets/icons/regen.png"
