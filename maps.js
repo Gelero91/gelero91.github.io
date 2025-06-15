@@ -722,8 +722,8 @@ const maps = [
           "Garde du Temple",
           [
             [
-              "facePlayer",
-              "Aventurier",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "Bonjour, j'aimerais vous aider."
             ],
             [
@@ -732,8 +732,8 @@ const maps = [
               "Salut aventurier ! Nous avons besoin d'aide dans le temple, les cryptes sont envahies par des créatures."
             ],
             [
-              "facePlayer",
-              "Aventurier",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "Merci pour l'info, je vais m'en occuper."
             ]
           ],
@@ -752,8 +752,8 @@ const maps = [
           "Garde du Temple",
           [
             [
-              "facePlayer",
-              "Aventurier",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "Bonjour, j'aimerais vous aider."
             ],
             [
@@ -762,8 +762,8 @@ const maps = [
               "Salut aventurier ! Nous avons besoin d'aide dans le temple, les cryptes sont envahies par des créatures."
             ],
             [
-              "facePlayer",
-              "Aventurier",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "Merci pour l'info, je vais m'en occuper."
             ]
           ],
@@ -895,8 +895,8 @@ const maps = [
           "Garde du Temple",
           [
             [
-              "facePlayer",
-              "Aventurier",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "Bonjour, j'aimerais vous aider."
             ],
             [
@@ -905,8 +905,8 @@ const maps = [
               "Salut aventurier ! Nous avons besoin d'aide dans le temple, les cryptes sont envahies par des créatures."
             ],
             [
-              "facePlayer",
-              "Aventurier",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "Merci pour l'info, je vais m'en occuper."
             ]
           ],
@@ -925,7 +925,7 @@ const maps = [
           "Quill le Marchand",
           [
             [
-              "facePlayer",
+              "%PLAYERFACE%",
               "Aventurier",
               "Salut !"
             ],
@@ -935,7 +935,7 @@ const maps = [
               "Hé mon pote ! Tu veux acheter quelque chose ?"
             ],
             [
-              "facePlayer",
+              "%PLAYERFACE%",
               "Aventurier",
               "D'accord, peut-être plus tard."
             ]
@@ -2288,17 +2288,17 @@ const maps = [
           19,
           2,
           2,
-          "facePlayer",
+          "%PLAYERFACE%",
           "Guarde blessé",
           [
             [
-              "facePlayer",
-              "Alakir",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "You're injured ! Please, let me help you..."
             ],
             [
               "faceGuard",
-              "Injured guard :",
+              "Injured guard",
               "There's nothing to do, my Child. My last breath comes near, you have to listen..."
             ],
             [
@@ -2307,13 +2307,13 @@ const maps = [
               "Beyond this door, lies a temple dedicated to the evil goddess Lamashtu. We build this fort to contain its power."
             ],
             [
-              "facePlayer",
-              "Alakir :",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "Lamashtu !? It cannot be !"
             ],
             [
               "faceGuard",
-              "Injured guard :",
+              "Injured guard",
               "There's no time to explain. The more we wait, the stronger she becomes. You have to go in the deepest layer of this dungeon... Please, you have to... "
             ],
             [
@@ -2322,8 +2322,8 @@ const maps = [
               "*cough* May Anu bless this child...!"
             ],
             [
-              "facePlayer",
-              "Alakir",
+              "%PLAYERFACE%",
+              "%PLAYER%",
               "...He's still breathing, but not for long."
             ]
           ],

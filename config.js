@@ -40,6 +40,12 @@ let gameOver = false;
 let isLoading = false;
 let isChangingMap = false;
 
+
+// récupère le nom du joueur
+let playerName = "%PLAYER%";
+
+let playerFace = "oupsi"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MOVE CONTROLS
 

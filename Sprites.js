@@ -1703,95 +1703,129 @@ class Sprite {
         return this.spriteTalk.length;
     }
 
-    // Gérer les dialogues
-    talk() {
-        Sprite.resetToggle();
-    
-        // Activer le blocage des commandes pendant le dialogue
-        commandBlocking = true;
-    
-        const dialogue = document.getElementById("dialogue");
-        const faceOutput = document.getElementById("faceOutput");
-        const dialWindow = document.getElementById("dialogueWindow");
-        const outputElement = document.getElementById("output");
-        const nextButton = document.getElementById("nextButton");
-    
-        // Réinitialiser le contenu de la fenêtre de dialogue
-        dialogue.innerHTML = "";
-        faceOutput.src = "";
-    
-        // Retirer tout ancien gestionnaire d'événements du bouton "Next"
-        const newNextButton = nextButton.cloneNode(true);
-        nextButton.parentNode.replaceChild(newNextButton, nextButton);
-    
-        outputElement.style.display = "none";
-        dialWindow.style.display = "block";
-    
-        let currentDialogue = 0;
-        let allDialoguesLog = ''; // Stocker tous les dialogues pour le log
-    
-        // Variable pour stocker la référence de l'écouteur actuel
-        let activeKeyListener = null;
-    
-        const showNextDialogue = () => {
-            if (currentDialogue < this.spriteTalk.length) {
-                const [face, name, entry] = this.spriteTalk[currentDialogue];
-    
-                if (face && name && entry) {
-                    dialogue.innerHTML = `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br><br>${entry}</font>`;
-                   faceOutput.src = IMAGES[face] || '';
-                    allDialoguesLog += `<font style="font-weight: bold;">${name} </font> :<font style="font-style: italic;"><br><br>${entry}</font><br>`;
-                }
-    
-                currentDialogue++;
-            } else {
-                // Fin du dialogue - retirer l'écouteur d'événements
-                if (activeKeyListener) {
-                    document.removeEventListener("keydown", activeKeyListener);
-                    activeKeyListener = null;
+    // Gérer les dialogues et visages
+talk() {
+    Sprite.resetToggle();
+
+    // Activer le blocage des commandes pendant le dialogue
+    commandBlocking = true;
+
+    const dialogue = document.getElementById("dialogue");
+    const faceOutput = document.getElementById("faceOutput");
+    const dialWindow = document.getElementById("dialogueWindow");
+    const outputElement = document.getElementById("output");
+    const nextButton = document.getElementById("nextButton");
+
+    // Réinitialiser le contenu de la fenêtre de dialogue
+    dialogue.innerHTML = "";
+    faceOutput.src = "";
+
+    // Retirer tout ancien gestionnaire d'événements du bouton "Next"
+    const newNextButton = nextButton.cloneNode(true);
+    nextButton.parentNode.replaceChild(newNextButton, nextButton);
+
+    outputElement.style.display = "none";
+    dialWindow.style.display = "block";
+
+    let currentDialogue = 0;
+    let allDialoguesLog = ''; // Stocker tous les dialogues pour le log
+
+    // Variable pour stocker la référence de l'écouteur actuel
+    let activeKeyListener = null;
+
+    // Définir showNextDialogue comme une fonction const pour une meilleure capture de contexte
+    const showNextDialogue = () => {
+        if (currentDialogue < this.spriteTalk.length) {
+            let [face, name, entry] = this.spriteTalk[currentDialogue];
+
+            if (face && name && entry) {
+                // Créer des copies pour ne pas modifier les données originales
+                let displayFace = face;
+                let displayName = name;
+                let displayEntry = entry;
+                
+                // Remplacer %PLAYER% SEULEMENT si c'est exactement %PLAYER%
+                if (displayName === "%PLAYER%" && playerName) {
+                    displayName = playerName;
                 }
                 
-                for (let i = 0; i < this.spriteTalk.length; i++) {
-                    const [face, name, entry] = this.spriteTalk[i];
-                    Sprite.terminalLog(`${name} :</br>${entry}</br>`, 4);
+                // Remplacer %PLAYERFACE% SEULEMENT si c'est exactement %PLAYERFACE%
+                if (displayFace === "%PLAYERFACE%" && playerFace) {
+                    displayFace = playerFace;
                 }
-    
-
-                outputElement.style.display = "block";
-                dialWindow.style.display = "none";
-
-                setTimeout(() => {
-                    commandBlocking = false;
-                }, 500);
+                
+                // Remplacer %PLAYER% dans le texte du dialogue si présent
+                if (displayEntry.includes("%PLAYER%") && playerName) {
+                    displayEntry = displayEntry.replace(/%PLAYER%/g, playerName);
+                }
+                
+                dialogue.innerHTML = `<font style="font-weight: bold;">${displayName} </font> :<font style="font-style: italic;"><br><br>${displayEntry}</font>`;
+                faceOutput.src = IMAGES[displayFace] || '';
+                allDialoguesLog += `<font style="font-weight: bold;">${displayName} </font> :<font style="font-style: italic;"><br><br>${displayEntry}</font><br>`;
             }
-        };
-    
-        // Écouteur pour les touches clavier
-        const keyListener = (event) => {
-            if (event.code === "Space" || event.key.toLowerCase() === "f") {
-                event.preventDefault();
-                showNextDialogue();
+
+            currentDialogue++;
+        } else {
+            // Fin du dialogue - retirer l'écouteur d'événements
+            if (activeKeyListener) {
+                document.removeEventListener("keydown", activeKeyListener);
+                activeKeyListener = null;
             }
-        };
-    
-        // S'assurer qu'aucun ancien écouteur n'est actif
-        if (activeKeyListener) {
-            document.removeEventListener("keydown", activeKeyListener);
+            
+            for (let i = 0; i < this.spriteTalk.length; i++) {
+                let [face, name, entry] = this.spriteTalk[i];
+                
+                // Créer des copies pour ne pas modifier les données originales
+                let displayName = name;
+                let displayEntry = entry;
+                
+                // Remplacer %PLAYER% SEULEMENT si c'est exactement %PLAYER%
+                if (displayName === "%PLAYER%" && playerName) {
+                    displayName = playerName;
+                }
+                
+                // Remplacer %PLAYER% dans le texte si présent
+                if (displayEntry.includes("%PLAYER%") && playerName) {
+                    displayEntry = displayEntry.replace(/%PLAYER%/g, playerName);
+                }
+                
+                Sprite.terminalLog(`${displayName} :</br>${displayEntry}</br>`, 4);
+            }
+
+            outputElement.style.display = "block";
+            dialWindow.style.display = "none";
+
+            setTimeout(() => {
+                commandBlocking = false;
+            }, 500);
         }
-        
-        // Stocker et ajouter le nouvel écouteur
-        activeKeyListener = keyListener;
-        
-        // Ajout des event listeners
-        newNextButton.addEventListener("click", showNextDialogue);
-        document.addEventListener("keydown", activeKeyListener);
+    };
+
+    // Écouteur pour les touches clavier
+    const keyListener = (event) => {
+        if (event.code === "Space" || event.key.toLowerCase() === "f") {
+            event.preventDefault();
+            showNextDialogue();
+        }
+    };
+
+    // S'assurer qu'aucun ancien écouteur n'est actif
+    if (activeKeyListener) {
+        document.removeEventListener("keydown", activeKeyListener);
+    }
     
-        if (currentDialogue === 0) {
+    // Stocker et ajouter le nouvel écouteur
+    activeKeyListener = keyListener;
+    
+    // Ajout des event listeners
+    newNextButton.addEventListener("click", showNextDialogue);
+    document.addEventListener("keydown", activeKeyListener);
+
+    if (currentDialogue === 0) {
         // Affiche le premier dialogue immédiatement
         showNextDialogue();
-        }
-
     }
+}
 
     static showGameOver() {
         const mainCanvas = document.getElementById("mainCanvas");
@@ -1806,107 +1840,125 @@ class Sprite {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Fonction showCinematic avec fade simple sur la fenêtre cinématique
-    static async showCinematic(cinematicSteps, onComplete = null) {
-        // Bloquer les commandes 
-        commandBlocking = true;
-        
-        const dialogue = document.getElementById("dialogue");
-        const faceOutput = document.getElementById("faceOutput");
-        const dialWindow = document.getElementById("dialogueWindow");
-        const outputElement = document.getElementById("output");
-        const nextButton = document.getElementById("nextButton");
-        const mainCanvas = document.getElementById("mainCanvas");
-        const cinematicWindow = document.getElementById("cinematicWindow");
+static async showCinematic(cinematicSteps, onComplete = null) {
+    // Bloquer les commandes 
+    commandBlocking = true;
+    
+    const dialogue = document.getElementById("dialogue");
+    const faceOutput = document.getElementById("faceOutput");
+    const dialWindow = document.getElementById("dialogueWindow");
+    const outputElement = document.getElementById("output");
+    const nextButton = document.getElementById("nextButton");
+    const mainCanvas = document.getElementById("mainCanvas");
+    const cinematicWindow = document.getElementById("cinematicWindow");
 
-        // Cacher le canvas et montrer l'image cinématique
-        mainCanvas.style.display = "none";
-        cinematicWindow.style.display = "block";
-        outputElement.style.display = "none";
-        dialWindow.style.display = "block";
+    // Cacher le canvas et montrer l'image cinématique
+    mainCanvas.style.display = "none";
+    cinematicWindow.style.display = "block";
+    outputElement.style.display = "none";
+    dialWindow.style.display = "block";
+    
+    // Préparer la transition CSS
+    cinematicWindow.style.transition = "opacity 0.3s ease-in-out";
+    cinematicWindow.style.opacity = "0"; // Commencer invisible pour le fade in initial
+    
+    let currentStep = 0;
+    let keyListener = null;
+    let isTransitioning = false;
+    
+    const showNextStep = async () => {
+        if (isTransitioning) return;
         
-        // Préparer la transition CSS
-        cinematicWindow.style.transition = "opacity 0.3s ease-in-out";
-        cinematicWindow.style.opacity = "0"; // Commencer invisible pour le fade in initial
-        
-        let currentStep = 0;
-        let keyListener = null;
-        let isTransitioning = false;
-        
-        const showNextStep = async () => {
-            if (isTransitioning) return;
+        if (currentStep < cinematicSteps.length) {
+            isTransitioning = true;
             
-            if (currentStep < cinematicSteps.length) {
-                isTransitioning = true;
-                
-                // Fade out (sauf pour la première slide)
-                if (currentStep > 0) {
-                    cinematicWindow.style.opacity = "0";
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                }
-                
-                const step = cinematicSteps[currentStep];
-                
-                // Changer l'image et le dialogue
-                if (step.image) {
-                    const imageKey = step.image.replace('assets/', '').replace('.png', '').replace('.jpg', '');
-                    cinematicWindow.src = IMAGES[imageKey] || step.image;
-                }
-                
-                if (step.face && step.name && step.text) {
-                    dialogue.innerHTML = `<font style="font-weight: bold;">${step.name} </font> :<font style="font-style: italic;"><br><br>${step.text}</font>`;
-                    const faceKey = step.face.replace('assets/', '').replace('.png', '').replace('.jpg', '');
-                    faceOutput.src = IMAGES[faceKey] || '';
-                }
-                
-                // Petit délai pour charger l'image
-                await new Promise(resolve => setTimeout(resolve, 50));
-                
-                // Fade in
-                cinematicWindow.style.opacity = "1";
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                currentStep++;
-                isTransitioning = false;
-            } else {
-                // Fin de la cinématique - fade out final
+            // Fade out (sauf pour la première slide)
+            if (currentStep > 0) {
                 cinematicWindow.style.opacity = "0";
                 await new Promise(resolve => setTimeout(resolve, 300));
-                
-                document.removeEventListener("keydown", keyListener);
-                
-                // Restaurer l'opacité pour la prochaine fois
-                cinematicWindow.style.opacity = "1";
-                
-                if (onComplete && typeof onComplete === 'function') {
-                    onComplete();
-                } else {
-                    mainCanvas.style.display = "block";
-                    cinematicWindow.style.display = "none";
-                    outputElement.style.display = "block";
-                    dialWindow.style.display = "none";
-                    commandBlocking = false;
+            }
+            
+            const step = cinematicSteps[currentStep];
+            
+            // Changer l'image et le dialogue
+            if (step.image) {
+                const imageKey = step.image.replace('assets/', '').replace('.png', '').replace('.jpg', '');
+                cinematicWindow.src = IMAGES[imageKey] || step.image;
+            }
+            
+            if (step.face && step.name && step.text) {
+                // Remplacer %PLAYER% dans le nom
+                let displayName = step.name;
+                if (displayName === '%PLAYER%' && playerName) {
+                    displayName = playerName;
                 }
+                
+                // Remplacer %PLAYERFACE% dans le visage
+                let displayFace = step.face;
+                if (displayFace === '%PLAYERFACE%' && playerFace) {
+                    displayFace = playerFace;
+                }
+                
+                // Remplacer %PLAYER% dans le texte aussi si nécessaire
+                let displayText = step.text;
+                if (displayText.includes('%PLAYER%') && playerName) {
+                    displayText = displayText.replace(/%PLAYER%/g, playerName);
+                }
+                
+                dialogue.innerHTML = `<font style="font-weight: bold;">${displayName} </font> :<font style="font-style: italic;"><br><br>${displayText}</font>`;
+                const faceKey = displayFace.replace('assets/', '').replace('.png', '').replace('.jpg', '');
+                faceOutput.src = IMAGES[faceKey] || '';
             }
-        };
-        
-        // Écouteurs d'événements
-        keyListener = (event) => {
-            if (!isTransitioning && (event.code === "Space" || event.key.toLowerCase() === "f")) {
-                event.preventDefault();
-                showNextStep();
+            
+            // Petit délai pour charger l'image
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            // Fade in
+            cinematicWindow.style.opacity = "1";
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            currentStep++;
+            isTransitioning = false;
+        } else {
+            // Fin de la cinématique - fade out final
+            cinematicWindow.style.opacity = "0";
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            document.removeEventListener("keydown", keyListener);
+            
+            // Restaurer l'opacité pour la prochaine fois
+            cinematicWindow.style.opacity = "1";
+            
+            if (onComplete && typeof onComplete === 'function') {
+                onComplete();
+            } else {
+                mainCanvas.style.display = "block";
+                cinematicWindow.style.display = "none";
+                outputElement.style.display = "block";
+                dialWindow.style.display = "none";
+                commandBlocking = false;
             }
-        };
-        
-        const newNextButton = nextButton.cloneNode(true);
-        nextButton.parentNode.replaceChild(newNextButton, nextButton);
-        newNextButton.addEventListener("click", () => {
-            if (!isTransitioning) showNextStep();
-        });
-        document.addEventListener("keydown", keyListener);
-        
-        // Première étape
-        showNextStep();
-    }
+        }
+    };
+    
+    // Écouteurs d'événements
+    keyListener = (event) => {
+        if (!isTransitioning && (event.code === "Space" || event.key.toLowerCase() === "f")) {
+            event.preventDefault();
+            showNextStep();
+        }
+    };
+    
+    const newNextButton = nextButton.cloneNode(true);
+    nextButton.parentNode.replaceChild(newNextButton, nextButton);
+    newNextButton.addEventListener("click", () => {
+        if (!isTransitioning) showNextStep();
+    });
+    document.addEventListener("keydown", keyListener);
+    
+    // Première étape
+    showNextStep();
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 5.3 Cinématiques et animations
@@ -1940,62 +1992,63 @@ class Sprite {
     }
 
     // Cinématique d'introduction
-    static showIntroCinematic() {
-        commandBlocking = true;
+// Dans Sprite.js - Méthode showIntroCinematic complète
+static showIntroCinematic() {
+    commandBlocking = true;
 
-        const introCinematic = [
-            {
-                image: 'assets/intro/1.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "I don't really know where I come from... I was an orphan, left for dead in the desert."
-            },
-            {
-                image: 'assets/intro/2.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "By chance, I was taken in by a bard who was resting after a life of adventure."
-            },
-            {
-                image: 'assets/intro/3.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "He taught me to read and write, while telling me about his incredible adventures."
-            },
-            {
-                image: 'assets/intro/4.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "He felt I wouldn't stay in one place for long. I wanted to discover the world too."
-            },
-            {
-                image: 'assets/intro/5.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "He taught me everything he knew. Combat, magic, trickery... Everything that makes an adventurer."
-            },
-            {
-                image: 'assets/intro/6.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "Now I'm an adult, ready to risk everything, because I need to know I can live on my own. Without help."
-            },
-            {
-                image: 'assets/intro/7.jpg',
-                face: 'facePlayer',
-                name: 'Alakir',
-                text: "I hope my youthful whim won't lead me to death... There's only one way to find out."
-            }
-        ];
+    const introCinematic = [
+        {
+            image: 'assets/intro/1.jpg',
+            face: '%PLAYERFACE%',
+            name: '%PLAYER%',
+            text: "I don't really know where I come from... I was an orphan, left for dead in the desert."
+        },
+        {
+            image: 'assets/intro/2.jpg',
+            face: '%PLAYERFACE%',
+            name: '%PLAYER%',
+            text: "By chance, I was taken in by a bard who was resting after a life of adventure."
+        },
+        {
+            image: 'assets/intro/3.jpg',
+            face: '%PLAYERFACE%',
+            name: '%PLAYER%',
+            text: "He taught me to read and write, while telling me about his incredible adventures."
+        },
+        {
+            image: 'assets/intro/4.jpg',
+            face: '%PLAYERFACE%',
+            name: '%PLAYER%',
+            text: "He felt I wouldn't stay in one place for long. I wanted to discover the world too."
+        },
+        {
+            image: 'assets/intro/5.jpg',
+            face: '%PLAYERFACE%',
+            name: '%PLAYER%',
+            text: "He taught me everything he knew. Combat, magic, trickery... Everything that makes an adventurer."
+        },
+        {
+            image: 'assets/intro/6.jpg',
+            face: '%PLAYERFACE%',
+            name: '%PLAYER%',
+            text: "Now I'm an adult, ready to risk everything, because I need to know I can live on my own. Without help."
+        },
+        {
+            image: 'assets/intro/7.jpg',
+            face: '%PLAYERFACE%',
+            name: '%PLAYER%',
+            text: "I hope my youthful whim won't lead me to death... There's only one way to find out."
+        }
+    ];
 
-        // Utiliser showCinematic avec un callback pour retourner au menu
-        Sprite.showCinematic(introCinematic, () => {
-            // À la fin de la cinématique, retourner au menu principal
-            // Raycaster.showMainMenu();
-            Raycaster.showRenderWindow();
-            commandBlocking = false;
-        });
-    }
+    // Utiliser showCinematic avec un callback pour retourner au menu
+    Sprite.showCinematic(introCinematic, () => {
+        // À la fin de la cinématique, retourner au menu principal
+        // Raycaster.showMainMenu();
+        Raycaster.showRenderWindow();
+        commandBlocking = false;
+    });
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 6. SYSTÈME D'INTERFACE UTILISATEUR

@@ -119,6 +119,8 @@ class Player {
         // Initialisation des anciens stats pour comparaison
         this.oldStrength = this.strength;
         this.oldIntellect = this.intellect;
+
+        this.face = this.face;
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -258,6 +260,17 @@ class Player {
         // Mise à jour de l'interface des sorts
         this.updateSpellInterface();
 
+
+        // enregistre le nom du joueur
+        playerName = this.name;        
+        document.getElementById("playerName").textContent = playerName;
+
+        // Mise à jour de la variable globale du visage
+        playerFace = this.face || 'facePlayer';  // 'facePlayer' par défaut si non défini
+    
+
+        // console.log(playerName);
+        
         if (this.buffedStats) {
             // Changer la couleur des stats buffées
             if (this.buffedStats.strength) {

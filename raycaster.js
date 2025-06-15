@@ -365,7 +365,7 @@ class Raycaster {
         
         if (!this.rayAngles) {
             console.warn("rayAngles non initialisé, skip précalcul");
-            return;
+            return;t
         }
         
         for (let i = 0; i < this.rayCount; i++) {
