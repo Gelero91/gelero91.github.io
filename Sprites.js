@@ -273,137 +273,138 @@ class Sprite {
 // 2.1 IA et déplacements ennemis
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    async moveRandomlyOrChase(map, sprites, player) {
-        // Ne pas déplacer si le sprite n'est pas un ennemi ou s'il est mort ou déjà en mouvement
-        if (this.spriteType !== "A" || this.hp <= 0 || this.isMoving) {
-            return false;
-        }
-        
-        const tileSize = 1280;
-        const currentCellX = Math.floor(this.x / tileSize);
-        const currentCellY = Math.floor(this.y / tileSize);
-        const playerCellX = Math.floor(player.x / tileSize);
-        const playerCellY = Math.floor(player.y / tileSize);
-        
-        // Calculer la distance entre l'ennemi et le joueur (distance Manhattan)
-        const distanceToPlayer = Math.abs(currentCellX - playerCellX) + Math.abs(currentCellY - playerCellY);
-        
-        // Si on est en contact avec le joueur, attaquer
-        if (distanceToPlayer <= 1) {
-            if (!this.lastAttackTime || (Date.now() - this.lastAttackTime) >= 2000) {
-                this.attackPlayer(player);
-                
-                // Planifier une attaque supplémentaire dans 2 secondes
-                this.lastAttackTime = Date.now();
-                setTimeout(() => {
-                    if (this.hp > 0 && player.hp > 0) {
-                        const newCurrentCellX = Math.floor(this.x / tileSize);
-                        const newCurrentCellY = Math.floor(this.y / tileSize);
-                        const newPlayerCellX = Math.floor(player.x / tileSize);
-                        const newPlayerCellY = Math.floor(player.y / tileSize);
-                        const newDistanceToPlayer = Math.abs(newCurrentCellX - newPlayerCellX) + 
-                                                    Math.abs(newCurrentCellY - newPlayerCellY);
-                        
-                        if (newDistanceToPlayer <= 1) {
-                            this.attackPlayer(player);
-                        }
-                    }
-                }, 2000);
-            }
-            return false;
-        }
-        
-        // Zone de détection
-        const detectionRange = 5;
-        const isChasing = distanceToPlayer <= detectionRange;
-        const moveChance = isChasing ? 0.8 : 0.4;
-        
-        if (Math.random() > moveChance) {
-            return false;
-        }
-        
-        let directionToMove = null;
-        
-        if (isChasing) {
-            // Mode poursuite: essayer de se rapprocher du joueur
-            const dx = playerCellX - currentCellX;
-            const dy = playerCellY - currentCellY;
-            
-            // Choisir l'axe avec la plus grande différence
-            if (Math.abs(dx) >= Math.abs(dy)) {
-                directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
-                
-                if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
-                    directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
-                }
-            } else {
-                directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
-                
-                if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
-                    directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
-                }
-            }
-            
-            // Si toujours bloqué, essayer une direction aléatoire
-            if (!directionToMove || !this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
-                return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
-            }
-        } else {
-            // Mode aléatoire
-            return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
-        }
-        
-        // Exécuter le mouvement si une direction valide a été trouvée
-        if (directionToMove && this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
-            return this.executeMove(directionToMove, currentCellX, currentCellY, tileSize);
-        }
-        
+async moveRandomlyOrChase(map, sprites, player) {
+    // Ne pas déplacer si le sprite n'est pas un ennemi ou s'il est mort ou déjà en mouvement
+    if (this.spriteType !== "A" || this.hp <= 0 || this.isMoving) {
         return false;
     }
+    
+    const tileSize = 1280;
+    const currentCellX = Math.floor(this.x / tileSize);
+    const currentCellY = Math.floor(this.y / tileSize);
+    const playerCellX = Math.floor(player.x / tileSize);
+    const playerCellY = Math.floor(player.y / tileSize);
+    
+    // Calculer la distance entre l'ennemi et le joueur (distance Manhattan)
+    const distanceToPlayer = Math.abs(currentCellX - playerCellX) + Math.abs(currentCellY - playerCellY);
+    
+    // Si on est en contact avec le joueur, attaquer
+    if (distanceToPlayer <= 1) {
+        if (!this.lastAttackTime || (Date.now() - this.lastAttackTime) >= 2000) {
+            this.attackPlayer(player);
+            
+            // Planifier une attaque supplémentaire dans 2 secondes
+            this.lastAttackTime = Date.now();
+            setTimeout(() => {
+                if (this.hp > 0 && player.hp > 0) {
+                    const newCurrentCellX = Math.floor(this.x / tileSize);
+                    const newCurrentCellY = Math.floor(this.y / tileSize);
+                    const newPlayerCellX = Math.floor(player.x / tileSize);
+                    const newPlayerCellY = Math.floor(player.y / tileSize);
+                    const newDistanceToPlayer = Math.abs(newCurrentCellX - newPlayerCellX) + 
+                                                Math.abs(newCurrentCellY - newPlayerCellY);
+                    
+                    if (newDistanceToPlayer <= 1) {
+                        this.attackPlayer(player);
+                    }
+                }
+            }, 2000);
+        }
+        return false;
+    }
+    
+    // Zone de détection
+    const detectionRange = 5;
+    const isChasing = distanceToPlayer <= detectionRange;
+    const moveChance = isChasing ? 0.8 : 0.4;
+    
+    if (Math.random() > moveChance) {
+        return false;
+    }
+    
+    let directionToMove = null;
+    
+    if (isChasing) {
+        // Mode poursuite: essayer de se rapprocher du joueur
+        const dx = playerCellX - currentCellX;
+        const dy = playerCellY - currentCellY;
+        
+        // Choisir l'axe avec la plus grande différence
+        if (Math.abs(dx) >= Math.abs(dy)) {
+            directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
+            
+            if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+                directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
+            }
+        } else {
+            directionToMove = dy > 0 ? { dx: 0, dy: 1 } : { dx: 0, dy: -1 };
+            
+            if (!this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+                directionToMove = dx > 0 ? { dx: 1, dy: 0 } : { dx: -1, dy: 0 };
+            }
+        }
+        
+        // Si toujours bloqué, essayer une direction aléatoire
+        if (!directionToMove || !this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+            return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
+        }
+    } else {
+        // Mode aléatoire
+        return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
+    }
+    
+    // Exécuter le mouvement si une direction valide a été trouvée
+    if (directionToMove && this.isValidMove(directionToMove, map, sprites, player, currentCellX, currentCellY)) {
+        return this.executeMove(directionToMove, currentCellX, currentCellY, tileSize);
+    }
+    
+    return false;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 2.2 Pathfinding et mouvements
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Vérifier si un mouvement est valide
-    isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
-        if (!direction) return false;
-        
-        const tileSize = 1280;
-        const newCellX = currentCellX + direction.dx;
-        const newCellY = currentCellY + direction.dy;
-        
-        // Vérifier les limites de la carte
-        if (newCellX < 0 || newCellY < 0 || newCellX >= map[0].length || newCellY >= map.length) {
-            return false;
-        }
-        
-        // Vérifier si la case est vide (0 = traversable)
-        if (map[newCellY][newCellX] !== 0) {
-            return false;
-        }
-        
-        // Vérifier si le joueur est dans la case de destination
-        const playerCellX = Math.floor(player.x / tileSize);
-        const playerCellY = Math.floor(player.y / tileSize);
-        if (newCellX === playerCellX && newCellY === playerCellY) {
-            return false;
-        }
-        
-        // Vérifier s'il y a déjà un sprite sur cette case
-        for (const sprite of sprites) {
-            if (sprite !== this && sprite.isBlocking) {
-                const spriteCellX = Math.floor(sprite.x / tileSize);
-                const spriteCellY = Math.floor(sprite.y / tileSize);
-                
-                if (spriteCellX === newCellX && spriteCellY === newCellY) {
-                    return false;
-                }
+// Vérifier si un mouvement est valide
+isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
+    if (!direction) return false;
+    
+    const tileSize = 1280;
+    const newCellX = currentCellX + direction.dx;
+    const newCellY = currentCellY + direction.dy;
+    
+    // Vérifier les limites de la carte
+    if (newCellX < 0 || newCellY < 0 || newCellX >= map[0].length || newCellY >= map.length) {
+        return false;
+    }
+    
+    // Vérifier si la case est vide (< 1 = traversable, >= 1 = mur) - MODIFIÉ pour textures de sol
+    if (map[newCellY][newCellX] >= 1) {
+        return false;
+    }
+    
+    // Vérifier si le joueur est dans la case de destination
+    const playerCellX = Math.floor(player.x / tileSize);
+    const playerCellY = Math.floor(player.y / tileSize);
+    if (newCellX === playerCellX && newCellY === playerCellY) {
+        return false;
+    }
+    
+    // Vérifier s'il y a déjà un sprite sur cette case
+    for (const sprite of sprites) {
+        if (sprite !== this && sprite.isBlocking) {
+            const spriteCellX = Math.floor(sprite.x / tileSize);
+            const spriteCellY = Math.floor(sprite.y / tileSize);
+            
+            if (spriteCellX === newCellX && spriteCellY === newCellY) {
+                return false;
             }
         }
-        
-        return true;
     }
+    
+    return true;
+}
 
     // Essayer un mouvement aléatoire
     tryRandomMove(map, sprites, player, currentCellX, currentCellY) {

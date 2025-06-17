@@ -1,0 +1,63 @@
+# Modifications pour système de textures de sol par tuile
+
+## Concept développé
+- **Objectif** : Permettre de spécifier une texture de sol différente pour chaque tuile
+- **Méthode** : Utiliser la partie décimale des valeurs de carte pour identifier la texture
+- **Mapping** :
+  - `0` = texture générale (floorTexture global)
+  - `0.01` = floorimg1
+  - `0.02` = floorimg2  
+  - `0.03` = floorimg3
+  - `0.04` = floorimg4
+  - `≥ 1` = murs (inchangé)
+
+## Fonctions modifiées
+
+### 1. `loadFloorCeilingImages()` - raycaster.js
+**Modification** : Chargement de toutes les textures de sol
+- Ajout de `this.floorImageDataArray = {}`
+- Boucle pour charger floorimg1 à floorimg4 dans le tableau
+- Conservation de `this.floorImageData` pour texture par défaut
+
+### 2. `drawTexturedFloor()` - raycaster.js  
+**Modification** : Sélection de texture selon valeur de cellule
+- Ajout calcul `cellValue = this.map[cellY][cellX]`
+- Logique de sélection : si `cellValue < 1 && cellValue > 0`
+- Extraction `textureId = Math.floor(cellValue * 100)`
+- Utilisation de `textureToUse` au lieu de `this.floorImageData`
+
+### 3. `onCellHit()` - raycaster.js
+**Modification** : Détection de murs
+- Changement : `if (this.map[cellY][cellX] > 0)` → `if (this.map[cellY][cellX] >= 1)`
+
+### 4. `checkCollisions()` - Player.js
+**Modification** : Collision de mouvement
+- Changement : `map[destY][destX] !== 0` → `map[destY][destX] >= 1`
+
+### 5. `isValidMove()` - Sprites.js
+**Modification** : Pathfinding IA ennemis
+- Changement : `if (map[newCellY][newCellX] !== 0)` → `if (map[newCellY][newCellX] >= 1)`
+
+### 6. `moveRandomlyOrChase()` - Sprites.js
+**Modification** : Hérite automatiquement via `isValidMove()`
+
+### 7. `handleTeleportation()` - Player.js
+**Modification** : Aucune nécessaire (utilise coordonnées prédéfinies)
+
+### 8. `getTextureCoord()` et `getTextureCoordFast()` - raycaster.js
+**Modification** : Cache multi-textures
+- Ajout paramètre optionnel `textureId`
+- Clé de cache étendue : `baseKey_textureId`
+- Compatibilité préservée si `textureId = null`
+
+## Compatibilité
+- **100% rétrocompatible** avec cartes existantes
+- Valeur `0` = comportement identique à l'actuel
+- Valeurs `≥ 1` = murs inchangés
+- Nouvelles valeurs `0.01-0.99` = textures spécifiques
+
+## Impact technique
+- **Rendu** : 1 fonction principale modifiée
+- **Collisions** : 3 fonctions modifiées (changement simple `> 0` → `>= 1`)
+- **Cache** : 2 fonctions optimisées
+- **Chargement** : 1 fonction étendue

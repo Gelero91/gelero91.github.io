@@ -1491,41 +1491,41 @@ getCharacterData() {
 // 7.4 Téléportation et événements
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
-        // Vérifier qu'aucune autre action n'est en cours
-        if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
-            console.log("Cannot teleport - player is busy");
-            return;
-        }
-        
-        // Marquer qu'une téléportation est en cours
-        player.isTeleporting = true;
-        
-        try {
-            const tolerance = Math.PI / 6; // 30° en radians
-    
-            for (var i = 0; i < mapEventA.length; i++) {
-                // Calculer l'orientation opposée (ajout de π radians)
-                const oppositeOrientationA = (mapEventA[i][2] + Math.PI) % (2 * Math.PI);
-                const oppositeOrientationB = (mapEventB[i][2] + Math.PI) % (2 * Math.PI);
-    
-                // Vérification pour la téléportation depuis A vers B
-                if (this.checkTeleportConditionAtoB(newX, newY, tileSize, mapEventA[i], oppositeOrientationA, tolerance)) {
-                    await this.executeTeleportation(mapEventB[i], tileSize, player);
-                    break;
-                }
-    
-                // Vérification pour la téléportation depuis B vers A
-                if (this.checkTeleportConditionBtoA(newX, newY, tileSize, mapEventB[i], oppositeOrientationB, tolerance)) {
-                    await this.executeTeleportation(mapEventA[i], tileSize, player);
-                    break;
-                }
-            }
-        } finally {
-            // Toujours libérer le verrou, même en cas d'erreur
-            player.isTeleporting = false;
-        }
+async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
+    // Vérifier qu'aucune autre action n'est en cours
+    if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
+        console.log("Cannot teleport - player is busy");
+        return;
     }
+    
+    // Marquer qu'une téléportation est en cours
+    player.isTeleporting = true;
+    
+    try {
+        const tolerance = Math.PI / 6; // 30° en radians
+
+        for (var i = 0; i < mapEventA.length; i++) {
+            // Calculer l'orientation opposée (ajout de π radians)
+            const oppositeOrientationA = (mapEventA[i][2] + Math.PI) % (2 * Math.PI);
+            const oppositeOrientationB = (mapEventB[i][2] + Math.PI) % (2 * Math.PI);
+
+            // Vérification pour la téléportation depuis A vers B
+            if (this.checkTeleportConditionAtoB(newX, newY, tileSize, mapEventA[i], oppositeOrientationA, tolerance)) {
+                await this.executeTeleportation(mapEventB[i], tileSize, player);
+                break;
+            }
+
+            // Vérification pour la téléportation depuis B vers A
+            if (this.checkTeleportConditionBtoA(newX, newY, tileSize, mapEventB[i], oppositeOrientationB, tolerance)) {
+                await this.executeTeleportation(mapEventA[i], tileSize, player);
+                break;
+            }
+        }
+    } finally {
+        // Toujours libérer le verrou, même en cas d'erreur
+        player.isTeleporting = false;
+    }
+}
 
     checkTeleportConditionAtoB(newX, newY, tileSize, eventA, oppositeOrientationA, tolerance) {
         return Math.floor(newX / tileSize) === eventA[0] &&
@@ -1809,32 +1809,32 @@ getCharacterData() {
         }
     }
 
-    checkCollisions(destX, destY, map, sprites) {
-        // Vérification de collision avec mur ou limite de carte
-        let collidesWithWall = destX < 0 || destY < 0 || destX >= map[0].length || destY >= map.length || map[destY][destX] !== 0;
+checkCollisions(destX, destY, map, sprites) {
+    // Vérification de collision avec mur ou limite de carte - MODIFIÉ pour textures de sol
+    let collidesWithWall = destX < 0 || destY < 0 || destX >= map[0].length || destY >= map.length || map[destY][destX] >= 1;
+    
+    // Vérification des sprites bloquants
+    let collidesWithSprite = false;
+    let collidedSprite = null;
+    
+    for (let sprite of sprites) {
+        let spriteX = Math.floor(sprite.x / this.tileSize);
+        let spriteY = Math.floor(sprite.y / this.tileSize);
         
-        // Vérification des sprites bloquants
-        let collidesWithSprite = false;
-        let collidedSprite = null;
-        
-        for (let sprite of sprites) {
-            let spriteX = Math.floor(sprite.x / this.tileSize);
-            let spriteY = Math.floor(sprite.y / this.tileSize);
-            
-            if (spriteX === destX && spriteY === destY && sprite.isBlocking) {
-                collidesWithSprite = true;
-                collidedSprite = sprite;
-                break;
-            }
+        if (spriteX === destX && spriteY === destY && sprite.isBlocking) {
+            collidesWithSprite = true;
+            collidedSprite = sprite;
+            break;
         }
-        
-        return {
-            hasCollision: collidesWithWall || collidesWithSprite,
-            withWall: collidesWithWall,
-            withSprite: collidesWithSprite,
-            sprite: collidedSprite
-        };
     }
+    
+    return {
+        hasCollision: collidesWithWall || collidesWithSprite,
+        withWall: collidesWithWall,
+        withSprite: collidesWithSprite,
+        sprite: collidedSprite
+    };
+}
 
     async handleCollisionMovement(collisionResult, movement, config) {
         this.isMoving = true;
