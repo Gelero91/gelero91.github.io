@@ -2403,6 +2403,7 @@ static showIntroCinematic() {
                 ceilingRender = mapData.playerStart.ceilingRender;
                 ceilingHeight = mapData.playerStart.ceilingHeight;
                 ceilingTexture = mapData.playerStart.ceilingTexture;
+                console.log("if true : " + ceilingTexture);
                 floorTexture = mapData.playerStart.floorTexture;
                 
                 console.log(`Ceiling render OFF: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
@@ -2410,8 +2411,8 @@ static showIntroCinematic() {
                 // Turn ceiling rendering on with specific values
                 ceilingRender = true;
                 ceilingHeight = 1;
-                ceilingTexture = 1;
-                floorTexture = floor || 1; // Use the determined floor or default to 2
+                ceilingTexture = mapData.playerStart.ceilingTexture;
+                floorTexture = floor || 3; // Use the determined floor or default to 2
                 
                 console.log(`Ceiling render ON: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
             }

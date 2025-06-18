@@ -1165,7 +1165,7 @@ async loadFloorCeilingImages() {
                 const floorImg = await loadImageFromBase64(IMAGES[floorTextures[i]]);
                 context.drawImage(floorImg, 0, 0, floorImg.width, floorImg.height);
                 this.floorImageDataArray[i] = context.getImageData(0, 0, this.textureSize, this.textureSize);
-                console.log(`✅ Texture de sol ${i} (${floorTextures[i]}) chargée`);
+                // console.log(`✅ Texture de sol ${i} (${floorTextures[i]}) chargée`);
             }
         }
 
@@ -1208,7 +1208,7 @@ async loadFloorCeilingImages() {
                 spriteCanvas.height = spriteImage.height;
                 spriteContext.drawImage(spriteImage, 0, 0, spriteImage.width, spriteImage.height);
                 this["spriteImageData" + (i + 1)] = spriteContext.getImageData(0, 0, spriteImage.width, spriteImage.height);
-                console.log(`✅ Texture ${i + 1} (${spriteId}) chargée avec succès`);
+                // console.log(`✅ Texture ${i + 1} (${spriteId}) chargée avec succès`);
             }
         }
 

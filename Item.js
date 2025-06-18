@@ -182,7 +182,7 @@ Item.itemList = [{
         armor: 0,
         criti: 0,
         price: 1,
-        icon: IMAGES["icons/sword"] || "data:image/png;base64,..."
+        icon: "assets/icons/shortsword.png"
     },
     {
         id: 2,
