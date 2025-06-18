@@ -2263,14 +2263,14 @@ checkCollisions(destX, destY, map, sprites) {
 
     async handleDoorAction(sprite) {
         // Fondu vers le noir
-        await Raycaster.fadeToBlack(300);
+        await Raycaster.fadeToBlack(100);
         
         // Appeler door pendant que l'écran est noir
         await sprite.door(this, null, this.raycaster);
         await this.raycaster.loadFloorCeilingImages();
         
         // Fondu depuis le noir
-        await Raycaster.fadeFromBlack(300);
+        await Raycaster.fadeFromBlack(150);
         
         Sprite.terminalLog('You enter/exit the area.');
         

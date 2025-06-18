@@ -2350,89 +2350,135 @@ static showIntroCinematic() {
 // 7.1 Gestion des portes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    async door(player, textureSet, raycaster) {  // Ajoutez raycaster comme paramètre
-        // Vérifier qu'aucune autre action n'est en cours
-        if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
-            console.log("Cannot use door - player is busy");
+async door(player, textureSet, raycaster) {
+    // Vérification du verrou global de porte AVANT tout
+    if (doorLockActive) {
+        console.log("Door action already in progress - aborting");
+        return;
+    }
+
+    // Activer immédiatement le verrou global
+    doorLockActive = true;
+    commandBlocking = true;
+
+    // Vérifier le cooldown
+    const currentTime = Date.now();
+    if (!this.lastDoorTime) {
+        this.lastDoorTime = 0;
+    }
+    
+    const timeSinceLastDoor = currentTime - this.lastDoorTime;
+    
+    if (timeSinceLastDoor < 500) { // 500ms de cooldown
+        doorLockActive = false;
+        commandBlocking = false;
+        return;
+    }
+
+    // Vérifier qu'aucune autre action n'est en cours
+    if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
+        console.log("Cannot use door - player is busy");
+        doorLockActive = false;
+        commandBlocking = false;
+        return;
+    }
+    
+    // Mettre à jour le temps de la dernière action
+    this.lastDoorTime = currentTime;
+    
+    // Marquer qu'une action de porte est en cours
+    player.isDooring = true;
+    
+    try {
+        // Store initial position
+        const initialX = player.x;
+        const initialY = player.y;
+        
+        // Determine floor texture to use
+        let floor;
+        if (textureSet === null) {
+            floor = 1;
+        } else if (textureSet) {
+            floor = floorType;
+        }
+    
+        // Calculate new position based on player's facing direction
+        const tileSize = 1280;
+        const teleportDistance = 2 * tileSize;
+        
+        // Apply teleportation based on direction
+        if (player.quadrant === "nord") {
+            player.y -= teleportDistance;
+        } else if (player.quadrant === "est") {
+            player.x += teleportDistance;
+        } else if (player.quadrant === "sud") {
+            player.y += teleportDistance;
+        } else if (player.quadrant === "ouest") {
+            player.x -= teleportDistance;
+        } else {
+            console.log("Invalid quadrant - diagonal movement not supported");
+            // Libérer les verrous avant de sortir
+            player.isDooring = false;
+            doorLockActive = false;
+            commandBlocking = false;
             return;
         }
         
-        // Marquer qu'une action de porte est en cours
-        player.isDooring = true;
-        
-        try {
-            // Store initial position for debugging
-            const initialX = player.x;
-            const initialY = player.y;
-            
-            // Determine floor texture to use
-            let floor;
-            if (textureSet === null) {
-                floor = 1;
-            } else if (textureSet) {
-                // If a texture set is provided, use it
-                floor = floorType;
-            }
-        
-            // Calculate new position based on player's facing direction
-            // The teleportation distance is 2 tiles (2 * tileSize)
-            const tileSize = 1280; // Make sure this matches the game's tileSize
-            const teleportDistance = 2 * tileSize;
-            
-            // Log current position and quadrant for debugging
-            console.log(`Before teleport: x=${player.x}, y=${player.y}, quadrant=${player.quadrant}`);
-            
-            // Apply teleportation based on direction
-            // Using more precise quadrant detection
-            if (player.quadrant === "nord") {
-                player.y -= teleportDistance;
-            } else if (player.quadrant === "est") {
-                player.x += teleportDistance;
-            } else if (player.quadrant === "sud") {
-                player.y += teleportDistance;
-            } else if (player.quadrant === "ouest") {
-                player.x -= teleportDistance;
-            } else {
-                console.log("Invalid quadrant or diagonal movement not supported");
-                return; // Exit without making any changes
-            }
-            
-            // Toggle ceiling rendering and update environment properties
-            if (ceilingRender === true) {
+        // Toggle ceiling rendering and update environment properties
+        if (ceilingRender === true) {
+            // Vérifier que mapData existe
+            if (mapData && mapData.playerStart) {
                 // Restore map default values
-                ceilingRender = mapData.playerStart.ceilingRender;
-                ceilingHeight = mapData.playerStart.ceilingHeight;
-                ceilingTexture = mapData.playerStart.ceilingTexture;
-                console.log("if true : " + ceilingTexture);
-                floorTexture = mapData.playerStart.floorTexture;
-                
-                console.log(`Ceiling render OFF: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
+                ceilingRender = mapData.playerStart.ceilingRender || false;
+                ceilingHeight = mapData.playerStart.ceilingHeight || 2;
+                ceilingTexture = mapData.playerStart.ceilingTexture || 1;
+                floorTexture = mapData.playerStart.floorTexture || 1;
             } else {
-                // Turn ceiling rendering on with specific values
-                ceilingRender = true;
-                ceilingHeight = 1;
-                ceilingTexture = mapData.ceilingTexture || 3;
-                floorTexture = floor || 3; // Use the determined floor or default to 2q
-                
-                console.log(`Ceiling render ON: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
+                // Valeurs par défaut
+                ceilingRender = false;
+                ceilingHeight = 2;
+                ceilingTexture = 1;
+                floorTexture = 1;
+            }
+        } else {
+            // Turn ceiling rendering on with specific values
+            ceilingRender = true;
+            ceilingHeight = 1;
+            
+            // Utiliser la texture du plafond de la carte si disponible
+            if (mapData && mapData.ceilingTexture) {
+                ceilingTexture = mapData.ceilingTexture;
+            } else {
+                ceilingTexture = 3;
             }
             
-            // Recharger les textures - Utiliser l'instance raycaster passée en paramètre
-            if (raycaster) {
-                raycaster.loadFloorCeilingImages();
-            }
-            
-            // Pause courte pour permettre la mise à jour visuelle
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Log the new position for debugging
-            console.log(`After teleport: x=${player.x}, y=${player.y}, moved: x=${player.x - initialX}, y=${player.y - initialY}`);
-            
-        } finally {
-            // Toujours libérer le verrou, même en cas d'erreur
-            player.isDooring = false;
+            floorTexture = floor || 3;
         }
+        
+        // Recharger les textures
+        if (raycaster) {
+            raycaster.loadFloorCeilingImages();
+        }
+        
+        // Pause courte pour permettre la mise à jour visuelle
+        // await new Promise(resolve => setTimeout(resolve, 50));
+        
+        // Attendre un peu plus pour s'assurer que tout est terminé
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+    } catch (error) {
+        console.error("Error in door function:", error);
+    } finally {
+        // Toujours libérer les verrous
+        player.isDooring = false;
+        commandBlocking = false;
+        
+        // Délai supplémentaire avant de libérer le verrou global
+        setTimeout(() => {
+            doorLockActive = false;
+        }, 100);
     }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 7.2 Transitions entre zones
