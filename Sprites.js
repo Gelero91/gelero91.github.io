@@ -2411,8 +2411,8 @@ static showIntroCinematic() {
                 // Turn ceiling rendering on with specific values
                 ceilingRender = true;
                 ceilingHeight = 1;
-                ceilingTexture = mapData.playerStart.ceilingTexture;
-                floorTexture = floor || 3; // Use the determined floor or default to 2
+                ceilingTexture = mapData.ceilingTexture || 3;
+                floorTexture = floor || 3; // Use the determined floor or default to 2q
                 
                 console.log(`Ceiling render ON: height=${ceilingHeight}, texture=${ceilingTexture}, floor=${floorTexture}`);
             }
