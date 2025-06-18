@@ -657,7 +657,7 @@ const maps = [
         "Orientation": 4.71238898038469,
         "ceilingRender": false,
         "ceilingHeight": 2,
-        "ceilingTexture": 1,
+        "ceilingTexture": 3,
         "floorTexture": 1
       }
     },
