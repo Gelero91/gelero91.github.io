@@ -1568,46 +1568,49 @@ async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
 // 7.5 Méthode move() principale
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    async move(timeElapsed, map, eventA, eventB, sprites) {
-        // PARAMÈTRES AJUSTABLES DE MOUVEMENT
-        const movementConfig = this.getMovementConfig();
+async move(timeElapsed, map, eventA, eventB, sprites) {
+    // PARAMÈTRES AJUSTABLES DE MOUVEMENT
+    const movementConfig = this.getMovementConfig();
+    
+    // Récupération des entrées utilisateur
+    const inputs = this.getUserInputs();
+    
+    // Réinitialiser les états des boutons
+    this.resetButtonStates();
+    
+    // Si les commandes sont bloquées, ignorer les déplacements
+    if (commandBlocking || !this.turn) {
+        return;
+    }
+    
+    // Éviter les mouvements multiples pendant une animation
+    if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
+        return;
+    }
+    
+    // Traitement des rotations
+    if (inputs.left || inputs.right) {
+        await this.handleRotation(inputs.left, inputs.right, movementConfig);
+        return;
+    }
+    
+    // Traitement des mouvements
+    const movement = this.calculateMovement(inputs);
+    if (movement.requested) {
+        await this.handleMovement(movement, map, sprites, movementConfig, timeElapsed, eventA, eventB);
+    }
+    
+    // Traitement des actions
+    if (inputs.action && this.turn) {
+        await this.handleSpriteAction(inputs.action, sprites);
+        // IMPORTANT : Réinitialiser actionButtonClicked APRÈS le traitement
+        this.actionButtonClicked = false;
         
-        // Récupération des entrées utilisateur
-        const inputs = this.getUserInputs();
-        
-        // Réinitialiser les états des boutons
-        this.resetButtonStates();
-        
-        // Si les commandes sont bloquées, ignorer les déplacements
-        if (commandBlocking || !this.turn) {
-            return;
-        }
-        
-        // Éviter les mouvements multiples pendant une animation
-        if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
-            return;
-        }
-        
-        // Traitement des rotations
-        if (inputs.left || inputs.right) {
-            await this.handleRotation(inputs.left, inputs.right, movementConfig);
-            return;
-        }
-        
-        // Traitement des mouvements
-        const movement = this.calculateMovement(inputs);
-        if (movement.requested) {
-            await this.handleMovement(movement, map, sprites, movementConfig, timeElapsed, eventA, eventB);
-        }
-        
-        // Traitement des actions
-        if (inputs.action && this.turn) {
-            await this.handleSpriteAction(inputs.action, sprites);
-            if (inputs.action) {
-                await this.handleTeleportation(this, eventA, eventB, this.x, this.y, this.tileSize);
-            }
+        if (inputs.action) {
+            await this.handleTeleportation(this, eventA, eventB, this.x, this.y, this.tileSize);
         }
     }
+}
 
     getMovementConfig() {
         return {
@@ -1633,6 +1636,8 @@ async handleTeleportation(player, mapEventA, mapEventB, newX, newY, tileSize) {
         let right = this.keysDown[KEY_RIGHT] || this.keysDown[KEY_D] || this.joystickRightClicked || this.turnRightButtonClicked;
         let dodgeLeft = this.button7Clicked;
         let dodgeRight = this.button9Clicked;
+        
+        // MODIFICATION : Capturer l'état et le réinitialiser immédiatement
         const action = this.actionButtonClicked || this.keysDown[KEY_F] || this.keysDown[KEY_SPACE] || this.buttonAClicked;
         
         // Sauvegarde l'état des touches pour vérification ultérieure
@@ -2112,48 +2117,48 @@ checkCollisions(destX, destY, map, sprites) {
 // 8.1 Actions avec sprites
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    async handleSpriteAction(action, sprites) {
-        if (!action || !this || !this.turn) return;
-    
-        // Vérifier qu'aucune action n'est en cours
-        if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
-            console.log("Cannot perform action - player is busy");
-            return;
-        }
-    
-        // Vérifier si suffisamment de temps s'est écoulé depuis la dernière attaque
-        const currentTime = Date.now();
-        if (currentTime - this.lastAttackTime < 2000) {
-            Sprite.terminalLog("Vous n'êtes pas prêt à attaquer de nouveau.");
-            return;
-        }
+async handleSpriteAction(action, sprites) {
+    if (!action || !this || !this.turn) return;
 
-        const { frontX, frontY } = this.calculateFrontPosition();
-
-        console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
-        console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
-
-        let spriteFound = false;
-        for (const sprite of sprites) {
-            const spriteX = Math.floor(sprite.x / this.tileSize);
-            const spriteY = Math.floor(sprite.y / this.tileSize);
-            
-            if (spriteX === frontX && spriteY === frontY) {
-                spriteFound = true;
-                console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
-                
-                await this.executeSpriteAction(sprite, currentTime);
-                break;
-            }
-        }
-        
-        if (!spriteFound) {
-            console.log("No sprite found at front position");
-        }
-        
-        // Réinitialisation de la touche d'action après utilisation
-        this.actionButtonClicked = false;
+    // Vérifier qu'aucune action n'est en cours
+    if (this.isMoving || this.isRotating || this.isTeleporting || this.isDooring) {
+        console.log("Cannot perform action - player is busy");
+        return;
     }
+
+    // Vérifier si suffisamment de temps s'est écoulé depuis la dernière attaque
+    const currentTime = Date.now();
+    if (currentTime - this.lastAttackTime < 2000) {
+        Sprite.terminalLog("Vous n'êtes pas prêt à attaquer de nouveau.");
+        return;
+    }
+
+    const { frontX, frontY } = this.calculateFrontPosition();
+
+    console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
+    console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
+
+    let spriteFound = false;
+    for (const sprite of sprites) {
+        const spriteX = Math.floor(sprite.x / this.tileSize);
+        const spriteY = Math.floor(sprite.y / this.tileSize);
+        
+        if (spriteX === frontX && spriteY === frontY) {
+            spriteFound = true;
+            console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
+            
+            await this.executeSpriteAction(sprite, currentTime);
+            break;
+        }
+    }
+    
+    if (!spriteFound) {
+        console.log("No sprite found at front position");
+    }
+    
+    // SUPPRIMÉ : this.actionButtonClicked = false;
+    // La réinitialisation se fait maintenant dans move()
+}
 
     async executeSpriteAction(sprite, currentTime) {
         switch (sprite.spriteType) {
@@ -2167,6 +2172,7 @@ checkCollisions(destX, destY, map, sprites) {
                 await this.handleDoorAction(sprite);
                 return; // Important: sortir immédiatement pour éviter handleTeleportation
             case 0:
+                // case 2 juste après pour obtenir le même comportement
             case 2:
                 await this.handleDialogueAction(sprite);
                 break;

@@ -166,104 +166,126 @@ class Raycaster {
 // 2.1 Constructeur principal
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    constructor(
-        mainCanvas,
-        displayWidth = 330,
-        displayHeight = 190,
-        tileSize = 1280,
-        textureSize = 64,
-        fovDegrees = 90
-    ) {
-        // Initialisation de la carte
-        this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
-        
-        // Propriétés de base
-        this.stripWidth = 1;
-        this.ceilingHeight = 1;
-        this.mainCanvas = mainCanvas;
-        this.mapWidth = this.map[0].length;
-        this.mapHeight = this.map.length;
-        this.displayWidth = displayWidth;
-        this.displayHeight = displayHeight;
-        this.rayCount = Math.ceil(displayWidth / this.stripWidth);
-        this.tileSize = tileSize;
-        this.worldWidth = this.mapWidth * this.tileSize;
-        this.worldHeight = this.mapHeight * this.tileSize;
-        this.textureSize = textureSize;
-        this.fovRadians = (fovDegrees * Math.PI) / 180;
-        this.viewDist = (this.displayWidth >> 1) / Math.tan(this.fovRadians / 2);
-        this.rayAngles = null;
-        this.viewDistances = null;
-        this.backBuffer = null;
+constructor(
+    mainCanvas,
+    displayWidth = 330,
+    displayHeight = 190,
+    tileSize = 1280,
+    textureSize = 64,
+    fovDegrees = 90
+) {
+    // Initialisation de la carte
+    this.initMap(currentMap, mapData.map, mapData.eventA, mapData.eventB);
+    
+    // Propriétés de base
+    this.stripWidth = 1;
+    this.ceilingHeight = 1;
+    this.mainCanvas = mainCanvas;
+    this.mapWidth = this.map[0].length;
+    this.mapHeight = this.map.length;
+    this.displayWidth = displayWidth;
+    this.displayHeight = displayHeight;
+    
+    // MODIFICATION : Calcul du nombre de rayons avec interpolation
+    this.rayCount = Math.ceil(displayWidth / this.stripWidth); // Nombre total de strips
+    this.actualRayCount = Math.ceil(this.rayCount / 2); // Nombre de rayons effectivement lancés
+    
+    this.tileSize = tileSize;
+    this.worldWidth = this.mapWidth * this.tileSize;
+    this.worldHeight = this.mapHeight * this.tileSize;
+    this.textureSize = textureSize;
+    this.fovRadians = (fovDegrees * Math.PI) / 180;
+    this.viewDist = (this.displayWidth >> 1) / Math.tan(this.fovRadians / 2);
+    this.rayAngles = null;
+    this.viewDistances = null;
+    this.backBuffer = null;
 
-        // Contexte et données d'image
-        this.mainCanvasContext = null;
-        this.screenImageData = null;
-        this.textureIndex = 0;
-        this.textureImageDatas = [];
-        this.texturesLoadedCount = 0;
-        this.texturesLoaded = false;
+    // Contexte et données d'image
+    this.mainCanvasContext = null;
+    this.screenImageData = null;
+    this.textureIndex = 0;
+    this.textureImageDatas = [];
+    this.texturesLoadedCount = 0;
+    this.texturesLoaded = false;
 
-        // IA / Deplacement Ennemis
-        this.enemyMoveCounter = 0;
-        
-        // Marqueur pour savoir si le jeu est prêt
-        this.gameReady = false;
-        
-        // OPTIMISATION : Caches et tables de lookup
-        this.textureCache = new Map();
-        this.spriteSpatialIndex = new Map();
-        this.sinTable = null;
-        this.cosTable = null;
-        this.tanTable = null;
-        this.fogTable = null;
-        this.angleNormTable = null;
-        this.fishEyeTable = null;
-        this.textureCoordTable = null;
-        
-        // OPTIMISATION : Constantes pré-calculées
-        this.halfDisplayWidth = this.displayWidth >> 1;
-        this.halfDisplayHeight = this.displayHeight >> 1;
-        this.tileSizeSquared = this.tileSize * this.tileSize;
-        this.maxDistanceSquared = (this.worldWidth * this.worldWidth) + (this.worldHeight * this.worldHeight);
-        
-        // Initialisation synchrone
-        this.initPlayer();
-        this.initSprites(mapData.sprites);
-        this.player.bindKeysAndButtons();
-        this.initScreen();
-        this.drawMiniMap();
+    // IA / Deplacement Ennemis
+    this.enemyMoveCounter = 0;
+    
+    // Marqueur pour savoir si le jeu est prêt
+    this.gameReady = false;
+    
+    // OPTIMISATION : Caches et tables de lookup
+    this.textureCache = new Map();
+    this.spriteSpatialIndex = new Map();
+    this.sinTable = null;
+    this.cosTable = null;
+    this.tanTable = null;
+    this.fogTable = null;
+    this.angleNormCache = new Map();
+    this.angleNormCacheLimit = 5000;
+    this.fishEyeTable = null;
+    this.textureCoordTable = null;
+    
+    // AJOUT : Tables pour l'interpolation
+    this.actualRayAngles = null; // Angles des rayons effectivement lancés
+    this.actualViewDistances = null; // Distances pour les rayons effectifs
+    this.actualRayHits = []; // Stockage temporaire des hits pour interpolation
+    
+    // OPTIMISATION : Constantes pré-calculées
+    this.halfDisplayWidth = this.displayWidth >> 1;
+    this.halfDisplayHeight = this.displayHeight >> 1;
+    this.tileSizeSquared = this.tileSize * this.tileSize;
+    this.maxDistanceSquared = (this.worldWidth * this.worldWidth) + (this.worldHeight * this.worldHeight);
+    
+    // Initialisation synchrone
+    this.initPlayer();
+    this.initSprites(mapData.sprites);
+    this.player.bindKeysAndButtons();
+    this.initScreen();
+    this.drawMiniMap();
 
-        // IMPORTANT : Ces méthodes DOIVENT être appelées dans cet ordre
-        this.createRayAngles();
-        this.createViewDistances();
-        this.initTrigTables();
-        this.initFogTable();
-        this.initAngleTable();
-        this.initFishEyeTable();
-        this.initTextureTable();
-        this.initFloorCeilingOptimizations()
+    // IMPORTANT : Ces méthodes DOIVENT être appelées dans cet ordre
+    this.createRayAngles();
+    this.createViewDistances();
+    this.initTrigTables();
+    this.initFogTable();
+    this.initAngleTable();
+    this.initFishEyeTable();
+    this.initTextureTable();
+    this.initFloorCeilingOptimizations();
 
-        this.past = Date.now();
+    this.past = Date.now();
+    
+    // Variables pour le suivi des performances
+    this.fpsCounter = null;
+    this.perfTested = false;
+    this.tablesChecked = false;
+    this.loadingMessageShown = false;
+    this.warnedMissingTextures = null;
+    this.lastCeilingRender = null;
+    
+    // Variables pour l'animation
+    this.skyboxAnimationOffset = 0;
+    
+    // Charger les ressources de manière asynchrone
+    this.initializeResources().then(() => {
+        this.gameReady = true;
+        console.log("✅ Toutes les ressources sont chargées ! Le jeu peut démarrer.");
+        console.log(`📊 Optimisation active : ${this.actualRayCount} rayons lancés pour ${this.rayCount} strips (économie de ${Math.round((1 - this.actualRayCount/this.rayCount) * 100)}%)`);
         
-        // Charger les ressources de manière asynchrone
-        this.initializeResources().then(() => {
-            this.gameReady = true;
-            console.log("✅ Toutes les ressources sont chargées ! Le jeu peut démarrer.");
-            
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) {
-                loadingScreen.style.display = 'none';
-            }
-        }).catch(error => {
-            console.error("❌ Erreur lors du chargement des ressources:", error);
-            const errorMessage = document.getElementById('errorMessage');
-            if (errorMessage) {
-                errorMessage.textContent = "Erreur lors du chargement du jeu. Veuillez rafraîchir la page.";
-                errorMessage.style.display = 'block';
-            }
-        });
-    }
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
+    }).catch(error => {
+        console.error("❌ Erreur lors du chargement des ressources:", error);
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorMessage) {
+            errorMessage.textContent = "Erreur lors du chargement du jeu. Veuillez rafraîchir la page.";
+            errorMessage.style.display = 'block';
+        }
+    });
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 2.2 Initialisation des ressources
@@ -287,19 +309,40 @@ class Raycaster {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Initialiser les tables trigonométriques
+// 8. Optimiser initTrigTables pour les rayons effectifs
     initTrigTables() {
-        this.sinTable = new Float32Array(this.rayCount);
-        this.cosTable = new Float32Array(this.rayCount);
-        this.tanTable = new Float32Array(this.rayCount);
+        // Tables pour les rayons effectifs
+        this.sinTable = new Float32Array(this.actualRayCount);
+        this.cosTable = new Float32Array(this.actualRayCount);
+        this.tanTable = new Float32Array(this.actualRayCount);
         
-        for (let i = 0; i < this.rayCount; i++) {
-            const angle = this.rayAngles[i];
+        // Tables complètes pour compatibilité
+        this.sinTableFull = new Float32Array(this.rayCount);
+        this.cosTableFull = new Float32Array(this.rayCount);
+        this.tanTableFull = new Float32Array(this.rayCount);
+        
+        for (let i = 0; i < this.actualRayCount; i++) {
+            const angle = this.actualRayAngles[i];
             this.sinTable[i] = Math.sin(angle);
             this.cosTable[i] = Math.cos(angle);
             this.tanTable[i] = Math.tan(angle);
+            
+            // Remplir aussi les tables complètes
+            let stripIdx = i * 2;
+            this.sinTableFull[stripIdx] = this.sinTable[i];
+            this.cosTableFull[stripIdx] = this.cosTable[i];
+            this.tanTableFull[stripIdx] = this.tanTable[i];
         }
         
-        console.log("Tables trigonométriques initialisées");
+        // Interpoler les valeurs manquantes
+        for (let i = 0; i < this.actualRayCount - 1; i++) {
+            let stripIdx = i * 2 + 1;
+            this.sinTableFull[stripIdx] = (this.sinTable[i] + this.sinTable[i + 1]) / 2;
+            this.cosTableFull[stripIdx] = (this.cosTable[i] + this.cosTable[i + 1]) / 2;
+            this.tanTableFull[stripIdx] = (this.tanTable[i] + this.tanTable[i + 1]) / 2;
+        }
+        
+        console.log("Tables trigonométriques optimisées initialisées");
     }
 
     // Initialiser la table de brouillard
@@ -477,9 +520,15 @@ class Raycaster {
         this.updateMiniMap();
         
         let rayHits = [];
-        this.resetSpriteHits();
+        // MODIFICATION : Plus besoin de réinitialiser les hits de sprites
+        // this.resetSpriteHits(); // SUPPRIMÉ
+        
         this.castRays(rayHits);
-        this.sortRayHits(rayHits);
+        
+        // MODIFICATION : sortRayHits n'est plus nécessaire car on n'a plus de sprites dans rayHits
+        // mais on peut le garder au cas où pour s'assurer que les murs sont triés correctement
+        // this.sortRayHits(rayHits); // OPTIONNEL
+        
         this.drawWorld(rayHits);
         
         // IA / Deplacements ennemis
@@ -527,13 +576,12 @@ class Raycaster {
         this.fpsCounter.frames++;
         const nowPerf = performance.now();
         
-        // affichaged du compteur
+        // affichage fps
         if (nowPerf - this.fpsCounter.lastTime >= 1000) {
             console.log(`FPS: ${this.fpsCounter.frames}`);
             this.fpsCounter.frames = 0;
             this.fpsCounter.lastTime = nowPerf;
         }
-        
 
         // Test de performance des optimisations
         if (!this.perfTested && this.fpsCounter && this.fpsCounter.frames > 100) {
@@ -573,7 +621,7 @@ class Raycaster {
             this2.gameCycle();
         });
     }
-        
+            
     // Mettre à jour l'index spatial des sprites
     updateSpriteSpatialIndex() {
         this.spriteSpatialIndex.clear();
@@ -1222,48 +1270,62 @@ async loadFloorCeilingImages() {
 // 4.3 Rendu du monde
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    drawWorld(rayHits) {
-        this.ceilingHeight = ceilingHeight;
+// REMPLACER la méthode drawWorld existante dans Raycaster
+drawWorld(rayHits) {
+    this.ceilingHeight = ceilingHeight;
 
-        if (!this.backBuffer) {
-            this.backBuffer = this.mainCanvasContext.createImageData(
-                this.displayWidth,
-                this.displayHeight
-            );
-        }
-
-        let texturedFloorOn = true;
-
-        if (texturedFloorOn) {
-            this.drawTexturedFloor(rayHits);
-        } else {
-            this.drawSolidFloor();
-        }
-
-        let texturedCeilingOn = ceilingRender;
-
-        if (texturedCeilingOn) {
-            this.drawTexturedCeiling(rayHits);
-        } else {
-            this.drawSkybox();
-        }
-        
-        for (let rayHit of rayHits) {
-            if (rayHit.sprite) {
-                this.drawSpriteStrip(rayHit);
-            } else {
-                let wallScreenHeight = Math.round(
-                    (this.viewDist / rayHit.correctDistance) * this.tileSize
-                );
-                let textureX =
-                    (rayHit.horizontal ? this.textureSize : 0) +
-                    (rayHit.tileX / this.tileSize) * this.textureSize;
-                let textureY = this.textureSize * (rayHit.wallType - 1);
-                this.drawWallStrip(rayHit, textureX, textureY, wallScreenHeight);
-            }
-        }
-        this.mainCanvasContext.putImageData(this.backBuffer, 0, 0);
+    if (!this.backBuffer) {
+        this.backBuffer = this.mainCanvasContext.createImageData(
+            this.displayWidth,
+            this.displayHeight
+        );
     }
+
+    // Rendu du sol
+    let texturedFloorOn = true;
+    if (texturedFloorOn) {
+        this.drawTexturedFloor(rayHits);
+    } else {
+        this.drawSolidFloor();
+    }
+
+    // Rendu du plafond/skybox
+    let texturedCeilingOn = ceilingRender;
+    if (texturedCeilingOn) {
+        this.drawTexturedCeiling(rayHits);
+    } else {
+        this.drawSkybox();
+    }
+    
+    // Créer la carte des distances des murs pour chaque colonne
+    const wallDistances = this.createWallDistanceMap(rayHits);
+    
+    // PHASE 1 : Dessiner tous les murs
+    for (let rayHit of rayHits) {
+        // Ne dessiner que les murs (pas de sprites dans rayHits maintenant)
+        if (!rayHit.sprite) {
+            let wallScreenHeight = Math.round(
+                (this.viewDist / rayHit.correctDistance) * this.tileSize
+            );
+            let textureX =
+                (rayHit.horizontal ? this.textureSize : 0) +
+                (rayHit.tileX / this.tileSize) * this.textureSize;
+            let textureY = this.textureSize * (rayHit.wallType - 1);
+            this.drawWallStrip(rayHit, textureX, textureY, wallScreenHeight);
+        }
+    }
+    
+    // PHASE 2 : Collecter et dessiner tous les sprites visibles
+    const visibleSprites = this.collectVisibleSprites();
+    
+    // Dessiner chaque sprite (du plus loin au plus proche)
+    for (let spriteData of visibleSprites) {
+        this.drawDirectSprite(spriteData, wallDistances);
+    }
+    
+    // Appliquer le backbuffer à l'écran
+    this.mainCanvasContext.putImageData(this.backBuffer, 0, 0);
+}
 
     // Gestion prototype des différentes textures et hauteurs
     drawTexturedRect(
@@ -1593,187 +1655,187 @@ getTextureCoordFast(worldX, worldY, textureId = null) {
 
     // VERSION OPTIMISÉE de drawTexturedFloor
 // VERSION OPTIMISÉE de drawTexturedFloor
-drawTexturedFloor(rayHits) {
-    const centerY = this.halfDisplayHeight;
-    const eyeHeight = (this.tileSize >> 1) + this.player.z;
-    
-    // Pré-calculer les distances une fois par frame
-    if (!this.floorDistanceCache || this.floorDistanceCacheHeight !== eyeHeight) {
-        this.floorDistanceCache = new Float32Array(this.displayHeight);
-        this.floorDistanceCacheHeight = eyeHeight;
+    drawTexturedFloor(rayHits) {
+        const centerY = this.halfDisplayHeight;
+        const eyeHeight = (this.tileSize >> 1) + this.player.z;
         
-        for (let y = centerY; y < this.displayHeight; y++) {
-            const dy = y - centerY;
-            if (dy > 0) {
-                this.floorDistanceCache[y] = eyeHeight / dy;
+        // Pré-calculer les distances une fois par frame
+        if (!this.floorDistanceCache || this.floorDistanceCacheHeight !== eyeHeight) {
+            this.floorDistanceCache = new Float32Array(this.displayHeight);
+            this.floorDistanceCacheHeight = eyeHeight;
+            
+            for (let y = centerY; y < this.displayHeight; y++) {
+                const dy = y - centerY;
+                if (dy > 0) {
+                    this.floorDistanceCache[y] = eyeHeight / dy;
+                }
             }
         }
-    }
-    
-    // Créer une lookup table pour les coordonnées de texture
-    const textureSizeReciprocal = 1 / this.tileSize;
-    const textureScale = this.textureSize * textureSizeReciprocal;
-    
-    // Pré-calculer les constantes de distance
-    const NEAR_DISTANCE = this.tileSize << 2;    // * 4
-    const MID_DISTANCE = this.tileSize * 6;
-    const FAR_DISTANCE = this.tileSize << 3;     // * 8
-    const VERY_FAR_DISTANCE = this.tileSize * 10;
-    
-    // Buffer temporaire pour stocker les pixels d'une colonne
-    const columnBuffer = new Uint8Array(this.displayHeight * 4);
-    
-    for (let i = 0; i < rayHits.length; i++) {
-        const rayHit = rayHits[i];
-        const wallScreenHeight = this.stripScreenHeight(
-            this.viewDist,
-            rayHit.correctDistance,
-            this.tileSize
-        );
         
-        const screenX = rayHit.strip * this.stripWidth;
-        const currentViewDistance = this.viewDistances[rayHit.strip];
+        // Créer une lookup table pour les coordonnées de texture
+        const textureSizeReciprocal = 1 / this.tileSize;
+        const textureScale = this.textureSize * textureSizeReciprocal;
         
-        // Utiliser les tables trigonométriques si disponibles
-        const stripIdx = rayHit.strip;
-        const rayAngle = this.player.rot + this.rayAngles[stripIdx];
-        const cosRayAngle = Math.cos(rayAngle);
-        const sinRayAngle = Math.sin(rayAngle);
+        // Pré-calculer les constantes de distance
+        const NEAR_DISTANCE = this.tileSize << 2;    // * 4
+        const MID_DISTANCE = this.tileSize * 6;
+        const FAR_DISTANCE = this.tileSize << 3;     // * 8
+        const VERY_FAR_DISTANCE = this.tileSize * 10;
         
-        // Pré-calculer les facteurs de direction
-        const xFactor = cosRayAngle;
-        const yFactor = -sinRayAngle;
+        // Buffer temporaire pour stocker les pixels d'une colonne
+        const columnBuffer = new Uint8Array(this.displayHeight * 4);
         
-        let screenY = Math.max(
-            centerY,
-            ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight
-        ) | 0;
-        
-        let lastPixel = null;
-        let lastPixelStep = 1;
-        let bufferIdx = 0;
-        
-        // Dérouler partiellement la boucle pour les cas courants
-        while (screenY < this.displayHeight) {
-            const baseDistance = this.floorDistanceCache[screenY];
-            const floorDistance = baseDistance * currentViewDistance;
+        for (let i = 0; i < rayHits.length; i++) {
+            const rayHit = rayHits[i];
+            const wallScreenHeight = this.stripScreenHeight(
+                this.viewDist,
+                rayHit.correctDistance,
+                this.tileSize
+            );
             
-            // Détermination rapide du pixelStep
-            let pixelStep;
-            if (floorDistance < NEAR_DISTANCE) {
-                pixelStep = 1;
-            } else if (floorDistance < MID_DISTANCE) {
-                pixelStep = 1;
-            } else if (floorDistance < FAR_DISTANCE) {
-                pixelStep = 2;
-            } else if (floorDistance < VERY_FAR_DISTANCE) {
-                pixelStep = 2;
-            } else {
-                pixelStep = 4;
-            }
-             
-            // Éviter le modulo coûteux
-            const shouldCalculate = (pixelStep === 1) || 
-                                    ((screenY & (pixelStep - 1)) === 0);
+            const screenX = rayHit.strip * this.stripWidth;
+            const currentViewDistance = this.viewDistances[rayHit.strip];
             
-            if (shouldCalculate) {
-                const worldX = this.player.x + floorDistance * xFactor;
-                const worldY = this.player.y + floorDistance * yFactor;
+            // Utiliser les tables trigonométriques si disponibles
+            const stripIdx = rayHit.strip;
+            const rayAngle = this.player.rot + this.rayAngles[stripIdx];
+            const cosRayAngle = Math.cos(rayAngle);
+            const sinRayAngle = Math.sin(rayAngle);
+            
+            // Pré-calculer les facteurs de direction
+            const xFactor = cosRayAngle;
+            const yFactor = -sinRayAngle;
+            
+            let screenY = Math.max(
+                centerY,
+                ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight
+            ) | 0;
+            
+            let lastPixel = null;
+            let lastPixelStep = 1;
+            let bufferIdx = 0;
+            
+            // Dérouler partiellement la boucle pour les cas courants
+            while (screenY < this.displayHeight) {
+                const baseDistance = this.floorDistanceCache[screenY];
+                const floorDistance = baseDistance * currentViewDistance;
                 
-                if (worldX >= 0 && worldY >= 0 && 
-                    worldX < this.worldWidth && worldY < this.worldHeight) {
+                // Détermination rapide du pixelStep
+                let pixelStep;
+                if (floorDistance < NEAR_DISTANCE) {
+                    pixelStep = 1;
+                } else if (floorDistance < MID_DISTANCE) {
+                    pixelStep = 1;
+                } else if (floorDistance < FAR_DISTANCE) {
+                    pixelStep = 2;
+                } else if (floorDistance < VERY_FAR_DISTANCE) {
+                    pixelStep = 2;
+                } else {
+                    pixelStep = 4;
+                }
+                
+                // Éviter le modulo coûteux
+                const shouldCalculate = (pixelStep === 1) || 
+                                        ((screenY & (pixelStep - 1)) === 0);
+                
+                if (shouldCalculate) {
+                    const worldX = this.player.x + floorDistance * xFactor;
+                    const worldY = this.player.y + floorDistance * yFactor;
                     
-                    // Sélection de la texture selon la valeur de cellule
-                    const cellX = Math.floor(worldX / this.tileSize);
-                    const cellY = Math.floor(worldY / this.tileSize);
-                    const cellValue = this.map[cellY][cellX];
-                    
-                    let textureToUse = this.floorImageData; // Par défaut
-                    
-                    if (cellValue < 1 && cellValue > 0) {
-                        const textureId = Math.floor(cellValue * 100);
-                        if (this.floorImageDataArray && this.floorImageDataArray[textureId]) {
-                            textureToUse = this.floorImageDataArray[textureId];
+                    if (worldX >= 0 && worldY >= 0 && 
+                        worldX < this.worldWidth && worldY < this.worldHeight) {
+                        
+                        // Sélection de la texture selon la valeur de cellule
+                        const cellX = Math.floor(worldX / this.tileSize);
+                        const cellY = Math.floor(worldY / this.tileSize);
+                        const cellValue = this.map[cellY][cellX];
+                        
+                        let textureToUse = this.floorImageData; // Par défaut
+                        
+                        if (cellValue < 1 && cellValue > 0) {
+                            const textureId = Math.floor(cellValue * 100);
+                            if (this.floorImageDataArray && this.floorImageDataArray[textureId]) {
+                                textureToUse = this.floorImageDataArray[textureId];
+                            }
                         }
+                        
+                        // Calcul direct des coordonnées de texture
+                        let texX = ((worldX | 0) % this.tileSize);
+                        let texY = ((worldY | 0) % this.tileSize);
+                        if (texX < 0) texX += this.tileSize;
+                        if (texY < 0) texY += this.tileSize;
+                        texX = (texX * textureScale) | 0;
+                        texY = (texY * textureScale) | 0;
+                        
+                        // Accès direct aux données de texture
+                        const srcIdx = (texY * this.textureSize + texX) << 2;
+                        
+                        let r = textureToUse.data[srcIdx];
+                        let g = textureToUse.data[srcIdx + 1];
+                        let b = textureToUse.data[srcIdx + 2];
+                        
+                        // Brouillard simplifié
+                        const fogFactor = this.getFogFactorFast(floorDistance);
+                        if (fogFactor > 0) {
+                            const invFog = 1 - fogFactor;
+                            r = (r * invFog + fogColorR * fogFactor) | 0;
+                            g = (g * invFog + fogColorG * fogFactor) | 0;
+                            b = (b * invFog + fogColorB * fogFactor) | 0;
+                        }
+                        
+                        // Stocker dans le buffer temporaire
+                        columnBuffer[bufferIdx] = r;
+                        columnBuffer[bufferIdx + 1] = g;
+                        columnBuffer[bufferIdx + 2] = b;
+                        columnBuffer[bufferIdx + 3] = 255;
+                        
+                        lastPixel = bufferIdx;
+                        lastPixelStep = pixelStep;
                     }
-                    
-                    // Calcul direct des coordonnées de texture
-                    let texX = ((worldX | 0) % this.tileSize);
-                    let texY = ((worldY | 0) % this.tileSize);
-                    if (texX < 0) texX += this.tileSize;
-                    if (texY < 0) texY += this.tileSize;
-                    texX = (texX * textureScale) | 0;
-                    texY = (texY * textureScale) | 0;
-                    
-                    // Accès direct aux données de texture
-                    const srcIdx = (texY * this.textureSize + texX) << 2;
-                    
-                    let r = textureToUse.data[srcIdx];
-                    let g = textureToUse.data[srcIdx + 1];
-                    let b = textureToUse.data[srcIdx + 2];
-                    
-                    // Brouillard simplifié
-                    const fogFactor = this.getFogFactorFast(floorDistance);
-                    if (fogFactor > 0) {
-                        const invFog = 1 - fogFactor;
-                        r = (r * invFog + fogColorR * fogFactor) | 0;
-                        g = (g * invFog + fogColorG * fogFactor) | 0;
-                        b = (b * invFog + fogColorB * fogFactor) | 0;
-                    }
-                    
-                    // Stocker dans le buffer temporaire
-                    columnBuffer[bufferIdx] = r;
-                    columnBuffer[bufferIdx + 1] = g;
-                    columnBuffer[bufferIdx + 2] = b;
+                } else if (lastPixel !== null) {
+                    // Réutiliser le dernier pixel calculé
+                    columnBuffer[bufferIdx] = columnBuffer[lastPixel];
+                    columnBuffer[bufferIdx + 1] = columnBuffer[lastPixel + 1];
+                    columnBuffer[bufferIdx + 2] = columnBuffer[lastPixel + 2];
                     columnBuffer[bufferIdx + 3] = 255;
-                    
-                    lastPixel = bufferIdx;
-                    lastPixelStep = pixelStep;
                 }
-            } else if (lastPixel !== null) {
-                // Réutiliser le dernier pixel calculé
-                columnBuffer[bufferIdx] = columnBuffer[lastPixel];
-                columnBuffer[bufferIdx + 1] = columnBuffer[lastPixel + 1];
-                columnBuffer[bufferIdx + 2] = columnBuffer[lastPixel + 2];
-                columnBuffer[bufferIdx + 3] = 255;
-            }
-            
-            bufferIdx += 4;
-            screenY++;
-            
-            // Remplissage rapide pour les grandes distances
-            if (pixelStep > 1 && lastPixel !== null) {
-                const fillEnd = Math.min(screenY + pixelStep - 1, this.displayHeight);
-                const lastR = columnBuffer[lastPixel];
-                const lastG = columnBuffer[lastPixel + 1];
-                const lastB = columnBuffer[lastPixel + 2];
                 
-                while (screenY < fillEnd) {
-                    columnBuffer[bufferIdx] = lastR;
-                    columnBuffer[bufferIdx + 1] = lastG;
-                    columnBuffer[bufferIdx + 2] = lastB;
-                    columnBuffer[bufferIdx + 3] = 255;
-                    bufferIdx += 4;
-                    screenY++;
+                bufferIdx += 4;
+                screenY++;
+                
+                // Remplissage rapide pour les grandes distances
+                if (pixelStep > 1 && lastPixel !== null) {
+                    const fillEnd = Math.min(screenY + pixelStep - 1, this.displayHeight);
+                    const lastR = columnBuffer[lastPixel];
+                    const lastG = columnBuffer[lastPixel + 1];
+                    const lastB = columnBuffer[lastPixel + 2];
+                    
+                    while (screenY < fillEnd) {
+                        columnBuffer[bufferIdx] = lastR;
+                        columnBuffer[bufferIdx + 1] = lastG;
+                        columnBuffer[bufferIdx + 2] = lastB;
+                        columnBuffer[bufferIdx + 3] = 255;
+                        bufferIdx += 4;
+                        screenY++;
+                    }
                 }
             }
-        }
-        
-        // Copie en bloc vers le backbuffer
-        const startY = Math.max(
-            centerY,
-            ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight
-        ) | 0;
-        
-        for (let y = startY, srcIdx = 0; y < this.displayHeight; y++, srcIdx += 4) {
-            const dstIdx = (y * this.displayWidth + screenX) << 2;
-            this.backBuffer.data[dstIdx] = columnBuffer[srcIdx];
-            this.backBuffer.data[dstIdx + 1] = columnBuffer[srcIdx + 1];
-            this.backBuffer.data[dstIdx + 2] = columnBuffer[srcIdx + 2];
-            this.backBuffer.data[dstIdx + 3] = 255;
+            
+            // Copie en bloc vers le backbuffer
+            const startY = Math.max(
+                centerY,
+                ((this.displayHeight - wallScreenHeight) >> 1) + wallScreenHeight
+            ) | 0;
+            
+            for (let y = startY, srcIdx = 0; y < this.displayHeight; y++, srcIdx += 4) {
+                const dstIdx = (y * this.displayWidth + screenX) << 2;
+                this.backBuffer.data[dstIdx] = columnBuffer[srcIdx];
+                this.backBuffer.data[dstIdx + 1] = columnBuffer[srcIdx + 1];
+                this.backBuffer.data[dstIdx + 2] = columnBuffer[srcIdx + 2];
+                this.backBuffer.data[dstIdx + 3] = 255;
+            }
         }
     }
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 4.6 Rendu du plafond et skybox
@@ -2019,116 +2081,303 @@ drawTexturedFloor(rayHits) {
 // 4.7 Rendu des sprites
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    drawSpriteStrip(rayHit) {
-        if (!rayHit.sprite.screenPosition) {
-            rayHit.sprite.screenPosition = this.spriteScreenPosition(rayHit.sprite);
-        }
-        let rc = rayHit.sprite.screenPosition;
-
-        // sprite first strip is ahead of current strip
-        if (rc.x > rayHit.strip) {
+// NOUVELLE MÉTHODE à ajouter dans la classe Raycaster
+    drawDirectSprite(spriteData, wallDistances) {
+        const sprite = spriteData.sprite;
+        const textureSize = this.textureSize;
+        
+        // NOUVEAU : Vérifications de sécurité
+        if (!sprite || !spriteData.screenWidth || !spriteData.screenHeight) {
             return;
         }
-
-        // sprite last strip is before current strip
-        if (rc.x + rc.w < rayHit.strip) {
+        
+        // Vérifier les limites de taille
+        if (spriteData.screenWidth > this.displayWidth * 2 || 
+            spriteData.screenHeight > this.displayHeight * 2) {
+            // console.warn(`Sprite trop grand ignoré: ${spriteData.screenWidth}x${spriteData.screenHeight}`);
             return;
         }
-
-        let diffX = (rayHit.strip - rc.x) | 0;
-        let dstX = rc.x + diffX; // skip left parts of sprite already drawn
-        let srcX = ((diffX / rc.w) * this.textureSize) | 0;
-        let srcW = 1;
-
-        if (srcX >= 0 && srcX < this.textureSize) {
-            // Récupérer le numéro de texture du sprite
-            const spriteTexture = rayHit.sprite.spriteTexture;
-            const spriteFlash = rayHit.sprite.spriteFlash;
+        
+        // Obtenir les données de texture
+        const spriteTexture = sprite.spriteTexture;
+        
+        // NOUVEAU : Ignorer les sprites sans texture valide
+        if (!spriteTexture || spriteTexture === 0) {
+            return;
+        }
+        
+        const spriteDataName = "spriteImageData" + spriteTexture;
+        const textureData = this[spriteDataName];
+        
+        // Si la texture n'est pas chargée, abandonner ou utiliser texture par défaut
+        if (!textureData) {
+            if (!this.warnedMissingTextures) {
+                this.warnedMissingTextures = new Set();
+            }
             
-            // Nom de la propriété qui contient les données de texture
-            const spriteDataName = "spriteImageData" + spriteTexture;
+            if (!this.warnedMissingTextures.has(spriteTexture)) {
+                // console.warn(`⚠ Texture sprite${spriteTexture} non chargée pour sprite ID ${sprite.id} (${sprite.spriteName})`);
+                this.warnedMissingTextures.add(spriteTexture);
+            }
             
-            // Vérifier que les données de texture existent
-            if (this[spriteDataName]) {
-                this.drawTexturedRect(
-                    this[spriteDataName], 
-                    srcX, 
-                    0, 
-                    srcW,
-                    this.textureSize, 
-                    dstX, 
-                    rc.y, 
-                    this.stripWidth, 
-                    rc.h, 
-                    spriteFlash,
-                    rayHit.distance
-                );
-            } else {
-                // Log d'avertissement uniquement si on n'a pas déjà signalé cette texture manquante
-                if (!this.warnedMissingTextures) {
-                    this.warnedMissingTextures = new Set();
-                }
+            if (!this.spriteImageData1) {
+                return;
+            }
+        }
+        
+        const finalTextureData = textureData || this.spriteImageData1;
+        
+        // Précalcul des limites et facteurs
+        const startX = Math.max(0, spriteData.screenX) | 0;
+        const endX = Math.min(this.displayWidth, spriteData.screenX + spriteData.screenWidth) | 0;
+        
+        // NOUVEAU : Vérifier que nous avons des colonnes à dessiner
+        if (startX >= endX) {
+            return;
+        }
+        
+        const screenWidthReciprocal = 1 / spriteData.screenWidth;
+        const textureScale = textureSize * screenWidthReciprocal;
+        
+        // Obtenir le facteur de fog une fois si la distance est la même pour toutes les colonnes
+        const fogFactor = this.getFogFactorFast(spriteData.distance);
+        const invFog = 1 - fogFactor;
+        
+        // Variables pour optimiser l'accès aux pixels
+        const srcData = finalTextureData.data;
+        const srcWidth = finalTextureData.width;
+        
+        // Pour chaque colonne visible du sprite
+        for (let screenX = startX; screenX < endX; screenX++) {
+            // Test rapide de distance
+            if (spriteData.correctDistance < wallDistances[screenX]) {
+                // Calcul optimisé de la coordonnée de texture
+                const relativeX = (screenX - spriteData.screenX) * screenWidthReciprocal;
+                const texX = (relativeX * textureSize) | 0;
                 
-                if (!this.warnedMissingTextures.has(spriteTexture)) {
-                    console.warn(`⚠ Texture sprite${spriteTexture} non chargée pour sprite ID ${rayHit.sprite.id} (${rayHit.sprite.spriteName})`);
-                    this.warnedMissingTextures.add(spriteTexture);
-                }
-                
-                // Optionnel : utiliser une texture par défaut (sprite1)
-                if (this.spriteImageData1) {
-                    this.drawTexturedRect(
-                        this.spriteImageData1, // Texture par défaut
-                        srcX, 
-                        0, 
-                        srcW,
-                        this.textureSize, 
-                        dstX, 
-                        rc.y, 
-                        this.stripWidth, 
-                        rc.h, 
-                        spriteFlash,
-                        rayHit.distance
+                // Vérifier les limites avec bit masking si textureSize est une puissance de 2
+                if (texX >= 0 && texX < textureSize) {
+                    this.drawTexturedRectOptimized(
+                        finalTextureData,
+                        texX,
+                        0,
+                        1,
+                        textureSize,
+                        screenX,
+                        spriteData.screenY,
+                        1,
+                        spriteData.screenHeight,
+                        sprite.spriteFlash || 0,
+                        fogFactor,
+                        invFog
                     );
                 }
             }
         }
     }
 
-    spriteScreenPosition(sprite) {
-        let rc = {
-            x: 0,
-            y: 0,
-            w: 0,
-            h: 0,
-        };
+// Version optimisée inline de drawTexturedRect pour les sprites
+    drawTexturedRectOptimized(imgdata, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, spriteFlash, fogFactor, invFog) {
+        // Vérifications de limites rapides
+        if (dstX < 0 || dstX >= this.displayWidth || dstH === 0 || dstH > this.displayHeight * 2) {
+            return;
+        }
+        
+        // NOUVEAU : Vérifier que les coordonnées de destination sont valides
+        if (isNaN(dstY) || isNaN(dstH)) {
+            // console.warn("Coordonnées de destination invalides");
+            return;
+        }
+        
+        const dstEndY = Math.min(dstY + dstH, this.displayHeight) | 0;
+        const screenStartY = Math.max(dstY, 0) | 0;
+        
+        if (screenStartY >= dstEndY) return;
+        
+        // Précalcul des facteurs
+        const texStepY = srcH / dstH;
+        let texStartY = srcY;
+        
+        if (screenStartY > dstY) {
+            texStartY = srcY + (screenStartY - dstY) * texStepY;
+        }
+        
+        // Accès direct aux données
+        const srcData = imgdata.data;
+        const srcWidth = imgdata.width;
+        const dstData = this.backBuffer.data;
+        const dstWidth = this.displayWidth;
+        
+        // Précalcul pour le sprite flash
+        const hasFlash = spriteFlash > 0;
+        const flashInt = hasFlash ? spriteFlash | 0 : 0;
+        
+        // Précalcul pour l'animation si nécessaire
+        let animOffset = 0;
+        if (imgdata.width > 128) {
+            animOffset = 64 * spriteAnimationProgress;
+        }
+        
+        // NOUVEAU : S'assurer que srcX est un entier
+        srcX = srcX | 0;
+        
+        // Boucle optimisée
+        let texY = texStartY;
+        for (let screenY = screenStartY; screenY < dstEndY; screenY++) {
+            const textureY = texY | 0;
+            
+            // NOUVEAU : Vérifier les limites de texture
+            if (textureY < 0 || textureY >= imgdata.height) {
+                texY += texStepY;
+                continue;
+            }
+            
+            const srcIdx = ((textureY * srcWidth + srcX + animOffset) << 2);
+            
+            // NOUVEAU : Vérifier les limites du tableau source
+            if (srcIdx < 0 || srcIdx + 3 >= srcData.length) {
+                texY += texStepY;
+                continue;
+            }
+            
+            // Test alpha rapide
+            if (srcData[srcIdx + 3]) {
+                let r = srcData[srcIdx];
+                let g = srcData[srcIdx + 1];
+                let b = srcData[srcIdx + 2];
+                
+                // Flash effect optimisé
+                if (hasFlash) {
+                    r = Math.min(r + flashInt, 255);
+                    g = Math.min(g + flashInt, 255);
+                    b = Math.min(b + flashInt, 255);
+                }
+                
+                // Fog optimisé (précalculé)
+                if (fogFactor > 0) {
+                    r = (r * invFog + fogColorR * fogFactor) | 0;
+                    g = (g * invFog + fogColorG * fogFactor) | 0;
+                    b = (b * invFog + fogColorB * fogFactor) | 0;
+                }
+                
+                // Écriture directe dans le backbuffer
+                const dstIdx = ((screenY * dstWidth + dstX) << 2);
+                
+                // NOUVEAU : Vérifier les limites du backbuffer
+                if (dstIdx >= 0 && dstIdx + 3 < dstData.length) {
+                    dstData[dstIdx] = r;
+                    dstData[dstIdx + 1] = g;
+                    dstData[dstIdx + 2] = b;
+                    dstData[dstIdx + 3] = 255;
+                }
+            }
+            
+            texY += texStepY;
+        }
+    }
 
-        // Calculate angle between player and sprite
-        let dx = sprite.x - this.player.x;
-        let dy = sprite.y - this.player.y;
-        let totalAngle = Math.atan2(dy, dx);
-        let spriteAngle = totalAngle + this.player.rot;
+// NOUVELLE MÉTHODE à ajouter dans la classe Raycaster
+    collectVisibleSprites() {
+        const visibleSprites = [];
+        const player = this.player;
+        const fov = this.fovRadians;
+        
+        // Précalcul des valeurs du joueur
+        const playerCos = Math.cos(player.rot);
+        const playerSin = Math.sin(player.rot);
+        
+        // Distance minimale en dessous de laquelle les sprites disparaissent
+        const MIN_RENDER_DISTANCE = this.tileSize * 0.3; // 30% d'une tuile
+        
+        for (let sprite of this.sprites) {
+            // Calculer la distance et l'angle
+            const dx = sprite.x - player.x;
+            const dy = sprite.y - player.y;
+            
+            // Distance au carré pour éviter sqrt dans le premier test
+            const distanceSquared = dx * dx + dy * dy;
+            
+            // SIMPLE : Si trop proche, on ignore complètement le sprite
+            if (distanceSquared < MIN_RENDER_DISTANCE * MIN_RENDER_DISTANCE) {
+                continue;
+            }
+            
+            const maxDistanceSquared = this.tileSizeSquared * 100; // 10 tuiles au carré
+            
+            // Test rapide de distance
+            if (distanceSquared > maxDistanceSquared) {
+                continue;
+            }
+            
+            // Calcul de distance réelle seulement si nécessaire
+            const distance = Math.sqrt(distanceSquared);
+            
+            // Angle avec Y-down (négation de dy)
+            const angleToSprite = Math.atan2(-dy, dx);
+            
+            // Normaliser l'angle en positif [0, 2π]
+            let normalizedAngle = angleToSprite;
+            if (normalizedAngle < 0) normalizedAngle += Raycaster.TWO_PI;
+            
+            // Calcul de l'angle relatif
+            let relativeAngle = normalizedAngle - player.rot;
+            
+            // Normaliser l'angle relatif entre -PI et PI
+            if (relativeAngle > Math.PI) relativeAngle -= Raycaster.TWO_PI;
+            if (relativeAngle < -Math.PI) relativeAngle += Raycaster.TWO_PI;
+            
+            // Test de FOV avec marge
+            const fovHalf = fov * 0.5;
+            const fovMargin = 1.0;
+            if (Math.abs(relativeAngle) < fovHalf + fovMargin) {
+                // Utiliser viewDist précalculé
+                const screenX = this.halfDisplayWidth - Math.tan(relativeAngle) * this.viewDist;
+                
+                // Distance corrigée avec cos précalculé si possible
+                const correctDistance = distance * Math.cos(relativeAngle);
+                
+                // Taille projetée optimisée
+                const screenHeight = (this.viewDist * this.tileSize / correctDistance) | 0;
+                const screenWidth = screenHeight;
+                
+                // Calcul optimisé des bords
+                const halfWidth = screenWidth >> 1;
+                const leftEdge = (screenX - halfWidth) | 0;
+                const rightEdge = leftEdge + screenWidth;
+                
+                // Test de visibilité optimisé
+                const screenMargin = halfWidth;
+                if (rightEdge > -screenMargin && leftEdge < this.displayWidth + screenMargin && screenHeight > 1) {
+                    visibleSprites.push({
+                        sprite: sprite,
+                        distance: distance,
+                        correctDistance: correctDistance,
+                        screenX: leftEdge,
+                        screenY: (this.halfDisplayHeight - (screenHeight >> 1)) | 0,
+                        screenWidth: screenWidth,
+                        screenHeight: screenHeight,
+                        centerX: screenX | 0,
+                        relativeAngle: relativeAngle
+                    });
+                }
+            }
+        }
+        
+        // Trier par distance (plus loin en premier)
+        return visibleSprites.sort((a, b) => b.distance - a.distance);
+    }
 
-        // x distance from center line
-        let x = Math.tan(spriteAngle) * this.viewDist;
-
-        let spriteDistance = Math.sqrt(dx * dx + dy * dy);
-        let centerDistance = Math.cos(spriteAngle) * spriteDistance;
-
-        // spriteScreenWidth   spriteWorldWidth
-        // ----------------- = ----------------
-        //      viewDist        centerDistance
-        let spriteScreenWidth = (this.tileSize * this.viewDist) / centerDistance;
-        let spriteScreenHeight = spriteScreenWidth; // assume both width and height are the same
-
-        rc.x =
-            this.halfDisplayWidth +
-            x - // get distance from left of screen
-            (spriteScreenWidth >> 1); // deduct half of sprite width because x is center of sprite
-        rc.y = (this.displayHeight - spriteScreenWidth) / 2.0;
-        rc.w = spriteScreenWidth;
-        rc.h = spriteScreenHeight;
-
-        return rc;
+// NOUVELLE MÉTHODE à ajouter dans la classe Raycaster
+    createWallDistanceMap(rayHits) {
+        const wallDistances = new Array(this.displayWidth).fill(Infinity);
+        
+        for (let rayHit of rayHits) {
+            if (!rayHit.sprite && rayHit.strip >= 0 && rayHit.strip < this.displayWidth) {
+                wallDistances[rayHit.strip] = rayHit.correctDistance;
+            }
+        }
+        
+        return wallDistances;
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2140,32 +2389,58 @@ drawTexturedFloor(rayHits) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Utilisation de Float32Array
-    createRayAngles() {
-        if (!this.rayAngles) {
-            this.rayAngles = new Float32Array(this.rayCount);
-            for (let i = 0; i < this.rayCount; i++) {
-                let screenX = (this.rayCount / 2 - i) * this.stripWidth;
-                let rayAngle = Math.atan(screenX / this.viewDist);
-                this.rayAngles[i] = rayAngle;
+// 2. Modifier createRayAngles pour créer seulement la moitié des angles
+createRayAngles() {
+    if (!this.rayAngles) {
+        // Créer les angles pour les rayons effectifs uniquement
+        this.actualRayAngles = new Float32Array(this.actualRayCount);
+        this.rayAngles = new Float32Array(this.rayCount); // Pour compatibilité
+        
+        // Calculer les angles pour les rayons effectifs (un sur deux)
+        for (let i = 0; i < this.actualRayCount; i++) {
+            let actualStrip = i * 2; // Un rayon tous les deux strips
+            let screenX = (this.rayCount / 2 - actualStrip) * this.stripWidth;
+            let rayAngle = Math.atan(screenX / this.viewDist);
+            this.actualRayAngles[i] = rayAngle;
+            
+            // Remplir aussi le tableau complet pour compatibilité
+            this.rayAngles[actualStrip] = rayAngle;
+            if (actualStrip + 1 < this.rayCount) {
+                // Pré-interpoler l'angle pour le strip intermédiaire
+                let nextScreenX = (this.rayCount / 2 - (actualStrip + 2)) * this.stripWidth;
+                let nextAngle = Math.atan(nextScreenX / this.viewDist);
+                this.rayAngles[actualStrip + 1] = (rayAngle + nextAngle) / 2;
             }
-            console.log("No. of ray angles=" + this.rayAngles.length);
         }
+        
+        console.log("Rayons effectifs: " + this.actualRayCount + " (sur " + this.rayCount + " strips)");
     }
-
+}
     // Utilisation de Float32Array
-    createViewDistances() {
-        if (!this.viewDistances) {
-            this.viewDistances = new Float32Array(this.rayCount);
-            for (let x = 0; x < this.rayCount; x++) {
-                let dx = (this.rayCount / 2 - x) * this.stripWidth;
-                let currentViewDistance = Math.sqrt(
-                    dx * dx + this.viewDist * this.viewDist
-                );
-                this.viewDistances[x] = currentViewDistance;
+// 9. Ajuster createViewDistances de la même manière
+createViewDistances() {
+    if (!this.viewDistances) {
+        this.actualViewDistances = new Float32Array(this.actualRayCount);
+        this.viewDistances = new Float32Array(this.rayCount);
+        
+        for (let i = 0; i < this.actualRayCount; i++) {
+            let actualStrip = i * 2;
+            let dx = (this.rayCount / 2 - actualStrip) * this.stripWidth;
+            let currentViewDistance = Math.sqrt(dx * dx + this.viewDist * this.viewDist);
+            this.actualViewDistances[i] = currentViewDistance;
+            this.viewDistances[actualStrip] = currentViewDistance;
+            
+            // Interpoler pour le strip suivant
+            if (actualStrip + 1 < this.rayCount) {
+                let nextDx = (this.rayCount / 2 - (actualStrip + 2)) * this.stripWidth;
+                let nextViewDistance = Math.sqrt(nextDx * nextDx + this.viewDist * this.viewDist);
+                this.viewDistances[actualStrip + 1] = (currentViewDistance + nextViewDistance) / 2;
             }
-            console.log("No. of view distances=" + this.viewDistances.length);
         }
+        
+        console.log("View distances optimisées créées");
     }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 5.2 Lancement des rayons
@@ -2178,115 +2453,456 @@ drawTexturedFloor(rayHits) {
     }
 
     // Utilisation des tables trigonométriques pré-calculées
-    castRays(rayHits) {
-        for (let i = 0; i < this.rayAngles.length; i++) {
-            let rayAngle = this.rayAngles[i];
-            this.castSingleRay(rayHits, this.player.rot + rayAngle, i);
+// 3. Modifier castRays pour lancer seulement la moitié des rayons
+castRays(rayHits) {
+    // Tableau pour stocker les résultats des rayons effectifs
+    this.actualRayHits = [];
+    
+    // Lancer seulement les rayons effectifs (un sur deux)
+    for (let i = 0; i < this.actualRayCount; i++) {
+        let rayAngle = this.actualRayAngles[i];
+        let stripIdx = i * 2; // Position du strip réel
+        
+        // Stocker les hits pour ce rayon
+        let rayHitData = {
+            stripIdx: stripIdx,
+            hits: []
+        };
+        
+        this.castSingleRayWithData(rayHitData.hits, this.player.rot + rayAngle, stripIdx);
+        this.actualRayHits.push(rayHitData);
+    }
+    
+    // Interpoler pour créer les rayons manquants
+    this.interpolateRayHits(rayHits);
+}
+
+// Méthode à ajouter dans la classe Raycaster (après castSingleRay)
+
+castSingleRayWithData(hitArray, rayAngle, stripIdx) {
+    // Normalisation d'angle optimisée
+    rayAngle = Raycaster.normalizeAngleFast(rayAngle, this);
+
+    //   2  |  1
+    //  ----+----
+    //   3  |  4
+    let right =
+        (rayAngle < Raycaster.TWO_PI * 0.25 && rayAngle >= 0) || // Quadrant 1
+        rayAngle > Raycaster.TWO_PI * 0.75; // Quadrant 4
+    let up = rayAngle < Raycaster.TWO_PI * 0.5 && rayAngle >= 0; // Quadrant 1 and 2
+
+    let ray = new RayState(rayAngle, stripIdx);
+    ray.rayHits = hitArray; // Utiliser hitArray au lieu de rayHits global
+    ray.right = right;
+    ray.up = up;
+    ray.wallHit = new RayHit();
+
+    // Process current player cell
+    ray.cellX = (this.player.x / this.tileSize) | 0;
+    ray.cellY = (this.player.y / this.tileSize) | 0;
+    this.onCellHit(ray);
+
+    // closest vertical line
+    ray.vx = right ?
+        ((this.player.x / this.tileSize) | 0) * this.tileSize + this.tileSize :
+        ((this.player.x / this.tileSize) | 0) * this.tileSize - 1;
+    ray.vy = this.player.y + (this.player.x - ray.vx) * Math.tan(rayAngle);
+
+    // closest horizontal line
+    ray.hy = up ?
+        ((this.player.y / this.tileSize) | 0) * this.tileSize - 1 :
+        ((this.player.y / this.tileSize) | 0) * this.tileSize + this.tileSize;
+    ray.hx = this.player.x + (this.player.y - ray.hy) / Math.tan(rayAngle);
+
+    // vector for next vertical line
+    let stepvx = right ? this.tileSize : -this.tileSize;
+    let stepvy = this.tileSize * Math.tan(rayAngle);
+
+    // vector for next horizontal line
+    let stephy = up ? -this.tileSize : this.tileSize;
+    let stephx = this.tileSize / Math.tan(rayAngle);
+
+    // tan() returns positive values in Quadrant 1 and Quadrant 4
+    // But window coordinates need negative coordinates for Y-axis so we reverse them
+    if (right) {
+        stepvy = -stepvy;
+    }
+
+    // tan() returns stepx as positive in quadrant 3 and negative in quadrant 4
+    // This is the opposite of horizontal window coordinates so we need to reverse the values
+    // when angle is facing down
+    if (!up) {
+        stephx = -stephx;
+    }
+
+    // Vertical lines
+    ray.vertical = true;
+    ray.horizontal = false;
+    while (
+        ray.vx >= 0 &&
+        ray.vx < this.worldWidth &&
+        ray.vy >= 0 &&
+        ray.vy < this.worldHeight
+    ) {
+        ray.cellX = (ray.vx / this.tileSize) | 0;
+        ray.cellY = (ray.vy / this.tileSize) | 0;
+        if (this.onCellHit(ray)) {
+            ray.vx += stepvx;
+            ray.vy += stepvy;
+        } else {
+            break;
         }
     }
 
-    castSingleRay(rayHits, rayAngle, stripIdx) {
-        // Normalisation d'angle optimisée
-        rayAngle = Raycaster.normalizeAngleFast(rayAngle, this);
-
-        //   2  |  1
-        //  ----+----
-        //   3  |  4
-        let right =
-            (rayAngle < Raycaster.TWO_PI * 0.25 && rayAngle >= 0) || // Quadrant 1
-            rayAngle > Raycaster.TWO_PI * 0.75; // Quadrant 4
-        let up = rayAngle < Raycaster.TWO_PI * 0.5 && rayAngle >= 0; // Quadrant 1 and 2
-
-        let ray = new RayState(rayAngle, stripIdx);
-        ray.rayHits = rayHits;
-        ray.right = right;
-        ray.up = up;
-        ray.wallHit = new RayHit();
-
-        // Process current player cell
-        ray.cellX = (this.player.x / this.tileSize) | 0;
-        ray.cellY = (this.player.y / this.tileSize) | 0;
-        this.onCellHit(ray);
-
-        // closest vertical line
-        ray.vx = right ?
-            ((this.player.x / this.tileSize) | 0) * this.tileSize + this.tileSize :
-            ((this.player.x / this.tileSize) | 0) * this.tileSize - 1;
-        ray.vy = this.player.y + (this.player.x - ray.vx) * Math.tan(rayAngle);
-
-        // closest horizontal line
-        ray.hy = up ?
-            ((this.player.y / this.tileSize) | 0) * this.tileSize - 1 :
-            ((this.player.y / this.tileSize) | 0) * this.tileSize + this.tileSize;
-        ray.hx = this.player.x + (this.player.y - ray.hy) / Math.tan(rayAngle);
-
-        // vector for next vertical line
-        let stepvx = right ? this.tileSize : -this.tileSize;
-        let stepvy = this.tileSize * Math.tan(rayAngle);
-
-        // vector for next horizontal line
-        let stephy = up ? -this.tileSize : this.tileSize;
-        let stephx = this.tileSize / Math.tan(rayAngle);
-
-        // tan() returns positive values in Quadrant 1 and Quadrant 4
-        // But window coordinates need negative coordinates for Y-axis so we reverse them
-        if (right) {
-            stepvy = -stepvy;
+    // Horizontal lines
+    ray.vertical = false;
+    ray.horizontal = true;
+    while (
+        ray.hx >= 0 &&
+        ray.hx < this.worldWidth &&
+        ray.hy >= 0 &&
+        ray.hy < this.worldHeight
+    ) {
+        ray.cellX = (ray.hx / this.tileSize) | 0;
+        ray.cellY = (ray.hy / this.tileSize) | 0;
+        if (this.onCellHit(ray)) {
+            ray.hx += stephx;
+            ray.hy += stephy;
+        } else {
+            break;
         }
-
-        // tan() returns stepx as positive in quadrant 3 and negative in quadrant 4
-        // This is the opposite of horizontal window coordinates so we need to reverse the values
-        // when angle is facing down
-        if (!up) {
-            stephx = -stephx;
-        }
-
-        // Vertical lines
-        ray.vertical = true;
-        ray.horizontal = false;
-        while (
-            ray.vx >= 0 &&
-            ray.vx < this.worldWidth &&
-            ray.vy >= 0 &&
-            ray.vy < this.worldHeight
-        ) {
-            ray.cellX = (ray.vx / this.tileSize) | 0;
-            ray.cellY = (ray.vy / this.tileSize) | 0;
-            if (this.onCellHit(ray)) {
-                ray.vx += stepvx;
-                ray.vy += stepvy;
-            } else {
-                break;
-            }
-        }
-
-        // Horizontal lines
-        ray.vertical = false;
-        ray.horizontal = true;
-        while (
-            ray.hx >= 0 &&
-            ray.hx < this.worldWidth &&
-            ray.hy >= 0 &&
-            ray.hy < this.worldHeight
-        ) {
-            ray.cellX = (ray.hx / this.tileSize) | 0;
-            ray.cellY = (ray.hy / this.tileSize) | 0;
-            if (this.onCellHit(ray)) {
-                ray.hx += stephx;
-                ray.hy += stephy;
-            } else {
-                break;
-            }
-        }
-
-        this.onRayEnd(ray);
     }
+
+    this.onRayEnd(ray);
+}
+
+// 5. Nouvelle méthode pour interpoler les rayons manquants
+// 5. Nouvelle méthode pour interpoler les rayons manquants
+interpolateRayHits(rayHits) {
+    // Set pour tracker les strips couverts
+    const stripsCovered = new Set();
+    
+    // Map pour stocker les voisins valides de chaque strip
+    const neighborMap = new Map();
+    
+    // Pour chaque paire de rayons effectifs
+    for (let i = 0; i < this.actualRayCount - 1; i++) {
+        let currentRayData = this.actualRayHits[i];
+        let nextRayData = this.actualRayHits[i + 1];
+        
+        // Ajouter les hits du rayon actuel (uniquement les murs maintenant)
+        for (let hit of currentRayData.hits) {
+            rayHits.push(hit);
+            stripsCovered.add(hit.strip);
+        }
+        
+        // Créer le rayon interpolé entre les deux
+        let interpolatedStripIdx = currentRayData.stripIdx + 1;
+        
+        // Interpoler uniquement les hits de murs
+        let interpolatedWallHit = this.interpolateWallHits(
+            currentRayData.hits,
+            nextRayData.hits,
+            interpolatedStripIdx
+        );
+        
+        if (interpolatedWallHit) {
+            rayHits.push(interpolatedWallHit);
+            stripsCovered.add(interpolatedStripIdx);
+        }
+    }
+    
+    // Ajouter les hits du dernier rayon
+    if (this.actualRayHits.length > 0) {
+        let lastRayData = this.actualRayHits[this.actualRayHits.length - 1];
+        for (let hit of lastRayData.hits) {
+            rayHits.push(hit);
+            stripsCovered.add(hit.strip);
+        }
+        
+        // Gérer le dernier strip si nombre impair de strips total
+        const hasOddStrips = (this.rayCount % 2) === 1;
+        if (hasOddStrips) {
+            let lastStripIdx = this.rayCount - 1;
+            let lastWall = lastRayData.hits.find(h => !h.sprite);
+            
+            if (lastWall && !stripsCovered.has(lastStripIdx)) {
+                // Créer une copie du dernier mur pour le dernier strip
+                let duplicatedHit = new RayHit();
+                duplicatedHit.x = lastWall.x;
+                duplicatedHit.y = lastWall.y;
+                duplicatedHit.strip = lastStripIdx;
+                duplicatedHit.tileX = lastWall.tileX;
+                duplicatedHit.distance = lastWall.distance;
+                duplicatedHit.correctDistance = lastWall.correctDistance;
+                duplicatedHit.vertical = lastWall.vertical;
+                duplicatedHit.horizontal = lastWall.horizontal;
+                duplicatedHit.wallType = lastWall.wallType;
+                duplicatedHit.rayAngle = this.rayAngles[lastStripIdx] + this.player.rot;
+                
+                rayHits.push(duplicatedHit);
+                stripsCovered.add(lastStripIdx);
+            }
+        }
+    }
+    
+    // Construire la map des voisins pendant qu'on parcourt les strips couverts
+    const coveredStripsArray = Array.from(stripsCovered).sort((a, b) => a - b);
+    
+    // Pré-calculer les voisins pour chaque strip non couvert
+    for (let i = 0; i < coveredStripsArray.length; i++) {
+        const currentStrip = coveredStripsArray[i];
+        const nextStrip = i < coveredStripsArray.length - 1 ? coveredStripsArray[i + 1] : null;
+        
+        // Remplir les gaps entre les strips couverts
+        if (nextStrip !== null && nextStrip - currentStrip > 1) {
+            // Il y a des strips non couverts entre currentStrip et nextStrip
+            for (let missingStrip = currentStrip + 1; missingStrip < nextStrip; missingStrip++) {
+                if (!neighborMap.has(missingStrip)) {
+                    neighborMap.set(missingStrip, {});
+                }
+                neighborMap.get(missingStrip).left = currentStrip;
+                neighborMap.get(missingStrip).right = nextStrip;
+            }
+        }
+    }
+    
+    // Gérer les strips non couverts au début
+    if (coveredStripsArray.length > 0 && coveredStripsArray[0] > 0) {
+        const firstCovered = coveredStripsArray[0];
+        for (let strip = 0; strip < firstCovered; strip++) {
+            if (!stripsCovered.has(strip)) {
+                neighborMap.set(strip, { right: firstCovered });
+            }
+        }
+    }
+    
+    // Gérer les strips non couverts à la fin
+    if (coveredStripsArray.length > 0) {
+        const lastCovered = coveredStripsArray[coveredStripsArray.length - 1];
+        if (lastCovered < this.rayCount - 1) {
+            for (let strip = lastCovered + 1; strip < this.rayCount; strip++) {
+                if (!stripsCovered.has(strip)) {
+                    neighborMap.set(strip, { left: lastCovered });
+                }
+            }
+        }
+    }
+    
+    // Maintenant, corriger les strips manquants en utilisant la map pré-calculée
+    for (let [strip, neighbors] of neighborMap) {
+        if (!stripsCovered.has(strip)) {
+            let interpolatedHit = null;
+            
+            if (neighbors.left !== undefined && neighbors.right !== undefined) {
+                // Interpoler entre les deux voisins
+                let leftHit = rayHits.find(h => h.strip === neighbors.left && !h.sprite);
+                let rightHit = rayHits.find(h => h.strip === neighbors.right && !h.sprite);
+                
+                if (leftHit && rightHit) {
+                    // Créer un hit interpolé
+                    interpolatedHit = new RayHit();
+                    const t = (strip - neighbors.left) / (neighbors.right - neighbors.left);
+                    
+                    interpolatedHit.x = leftHit.x + (rightHit.x - leftHit.x) * t;
+                    interpolatedHit.y = leftHit.y + (rightHit.y - leftHit.y) * t;
+                    interpolatedHit.strip = strip;
+                    interpolatedHit.distance = leftHit.distance + (rightHit.distance - leftHit.distance) * t;
+                    interpolatedHit.correctDistance = interpolatedHit.distance * this.getFishEyeCorrection(strip);
+                    interpolatedHit.wallType = leftHit.wallType;
+                    interpolatedHit.horizontal = leftHit.horizontal;
+                    interpolatedHit.vertical = leftHit.vertical;
+                    interpolatedHit.tileX = leftHit.tileX + (rightHit.tileX - leftHit.tileX) * t;
+                    interpolatedHit.rayAngle = this.rayAngles[strip] + this.player.rot;
+                }
+            } else if (neighbors.left !== undefined) {
+                // Utiliser uniquement le voisin de gauche
+                let leftHit = rayHits.find(h => h.strip === neighbors.left && !h.sprite);
+                if (leftHit) {
+                    interpolatedHit = this.createWallHitCopy(leftHit, strip);
+                }
+            } else if (neighbors.right !== undefined) {
+                // Utiliser uniquement le voisin de droite
+                let rightHit = rayHits.find(h => h.strip === neighbors.right && !h.sprite);
+                if (rightHit) {
+                    interpolatedHit = this.createWallHitCopy(rightHit, strip);
+                }
+            }
+            
+            if (interpolatedHit) {
+                rayHits.push(interpolatedHit);
+                stripsCovered.add(strip);
+            }
+        }
+    }
+    
+    // Log de debug final
+    const uncoveredCount = this.rayCount - stripsCovered.size;
+    if (uncoveredCount > 0) {
+        console.warn(`⚠️ ${uncoveredCount} strips non couverts après correction sur ${this.rayCount} total`);
+    }
+}
+
+// 6. Interpolation des hits de murs (version optimisée)
+interpolateWallHits(currentHits, nextHits, stripIdx) {
+    // Trouver les hits de murs dans chaque ensemble
+    let currentWall = currentHits.find(h => !h.sprite);
+    let nextWall = nextHits.find(h => !h.sprite);
+    
+    // Cas où il n'y a pas de mur
+    if (!currentWall && !nextWall) return null;
+    if (!currentWall) return this.createWallHitCopy(nextWall, stripIdx);
+    if (!nextWall) return this.createWallHitCopy(currentWall, stripIdx);
+    
+    // Vérifier si c'est le même mur (même cellule)
+    const currentCellX = Math.floor(currentWall.x / this.tileSize);
+    const currentCellY = Math.floor(currentWall.y / this.tileSize);
+    const nextCellX = Math.floor(nextWall.x / this.tileSize);
+    const nextCellY = Math.floor(nextWall.y / this.tileSize);
+    
+    if (currentWall.wallType === nextWall.wallType &&
+        currentCellX === nextCellX && 
+        currentCellY === nextCellY) {
+        
+        // Même mur, on peut interpoler en toute sécurité
+        let interpolatedHit = new RayHit();
+        
+        // Interpolation linéaire des propriétés
+        interpolatedHit.x = (currentWall.x + nextWall.x) * 0.5;
+        interpolatedHit.y = (currentWall.y + nextWall.y) * 0.5;
+        interpolatedHit.strip = stripIdx;
+        interpolatedHit.distance = (currentWall.distance + nextWall.distance) * 0.5;
+        
+        // Utiliser la table fish-eye précalculée
+        interpolatedHit.correctDistance = interpolatedHit.distance * this.getFishEyeCorrection(stripIdx);
+        
+        interpolatedHit.wallType = currentWall.wallType;
+        interpolatedHit.horizontal = currentWall.horizontal;
+        interpolatedHit.vertical = currentWall.vertical;
+        
+        // Interpolation de la coordonnée de texture
+        if (currentWall.horizontal === nextWall.horizontal) {
+            // Même orientation, interpolation directe
+            interpolatedHit.tileX = (currentWall.tileX + nextWall.tileX) * 0.5;
+        } else {
+            // Orientation différente, prendre le plus proche
+            if (Math.abs(currentWall.distance - interpolatedHit.distance) < 
+                Math.abs(nextWall.distance - interpolatedHit.distance)) {
+                interpolatedHit.tileX = currentWall.tileX;
+                interpolatedHit.horizontal = currentWall.horizontal;
+                interpolatedHit.vertical = currentWall.vertical;
+            } else {
+                interpolatedHit.tileX = nextWall.tileX;
+                interpolatedHit.horizontal = nextWall.horizontal;
+                interpolatedHit.vertical = nextWall.vertical;
+            }
+        }
+        
+        // Angle du rayon interpolé
+        interpolatedHit.rayAngle = this.rayAngles[stripIdx] + this.player.rot;
+        
+        return interpolatedHit;
+    }
+    
+    // Murs différents ou dans des cellules différentes
+    // Choisir le plus proche et créer une copie avec le bon strip
+    if (currentWall.distance < nextWall.distance) {
+        return this.createWallHitCopy(currentWall, stripIdx);
+    } else {
+        return this.createWallHitCopy(nextWall, stripIdx);
+    }
+}
+
+// Méthode helper pour créer une copie d'un hit de mur avec un nouveau strip
+createWallHitCopy(wallHit, newStripIdx) {
+    let copy = new RayHit();
+    copy.x = wallHit.x;
+    copy.y = wallHit.y;
+    copy.strip = newStripIdx;
+    copy.tileX = wallHit.tileX;
+    copy.distance = wallHit.distance;
+    
+    // Recalculer la distance corrigée avec la bonne valeur fish-eye pour ce strip
+    copy.correctDistance = wallHit.distance * this.getFishEyeCorrection(newStripIdx);
+    
+    copy.vertical = wallHit.vertical;
+    copy.horizontal = wallHit.horizontal;
+    copy.wallType = wallHit.wallType;
+    copy.rayAngle = this.rayAngles[newStripIdx] + this.player.rot;
+    
+    return copy;
+}
+
+// 7. Interpolation des sprites
+/*
+interpolateSpriteHits(currentHits, nextHits, stripIdx) {
+    let interpolatedSprites = [];
+    
+    // Récupérer tous les sprites des deux rayons
+    let currentSprites = currentHits.filter(h => h.sprite);
+    let nextSprites = nextHits.filter(h => h.sprite);
+    
+    // Créer une map pour associer les sprites par ID
+    let spriteMap = new Map();
+    
+    // Ajouter les sprites du rayon actuel
+    for (let hit of currentSprites) {
+        spriteMap.set(hit.sprite.id, { current: hit, next: null });
+    }
+    
+    // Ajouter ou mettre à jour avec les sprites du rayon suivant
+    for (let hit of nextSprites) {
+        if (spriteMap.has(hit.sprite.id)) {
+            spriteMap.get(hit.sprite.id).next = hit;
+        } else {
+            spriteMap.set(hit.sprite.id, { current: null, next: hit });
+        }
+    }
+    
+    // Interpoler chaque sprite visible
+    for (let [spriteId, hits] of spriteMap) {
+        if (hits.current && hits.next) {
+            // Le sprite est visible dans les deux rayons, interpoler
+            let interpolatedHit = new RayHit();
+            interpolatedHit.sprite = hits.current.sprite;
+            interpolatedHit.strip = stripIdx;
+            interpolatedHit.distance = (hits.current.distance + hits.next.distance) / 2;
+            interpolatedHit.rayAngle = (hits.current.rayAngle + hits.next.rayAngle) / 2;
+            
+            interpolatedSprites.push(interpolatedHit);
+        } else if (hits.current || hits.next) {
+            // Le sprite n'est visible que dans un rayon
+            // Vérifier s'il devrait être visible dans le strip interpolé
+            let visibleHit = hits.current || hits.next;
+            
+            // Calculer la position théorique du sprite pour ce strip
+            let spriteScreenPos = this.spriteScreenPosition(visibleHit.sprite);
+            
+            // Si le sprite couvre ce strip, l'inclure
+            if (spriteScreenPos.x <= stripIdx && 
+                spriteScreenPos.x + spriteScreenPos.w >= stripIdx) {
+                
+                let interpolatedHit = new RayHit();
+                interpolatedHit.sprite = visibleHit.sprite;
+                interpolatedHit.strip = stripIdx;
+                interpolatedHit.distance = visibleHit.distance;
+                interpolatedHit.rayAngle = this.rayAngles[stripIdx] + this.player.rot;
+                
+                interpolatedSprites.push(interpolatedHit);
+            }
+        }
+    }
+    
+    return interpolatedSprites;
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 5.3 Détection de collision
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Calcul de distance sans sqrt
+// REMPLACER la méthode onCellHit existante dans Raycaster
 onCellHit(ray) {
     let vx = ray.vx,
         vy = ray.vy,
@@ -2303,20 +2919,8 @@ onCellHit(ray) {
     let rayAngle = ray.rayAngle;
     let rayHits = ray.rayHits;
 
-    // Check for sprites in cell - OPTIMISÉ avec index spatial
-    let spritesFound = this.findSpritesInCell(cellX, cellY, true);
-    for (let sprite of spritesFound) {
-        let spriteHit = RayHit.spriteRayHit(
-            sprite,
-            this.player.x - sprite.x,
-            this.player.y - sprite.y,
-            stripIdx,
-            rayAngle
-        );
-        if (spriteHit.distance) {
-            rayHits.push(spriteHit);
-        }
-    }
+    // SECTION SUPPRIMÉE : Détection des sprites
+    // Plus de vérification des sprites dans chaque cellule traversée par le rayon
 
     // Handle cell walls - OPTIMISÉ - MODIFIÉ pour textures de sol
     if (this.map[cellY][cellX] >= 1) {
@@ -2711,4 +3315,4 @@ onCellHit(ray) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FIN DU FICHIER RAYCASTER.JS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
