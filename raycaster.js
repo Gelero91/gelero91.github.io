@@ -527,13 +527,13 @@ class Raycaster {
         this.fpsCounter.frames++;
         const nowPerf = performance.now();
         
-        /*
+        // affichaged du compteur
         if (nowPerf - this.fpsCounter.lastTime >= 1000) {
             console.log(`FPS: ${this.fpsCounter.frames}`);
             this.fpsCounter.frames = 0;
             this.fpsCounter.lastTime = nowPerf;
         }
-        */
+        
 
         // Test de performance des optimisations
         if (!this.perfTested && this.fpsCounter && this.fpsCounter.frames > 100) {
