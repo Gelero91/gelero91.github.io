@@ -1841,17 +1841,41 @@ checkCollisions(destX, destY, map, sprites) {
     };
 }
 
-    async handleCollisionMovement(collisionResult, movement, config) {
-        this.isMoving = true;
+// xyz ici, check la collision avec le type de sprite (mettre les portes)
+async handleCollisionMovement(collisionResult, movement, config) {
+    this.isMoving = true;
+    
+    if (collisionResult.withSprite && collisionResult.sprite.spriteType === "A") {
+        await this.handleEnemyCollision(collisionResult.sprite, movement, config);
+    } else if (collisionResult.withSprite && collisionResult.sprite.spriteType === "DOOR") {
+        // Vérifier l'orientation du joueur vers la porte
+        const dx = collisionResult.sprite.x - this.x;
+        const dy = collisionResult.sprite.y - this.y;
         
-        if (collisionResult.withSprite && collisionResult.sprite.spriteType === "A") {
-            await this.handleEnemyCollision(collisionResult.sprite, movement, config);
+        // Calculer l'angle vers la porte
+        let angleToSprite = Math.atan2(dy, dx);
+        if (angleToSprite < 0) angleToSprite += 2 * Math.PI;
+        
+        // Calculer la différence d'angle
+        let angleDiff = Math.abs(this.rot - angleToSprite);
+        if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+        
+        // Tolérance d'angle (environ 45 degrés)
+        const ANGLE_TOLERANCE = Math.PI / 4;
+        
+        if (angleDiff < ANGLE_TOLERANCE) {
+            // Le joueur regarde vers la porte, on l'active
+            await this.handleDoorAction(collisionResult.sprite);
         } else {
+            // Le joueur n'est pas orienté vers la porte, collision normale
             await this.handleWallCollision(movement, config);
         }
-        
-        this.isMoving = false;
+    } else {
+        await this.handleWallCollision(movement, config);
     }
+    
+    this.isMoving = false;
+}
 
     async handleEnemyCollision(enemy, movement, config) {
         // Animation d'impact contre l'ennemi

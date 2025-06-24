@@ -2376,12 +2376,16 @@ async door(player, textureSet, raycaster) {
     }
 
     // Vérifier qu'aucune autre action n'est en cours
+    
+    // mise ne commentaire pour tester door à collision
+    /*
     if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
         console.log("Cannot use door - player is busy");
         doorLockActive = false;
         commandBlocking = false;
         return;
     }
+    */
     
     // Mettre à jour le temps de la dernière action
     this.lastDoorTime = currentTime;
