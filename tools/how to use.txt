@@ -1,0 +1,21 @@
+map editor :
+- works by layer : map,sprites, teleports.
+- chose the height of the starting point of map, it will be modified by teleporting in other rooms
+- Chose the walls in the palet, and click on the disired tile
+- same logic with the sprites, chose a type instead.
+- some sprites are PJG, Merchants or enemies. Chose their properties before clicking on the tile.
+- the teleporters are made of two points (A and B), representing a door. You have to chose the orientation desiried for each points.
+- the teleporters are also responsible of chanching the height of the walls, the ceiling or the skybox
+- Export in JSON format - manually implement in raycaster (for now - more map system to come)
+
+
+
+assetsExtractor :
+put the script in the same folder of index.html
+execute with node.js
+All png files are extracted in the "assets" folder
+
+assetsImporter :
+put the script in the same folder of index.html
+put the png files in the "assets" folder
+execute with node.js

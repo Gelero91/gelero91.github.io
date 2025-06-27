@@ -1,0 +1,750 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Oasis - Map Editor</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #f1f1f1;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+
+      .map {
+        display: flex;
+        flex-wrap: wrap;
+        width: 35%;
+        max-height: 80vh;
+        padding: 10px;
+        border: 1px solid #999;
+      }
+
+      .sprite-map {
+        display: flex;
+        flex-wrap: wrap;
+        width: 35%;
+        max-height: 80vh;
+        padding: 10px;
+        border: 1px solid #999;
+      }
+
+      .tile {
+        width: calc(100% / 24);
+        height: calc(100% / 24);
+        border: 1px solid #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .mapPalette {
+        width: 20%;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #999;
+        column-count: 2;
+        /* Nombre de colonnes */
+        max-height: 68vh;
+        /* Hauteur maximale des éléments */
+        overflow-y: auto;
+        /* Activation de la barre de défilement verticale si nécessaire */
+        flex-direction: column;
+        /* Inversion de l'orientation */
+      }
+
+      .mapPalette button {
+        text-align: left;
+        margin-bottom: 10px;
+        width: 100%;
+        padding: 5px;
+        font-size: 14px;
+      }
+
+      .spritePalette {
+        width: 20%;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #999;
+        column-count: 2;
+        /* Nombre de colonnes */
+        max-height: 68vh;
+        /* Hauteur maximale des éléments */
+        overflow-y: auto;
+        /* Activation de la barre de défilement verticale si nécessaire */
+        flex-direction: column;
+        /* Inversion de l'orientation */
+      }
+
+      .spritePalette button {
+        text-align: left;
+        margin-bottom: 10px;
+        width: 100%;
+        padding: 5px;
+        font-size: 14px;
+      }
+
+      .teleportPalette {
+        width: 20%;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #999;
+        column-count: 2;
+        max-height: 68vh;
+        overflow-y: auto;
+        flex-direction: column;
+      }
+
+      .teleportPalette button {
+        text-align: left;
+        margin-bottom: 10px;
+        width: 100%;
+        padding: 5px;
+        font-size: 14px;
+      }
+
+      .export {
+        width: 20%;
+        height: 68vh;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #999;
+      }
+
+      .export button {
+        margin-bottom: 10px;
+        width: 100%;
+        padding: 5px;
+        font-size: 14px;
+      }
+
+      #mapDataInput {
+        width: 100%;
+        height: 100px;
+      }
+
+      #spriteDataInput {
+        width: 100%;
+        height: 100px;
+      }
+
+      #confirmationModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      .modal-content p {
+        margin-bottom: 10px;
+      }
+
+      .modal-content button {
+        margin-top: 10px;
+        padding: 5px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="height: 100%; width: 100%;">
+      <div class="container">
+        <div class="export">
+          <button onclick="resetMap()">Réinitialiser la carte</button>
+          <p>World Map exportée :</p>
+          <input type="text" id="mapDataInput" readonly>
+          <!--caché pour l'instant-->
+          <button onclick="exportMap()" style="display: none;">Exporter en JSON</button>
+          <!--caché pour l'instant-->
+          <button onclick="copyToClipboard()" style="display:none;">Copier le JSON</button>
+          <p>Sprite exportés :</p>
+          <textarea id="spriteDataInput" readonly style="white-space: pre-line;"></textarea>
+          <button onclick="exportSprites(); exportMap();">Exporter les cartes</button>
+          <br>
+          <button id = "teleportEditor">Éditeur de téléporteurs</button>
+          <br>
+          <button onclick="toggleMapView()">Sprite Map / World Map</button>
+          <div id="coordinates">Coordonnées : <span id="coordinatesText">-</span></div>
+              <!-- Nouveau bouton "Créer un sprite" -->
+        </div>
+        <div class="map"></div>
+        <!--SpriteMap-->
+        <div class="sprite-map" style="display:none;"></div>
+        
+        <!--MAP PALETTE-->
+        <div class="mapPalette" id="mapPalette" style="display: flex;">
+          <div>
+            <!--revoir fonction
+            <button onclick="deselectTileType()">Désélectionner type</button>
+            -->
+            <button onclick="selectTileType(0)">0 - Sol</button>
+            <button onclick="selectTileType(1)">1 - mur de pierre</button>
+            <button onclick="selectTileType(2)">2 - Roche</button>
+            <button onclick="selectTileType(3)">3 - Ornate wall</button>
+            <button onclick="selectTileType(4)">4 - Ornate door</button>
+            <button onclick="selectTileType(5)">5 - Forêt</button>
+            <button onclick="selectTileType(6)">6 - House wall</button>
+            <button onclick="selectTileType(7)">7 - House window</button>
+            <button onclick="selectTileType(8)">8 - House</button>
+            <button onclick="selectTileType(9)">9 - grille</button>
+          </div>
+        </div>
+
+        <!--Sprite Palette-->
+        <div class="spritePalette" id="spritePalette" style="display: none;">
+          <div>
+         <!--revoir fonction
+            <button onclick="deselectTileType()">Désélectionner type</button>
+            -->
+            <button onclick="selectTileType(0)">0 - Vide</button>
+            <button onclick="selectTileType(1)">1 - PNJ1 (voleur)</button>
+            <button onclick="selectTileType(2)">2 - PNJ2 (Garde)</button>
+            <button onclick="selectTileType(3)">3 - PNJ3 (Marchand)</button>
+            <button onclick="selectTileType(4)">4 - Roche</button>
+            <button onclick="selectTileType(5)">5 - Tonneau</button>
+            <button onclick="selectTileType(6)">6 - Buisson</button>
+            <button onclick="selectTileType(7)">7 - Pancarte</button>
+            <button onclick="selectTileType(8)">8 - IMP (test)</button>
+            <button onclick="selectTileType(9)">9 - Tresor</button>
+            <button onclick="selectTileType(10)">10 - Cadavre</button>
+            <button onclick="selectTileType(11)">11 - Statue</button>
+            <button onclick="selectTileType(12)">12 - Brasier</button>
+            <button onclick="selectTileType(13)">13 - Weed</button>
+            <button onclick="selectTileType(14)">14 - Bat</button>
+            <button onclick="selectTileType(15)">15 - Arbre</button>
+            <button onclick="selectTileType(16)">16 - Colonne</button>
+            <button onclick="selectTileType(17)">17 - Sac</button>
+            <button onclick="selectTileType('A')">A - Ennemis</button>
+        </div>
+       </div>
+
+       <div class="teleportPalette" id="teleportPalette" style="display: none;">
+        <div>
+          <div class="teleport-palette">
+            <h2>Palette de téléporteurs</h2>
+            <select id="teleport-select">
+              <option value="">Sélectionnez un téléporteur</option>
+            </select>
+            <br>
+            <input type="radio" id="teleport-point-a" name="teleport-point" value="A" checked>
+            <label for="teleport-point-a">Point A</label>
+            <input type="radio" id="teleport-point-b" name="teleport-point" value="B">
+            <label for="teleport-point-b">Point B</label>
+            <br>
+            <label for="teleport-x">X : </label>
+            <input type="number" id="teleport-x" min="0" max="23">
+            <br>
+            <label for="teleport-y">Y : </label>
+            <input type="number" id="teleport-y" min="0" max="23">
+            <br>
+            <button id="select-position-btn" style="display: none;">Sélectionner la position</button>
+            <br>
+            <label for="teleport-rotation">Rotation : </label>
+            <select id="teleport-rotation">
+              <option value="nord">Nord</option>
+              <option value="est">Est</option>
+              <option value="sud">Sud</option>
+              <option value="ouest">Ouest</option>
+            </select>
+            <br>
+            <label for="teleport-rendu-plafond">Rendu plafond : </label>
+            <input type="checkbox" id="teleport-rendu-plafond">
+            <br>
+            <label for="teleport-texture-plafond">Texture plafond : </label>
+            <input type="number" id="teleport-texture-plafond" min="0" max="3">
+            <br>
+            <label for="teleport-hauteur-plafond">Hauteur plafond : </label>
+            <input type="number" id="teleport-hauteur-plafond" min="1" max="4">
+            <br>
+            <label for="teleport-texture-sol">Texture sol : </label>
+            <input type="number" id="teleport-texture-sol" min="0" max="3">
+            <br>
+            <label for="teleport-contextualisation">Contextualisation : </label>
+            <input type="text" id="teleport-contextualisation">
+            <br>
+            <button onclick="exportTeleports()">Exporter les téléporteurs</button>
+            <textarea id="exportResult" rows="4" cols="50" readonly></textarea>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script>
+      const mapEventA = [];
+      const mapEventB = [];
+      
+      var isMapSelected = true; // Par défaut, la carte est sélectionnée
+
+      function deselectTileType() {
+        selectedTile = -1;
+        updateCoordinates('-', '-'); // Réinitialise les coordonnées
+      }
+
+      function updateCoordinates(x, y) {
+        var coordinatesText = document.getElementById('coordinatesText');
+        coordinatesText.textContent = 'x: ' + x + ', y: ' + y;
+      }
+
+      function toggleMapView() {
+        var mapContainer = document.querySelector('.map');
+        var spriteMapContainer = document.querySelector('.sprite-map');
+        // Copier les valeurs de la carte principale vers la carte des sprites
+        copyToSpriteMap();
+
+
+        if (mapContainer.style.display === '' || mapContainer.style.display === 'flex') {
+            mapContainer.style.display = 'none';
+            spriteMapContainer.style.display = 'flex';
+            document.querySelector('.spritePalette').style.display = 'flex';
+            document.querySelector('.mapPalette').style.display = 'none';
+            isMapSelected = false; // La sprite map est maintenant sélectionnée
+        } else {
+            mapContainer.style.display = 'flex';
+            spriteMapContainer.style.display = 'none';
+            document.querySelector('.spritePalette').style.display = 'none';
+            document.querySelector('.mapPalette').style.display = 'flex';
+            isMapSelected = true; // La carte principale est maintenant sélectionnée
+        }
+    }
+    
+      var worldMap =   generateWorldMap(24, 24, 1, 0);
+      
+      var worldSpriteMap =  generateWorldMap(24, 24, "x", 0);
+
+      // Définir toggleTeleportEditor() en dehors de la fonction d'écouteur d'événement
+      var isTeleportPaletteVisible = false;
+
+      function toggleTeleportPalette() {
+        var teleportPalette = document.querySelector('.teleportPalette');
+        var mapPalette = document.querySelector('.mapPalette');
+        var spritePalette = document.querySelector('.spritePalette');
+      
+        if (isTeleportPaletteVisible) {
+          // Masquer la palette de téléporteur
+          teleportPalette.style.display = 'none';
+          // Afficher les autres palettes
+          mapPalette.style.display = 'none';
+          spritePalette.style.display = 'flex';
+          isTeleportPaletteVisible = false;
+        } else {
+          // Masquer les autres palettes
+          mapPalette.style.display = 'none';
+          spritePalette.style.display = 'none';
+          // Afficher la palette de téléporteur
+          teleportPalette.style.display = 'flex';
+          isTeleportPaletteVisible = true;
+        }
+      }
+      
+      // Ajouter un écouteur d'événements au bouton de la palette de téléporteur
+      var teleportEditorBtn = document.querySelector('#teleportEditor');
+      teleportEditorBtn.addEventListener('click', toggleTeleportPalette);
+
+      let lastTeleportNumber = 0; // variable pour stocker le dernier numéro de téléporteur
+
+      function createTeleportSelect() {
+        const teleportSelect = document.getElementById("teleport-select");
+      
+        for (let i = 1; i <= 10; i++) {
+          const option = document.createElement("option");
+          option.value = i;
+          option.textContent = `Téléporteur ${i}`;
+          teleportSelect.appendChild(option);
+        }
+      
+        const teleportPointA = document.getElementById("teleport-point-a");
+        const teleportPointB = document.getElementById("teleport-point-b");
+      
+        teleportPointA.addEventListener("click", function() {
+          const teleportIndex = parseInt(teleportSelect.value);
+          const teleport = mapEventA[teleportIndex - 1];
+      
+          document.getElementById("teleport-x").value = teleport[0];
+          document.getElementById("teleport-y").value = teleport[1];
+          document.getElementById("teleport-rotation").value = teleport[2];
+          document.getElementById("teleport-rendu-plafond").checked = teleport[3];
+          document.getElementById("teleport-texture-plafond").value = teleport[4];
+          document.getElementById("teleport-hauteur-plafond").value = teleport[5];
+          document.getElementById("teleport-texture-sol").value = teleport[6];
+          document.getElementById("teleport-contextualisation").value = teleport[7];
+        });
+      
+        teleportPointB.addEventListener("click", function() {
+          const teleportIndex = parseInt(teleportSelect.value);
+          const teleport = mapEventB[teleportIndex - 1];
+      
+          document.getElementById("teleport-x").value = teleport[0];
+          document.getElementById("teleport-y").value = teleport[1];
+          document.getElementById("teleport-rotation").value = teleport[2];
+          document.getElementById("teleport-rendu-plafond").checked = teleport[3];
+          document.getElementById("teleport-texture-plafond").value = teleport[4];
+          document.getElementById("teleport-hauteur-plafond").value = teleport[5];
+          document.getElementById("teleport-texture-sol").value = teleport[6];
+          document.getElementById("teleport-contextualisation").value = teleport[7];
+        });
+      
+        teleportSelect.addEventListener("change", function() {
+          const teleportIndex = parseInt(this.value);
+          const teleportA = mapEventA[teleportIndex - 1];
+          const teleportB = mapEventB[teleportIndex - 1];
+      
+          if (teleportPointA.checked) {
+            document.getElementById("teleport-x").value = teleportA[0];
+            document.getElementById("teleport-y").value = teleportA[1];
+            document.getElementById("teleport-rotation").value = teleportA[2];
+            document.getElementById("teleport-rendu-plafond").checked = teleportA[3];
+            document.getElementById("teleport-texture-plafond").value = teleportA[4];
+            document.getElementById("teleport-hauteur-plafond").value = teleportA[5];
+            document.getElementById("teleport-texture-sol").value = teleportA[6];
+            document.getElementById("teleport-contextualisation").value = teleportA[7];
+          } else if (teleportPointB.checked) {
+            document.getElementById("teleport-x").value = teleportB[0];
+            document.getElementById("teleport-y").value = teleportB[1];
+            document.getElementById("teleport-rotation").value = teleportB[2];
+            document.getElementById("teleport-rendu-plafond").checked = teleportB[3];
+            document.getElementById("teleport-texture-plafond").value = teleportB[4];
+            document.getElementById("teleport-hauteur-plafond").value = teleportB[5];
+            document.getElementById("teleport-texture-sol").value = teleportB[6];
+            document.getElementById("teleport-contextualisation").value = teleportB[7];
+          }
+        });
+      
+        const teleportInputs = document.querySelectorAll(".teleport-palette input, .teleport-palette select");
+      
+        teleportInputs.forEach(function(input) {
+          input.addEventListener("change", function() {
+            const teleportIndex = parseInt(teleportSelect.value);
+            const teleportPoint = document.querySelector('input[name="teleport-point"]:checked').value;
+            const teleportArray = teleportPoint === "A" ? mapEventA : mapEventB;
+            const teleport = teleportArray[teleportIndex - 1];
+      
+            teleport[0] = parseInt(document.getElementById("teleport-x").value);
+            teleport[1] = parseInt(document.getElementById("teleport-y").value);
+            teleport[2] = document.getElementById("teleport-rotation").value;
+            teleport[3] = document.getElementById("teleport-rendu-plafond").checked;
+            teleport[4] = parseInt(document.getElementById("teleport-texture-plafond").value);
+            teleport[5] = parseInt(document.getElementById("teleport-hauteur-plafond").value);
+            teleport[6] = parseInt(document.getElementById("teleport-texture-sol").value);
+            teleport[7] = document.getElementById("teleport-contextualisation").value;
+          });
+        });
+      }
+      
+      function exportTeleports() {
+     
+        let exportText = '// from outside\nconst mapEventA = [\n';
+        for (const teleport of mapEventA) {
+          exportText += `  [${teleport[0]}, ${teleport[1]}, ${teleport[2]}, ${teleport[3]}, ${teleport[4]}, ${teleport[5]}, ${teleport[6]}, "${teleport[7]}"],\n`;
+        }
+        exportText = exportText.slice(0, -2) + '\n];\n\n// from inside\nconst mapEventB = [\n';
+        for (const teleport of mapEventB) {
+          exportText += `  [${teleport[0]}, ${teleport[1]}, ${teleport[2]}, ${teleport[3]}, ${teleport[4]}, ${teleport[5]}, ${teleport[6]}, "${teleport[7]}"],\n`;
+        }
+        exportText = exportText.slice(0, -2) + '\n];';
+      
+        // Mettre à jour le contenu de l'élément <textarea>
+        document.getElementById("exportResult").value = exportText;
+      }
+      
+      const selectPositionBtn = document.getElementById("select-position-btn");
+      selectPositionBtn.addEventListener("click", function() {
+        selectPositionMode = true;
+      });
+
+      function selectPositionMode() {
+        selectPositionMode = !selectPositionMode;
+        if (selectPositionMode) {
+          // Désactiver le bouton "Ajouter un téléporteur"
+          document.getElementById("add-teleport-btn").disabled = true;
+        } else {
+          // Activer le bouton "Ajouter un téléporteur"
+          document.getElementById("add-teleport-btn").disabled = false;
+        }
+      }
+
+      const tiles = document.querySelectorAll('.tile');
+      tiles.forEach((tile) => {
+        tile.addEventListener('click', (event) => {
+          const x = event.target.getAttribute('data-x');
+          const y = event.target.getAttribute('data-y');
+          const point = document.querySelector('input[name="teleport-point"]:checked').value;
+          const teleportIndex = parseInt(document.querySelector('#teleport-select').value);
+          if (point === 'A') {
+            mapEventA[teleportIndex - 1] = [x, y, document.querySelector('#teleport-rotation').value, document.querySelector('#teleport-rendu-plafond').checked, parseInt(document.querySelector('#teleport-texture-plafond').value), parseInt(document.querySelector('#teleport-hauteur-plafond').value), parseInt(document.querySelector('#teleport-texture-sol').value), document.querySelector('#teleport-contextualisation').value];
+          } else {
+            mapEventB[teleportIndex - 1] = [x, y, document.querySelector('#teleport-rotation').value, document.querySelector('#teleport-rendu-plafond').checked, parseInt(document.querySelector('#teleport-texture-plafond').value), parseInt(document.querySelector('#teleport-hauteur-plafond').value), parseInt(document.querySelector('#teleport-texture-sol').value), document.querySelector('#teleport-contextualisation').value];
+          }
+        });
+      });
+
+
+      var selectedTile = 0;
+      var mapContainer = document.querySelector('.map');
+      // création carte sprite
+      var spriteMapContainer = document.querySelector('.sprite-map');
+      var sprites = [];
+
+      spriteMapContainer.addEventListener("click", function(event) {
+        if (selectPositionMode) {
+          const x = Math.floor(event.offsetX / TILE_SIZE);
+          const y = Math.floor(event.offsetY / TILE_SIZE);
+          // Définir la position du téléporteur sélectionné
+          teleportXInput.value = x;
+          teleportYInput.value = y;
+          selectPositionMode = false;
+        }
+      });
+
+
+      function copyToSpriteMap() {
+        for (let i = 0; i < worldMap.length; i++) {
+          for (let j = 0; j < worldMap[i].length; j++) {
+            if (worldMap[i][j] !== 0) {
+              worldSpriteMap[i][j] = 'x';
+            }
+          }
+        }
+        updateSpriteMap();
+      }
+
+      // Modifiez la fonction existante qui gère les clics sur les cases pour inclure la mise à jour des coordonnées
+      // Modifiez la fonction existante qui gère les clics sur les cases pour inclure la désélection
+      function createMap() {
+        for (var i = 0; i < worldMap.length; i++) {
+          for (var j = 0; j < worldMap[i].length; j++) {
+            var tile = document.createElement('div');
+            tile.classList.add('tile');
+            tile.setAttribute('data-x', j);
+            tile.setAttribute('data-y', i);
+            tile.addEventListener('click', function() {
+              var x = parseInt(this.getAttribute('data-x'));
+              var y = parseInt(this.getAttribute('data-y'));
+              if (selectedTile !== -1) {
+                setTile(x, y, selectedTile);
+                updateCoordinates(x, y);
+              }
+            });
+            mapContainer.appendChild(tile);
+          }
+        }
+        createTeleportSelect(); // Ajouter cette ligne pour créer les options du menu déroulant
+      }
+      // Crée la deuxième carte pour les sprites
+      function createSpriteMap() {
+        for (var i = 0; i < worldMap.length; i++) {
+          for (var j = 0; j < worldMap[i].length; j++) {
+            var tile = document.createElement('div');
+            tile.classList.add('tile');
+            tile.setAttribute('data-x', j);
+            tile.setAttribute('data-y', i);
+            tile.addEventListener('click', function() {
+              var x = parseInt(this.getAttribute('data-x'));
+              var y = parseInt(this.getAttribute('data-y'));
+              if (selectedTile !== -1) {
+                // Si aucune valeur n'est sélectionnée, affiche les coordonnées
+                setTile(x, y, selectedTile);
+                updateCoordinates(x, y);
+              }
+            });
+            spriteMapContainer.appendChild(tile);
+          }
+        }
+      }
+
+      function updateMap() {
+        var tiles = mapContainer.querySelectorAll('.tile');
+        for (var i = 0; i < tiles.length; i++) {
+          var x = parseInt(tiles[i].getAttribute('data-x'));
+          var y = parseInt(tiles[i].getAttribute('data-y'));
+          var tileValue = worldMap[y][x];
+          tiles[i].innerText = tileValue;
+          tiles[i].style.backgroundColor = getTileColor(tileValue);
+        }
+      }
+
+      function getTileColor(tileValue) {
+        switch (tileValue) {
+          case 0:
+            return '#fff'; // white
+          case 1:
+            return '#ccc'; // gray
+          case 2:
+            return '#00ff00'; // green
+          case 3:
+            return '#ff0000'; // red
+          case 4:
+            return '#00ff00'; // green
+          case 5:
+            return '#0000ff'; // blue
+          case 6:
+            return '#ffa500'; // orange
+          case 7:
+            return '#ff00ff'; // magenta
+          case 8:
+            return '#00ffff'; // cyan
+          case 9:
+            return '#ffa500'; // orange
+          case 10:
+            return '#a52a2a'; // brown
+          case 11:
+            return '#008000'; // dark green
+          case 12:
+            return '#800080'; // purple
+          case 13:
+            return '#ffff00'; // yellow
+          default:
+            return '#fff';
+        }
+      }
+
+      function setTile(x, y, value) {
+        if (isMapSelected) {
+          worldMap[y][x] = value;
+          updateMap();
+        } else if (worldSpriteMap[y][x] !== 'x') {
+          worldSpriteMap[y][x] = value;
+          updateSpriteMap();
+        }
+      }
+      
+      function selectTileType(tileType) {
+        selectedTile = tileType;
+      }
+
+      function exportMap() {
+        var mapData = JSON.stringify(worldMap);
+        document.getElementById('mapDataInput').value = mapData;
+      }
+
+      function copyToClipboard() {
+        var mapDataInput = document.getElementById('mapDataInput');
+        mapDataInput.select();
+        mapDataInput.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        alert('Le JSON a été copié dans le presse-papier.');
+      }
+
+      function generateWorldMap(rows, cols, borderValue, innerValue) {
+            var map = [];
+
+            // création de 10 téléporteurs modifiables
+            for (let i = 0; i < 10; i++) {
+              mapEventA[i] = [-1, -1, "nord", false, 0, 1, 0, ""];
+              mapEventB[i] = [-1, -1, "nord", false, 0, 1, 0, ""];
+            }
+            
+
+            for (var i = 0; i < rows; i++) {
+                var row = [];
+                for (var j = 0; j < cols; j++) {
+                    if (i === 0 || i === rows - 1 || j === 0 || j === cols - 1) {
+                        row.push(borderValue);
+                    } else {
+                        row.push(innerValue);
+                    }
+                }
+                map.push(row);
+            }
+            return map;
+        }
+    
+      function resetMap() {
+        worldMap = generateWorldMap(24, 24, 1, 0);
+        worldSpriteMap = generateWorldMap(24, 24, "x",0);
+
+        updateMap();
+        updateSpriteMap();
+      }
+
+      function confirmResetMap() {
+        var confirmationModal = document.getElementById('confirmationModal');
+        confirmationModal.style.display = 'none';
+        resetMap();
+      }
+
+      function cancelResetMap() {
+        var confirmationModal = document.getElementById('confirmationModal');
+        confirmationModal.style.display = 'none';
+      }
+
+      function updateSpriteMap() {
+        for (let i = 0; i < worldSpriteMap.length; i++) {
+          for (let j = 0; j < worldSpriteMap[i].length; j++) {
+            let tile = document.querySelector(`.sprite-map [data-x="${j}"][data-y="${i}"]`);
+            if (worldSpriteMap[i][j] === 'x') {
+              tile.style.backgroundColor = "#000";
+              tile.style.color = "#fff";
+              tile.textContent = "x";
+            } else {
+              tile.style.backgroundColor = getTileColor(worldSpriteMap[i][j]);
+              tile.textContent = worldSpriteMap[i][j];
+            }
+          }
+        }
+      }
+
+      
+    
+
+      function updateSpriteDataOutput() {
+        var spriteDataOutput = document.getElementById('spriteDataInput');
+        spriteDataOutput.innerHTML = ' < h2 > Données des sprites: < /h2>';
+        for (var i = 0; i < sprites.length; i++) {
+          spriteDataOutput.innerHTML += 'Sprite ' + i + ': X=' + sprites[i][0] + ', Y=' + sprites[i][1] + ', Type=' + sprites[i][2] + ' < br > ';
+        }
+      }
+
+      function exportSprites() {
+        var spriteTiles = spriteMapContainer.querySelectorAll('.tile');
+        var spritesData = [];
+      
+        spriteTiles.forEach(function(tile) {
+          var x = parseInt(tile.getAttribute('data-x'));
+          var y = parseInt(tile.getAttribute('data-y'));
+          var type = worldSpriteMap[y][x]; // Récupérer le type de sprite à partir de la carte des sprites
+          if (type !== 0 && type !== 'x') { // Vérifier si le type de sprite est différent de 0
+            spritesData.push([x, y, type]);
+          }
+        });
+      
+        var spriteData = JSON.stringify(spritesData);
+        document.getElementById('spriteDataInput').value = spriteData;
+      }
+
+      createMap();
+      createSpriteMap();
+      updateSpriteMap()
+      updateMap();
+    </script>
+  </body>
+</html>
