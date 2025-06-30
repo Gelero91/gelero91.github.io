@@ -2441,7 +2441,7 @@ async door(player, textureSet, raycaster) {
                 // Valeurs par défaut
                 ceilingRender = false;
                 ceilingHeight = 2;
-                ceilingTexture = 1;
+                ceilingTexture = 2;
                 floorTexture = 1;
             }
         } else {
@@ -2453,7 +2453,7 @@ async door(player, textureSet, raycaster) {
             if (mapData && mapData.ceilingTexture) {
                 ceilingTexture = mapData.ceilingTexture;
             } else {
-                ceilingTexture = 3;
+                ceilingTexture = 2;
             }
             
             floorTexture = floor || 3;

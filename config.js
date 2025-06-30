@@ -84,7 +84,7 @@ var moveTargetY;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Variable globale pour activer/désactiver le brouillard
-let fogEnabled = false; 
+let fogEnabled = true; 
 
 
 // Variables globales pour les distances
