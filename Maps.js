@@ -2039,7 +2039,7 @@ const maps = [
         "Orientation": 1.5707963267948966,
         "ceilingRender": true,
         "ceilingHeight": 2,
-        "ceilingTexture": 1,
+        "ceilingTexture": 4,
         "floorTexture": 1
       }
     },

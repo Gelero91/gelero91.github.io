@@ -362,14 +362,14 @@ class Player {
     handleManaRegeneration() {
         // Régénération de mana
         if (this.mp < this.mpMax) {
-            this.mp = Math.min(this.mp + (this.intellect / 200), this.mpMax);
+            this.mp = Math.min(this.mp + (this.intellect / 300), this.mpMax);
         }
     }
 
     handleHealthRegeneration() {
         // Régénération de mana
         if (this.hp < this.mpMax) {
-            this.hp = Math.min(this.hp + (this.strength / 200), this.hpMax);
+            this.hp = Math.min(this.hp + (this.strength / 300), this.hpMax);
         }
     } 
 
@@ -380,6 +380,7 @@ class Player {
 
         // Limiter HP au maximum
         this.hp = Math.min(this.hp, this.hpMax);
+        this.mpMax = Math.min(this.mp, this.mpMax);
     }
 
     checkDeathState() {
@@ -390,37 +391,49 @@ class Player {
         }
     }
 
-    updateCombatStats() {
-        // Mise à jour might et magic si les stats ont changé
-        if (this.strength !== this.oldStrength) {
-            this.might += (this.strength - 5);
-            this.oldStrength = this.strength;
-        }
-
-        if (this.intellect !== this.oldIntellect) {
-            this.magic += (this.intellect - 5);
-            this.oldIntellect = this.intellect;
-        }
-
-        // Calcul de dodge et critical
-        const baseDodge = this.dexterity * 2;
-        const baseCriti = this.dexterity * 2;
-
-        if (this.hands[0]) {
-            this.dodge = baseDodge + this.hands[0].dodge;
-            this.criti = baseCriti + this.hands[0].criti;
-        } else {
-            this.dodge = baseDodge;
-            this.criti = baseCriti;
-        }
-
-        // Mise à jour des stats de combat affichées
-        document.getElementById("PlayerMightOutput").textContent = this.might;
-        document.getElementById("PlayerDodgeOutput").textContent = this.dodge;
-        document.getElementById("PlayerMagicOutput").textContent = this.magic;
-        document.getElementById("PlayerArmorOutput").textContent = this.armor;
-        document.getElementById("PlayerCritiOutput").textContent = this.criti;
+updateCombatStats() {
+    // Calcul des stats de base
+    const baseMight = this.strength - 5;
+    const baseMagic = this.intellect - 5;
+    const baseDodge = this.dexterity * 2;
+    const baseCriti = this.dexterity * 2;
+    const baseArmor = 0; // ou une valeur de base si nécessaire
+    
+    // Initialiser avec les valeurs de base
+    this.might = baseMight;
+    this.magic = baseMagic;
+    this.dodge = baseDodge;
+    this.criti = baseCriti;
+    this.armor = baseArmor;
+    
+    // Ajouter les bonus d'équipement (mains)
+    if (this.hands[0]) {
+        this.might += this.hands[0].might || 0;
+        this.magic += this.hands[0].magic || 0;
+        this.dodge += this.hands[0].dodge || 0;
+        this.criti += this.hands[0].criti || 0;
+        this.armor += this.hands[0].armor || 0;
     }
+    
+    // Ajouter les bonus d'équipement (torse)
+    if (this.torso[0]) {
+        this.might += this.torso[0].might || 0;
+        this.magic += this.torso[0].magic || 0;
+        this.dodge += this.torso[0].dodge || 0;
+        this.criti += this.torso[0].criti || 0;
+        this.armor += this.torso[0].armor || 0;
+    }
+    
+    // Ajouter d'autres bonus temporaires si nécessaire
+    // Par exemple, buffs de sorts, etc.
+    
+    // Mise à jour des stats de combat affichées
+    document.getElementById("PlayerMightOutput").textContent = this.might;
+    document.getElementById("PlayerDodgeOutput").textContent = this.dodge;
+    document.getElementById("PlayerMagicOutput").textContent = this.magic;
+    document.getElementById("PlayerArmorOutput").textContent = this.armor;
+    document.getElementById("PlayerCritiOutput").textContent = this.criti;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 2.3 Gestion des barres de progression
@@ -2162,26 +2175,53 @@ async handleSpriteAction(action, sprites) {
     console.log(`Action detected! Looking at position (${frontX}, ${frontY})`);
     console.log(`Player position: (${Math.floor(this.x / this.tileSize)}, ${Math.floor(this.y / this.tileSize)}), quadrant: ${this.quadrant}`);
 
-    let spriteFound = false;
+    // Trier les sprites par priorité
+    let spritesAtPosition = [];
     for (const sprite of sprites) {
         const spriteX = Math.floor(sprite.x / this.tileSize);
         const spriteY = Math.floor(sprite.y / this.tileSize);
         
         if (spriteX === frontX && spriteY === frontY) {
-            spriteFound = true;
-            console.log(`Sprite found at front position! Type: ${sprite.spriteType}`);
-            
-            await this.executeSpriteAction(sprite, currentTime);
-            break;
+            spritesAtPosition.push(sprite);
         }
     }
     
-    if (!spriteFound) {
+    // Trier les sprites : vivants d'abord, puis par type
+    spritesAtPosition.sort((a, b) => {
+        // Priorité 1 : Les sprites vivants (hp > 0 ou type "A" actif)
+        const aIsAlive = (a.hp && a.hp > 0) || (a.spriteType === "A" && a.hp > 0);
+        const bIsAlive = (b.hp && b.hp > 0) || (b.spriteType === "A" && b.hp > 0);
+        
+        if (aIsAlive && !bIsAlive) return -1;
+        if (!aIsAlive && bIsAlive) return 1;
+        
+        // Priorité 2 : Les sprites interactifs avant les cadavres
+        const interactivePriority = {
+            "A": 1,      // Ennemis vivants
+            "DOOR": 2,   // Portes
+            "EXIT": 3,   // Sorties
+            3: 4,        // Marchands
+            6: 5,        // Coffres
+            5: 6,        // Quest end
+            2: 7,        // PNJ dialogue
+            0: 8,        // Cadavres et décorations (les moins prioritaires)
+            1: 9         // Décorations
+        };
+        
+        const aPriority = interactivePriority[a.spriteType] || 10;
+        const bPriority = interactivePriority[b.spriteType] || 10;
+        
+        return aPriority - bPriority;
+    });
+    
+    if (spritesAtPosition.length > 0) {
+        const targetSprite = spritesAtPosition[0]; // Prendre le sprite le plus prioritaire
+        console.log(`Sprite found at front position! Type: ${targetSprite.spriteType}, HP: ${targetSprite.hp || 0}`);
+        
+        await this.executeSpriteAction(targetSprite, currentTime);
+    } else {
         console.log("No sprite found at front position");
     }
-    
-    // SUPPRIMÉ : this.actionButtonClicked = false;
-    // La réinitialisation se fait maintenant dans move()
 }
 
     async executeSpriteAction(sprite, currentTime) {

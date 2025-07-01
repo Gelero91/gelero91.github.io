@@ -77,7 +77,7 @@ var orientationTarget;
 var moveTargetX;
 var moveTargetY;
 
-
+let continuousMove = null; // null = pas de mouvement, sinon contient {dx, dy, speed}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FOG SETTINGS - VARIABLES GLOBALES
