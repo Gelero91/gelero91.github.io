@@ -13,26 +13,33 @@ class Spell {
         this.icon = icon;
     }
 
-    // Méthode pour lancer le sort
-    cast(caster, target) {
-        if (caster.turn) {
+// Méthode pour lancer le sort
+cast(caster, target) {
+    if (caster.turn) {
+        // Vérifier le mana AVANT de consommer le tour
+        if (caster.mp >= this.manaCost) {
+            // Consommer le tour seulement si on a assez de mana
             caster.turn = false;
-
-            if (caster.mp >= this.manaCost) {
-                // Vérifie si le lanceur a suffisamment de mana pour lancer le sort
-                caster.mp -= this.manaCost; // Réduire le mana du lanceur
-
-                // Appliquer l'effet du sort sur la cible
-                this.effect(caster, target);
-
-                // Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.spriteName}`, 4);
-            } else {
-                Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`, 4);
-            }
+            
+            // Réduire le mana du lanceur
+            caster.mp -= this.manaCost;
+            
+            // Appliquer l'effet du sort sur la cible
+            this.effect(caster, target);
+            
+            // IMPORTANT: Mettre à jour l'interface après la consommation du mana
+            caster.statsUpdate();
+            
+            // Message de confirmation (optionnel)
+            // Sprite.terminalLog(`${caster.name} cast ${this.name} on ${target.name}`, 4);
         } else {
-            console.log("not your turn");
+            // Pas assez de mana - NE PAS consommer le tour
+            Sprite.terminalLog(`${caster.name} doesn't have enough mana to cast ${this.name}`, 4);
         }
+    } else {
+        console.log("not your turn");
     }
+}
 
     // Fonction représentant l'effet de soins
     static healEffect(caster, target) {
@@ -134,17 +141,16 @@ static speedBuffEffect(caster, target) {
 }
 
 // Effet de buff de protection (armure temporaire)
+// Effet de buff de protection (armure temporaire)
 static shieldBuffEffect(caster, target) {
     Raycaster.armorAbsorbFlash();
     
-    if (!target.originalArmor) {
-        target.originalArmor = target.armor;
-    }
-    
+    // Stocker le bonus d'armure au lieu de modifier directement l'armure
     const buffAmount = 1 + caster.magic;
-    target.armor += buffAmount;
+    
     target.buffedStats = target.buffedStats || {};
     target.buffedStats.armor = true;
+    target.armorBuffAmount = buffAmount; // Stocker le montant du buff
     
     const duration = 45000; // 45 secondes
     
@@ -153,16 +159,15 @@ static shieldBuffEffect(caster, target) {
     }
     
     target.armorBuffTimeout = setTimeout(() => {
-        target.armor = target.originalArmor;
         delete target.buffedStats.armor;
-        delete target.originalArmor;
+        delete target.armorBuffAmount;
         Sprite.displayCombatAnimation(`${target.name}'s magical shield fades.`, 4);
-        target.statsUpdate(target);
+        target.statsUpdate();
     }, duration);
     
     caster.XPintellect += 2;
     Sprite.displayCombatAnimation(`${target.name} is protected by a magical shield (+${buffAmount} armor)!`, 4);
-    target.statsUpdate(target);
+    target.statsUpdate();
 }
 
 // Effet de buff de régénération
@@ -251,15 +256,6 @@ Spell.spellList = [{
     effect: Spell.strengthBuffEffect,
     selfCast: true,
     icon: "assets/icons/strength.png"
-},
-{
-    id: 4,
-    name: "OLD_Speed",
-    manaCost: 8,
-    description: "Move faster for 20 seconds.",
-    effect: Spell.speedBuffEffect,
-    selfCast: true,
-    icon: "assets/icons/speed.png"
 },
 {
     id: 5,

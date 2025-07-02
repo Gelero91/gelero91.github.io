@@ -176,11 +176,11 @@ class Sprite {
     // Tables de loot statiques pour la classe Sprite
     static lootTables = {
         "a": { minGold: 0, maxGold: 0, itemChance: 0, possibleItems: [] },
-        "b": { minGold: 5, maxGold: 15, itemChance: 0.1, possibleItems: [1, 2] },
-        "c": { minGold: 10, maxGold: 30, itemChance: 0.2, possibleItems: [1, 2, 5] },
-        "d": { minGold: 25, maxGold: 60, itemChance: 0.3, possibleItems: [1, 2, 3, 5] },
-        "e": { minGold: 50, maxGold: 120, itemChance: 0.5, possibleItems: [2, 3, 4, 5] },
-        "f": { minGold: 100, maxGold: 250, itemChance: 0.7, possibleItems: [3, 4, 5] }
+        "b": { minGold: 5, maxGold: 15, itemChance: 0.1, possibleItems: [1, 2, 3, 4, 5, 6, 7, 8, 9] },
+        "c": { minGold: 10, maxGold: 30, itemChance: 0.2, possibleItems: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  },
+        "d": { minGold: 25, maxGold: 60, itemChance: 0.3, possibleItems: [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19]  },
+        "e": { minGold: 50, maxGold: 120, itemChance: 0.5, possibleItems: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]  },
+        "f": { minGold: 100, maxGold: 250, itemChance: 0.7, possibleItems: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]  }
     };
 
     /**
@@ -1151,7 +1151,7 @@ isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
                 itemElement.innerHTML = `
                     <img src="${itemIcon}" style="width: 20px; height: 20px; margin-right: 5px;">
                     <span style="flex-grow: 1; font-size: 13px; color: #cccccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
-                    <span style="color: #ffcc00; font-weight: bold;">${priceDisplay}</span>
+                    <span style="color: #ffcc00; font-weight: bold; font-size:smaller;">${priceDisplay}</span>
                 `;
                 
                 itemElement.addEventListener('click', () => {

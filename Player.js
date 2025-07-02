@@ -148,9 +148,7 @@ class Player {
                     this.strength += 3;
                     break;
                 case 'dexterity':
-                    this.dexterity += 1;
-                    this.dodge += 10;
-                    this.criti += 10;
+                    this.dexterity += 3
                     break;
                 case 'magic':
                     this.intellect += 3;
@@ -380,7 +378,7 @@ class Player {
 
         // Limiter HP au maximum
         this.hp = Math.min(this.hp, this.hpMax);
-        this.mpMax = Math.min(this.mp, this.mpMax);
+        this.mp = Math.min(this.mp, this.mpMax);
     }
 
     checkDeathState() {
@@ -393,8 +391,8 @@ class Player {
 
 updateCombatStats() {
     // Calcul des stats de base
-    const baseMight = this.strength - 5;
-    const baseMagic = this.intellect - 5;
+    const baseMight = 1 + (this.strength - 5);
+    const baseMagic = 1 + (this.intellect - 5);
     const baseDodge = this.dexterity * 2;
     const baseCriti = this.dexterity * 2;
     const baseArmor = 0; // ou une valeur de base si nécessaire
@@ -426,6 +424,10 @@ updateCombatStats() {
     
     // Ajouter d'autres bonus temporaires si nécessaire
     // Par exemple, buffs de sorts, etc.
+     // Appliquer le buff d'armure si actif
+    if (this.armorBuffAmount) {
+        this.armor += this.armorBuffAmount;
+    }
     
     // Mise à jour des stats de combat affichées
     document.getElementById("PlayerMightOutput").textContent = this.might;
