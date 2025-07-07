@@ -16,8 +16,16 @@ Mode multijoueur à venir, prévu en Node.JS et SQL
 Les touches directionnelles vous permettront de vous déplacer. 
 Appuyez sur espace ou "f" (comme "fonction") pour passer les portes, discuter, marchander, observer, ouvrir un coffre & combattre.
 
+Nouveau : gestion de plusieurs textures sol/plafond, par paire.
 
-Encore plus nouveau - texture villaged de désert :
+![Sol](https://github.com/user-attachments/assets/4bda5c4a-0b63-4d95-998f-837b50b15e69)
+
+exemple :
+
+![Sol](https://github.com/user-attachments/assets/1c2a048a-6f09-42be-b4c2-4998316ce293)
+
+
+exture village de désert :
 
 ![2025-06-04T12_57_35](https://github.com/user-attachments/assets/012255ac-1e5f-43da-8330-165f45b84f41)
 
