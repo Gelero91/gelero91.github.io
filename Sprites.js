@@ -126,6 +126,9 @@ class Sprite {
     /*
     Types de sprites avec comportements spécifiques :
     
+
+    Types de sprites avec comportements spécifiques :
+
     0 = Décoration sans interaction (non bloquant)
     1 = Décoration alternative (bloquant)
     2 = PNJ avec dialogues
@@ -133,10 +136,16 @@ class Sprite {
     4 = Quest giver (donneur de quêtes - non implémenté)
     5 = Quest end (fin de quête/interaction spéciale)
     6 = Coffre au trésor (avec loot)
+
+    NOUVEAU !
+    7 = Critter (animaux/PNJ mobiles avec mouvements aléatoires)
+    
     10 = Sprites décoratifs multiples (génère 2 sprites herbe aléatoires)
     "A" = Ennemi (combat, IA, loot)
     "DOOR" = Porte intérieur/extérieur (téléportation 2 cases)
     "EXIT" = Sortie vers carte suivante
+    
+
     
     Structure des données sprites : [ID, x, y, type, texture, face, name, dialogue, items, hp, dmg, lootClass]
     
@@ -273,15 +282,35 @@ class Sprite {
 // 2.1 IA et déplacements ennemis
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// FONCTION COMPLÈTE moveRandomlyOrChase - À REMPLACER DANS SPRITES.JS
+
 async moveRandomlyOrChase(map, sprites, player) {
-    // Ne pas déplacer si le sprite n'est pas un ennemi ou s'il est mort ou déjà en mouvement
-    if (this.spriteType !== "A" || this.hp <= 0 || this.isMoving) {
+    // Ne pas déplacer si le sprite est mort ou déjà en mouvement
+    if (this.hp <= 0 || this.isMoving) {
+        return false;
+    }
+    
+    // Vérifier si c'est un sprite mobile (ennemi ou critter)
+    const isMobileSprite = this.spriteType === "A" || this.spriteType === 7;
+    if (!isMobileSprite) {
         return false;
     }
     
     const tileSize = 1280;
     const currentCellX = Math.floor(this.x / tileSize);
     const currentCellY = Math.floor(this.y / tileSize);
+    
+    // Les critters font uniquement des mouvements aléatoires
+    if (this.spriteType === 7) {
+        // 35% de chance de bouger pour les critters
+        if (Math.random() > 0.35) {
+            return false;
+        }
+        
+        return this.tryRandomMove(map, sprites, player, currentCellX, currentCellY);
+    }
+    
+    // Le reste du code pour les ennemis (type "A")
     const playerCellX = Math.floor(player.x / tileSize);
     const playerCellY = Math.floor(player.y / tileSize);
     
@@ -816,7 +845,7 @@ isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
             const elapsed = timestamp - startTime;
             const progress = elapsed / recoilDuration;
             if (progress < 1) {
-                animateRecoil(progress);
+                // animateRecoil(progress);
                 requestAnimationFrame(step);
             } else {
                 // Assurer la position finale correcte
@@ -895,6 +924,8 @@ isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Effet de tremblement d'écran lors des impacts
+    // Le tremblement posait de grave problème d'affichage.
+    // Mis en commentaire car inutile dans l'immédiat
     static screenShake(intensity = 10, duration = 300) {
         const gameWindow = document.getElementById("gameWindow");
         const startTime = performance.now();
@@ -911,9 +942,9 @@ isValidMove(direction, map, sprites, player, currentCellX, currentCellY) {
                 const offsetX = (Math.random() - 0.5) * currentIntensity;
                 const offsetY = (Math.random() - 0.5) * currentIntensity;
                 
-                gameWindow.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+                // gameWindow.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
                 
-                requestAnimationFrame(shakeAnimation);
+                // requestAnimationFrame(shakeAnimation);
             } else {
                 // Réinitialiser la position
                 gameWindow.style.transform = '';
@@ -1828,6 +1859,18 @@ talk() {
     }
 }
 
+async interactWithCritter(player) {
+    // Si le critter a des dialogues, les afficher
+    if (this.spriteTalk && this.spriteTalk.length > 0) {
+        this.talk();  // Utiliser la méthode talk() existante
+    }
+    // Sinon, pas d'interaction
+    // Vous pourriez ajouter ici d'autres comportements comme :
+    // - Un son d'animal
+    // - Une animation de fuite
+    // - Un message générique comme "Le [nom] vous ignore."
+}
+
     static showGameOver() {
         const mainCanvas = document.getElementById("mainCanvas");
         const gameOverWindow = document.getElementById("cinematicWindow").addEventListener;
@@ -2350,8 +2393,8 @@ static showIntroCinematic() {
 // 7.1 Gestion des portes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-async door(player, textureSet, raycaster) {
-    // Vérification du verrou global de porte AVANT tout
+async door(player, raycaster) {
+    // Vérification du verrou global de porte
     if (doorLockActive) {
         console.log("Door action already in progress - aborting");
         return;
@@ -2363,121 +2406,59 @@ async door(player, textureSet, raycaster) {
 
     // Vérifier le cooldown
     const currentTime = Date.now();
-    if (!this.lastDoorTime) {
-        this.lastDoorTime = 0;
-    }
+    this.lastDoorTime = this.lastDoorTime || 0;
     
-    const timeSinceLastDoor = currentTime - this.lastDoorTime;
-    
-    if (timeSinceLastDoor < 500) { // 500ms de cooldown
+    if (currentTime - this.lastDoorTime < 500) {
         doorLockActive = false;
         commandBlocking = false;
         return;
     }
 
-    // Vérifier qu'aucune autre action n'est en cours
-    
-    // mise ne commentaire pour tester door à collision
-    /*
-    if (player.isMoving || player.isRotating || player.isTeleporting || player.isDooring) {
-        console.log("Cannot use door - player is busy");
-        doorLockActive = false;
-        commandBlocking = false;
-        return;
-    }
-    */
-    
     // Mettre à jour le temps de la dernière action
     this.lastDoorTime = currentTime;
-    
-    // Marquer qu'une action de porte est en cours
     player.isDooring = true;
     
     try {
-        // Store initial position
-        const initialX = player.x;
-        const initialY = player.y;
-        
-        // Determine floor texture to use
-        let floor;
-        if (textureSet === null) {
-            floor = 1;
-        } else if (textureSet) {
-            floor = floorType;
-        }
-    
-        // Calculate new position based on player's facing direction
-        const tileSize = 1280;
-        const teleportDistance = 2 * tileSize;
-        
-        // Apply teleportation based on direction
-        if (player.quadrant === "nord") {
-            player.y -= teleportDistance;
-        } else if (player.quadrant === "est") {
-            player.x += teleportDistance;
-        } else if (player.quadrant === "sud") {
-            player.y += teleportDistance;
-        } else if (player.quadrant === "ouest") {
-            player.x -= teleportDistance;
-        } else {
+        // Téléportation selon la direction
+        const teleportDistance = 2560; // 2 * 1280
+        const directionOffsets = {
+            "nord": { x: 0, y: -teleportDistance },
+            "est": { x: teleportDistance, y: 0 },
+            "sud": { x: 0, y: teleportDistance },
+            "ouest": { x: -teleportDistance, y: 0 }
+        };
+
+        const offset = directionOffsets[player.quadrant];
+        if (!offset) {
             console.log("Invalid quadrant - diagonal movement not supported");
-            // Libérer les verrous avant de sortir
-            player.isDooring = false;
-            doorLockActive = false;
-            commandBlocking = false;
             return;
         }
+
+        player.x += offset.x;
+        player.y += offset.y;
         
-        // Toggle ceiling rendering and update environment properties
-        if (ceilingRender === true) {
-            // Vérifier que mapData existe
-            if (mapData && mapData.playerStart) {
-                // Restore map default values
-                ceilingRender = mapData.playerStart.ceilingRender || false;
-                ceilingHeight = mapData.playerStart.ceilingHeight || 2;
-                ceilingTexture = mapData.playerStart.ceilingTexture || 1;
-                floorTexture = mapData.playerStart.floorTexture || 1;
-            } else {
-                // Valeurs par défaut
-                ceilingRender = false;
-                ceilingHeight = 2;
-                ceilingTexture = 2;
-                floorTexture = 1;
-            }
+        // Toggle ceiling
+        if (ceilingRender) {
+            ceilingRender = mapData?.playerStart?.ceilingRender || false;
+            ceilingHeight = mapData?.playerStart?.ceilingHeight || 2;
         } else {
-            // Turn ceiling rendering on with specific values
             ceilingRender = true;
             ceilingHeight = 1;
-            
-            // Utiliser la texture du plafond de la carte si disponible
-            if (mapData && mapData.ceilingTexture) {
-                ceilingTexture = mapData.ceilingTexture;
-            } else {
-                ceilingTexture = 2;
-            }
-            
-            floorTexture = floor || 3;
         }
         
         // Recharger les textures
-        if (raycaster) {
-            raycaster.loadFloorCeilingImages();
-        }
+        raycaster?.loadFloorCeilingImages();
         
-        // Pause courte pour permettre la mise à jour visuelle
-        // await new Promise(resolve => setTimeout(resolve, 50));
-        
-        // Attendre un peu plus pour s'assurer que tout est terminé
+        // Pause pour mise à jour visuelle
         await new Promise(resolve => setTimeout(resolve, 50));
         
     } catch (error) {
         console.error("Error in door function:", error);
     } finally {
-        // Toujours libérer les verrous
+        // Libérer les verrous
         player.isDooring = false;
         commandBlocking = false;
         
-        // Délai supplémentaire avant de libérer le verrou global
         setTimeout(() => {
             doorLockActive = false;
         }, 100);

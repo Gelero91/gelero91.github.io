@@ -1319,7 +1319,30 @@ updateCombatStats() {
         }
     }
 
-    // xyz
+// XYZ
+// Dans Player.js - Ajouter cette méthode
+async handlePreviousMapAction() {
+    // Vérifier si on est sur la position de départ
+    const currentX = Math.floor(this.x / this.tileSize);
+    const currentY = Math.floor(this.y / this.tileSize);
+    const mapData = getMapDataByID(this.raycaster.mapID);
+    
+    if (!mapData) return;
+    
+    const startX = mapData.playerStart.X;
+    const startY = mapData.playerStart.Y;
+    
+    // Si on est sur la position de départ
+    if (currentX === startX && currentY === startY) {
+        // Vérifier qu'il y a une carte précédente
+        if (this.raycaster.mapID > 0) {
+            await this.raycaster.previousMap();
+        } else {
+            Sprite.terminalLog("This is the beginning of your journey.");
+        }
+    }
+}
+
     handleNewGame() {
         pause(500);
         
@@ -1617,6 +1640,13 @@ async move(timeElapsed, map, eventA, eventB, sprites) {
     
     // Traitement des actions
     if (inputs.action && this.turn) {
+
+        // retour carte précédente
+        // Vérifier d'abord si on veut retourner à la carte précédente
+        // possibilité de refactoriser. Pourquoi le mettre en dehor de la gestion des sprites?
+        // Le mettre dans la téléportation ?
+        await this.handlePreviousMapAction();
+        
         await this.handleSpriteAction(inputs.action, sprites);
         // IMPORTANT : Réinitialiser actionButtonClicked APRÈS le traitement
         this.actionButtonClicked = false;
@@ -2206,8 +2236,9 @@ async handleSpriteAction(action, sprites) {
             6: 5,        // Coffres
             5: 6,        // Quest end
             2: 7,        // PNJ dialogue
-            0: 8,        // Cadavres et décorations (les moins prioritaires)
-            1: 9         // Décorations
+            7: 8,        // Critters (priorité plus basse que les PNJ normaux)
+            0: 9,        // Cadavres et décorations
+            1: 10        // Décorations
         };
         
         const aPriority = interactivePriority[a.spriteType] || 10;
@@ -2239,6 +2270,8 @@ async handleSpriteAction(action, sprites) {
                 return; // Important: sortir immédiatement pour éviter handleTeleportation
             case 0:
                 // case 2 juste après pour obtenir le même comportement
+            case 7:
+                // même comportement pour les critters
             case 2:
                 await this.handleDialogueAction(sprite);
                 break;
@@ -2338,7 +2371,7 @@ async handleSpriteAction(action, sprites) {
         await Raycaster.fadeToBlack(100);
         
         // Appeler door pendant que l'écran est noir
-        await sprite.door(this, null, this.raycaster);
+        await sprite.door(this, this.raycaster);
         await this.raycaster.loadFloorCeilingImages();
         
         // Fondu depuis le noir

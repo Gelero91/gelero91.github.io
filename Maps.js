@@ -578,7 +578,7 @@ const maps = [
           68,
           8,
           5,
-          2,
+          7,
           2,
           "faceThief",
           "Villageois",

@@ -252,3 +252,21 @@ var mapData = getMapDataByID(currentMap);
     // Variable statique pour le verrouillage global de la porte
     // Doit être définie en dehors de la fonction pour persister entre les appels
     let doorLockActive = false;
+
+// Sol/Plafond, paire de texture
+
+// Tableau de correspondances des paires de textures sol/plafond
+const TEXTURE_PAIRS = {
+    // ID : { floor: index_texture_sol, ceiling: index_texture_plafond, name: "description" }
+    1: { floor: 1, ceiling: 4, name: "herbe / terre" },
+    2: { floor: 2, ceiling: 3, name: "terre / terre" },
+    3: { floor: 3, ceiling: 4, name: "cobblestone / plafond carrelé" },
+    4: { floor: 4, ceiling: 2, name: "Plancher/poutre" },
+    // Ajouter autant de paires que nécessaire
+};
+
+// plafond :
+// 1 == cobblestone
+// 2 == plancher/poutre
+// 3 == carreau plafond
+// 4 == terre
